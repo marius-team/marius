@@ -112,7 +112,7 @@ To train using CPUs only, use the `examples/configs/fb15k_cpu.ini` configuration
 After following the installation steps, the bindings can be installed by making the pymarius target: `make pymarius -j`
 
 *The location of the bindings needs to be added to the system path* in order to access them.
-The following is a python script that can be used as a sanity check to ensure the bindings are built properly.
+The following is a sample python script for training a single epoch on fb15k.
 
 ```
 import sys
@@ -121,10 +121,18 @@ import pymarius as m
 
 def marius():
     config_path = "examples/training/configs/fb15k_cpu.ini"
-    marius_options = m.parseConfig(config_path)
-    print(marius_options.general.num_train)
-    print(marius_options.general.num_valid)
-    print(marius_options.general.num_test)
+    config = m.parseConfig(config_path)
+
+    train_set, eval_set = m.initializeDatasets(config)
+
+    model = m.initializeModel(config.model.encoder_model, config.model.decoder_model)
+
+    trainer = m.SynchronousTrainer(train_set, model)
+    evaluator = m.SynchronousEvaluator(eval_set, model)
+
+    trainer.train(1)
+    evaluator.evaluate(True)
+
 
 if __name__ == "__main__":
     marius()
@@ -156,7 +164,6 @@ RUN apt update
 
 RUN apt install -y g++ \ 
          make \
-         cmake \
          wget \
          unzip \
          vim \
@@ -182,11 +189,12 @@ RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/wh
 ```
 
 ## Citing Marius ##
-
 ```
-@inproceedings{osdi2021,
-  title={Marius: Learning Massive Graph Embeddings on a Single Machine},
-  author={Mohoney, Waleffe, Xu, Rekatsinas, Venkataraman},
-  year={2021}
+@inproceedings {MariusOSDI2021,
+    author = {Jason Mohoney and Roger Waleffe and Yiheng Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
+    title = {Marius: Learning Massive Graph Embeddings on a Single Machine},
+    booktitle = {15th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 21)},
+    year = {2021},
+    publisher = {{USENIX} Association},
 }
 ```
