@@ -1,0 +1,192 @@
+# Marius #
+
+Marius is a system under active development for training embeddings for large-scale graphs on a single machine.
+
+Training on large scale graphs requires a large amount of data movement to get embedding parameters from storage to the computational device. 
+Marius is designed to mitigate/reduce data movement overheads using:
+- Pipelined training and IO
+- Partition caching and locality-aware data orderings
+
+Details on how Marius works can be found in the documentation, or in our [OSDI 21' Paper](https://arxiv.org/abs/2101.08358).
+
+## Requirements ##
+(Other versions may work, but are untested)
+* Ubuntu 18.04 or MacOS 10.15 
+* CUDA 10.1 or 10.2 (If using GPU training)
+* CuDNN 7 (If using GPU training)
+* 1.7 >= pytorch 
+* python >= 3.6
+* pip >= 21
+* GCC >= 9 (On Linux) or Clang 12.0 (On MacOS)
+* cmake >= 3.12
+* make >= 3.8
+
+
+## Installation ##
+
+1. Install latest version of PyTorch for your CUDA version:
+
+    Linux:
+    - CUDA 10.1: `python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html`
+    - CUDA 10.2: `python3 -m pip install torch==1.7.1`
+    - CPU Only: `python3 -m pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html`
+
+    MacOS:
+    - CPU Only: `python3 -m pip install torch==1.7.1`
+
+2. Clone the repository `git clone https://github.com/rekords-uw/marius.git`
+
+3. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
+
+4. Create build directory `mkdir build; cd build`
+
+5. Run cmake in the build directory `cmake ../` (CPU-only build) or `cmake ../ -DUSE_CUDA=1` (GPU build)
+
+6. Make the marius executable. `make marius_train -j`
+
+#### Full script (without torch install) ####
+
+```
+git clone https://github.com/rekords-uw/marius.git
+cd marius
+python3 -m pip install -r requirements.txt
+mkdir build
+cd build
+cmake ../ -DUSE_CUDA=1
+make marius_train -j
+```
+
+## Training a graph ##
+
+Training embeddings on a graph requires three steps. 
+
+1. Define a configuration file. This example will use the config already defined in `examples/training/configs/fb15k_gpu.ini`
+
+   See `docs/configuration.rst` for full details on the configuration options.
+
+2. Preprocess the dataset `python3 tools/preprocess.py fb15k output_dir/`
+
+   The first argument of tools/preprocess.py defines the dataset we wish to download and preprocess, in this case fb15k. 
+   The second argument tells the preprocessor where to put the preprocessed dataset.
+
+3. Run the training executable with the config file. `build/marius_train examples/training/configs/fb15k_gpu.ini`
+
+The output of the first epoch should be similar to the following.
+```[info] [03/18/21 01:33:16.173] Start preprocessing
+[info] [03/18/21 01:33:18.778] Metadata initialized
+[info] [03/18/21 01:33:18.778] Training set initialized
+[info] [03/18/21 01:33:18.779] Evaluation set initialized
+[info] [03/18/21 01:33:18.779] Preprocessing Complete: 2.605s
+[info] [03/18/21 01:33:18.791] ################ Starting training epoch 1 ################
+[info] [03/18/21 01:33:18.836] Total Edges Processed: 40000, Percent Complete: 0.082
+[info] [03/18/21 01:33:18.862] Total Edges Processed: 80000, Percent Complete: 0.163
+[info] [03/18/21 01:33:18.892] Total Edges Processed: 120000, Percent Complete: 0.245
+[info] [03/18/21 01:33:18.918] Total Edges Processed: 160000, Percent Complete: 0.327
+[info] [03/18/21 01:33:18.944] Total Edges Processed: 200000, Percent Complete: 0.408
+[info] [03/18/21 01:33:18.970] Total Edges Processed: 240000, Percent Complete: 0.490
+[info] [03/18/21 01:33:18.996] Total Edges Processed: 280000, Percent Complete: 0.571
+[info] [03/18/21 01:33:19.021] Total Edges Processed: 320000, Percent Complete: 0.653
+[info] [03/18/21 01:33:19.046] Total Edges Processed: 360000, Percent Complete: 0.735
+[info] [03/18/21 01:33:19.071] Total Edges Processed: 400000, Percent Complete: 0.816
+[info] [03/18/21 01:33:19.096] Total Edges Processed: 440000, Percent Complete: 0.898
+[info] [03/18/21 01:33:19.122] Total Edges Processed: 480000, Percent Complete: 0.980
+[info] [03/18/21 01:33:19.130] ################ Finished training epoch 1 ################
+[info] [03/18/21 01:33:19.130] Epoch Runtime (Before shuffle/sync): 339ms
+[info] [03/18/21 01:33:19.130] Edges per Second (Before shuffle/sync): 1425197.8
+[info] [03/18/21 01:33:19.130] Edges Shuffled
+[info] [03/18/21 01:33:19.130] Epoch Runtime (Including shuffle/sync): 339ms
+[info] [03/18/21 01:33:19.130] Edges per Second (Including shuffle/sync): 1425197.8
+[info] [03/18/21 01:33:19.148] Starting evaluating
+[info] [03/18/21 01:33:19.254] Pipeline flush complete
+[info] [03/18/21 01:33:19.271] Num Eval Edges: 50000
+[info] [03/18/21 01:33:19.271] Num Eval Batches: 50
+[info] [03/18/21 01:33:19.271] Auc: 0.973, Avg Ranks: 24.477, MRR: 0.491, Hits@1: 0.357, Hits@5: 0.651, Hits@10: 0.733, Hits@20: 0.806, Hits@50: 0.895, Hits@100: 0.943
+```
+
+To train using CPUs only, use the `examples/configs/fb15k_cpu.ini` configuration file instead.
+
+## Using the Python API ##
+
+### Building the Python Bindings ###
+
+After following the installation steps, the bindings can be installed by making the pymarius target: `make pymarius -j`
+
+*The location of the bindings needs to be added to the system path* in order to access them.
+The following is a python script that can be used as a sanity check to ensure the bindings are built properly.
+
+```
+import sys
+sys.path.insert(0, 'build/') # need to add the build directory to the system path so python can find the bindings
+import pymarius as m
+
+def marius():
+    config_path = "examples/training/configs/fb15k_cpu.ini"
+    marius_options = m.parseConfig(config_path)
+    print(marius_options.general.num_train)
+    print(marius_options.general.num_valid)
+    print(marius_options.general.num_test)
+
+if __name__ == "__main__":
+    marius()
+```
+
+## Marius in Docker ##
+
+Marius can be deployed within a docker container. Here is a sample ubuntu dockerfile (located at `examples/docker/dockerfile`) which contains the necessary dependencies preinstalled for GPU training.
+
+### Building and running the container ###
+
+Build an image with the name `marius` and the tag `example`:  
+`docker build -t marius:example -f examples/docker/dockerfile examples/docker`
+
+Create and start a new container instance named `gaius` with:  
+`docker run --name gaius -itd marius:example`
+
+Run `docker ps` to verify the container is running
+
+Start a bash session inside the container:  
+`docker exec -it gaius bash`
+
+
+### Sample Dockerfile ###
+See `examples/docker/dockerfile`
+```
+FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+RUN apt update
+
+RUN apt install -y g++ \ 
+         make \
+         cmake \
+         wget \
+         unzip \
+         vim \
+         git \
+         python3-pip
+
+# install gcc-9
+RUN apt install -y software-properties-common
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
+RUN apt update
+RUN apt install -y gcc-9 g++-9
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+
+# install cmake 3.20
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.sh
+RUN mkdir /opt/cmake
+RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
+RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+
+# install pytorch
+RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+```
+
+## Citing Marius ##
+
+```
+@inproceedings{osdi2021,
+  title={Marius: Learning Massive Graph Embeddings on a Single Machine},
+  author={Mohoney, Waleffe, Xu, Rekatsinas, Venkataraman},
+  year={2021}
+}
+```
