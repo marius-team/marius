@@ -103,7 +103,7 @@ The output of the first epoch should be similar to the following.
 [info] [03/18/21 01:33:19.271] Auc: 0.973, Avg Ranks: 24.477, MRR: 0.491, Hits@1: 0.357, Hits@5: 0.651, Hits@10: 0.733, Hits@20: 0.806, Hits@50: 0.895, Hits@100: 0.943
 ```
 
-To train using CPUs only, use the `examples/configs/fb15k_cpu.ini` configuration file instead.
+To train using CPUs only, use the `examples/training/configs/fb15k_cpu.ini` configuration file instead.
 
 ## Using the Python API ##
 
