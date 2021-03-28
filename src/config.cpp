@@ -235,9 +235,14 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
         ("reporting.logs_per_epoch", po::value<int>(&logs_per_epoch)->default_value(10), "How many times log statements will be output during a single epoch of training or evaluation")
         ("reporting.log_level", po::value<string>(&s_log_level)->default_value("info"), "Log level to use.");
 
-    store(parse_command_line(argc, argv, config_options), variables_map);
-    store(parse_config_file(config_fstream, config_options), variables_map);
-    notify(variables_map);
+    try {
+        store(parse_command_line(argc, argv, config_options), variables_map);
+        store(parse_config_file(config_fstream, config_options), variables_map);
+        notify(variables_map);
+    } catch(std::exception& e) {
+        SPDLOG_ERROR(e.what());
+        exit(-1);
+    }
 
     if (s_device == "GPU") {
         device = torch::kCUDA;
