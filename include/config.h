@@ -5,6 +5,7 @@
 #define MARIUS_CONFIG_H
 
 #include <string>
+#include <exception>
 #include <datatypes.h>
 #include <boost/program_options.hpp>
 #include <spdlog/spdlog.h>

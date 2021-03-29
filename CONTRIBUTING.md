@@ -22,7 +22,8 @@ Any contributions users wish to make to Marius are welcome. To name a few, here 
 - C++ Tests are located in a gtest under `test/cpp`
 - Python tests are located in `test/python`
 
-5. Run your tests with `<place_holder>` (fill in once testing framework is implemented)
+5. Run tests and verify nothing is broken.
+See the testing README for how to build and run the tests `test/README.md`
 
 ## Submitting a Pull Request
 
