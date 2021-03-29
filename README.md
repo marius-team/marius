@@ -34,7 +34,7 @@ Details on how Marius works can be found in the documentation, or in our [OSDI 2
     MacOS:
     - CPU Only: `python3 -m pip install torch==1.7.1`
 
-2. Clone the repository `git clone https://github.com/rekords-uw/marius.git`
+2. Clone the repository `git clone https://github.com/marius-team/marius.git`
 
 3. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
 
@@ -47,7 +47,7 @@ Details on how Marius works can be found in the documentation, or in our [OSDI 2
 #### Full script (without torch install) ####
 
 ```
-git clone https://github.com/rekords-uw/marius.git
+git clone https://github.com/marius-team/marius.git
 cd marius
 python3 -m pip install -r requirements.txt
 mkdir build
