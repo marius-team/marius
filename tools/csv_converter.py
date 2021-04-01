@@ -219,9 +219,9 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                     else:
                         edges = np.stack([src_nodes, np.zeros_like(src_nodes), dst_nodes]).T
 
-            edges = edges.astype(dtype)
-            f.write(bytes(edges))
-            i += chunksize
+                    edges = edges.astype(dtype)
+                    f.write(bytes(edges))
+                    i += chunksize
 
             if num_partitions > 1:
                 f.seek(0)
