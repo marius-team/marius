@@ -51,7 +51,7 @@ def run_fb15k():
 
 
 def run_livejournal():
-    exp_dir = "osdi2021/system_comparisons/livejournal/marius"
+    exp_dir = "osdi2021/system_comparisons/livejournal/marius/"
 
     dot_config = exp_dir + "dot.ini"
 
@@ -73,7 +73,7 @@ def run_livejournal():
 
 
 def run_twitter():
-    exp_dir = "osdi2021/system_comparisons/twitter/marius"
+    exp_dir = "osdi2021/system_comparisons/twitter/marius/"
 
     dot_config = exp_dir + "dot.ini"
 
@@ -491,7 +491,7 @@ def run_orderings_twitter():
 
 
 def run_staleness_bound():
-    exp_dir = "osdi2021/system_comparisons/microbenchmarks/bounded_staleness"
+    exp_dir = "osdi2021/system_comparisons/microbenchmarks/bounded_staleness/"
 
     all_async_config = exp_dir + "all_async.ini"
     all_sync = exp_dir + "all_sync.ini"
@@ -553,7 +553,7 @@ def run_staleness_bound():
 
 
 def run_prefetching():
-    exp_dir = "osdi2021/system_comparisons/microbenchmarks/prefetching"
+    exp_dir = "osdi2021/system_comparisons/microbenchmarks/prefetching/"
 
     no_prefetching_config = exp_dir + "no_prefetching.ini"
     prefetching_config = exp_dir + "prefetching.ini"
