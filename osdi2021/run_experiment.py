@@ -57,7 +57,7 @@ def run_livejournal():
 
     if not os.path.exists("livejournal/"):
         print("==== Preprocessing Livejournal =====")
-        preprocess.twitter("livejournal/")
+        preprocess.live_journal("livejournal/")
 
     dot_info_logs = []
 
