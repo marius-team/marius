@@ -497,7 +497,7 @@ if __name__ == "__main__":
 
     if dataset_dict.get(args.dataset) != None:
         dataset_dict.get(args.dataset)(args.output_directory, args.num_partitions)
-        output_bash_cmds("./output_dir", args.dataset)
+        output_bash_cmds(args.output_directory, args.dataset)
     else:
         print("Unrecognized dataset!")
 
