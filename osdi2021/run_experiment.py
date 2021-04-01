@@ -171,7 +171,7 @@ def run_buffer_simulator():
 
 def run_orderings_total_io():
 
-    exp_dir = "osdi2021/system_comparisons/partition_orderings/freebase86m/"
+    exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
     hilbert_config = exp_dir + "hilbert.ini"
@@ -233,7 +233,7 @@ def run_orderings_total_io():
 
 
 def run_orderings_freebase86m():
-    exp_dir = "osdi2021/system_comparisons/partition_orderings/freebase86m/"
+    exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
     hilbert_config = exp_dir + "hilbert.ini"
@@ -362,7 +362,7 @@ def run_orderings_freebase86m():
 
 
 def run_orderings_twitter():
-    exp_dir = "osdi2021/system_comparisons/partition_orderings/twitter/"
+    exp_dir = "osdi2021/partition_orderings/twitter/"
 
     elimination_config = exp_dir + "elimination.ini"
     hilbert_config = exp_dir + "hilbert.ini"
@@ -491,7 +491,7 @@ def run_orderings_twitter():
 
 
 def run_staleness_bound():
-    exp_dir = "osdi2021/system_comparisons/microbenchmarks/bounded_staleness/"
+    exp_dir = "osdi2021/microbenchmarks/bounded_staleness/"
 
     all_async_config = exp_dir + "all_async.ini"
     all_sync = exp_dir + "all_sync.ini"
@@ -553,7 +553,7 @@ def run_staleness_bound():
 
 
 def run_prefetching():
-    exp_dir = "osdi2021/system_comparisons/microbenchmarks/prefetching/"
+    exp_dir = "osdi2021/microbenchmarks/prefetching/"
 
     no_prefetching_config = exp_dir + "no_prefetching.ini"
     prefetching_config = exp_dir + "prefetching.ini"
