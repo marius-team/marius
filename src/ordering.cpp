@@ -154,7 +154,7 @@ map<pair<int64_t, int64_t>, int64_t> getHilbertSymmetricOrdering() {
 map<pair<int64_t, int64_t>, int64_t> getEliminationOrdering() {
     map<pair<int64_t, int64_t>, int64_t> ordering_map;
 
-    int num_elim = marius_options.storage.num_partitions - 1;
+    int num_elim = marius_options.storage.buffer_capacity - 1;
 
     vector<int64_t> curr_elim(num_elim);
 

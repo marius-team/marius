@@ -4,7 +4,7 @@
 
 #ifndef MARIUS_ORDERING_H
 #define MARIUS_ORDERING_H
-
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include <batch.h>
 #include <datatypes.h>
 #include <config.h>
