@@ -43,7 +43,7 @@ class MariusLogger {
 
         info_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("logs/{}_{}.log", filename, "info"), true);
         info_sink_->set_level(spdlog::level::info);
-        info_sink_->set_pattern("[%l] [%x %T.%e] %v");
+        info_sink_->set_pattern("[%l] [%x %T.%e] [PID:%P TID:%t] [%s:%!:%#] %v");
 
         warn_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("logs/{}_{}.log", filename, "warn"), true);
         warn_sink_->set_level(spdlog::level::warn);
