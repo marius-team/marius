@@ -23,9 +23,9 @@ def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
     extract_file(download_path)
     stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("soc-LiveJournal1.txt"))], ["sd"],
                                                  [output_dir], num_partitions=num_partitions, dataset_split=split)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "live_journal")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "live_journal", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "live_journal", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "live_journal")
+    output_config(stats, num_nodes, num_edges, output_dir, "live_journal", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "live_journal", device = "multi_gpu")
 
 
 def fb15k(output_dir, num_partitions=1):
@@ -39,9 +39,9 @@ def fb15k(output_dir, num_partitions=1):
                                                   str(Path(output_dir) / Path("freebase_mtr100_mte100-valid.txt")),
                                                   str(Path(output_dir) / Path("freebase_mtr100_mte100-test.txt"))],
                                                  ["srd"], [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "fb15k")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "fb15k", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "fb15k", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "fb15k")
+    output_config(stats, num_nodes, num_edges, output_dir, "fb15k", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "fb15k", device = "multi_gpu")
 
 
 def twitter(output_dir, num_partitions=1, split=(.05, .05)):
@@ -50,9 +50,9 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
 
     stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))], ["srd"],
                                                  [output_dir], num_partitions=num_partitions, dataset_split=split, num_line_skip=1)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "twitter")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "twitter", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "twitter", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "twitter")
+    output_config(stats, num_nodes, num_edges, output_dir, "twitter", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "twitter", device = "multi_gpu")
 
 
 def freebase86m(output_dir, num_partitions=1):
@@ -65,9 +65,9 @@ def freebase86m(output_dir, num_partitions=1):
     stats, num_nodes, num_edges = general_parser(
         [str(Path(output_dir) / Path("train.txt")), str(Path(output_dir) / Path("valid.txt")),
          str(Path(output_dir) / Path("test.txt"))], ["sdr"], [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "freebase86m")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "freebase86m", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "freebase86m", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "freebase86m")
+    output_config(stats, num_nodes, num_edges, output_dir, "freebase86m", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "freebase86m", device = "multi_gpu")
 
 
 def wn18(output_dir, num_partitions=1):
@@ -82,9 +82,9 @@ def wn18(output_dir, num_partitions=1):
                                                   str(Path(output_dir) / Path("wordnet-mlj12-valid.txt")),
                                                   str(Path(output_dir) / Path("wordnet-mlj12-test.txt"))], ["srd"],
                                                  [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "wn18")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "wn18", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "wn18", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "wn18")
+    output_config(stats, num_nodes, num_edges, output_dir, "wn18", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "wn18", device = "multi_gpu")
 
 
 def fb15k_237(output_dir, num_partitions=1):
@@ -97,9 +97,9 @@ def fb15k_237(output_dir, num_partitions=1):
     stats, num_nodes, num_edges = general_parser(
         [str(Path(output_dir) / Path("train.txt")), str(Path(output_dir) / Path("valid.txt")),
          str(Path(output_dir) / Path("test.txt"))], ["srd"], [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "fb15k_237")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "fb15k_237", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "fb15k_237", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "fb15k_237")
+    output_config(stats, num_nodes, num_edges, output_dir, "fb15k_237", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "fb15k_237", device = "multi_gpu")
 
 
 def wn18rr(output_dir, num_partitions=1):
@@ -112,9 +112,9 @@ def wn18rr(output_dir, num_partitions=1):
     stats, num_nodes, num_edges = general_parser(
         [str(Path(output_dir) / Path("train.txt")), str(Path(output_dir) / Path("valid.txt")),
          str(Path(output_dir) / Path("test.txt"))], ["srd"], [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "wn18rr")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "wn18rr", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "wn18rr", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "wn18rr")
+    output_config(stats, num_nodes, num_edges, output_dir, "wn18rr", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "wn18rr", device = "multi_gpu")
 
 
 def codex_s(output_dir, num_partitions=1):
@@ -129,9 +129,9 @@ def codex_s(output_dir, num_partitions=1):
                                                   str(Path(output_dir) / Path("valid.txt")),
                                                   str(Path(output_dir) / Path("test.txt"))],
                                                  ["srd"], [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_s")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_s", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_s", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_s")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_s", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_s", device = "multi_gpu")
 
 
 def codex_m(output_dir, num_partitions=1):
@@ -146,9 +146,9 @@ def codex_m(output_dir, num_partitions=1):
                                                   str(Path(output_dir) / Path("valid.txt")),
                                                   str(Path(output_dir) / Path("test.txt"))],
                                                  ["srd"], [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_m")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_m", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_m", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_m")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_m", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_m", device = "multi_gpu")
 
 
 def codex_l(output_dir, num_partitions=1):
@@ -163,9 +163,9 @@ def codex_l(output_dir, num_partitions=1):
                                                   str(Path(output_dir) / Path("valid.txt")),
                                                   str(Path(output_dir) / Path("test.txt"))],
                                                  ["srd"], [output_dir], num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_l")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_l", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "codex_l", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_l")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_l", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "codex_l", device = "multi_gpu")
 
 
 def drkg(output_dir, num_partitions=1, split=(.05, .05)):
@@ -174,9 +174,9 @@ def drkg(output_dir, num_partitions=1, split=(.05, .05)):
 
     stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("drkg.tsv"))], ["srd"], [output_dir],
                                                  num_partitions=num_partitions, dataset_split=split)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "drkg")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "drkg", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "drkg", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "drkg")
+    output_config(stats, num_nodes, num_edges, output_dir, "drkg", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "drkg", device = "multi_gpu")
 
 
 def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
@@ -186,9 +186,9 @@ def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
 
     stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("hetionet-v1.0-edges.sif"))], ["srd"],
                                                  [output_dir], num_partitions=num_partitions, dataset_split=split)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "hetionet")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "hetionet", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "hetionet", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "hetionet")
+    output_config(stats, num_nodes, num_edges, output_dir, "hetionet", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "hetionet", device = "multi_gpu")
 
 
 def kinships(output_dir, num_partitions=1, split=(.05, .05)):
@@ -215,9 +215,9 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
     
     stats = stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("sample_edges.txt"))], ["srd"],
                                             [output_dir], dataset_split=split)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "kinships")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "kinships", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "kinships", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "kinships")
+    output_config(stats, num_nodes, num_edges, output_dir, "kinships", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "kinships", device = "multi_gpu")
 
 
 def openbiolink_hq(output_dir, num_partitions=1):
@@ -229,9 +229,9 @@ def openbiolink_hq(output_dir, num_partitions=1):
          str(Path(output_dir) / Path("HQ_DIR/train_test_data/val_sample.csv")),
          str(Path(output_dir) / Path("HQ_DIR/train_test_data/test_sample.csv"))],
         ["srd"], [output_dir], num_partitions=num_partitions, num_line_skip=0)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "openbiolink_hq")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "openbiolink_hq", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "openbiolink_hq", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "openbiolink_hq")
+    output_config(stats, num_nodes, num_edges, output_dir, "openbiolink_hq", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "openbiolink_hq", device = "multi_gpu")
 
 def openbiolink_lq(output_dir, num_partitions=1):
     download_path = download_file("https://samwald.info/res/OpenBioLink_2020_final/ALL_DIR.zip", output_dir)
@@ -242,9 +242,9 @@ def openbiolink_lq(output_dir, num_partitions=1):
          str(Path(output_dir) / Path("ALL_DIR/train_test_data/val_sample.csv")),
          str(Path(output_dir) / Path("ALL_DIR/train_test_data/test_sample.csv"))],
         ["srd"], [output_dir], num_partitions=num_partitions, num_line_skip=0)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "openbiolink_lq")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "openbiolink_lq", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "openbiolink_lq", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "openbiolink_lq")
+    output_config(stats, num_nodes, num_edges, output_dir, "openbiolink_lq", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "openbiolink_lq", device = "multi_gpu")
 
 
 def ogbl_biokg(output_dir, num_partitions=1):
@@ -255,9 +255,9 @@ def ogbl_biokg(output_dir, num_partitions=1):
              str(Path(output_dir) / Path("biokg/split/random/test.pt"))]
 
     stats, num_nodes, num_edges = parse_ogbl(files, True, output_dir, num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_biokg")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_biokg", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_biokg", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_biokg")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_biokg", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_biokg", device = "multi_gpu")
 
 
 def ogbl_ppa(output_dir, num_partitions=1):
@@ -268,9 +268,9 @@ def ogbl_ppa(output_dir, num_partitions=1):
              str(Path(output_dir) / Path("ppassoc/split/throughput/test.pt"))]
 
     stats, num_nodes, num_edges = parse_ogbl(files, False, output_dir, num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_ppa")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_ppa", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_ppa", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_ppa")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_ppa", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_ppa", device = "multi_gpu")
 
 
 def ogbl_ddi(output_dir, num_partitions=1):
@@ -281,9 +281,9 @@ def ogbl_ddi(output_dir, num_partitions=1):
              str(Path(output_dir) / Path("ddi/split/target/test.pt"))]
 
     stats, num_nodes, num_edges = parse_ogbl(files, False, output_dir, num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_ddi")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_ddi", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_ddi", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_ddi")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_ddi", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_ddi", device = "multi_gpu")
 
 
 def ogbl_collab(output_dir, num_partitions=1):
@@ -294,9 +294,9 @@ def ogbl_collab(output_dir, num_partitions=1):
              str(Path(output_dir) / Path("collab/split/time/test.pt"))]
 
     stats, num_nodes, num_edges = parse_ogbl(files, False, output_dir, num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_collab")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_collab", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbl_collab", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_collab")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_collab", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbl_collab", device = "multi_gpu")
 
 
 def ogbn_arxiv(output_dir, num_partitions=1):
@@ -308,9 +308,9 @@ def ogbn_arxiv(output_dir, num_partitions=1):
              str(Path(output_dir) / Path("arxiv/raw/edge.csv.gz"))]
 
     stats, num_nodes, num_edges = parse_ogbn(files, output_dir, num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_arxiv")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_arxiv", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_arxiv", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_arxiv")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_arxiv", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_arxiv", device = "multi_gpu")
 
 
 def ogbn_proteins(output_dir, num_partitions=1):
@@ -322,9 +322,9 @@ def ogbn_proteins(output_dir, num_partitions=1):
              str(Path(output_dir) / Path("proteins/raw/edge.csv.gz"))]
 
     stats, num_nodes, num_edges = parse_ogbn(files, output_dir, num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_proteins")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_proteins", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_proteins", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_proteins")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_proteins", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_proteins", device = "multi_gpu")
 
 def ogbn_products(output_dir, num_partitions=1):
     download_path = download_file("http://snap.stanford.edu/ogb/data/nodeproppred/products.zip", output_dir)
@@ -335,9 +335,9 @@ def ogbn_products(output_dir, num_partitions=1):
              str(Path(output_dir) / Path("products/raw/edge.csv.gz"))]
 
     stats, num_nodes, num_edges = parse_ogbn(files, output_dir, num_partitions=num_partitions)
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_products")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_products", device = "gpu")
-    output_config(stats, num_nodes, num_edges, "./output_dir/", "ogbn_products", device = "multi_gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_products")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_products", device = "gpu")
+    output_config(stats, num_nodes, num_edges, output_dir, "ogbn_products", device = "multi_gpu")
 
 def parse_ogbn(files, output_dir, num_partitions=1):
     splits = []
@@ -497,7 +497,7 @@ if __name__ == "__main__":
 
     if dataset_dict.get(args.dataset) != None:
         dataset_dict.get(args.dataset)(args.output_directory, args.num_partitions)
-        output_bash_cmds("./output_dir", args.dataset)
+        output_bash_cmds(args.output_directory, args.dataset)
     else:
         print("Unrecognized dataset!")
 
