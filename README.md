@@ -4,12 +4,13 @@
 
 Experiment configuration, scripts and a copy of the paper are located in the `osdi2021` directory. The directory is structured in the following format.
 
+See the detailed instructions for how to build Marius.
 
-### How Marius works ### 
+### How to use Marius ### 
 
 Marius is run from the command line by supplying a .ini format configuration file which defines the training procedure. 
 
-For example, the following command will train marius on the configuration used to obtain the ComplEx entry in Table 2.
+For example, the following command will train marius on the configuration used to obtain the ComplEx entry in Table 2 of the paper.
 
 `marius_train osdi2021/system_comparisons/fb15k/marius/complex.ini`
 
@@ -17,7 +18,7 @@ For example, the following command will train marius on the configuration used t
 
 To reproduce the experiments we have provided python scripts to run each experiment in the paper.
 
-Experiments are run with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
+Experiments are run from the repository root directory with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
 
 The list of experiments and their corresponding figures/tables are:
 ```
@@ -31,19 +32,35 @@ ordering_total_io          // Figure 9
 orderings_freebase86m      // Figure 10 
 orderings_twitter          // Figure 11
 staleness_bound            // Figure 12
-prefatching                // Figure 13
+prefetching                // Figure 13
 big_embeddings             // Table 6
 all                        // Will run all of the above
 ```
 
 ### Reproducing plots ###
 
-### Differences from the original version ###
+### Example ###
+
+
 
 ## Detailed Instructions ##
 
 ### Artifact claims ###
 
+Since submitting the paper, we have made changes to the system to get it ready for open sourcing. The changes involved a full refactor of the system to simplify its design and usage. These changes have also resulted in fixing of some bugs that are relevant to the paper's results. The code in this repository is the most up to date version and will be used to rerun experiments for the final version of the paper. 
+
+#### Accuracy differences in Table 5 ####
+In the original submission of the paper we had differences in accuracy between PyTorch Big-Graph and Marius when running on Freebase86m, where the systems reached a peak MRR of .73 and ~.685 respectively. This issue was known by us and also pointed out by the reviewers and we aimed to fix it for the final submission of the paper. 
+
+As a result of the full refactor, the accuracy differences are no longer as large. With Marius now achieving a peak MRR of .717 on the same configuration. There still exists a slight difference in accuracy but we haven't had the opportunity to fully explore this yet, but will do so before the final submission of the paper.
+
+#### Updates to this artifact ####
+While the submission of this artifact for evaluation points to a specific commit, we will keep this branch up to date with our latest experiment configuration, scripts and plotting code. Such that for the final version of the paper, all produced results will correspond exactly to the scripts and configuration in the most up to date version of this branch. 
+
+Additionally, if the reviewers of this artifact encounter any issues/bugs, please contact us and we will fix the issue and push and update to the branch. 
+
+
+#### Experiments that require extra effort to reproduce ####
 
 
 ### Artifact structure ###
@@ -118,10 +135,14 @@ osdi2021/
    parse_output.py                           // parses the output of each systems output and dstat and nvidia-smi
    run_experiment.py                         // run each experiment 
    utils.py                                  // handles special routines for preprocessing datasets for other systems
+   plotting.py                               // produces plots after experiments have been run 
 ```
 
+## Build Information ##
 
-## Requirements ##
+For the artifact reviewers, we will set up an AWS P3.2xLarge instance with the system pre-built and provide access to them. But if one wishes to build the system from scratch, the following instructions denote dependencies and how to build Marius.
+
+### Requirements ###
 (Other versions may work, but are untested)
 * Ubuntu 18.04 or MacOS 10.15 
 * CUDA 10.1 or 10.2 (If using GPU training)
@@ -134,7 +155,7 @@ osdi2021/
 * make >= 3.8
 
 
-## Installation ##
+### Installation ###
 
 1. Install latest version of PyTorch for your CUDA version:
 
@@ -148,18 +169,20 @@ osdi2021/
 
 2. Clone the repository `git clone https://github.com/marius-team/marius.git`
 
-3. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
+3. Checkout the artifact evaluation branch `git checkout osdi2021`
 
-4. Create build directory `mkdir build; cd build`
+4. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
 
-5. Run cmake in the build directory `cmake ../` (CPU-only build) or `cmake ../ -DUSE_CUDA=1` (GPU build)
+5. Create build directory `mkdir build; cd build`
 
-6. Make the marius executable. `make marius_train -j`
+6. Run cmake in the build directory `cmake ../` (CPU-only build) or `cmake ../ -DUSE_CUDA=1` (GPU build)
+
+7. Make the marius executable. `make marius_train -j`
 
 #### Full script (without torch install) ####
-
 ```
 git clone https://github.com/marius-team/marius.git
+git checkout osdi2021
 cd marius
 python3 -m pip install -r requirements.txt
 mkdir build
