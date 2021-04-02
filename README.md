@@ -14,7 +14,7 @@ However, instead of directly running the Marius executable on configuration file
 
 ### Reproducing experiments ###
 
-To reproduce the experiments we have provided python scripts to run each experiment in the paper. **Nearly all experiments can be run on a single Amazon EC2 p3.2xlarge instance.** The few exceptions to this are described in the detailed instructions.
+To reproduce the experiments we have provided python scripts to run each experiment in the paper. **Nearly all experiments can be run on a single Amazon EC2 p3.2xlarge Ubuntu 18.04 instance.** The few exceptions to this are described in the detailed instructions. Also please refer to to [Requirements](#requirements) below for software packages and dependencies required. 
 
 Experiments are run from the repository root directory with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
 
@@ -64,15 +64,13 @@ While the submission of this artifact for evaluation points to a specific commit
 Additionally, if the reviewers of this artifact encounter any issues/bugs, please contact us and we will fix the issue and push an update to the branch. 
 
 #### What's missing? ####
-In this current version of the artifact the following experiments have not been added as they require a large amount of additional code. These will be added in future versions of the artifact.
+In this current version of the artifact the following experiments have not been added as they require additional data pre-processing code. These will be added in future versions of the artifact.
 
 Experiments not yet added:
  - DGL-KE Livejournal 
  - DGL-KE Twitter
  - PBG Twitter
  - PBG Freebase86m
-
-These experiments require additional preprocessing code to prepare the input dataset for each respective system.
 
 #### Experiments that require extra effort to reproduce ####
 Some experiments will not run on the single P3.2xLarge instance due to memory requirements and need to be run on a machine with a large amount of memory.
@@ -168,17 +166,16 @@ osdi2021/
 
 ## Build Information and Environment ##
 
-For the artifact reviewers, we will set up an AWS P3.2xLarge instance with the system pre-built and provide access to them. But if one wishes to build the system from scratch, the following instructions denote dependencies and how to build Marius.
+For the artifact reviewers, we will set up an AWS P3.2xLarge instance with the system pre-built and provide access to them. But if you wishe to build the system from scratch, the following instructions denote dependencies and how to build Marius.
 
 ### Requirements ###
-(Other versions may work, but are untested)
-* Ubuntu 18.04 or MacOS 10.15 
-* CUDA 10.1 or 10.2 (If using GPU training)
-* CuDNN 7 (If using GPU training)
+* Ubuntu 18.04
+* CUDA 10.1 or 10.2 
+* CuDNN 7
 * 1.7 >= pytorch 
 * python >= 3.6
 * pip >= 21
-* GCC >= 9 (On Linux) or Clang 12.0 (On MacOS)
+* GCC >= 9
 * cmake >= 3.12
 * make >= 3.8
 
@@ -188,13 +185,8 @@ Please also see instructions below.
 
 1. Install latest version of PyTorch for your CUDA version:
 
-    Linux:
     - CUDA 10.1: `python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html`
     - CUDA 10.2: `python3 -m pip install torch==1.7.1`
-    - CPU Only: `python3 -m pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html`
-
-    MacOS:
-    - CPU Only: `python3 -m pip install torch==1.7.1`
 
 2. Clone the repository `git clone https://github.com/marius-team/marius.git`
 
@@ -204,7 +196,7 @@ Please also see instructions below.
 
 5. Create build directory `mkdir build; cd build`
 
-6. Run cmake in the build directory `cmake ../` (CPU-only build) or `cmake ../ -DUSE_CUDA=1` (GPU build)
+6. Run cmake in the build directory `cmake ../ -DUSE_CUDA=1` (GPU build)
 
 7. Make the marius executable. `make marius_train -j`
 
