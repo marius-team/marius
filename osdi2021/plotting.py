@@ -55,16 +55,12 @@ def print_table_2():
 
     print("DGL-KE Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
 
-
     MRR = distmul_res["MRR"]
     hits1 = distmul_res["Hits@1"]
     hits10 = distmul_res["Hits@10"]
     time = distmul_res["Train Time"]
 
     print("DGL-KE Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
-
-
-    pass
 
 
 def print_table_3():

@@ -64,8 +64,9 @@ In this current version of the artifact the following experiments have not been 
 Experiments not yet added:
  - DGL-KE Livejournal 
  - DGL-KE Twitter
- - PBG Twitter
- - PBG Freebase86m
+ - All PBG experiments
+
+The experiments scripts for PBG are available but we encountered issues building PBG from the source repository. We will fix this issue and update the artifact.
 
 #### Experiments that require extra effort to reproduce ####
 Some experiments will not run on the single P3.2xLarge instance due to memory requirements and need to be run on a machine with a large amount of memory.

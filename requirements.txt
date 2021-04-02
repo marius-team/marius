@@ -9,4 +9,3 @@ matplotlib
 cycler
 dgl==0.4.3
 dglke
-torchbiggraph

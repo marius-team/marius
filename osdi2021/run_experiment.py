@@ -104,13 +104,14 @@ def run_fb15k():
     run_dglke(dglke_complex_cmd, exp_dir, "complex_fb15k")
     run_dglke(dglke_distmult_cmd, exp_dir, "distmult_fb15k")
 
-    exp_dir = "osdi2021/system_comparisons/fb15k/pbg/"
-
-    runner_file = exp_dir + "run_fb15k.py"
-    complex_config = exp_dir + "fb15k_complex_config.py"
-    distmult_config = exp_dir + "fb15k_distmult_config.py"
-    run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k")
-    run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k")
+    # PBG is not installing properly based on the readme instructions in the PBG repository
+    # exp_dir = "osdi2021/system_comparisons/fb15k/pbg/"
+    #
+    # runner_file = exp_dir + "run_fb15k.py"
+    # complex_config = exp_dir + "fb15k_complex_config.py"
+    # distmult_config = exp_dir + "fb15k_distmult_config.py"
+    # run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k")
+    # run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k")
 
     osdi_plot.print_table_2()
 
