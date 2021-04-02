@@ -1,1 +1,1 @@
-dglke_train --model_name ComplEx --dataset FB15k --batch_size 10000 --neg_sample_size 1000 --neg_deg_sample --hidden_dim 400 --lr 0.1 --max_step 1449 --log_interval 100 --batch_size_eval 1000 --test --regularization_coef 0
+DGLBACKEND=pytorch dglke_train --model_name ComplEx --dataset FB15k --batch_size 10000 --neg_sample_size 1000 --neg_deg_sample --hidden_dim 400 --lr 0.1 --max_step 1449 --log_interval 100 --batch_size_eval 1000 --test --regularization_coef 0

@@ -7,3 +7,5 @@ pytest
 hilbertcurve==1.0.3
 matplotlib
 cycler
+dgl==0.4.3
+dglke

@@ -1,4 +1,4 @@
-dglke_train --model_name ComplEx --dataset Freebase --batch_size 50000 \
+DGLBACKEND=pytorch dglke_train --model_name ComplEx --dataset Freebase --batch_size 50000 \
 --neg_sample_size 1000 --neg_deg_sample --hidden_dim 100 --lr 0.1  \
 --regularization_coef 0 --batch_size_eval 1000 --test \
 --mix_cpu_gpu --gpu 0 --max_step 480000 \
