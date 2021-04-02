@@ -10,6 +10,33 @@ import execute as e
 import json
 
 
+def run_marius(config, exp_dir, name, config_args="", overwrite=False):
+    if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
+        print("==== Running Marius: %s =====" % name)
+        dstat_pid, nvidia_smi_pid = e.start_tracing()
+        e.run_marius(config, config_args)
+        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
+        e.cleanup_experiments()
+
+        with open(exp_dir + name + "_result.json", 'w') as out_file:
+            json.dump(info_log, out_file)
+        with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
+            dstat_df.to_csv(out_file)
+        with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
+            nvidia_smi_df.to_csv(out_file)
+    else:
+        print("Marius: %s already run" % name)
+
+
+def run_pbg(config, exp_dir, name, overwrite=False):
+    pass
+
+
+def run_dglke(cmd, exp_dir, name, overwrite=False):
+    pass
+
+
 def run_fb15k():
     exp_dir = "osdi2021/system_comparisons/fb15k/marius/"
 
@@ -20,56 +47,19 @@ def run_fb15k():
         print("==== Preprocessing FB15K =====")
         preprocess.fb15k("fb15k/")
 
-    num_runs = 5
-
-    distmult_info_logs = []
-    complex_info_logs = []
-
-    print("==== Running Marius: DistMult FB15K =====")
-    for i in range(num_runs):
-        args = "--general.random_seed=%i" % i
-        e.run_marius(distmult_config, args)
-        info_log, _, _ = e.collect_metrics(info_log_only=True)
-        info_log["Epoch Progress"] = []
-        distmult_info_logs.append(info_log)
-        e.cleanup_experiments(info_log_only=True)
-
-    print("==== Running Marius: ComplEx FB15K =====")
-    for i in range(num_runs):
-        args = "--general.random_seed=%i" % i
-        e.run_marius(complex_config, args)
-        info_log, _, _ = e.collect_metrics(info_log_only=True)
-        info_log["Epoch Progress"] = []
-        complex_info_logs.append(info_log)
-        e.cleanup_experiments(info_log_only=True)
-
-    with open(exp_dir + "distmult_result.json", 'w') as dm_out:
-        json.dump(distmult_info_logs, dm_out)
-
-    with open(exp_dir + "complex_result.json", 'w') as cx_out:
-        json.dump(distmult_info_logs, cx_out)
+    run_marius(distmult_config, exp_dir, "distmult_fb15k")
+    run_marius(complex_config, exp_dir, "complex_fb15k")
 
 
 def run_livejournal():
     exp_dir = "osdi2021/system_comparisons/livejournal/marius/"
-
     dot_config = exp_dir + "dot.ini"
 
     if not os.path.exists("livejournal/"):
         print("==== Preprocessing Livejournal =====")
         preprocess.live_journal("livejournal/")
 
-    dot_info_logs = []
-
-    print("==== Running Marius: Dot Livejournal =====")
-    args = "--general.random_seed=%i" % 0
-    e.run_marius(dot_config, args)
-    info_log, _, _ = e.collect_metrics(info_log_only=True)
-    dot_info_logs.append(info_log)
-    e.cleanup_experiments(info_log_only=True)
-
-    with open(exp_dir + "dot_result.json", 'w') as cx_out:
-        json.dump(dot_info_logs, cx_out)
+    run_marius(dot_config, exp_dir, "dot_livejournal")
 
 
 def run_twitter():
@@ -81,17 +71,7 @@ def run_twitter():
         print("==== Preprocessing Twitter =====")
         preprocess.twitter("twitter/")
 
-    dot_info_logs = []
-
-    print("==== Running Marius: Dot Twitter =====")
-    args = "--general.random_seed=%i" % 0
-    e.run_marius(dot_config, args)
-    info_log, _, _ = e.collect_metrics(info_log_only=True)
-    dot_info_logs.append(info_log)
-    e.cleanup_experiments(info_log_only=True)
-
-    with open(exp_dir + "dot_result.json", 'w') as cx_out:
-        json.dump(dot_info_logs, cx_out)
+    run_marius(dot_config, exp_dir, "dot_twitter")
 
 
 def run_freebase86m():
@@ -102,67 +82,27 @@ def run_freebase86m():
         print("==== Preprocessing Freebase86m P=16 D=100 =====")
         preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
 
-    complex_info_logs = []
-
-    print("==== Running Marius: ComplEx Freebase86m D=100 =====")
-    args = "--general.random_seed=%i" % 0
-    e.run_marius(complex_config, args)
-    info_log, _, _ = e.collect_metrics(info_log_only=True)
-    complex_info_logs.append(info_log)
-    e.cleanup_experiments(info_log_only=True)
-
-    with open(exp_dir + "complex_100.json", 'w') as cx_out:
-        json.dump(complex_info_logs, cx_out)
+    run_marius(complex_config, exp_dir, "freebase86m_16")
 
 
 def run_utilization():
-
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
 
     complex_50_config = exp_dir + "d50.ini"
-    complex_100_config = exp_dir + "d100.ini"
+    complex_50_8_config = exp_dir + "d50_8.ini"
 
     if not os.path.exists("freebase86m/"):
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
-    complex_50_info_logs = []
-    print("==== Running Marius: ComplEx Freebase86m D=50 =====")
-    args = "--general.random_seed=%i" % 0
-    dstat_pid, nvidia_smi_pid = e.start_tracing()
-    e.run_marius(complex_50_config, args)
-    e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-    info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-    complex_50_info_logs.append(info_log)
-    e.cleanup_experiments()
+    config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2"
+    run_marius(complex_50_config, exp_dir, "complex_50_util", config_args)
 
-    with open(exp_dir + "complex_50_result.json", 'w') as cx_out:
-        json.dump(complex_50_info_logs, cx_out)
-    with open(exp_dir + "complex_50_dstat.csv", 'w') as cx_out:
-        dstat_df.to_csv(cx_out)
-    with open(exp_dir + "complex_50_nvidia_smi.csv", 'w') as cx_out:
-        nvidia_smi_df.to_csv(cx_out)
+    if not os.path.exists("freebase86m_p8/"):
+        print("==== Preprocessing Freebase86m P=8 D=50 =====")
+        preprocess.freebase86m("freebase86m_p8/", num_partitions=8)
 
-    if not os.path.exists("freebase86m_p16/"):
-        print("==== Preprocessing Freebase86m P=16 D=100 =====")
-        preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
-
-    complex_100_info_logs = []
-    print("==== Running Marius: ComplEx Freebase86m D=100 =====")
-    args = "--general.random_seed=%i" % 0
-    dstat_pid, nvidia_smi_pid = e.start_tracing()
-    e.run_marius(complex_100_config, args)
-    e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-    info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-    complex_100_info_logs.append(info_log)
-    e.cleanup_experiments()
-
-    with open(exp_dir + "complex_100_result.json", 'w') as cx_out:
-        json.dump(complex_100_info_logs, cx_out)
-    with open(exp_dir + "complex_100_dstat.csv", 'w') as cx_out:
-        dstat_df.to_csv(cx_out)
-    with open(exp_dir + "complex_100_nvidia_smi.csv", 'w') as cx_out:
-        nvidia_smi_df.to_csv(cx_out)
+    run_marius(complex_50_8_config, exp_dir, "complex_50_8_util", config_args)
 
 
 def run_buffer_simulator():
@@ -170,66 +110,22 @@ def run_buffer_simulator():
 
 
 def run_orderings_total_io():
-
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
     hilbert_config = exp_dir + "hilbert.ini"
     hilbert_symmetric_config = exp_dir + "hilbert_symmetric.ini"
 
-
     if not os.path.exists("freebase86m_32/"):
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
+    config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2 --reporting.logs_per_epoch=1000"
+    run_marius(elimination_config, exp_dir, "elimination100_util", config_args)
 
-    if not os.path.exists("elimination100_result.json"):
-        print("==== Running Marius: Elimination Freebase86m D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(elimination_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
+    run_marius(hilbert_config, exp_dir, "hilbert100_util", config_args)
 
-        with open(exp_dir + "elimination100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "elimination100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "elimination100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbert100_result.json"):
-        print("==== Running Marius: Hilbert Freebase86m D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbert100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbert100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbert100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbertsymmetric100_result.json"):
-        print("==== Running Marius: HilbertSymmetric Freebase86m D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_symmetric_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbertsymmetric100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbertsymmetric100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbertsymmetric100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args)
 
 
 def run_orderings_freebase86m():
@@ -244,121 +140,19 @@ def run_orderings_freebase86m():
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
+    run_marius(elimination_config, exp_dir, "elimination100")
+    run_marius(hilbert_config, exp_dir, "hilbert100")
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100")
+
     if not os.path.exists("freebase86m/"):
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
-    if not os.path.exists("elimination100_result.json"):
-        print("==== Running Marius: Elimination Freebase86m D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(elimination_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "elimination100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "elimination100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "elimination100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbert100_result.json"):
-        print("==== Running Marius: Hilbert Freebase86m D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbert100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbert100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbert100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbertsymmetric100_result.json"):
-        print("==== Running Marius: HilbertSymmetric Freebase86m D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_symmetric_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbertsymmetric100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbertsymmetric100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbertsymmetric100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("elimination50_result.json"):
-        print("==== Running Marius: Elimination Freebase86m D=50 =====")
-        args = "--general.random_seed=%i --model.embedding_size=50" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(elimination_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "elimination50_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "elimination50_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "elimination50_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbert50_result.json"):
-        print("==== Running Marius: Hilbert Freebase86m D=50 =====")
-        args = "--general.random_seed=%i --model.embedding_size=50" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbert50_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbert50_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbert50_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbertsymmetric50_result.json"):
-        print("==== Running Marius: HilbertSymmetric Freebase86m D=50 =====")
-        args = "--general.random_seed=%i --model.embedding_size=50" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_symmetric_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbertsymmetric50_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbertsymmetric50_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbertsymmetric50_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("memory50_result.json"):
-        print("==== Running Marius: Memory Freebase86m D=50 =====")
-        args = "--general.random_seed=%i --model.embedding_size=50" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(memory_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "memory50_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "memory50_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "memory50_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
+    config_args = "--model.embedding_size=50"
+    run_marius(elimination_config, exp_dir, "elimination50")
+    run_marius(hilbert_config, exp_dir, "hilbert50", config_args)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric50", config_args)
+    run_marius(memory_config, exp_dir, "memory50", config_args)
 
 
 def run_orderings_twitter():
@@ -377,117 +171,15 @@ def run_orderings_twitter():
         print("==== Preprocessing Twitter P=1 D=100 =====")
         preprocess.freebase86m("twitter/")
 
-    if not os.path.exists("elimination100_result.json"):
-        print("==== Running Marius: Elimination Twitter D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(elimination_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
+    run_marius(elimination_config, exp_dir, "elimination100")
+    run_marius(hilbert_config, exp_dir, "hilbert100")
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100")
+    run_marius(memory_config, exp_dir, "memory100")
 
-        with open(exp_dir + "elimination100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "elimination100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "elimination100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbert100_result.json"):
-        print("==== Running Marius: Hilbert Twitter D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbert100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbert100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbert100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbertsymmetric100_result.json"):
-        print("==== Running Marius: HilbertSymmetric Twitter D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_symmetric_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbertsymmetric100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbertsymmetric100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbertsymmetric100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("memory50_result.json"):
-        print("==== Running Marius: Memory Twitter D=100 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(memory_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "memory100_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "memory100_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "memory100_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("elimination200_result.json"):
-        print("==== Running Marius: Elimination Twitter D=200 =====")
-        args = "--general.random_seed=%i --model.embedding_size=200" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(elimination_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "elimination200_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "elimination200_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "elimination200_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbert200_result.json"):
-        print("==== Running Marius: Hilbert Twitter D=200 =====")
-        args = "--general.random_seed=%i --model.embedding_size=200" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbert200_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbert200_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbert200_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("hilbertsymmetric200_result.json"):
-        print("==== Running Marius: HilbertSymmetric Twitter D=200 =====")
-        args = "--general.random_seed=%i --model.embedding_size=200" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(hilbert_symmetric_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "hilbertsymmetric200_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "hilbertsymmetric200_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "hilbertsymmetric200_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
+    config_args = "--model.embedding_size=200"
+    run_marius(elimination_config, exp_dir, "elimination200", config_args)
+    run_marius(hilbert_config, exp_dir, "hilbert200", config_args)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric200", config_args)
 
 
 def run_staleness_bound():
@@ -501,55 +193,12 @@ def run_staleness_bound():
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
-    if not os.path.exists("sync_result.json"):
-        print("==== Running Marius: Sync Freebase86m D=50 =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(all_sync, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
+    run_marius(all_sync, exp_dir, "all_sync")
 
-        with open(exp_dir + "sync_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "sync_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "sync_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("sync_relations_bound_2_result.json"):
-        for bound in [2, 4, 8, 16, 32, 64]:
-            print("==== Running Marius: Sync Relations, Bound=%i Freebase86m D=50 =====" % bound)
-            args = "--general.random_seed=%i --training_pipeline.max_batches_in_flight=%i" % (0, bound)
-            dstat_pid, nvidia_smi_pid = e.start_tracing()
-            e.run_marius(sync_relations_async_nodes, args)
-            e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-            info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-            e.cleanup_experiments()
-
-            with open(exp_dir + "sync_relations_bound_2_result.json", 'w') as cx_out:
-                json.dump(info_log, cx_out)
-            with open(exp_dir + "sync_relations_bound_2_dstat.csv", 'w') as cx_out:
-                dstat_df.to_csv(cx_out)
-            with open(exp_dir + "sync_relations_bound_2_nvidia_smi.csv", 'w') as cx_out:
-                nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("async_relations_bound_2_result.json"):
-        for bound in [2, 4, 8, 16, 32, 64]:
-            print("==== Running Marius: Async Relations, Bound=%i Freebase86m D=50 =====" % bound)
-            args = "--general.random_seed=%i --training_pipeline.max_batches_in_flight=%i" % (0, bound)
-            dstat_pid, nvidia_smi_pid = e.start_tracing()
-            e.run_marius(all_async_config, args)
-            e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-            info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-            e.cleanup_experiments()
-
-            with open(exp_dir + "async_relations_bound_2_result.json", 'w') as cx_out:
-                json.dump(info_log, cx_out)
-            with open(exp_dir + "async_relations_bound_2_dstat.csv", 'w') as cx_out:
-                dstat_df.to_csv(cx_out)
-            with open(exp_dir + "async_relations_bound_2_nvidia_smi.csv", 'w') as cx_out:
-                nvidia_smi_df.to_csv(cx_out)
+    for bound in [2, 4, 8, 16, 32, 64]:
+        config_args = "--training_pipeline.max_batches_in_flight=%i" % bound
+        run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args)
+        run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args)
 
 
 def run_prefetching():
@@ -560,43 +209,40 @@ def run_prefetching():
 
     if not os.path.exists("freebase86m_32/"):
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
-        preprocess.freebase86m("freebase86m_32/")
+        preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    if not os.path.exists("no_prefetching_result.json"):
-        print("==== Running Marius: No Prefetching Freebase86m =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(no_prefetching_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "no_prefetching_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "no_prefetching_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "no_prefetching_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
-
-    if not os.path.exists("prefetching_result.json"):
-        print("==== Running Marius: Prefetching Freebase86m =====")
-        args = "--general.random_seed=%i" % 0
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
-        e.run_marius(prefetching_config, args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
-
-        with open(exp_dir + "prefetching_result.json", 'w') as cx_out:
-            json.dump(info_log, cx_out)
-        with open(exp_dir + "prefetching_dstat.csv", 'w') as cx_out:
-            dstat_df.to_csv(cx_out)
-        with open(exp_dir + "prefetching_nvidia_smi.csv", 'w') as cx_out:
-            nvidia_smi_df.to_csv(cx_out)
+    run_marius(no_prefetching_config, exp_dir, "no_prefetching")
+    run_marius(prefetching_config, exp_dir, "prefetching")
 
 
 def run_big_embeddings():
-    pass
+    exp_dir = "osdi2021/large_embeddings/"
+    cpu_memory = exp_dir + "cpu_memory.ini"
+    gpu_memory = exp_dir + "gpu_memory.ini"
+    disk = exp_dir + "disk.ini"
+    if not os.path.exists("freebase86m/"):
+        print("==== Preprocessing Freebase86m P=1 =====")
+        preprocess.freebase86m("freebase86m/")
+
+    if not os.path.exists("freebase86m_32/"):
+        print("==== Preprocessing Freebase86m P=32 =====")
+        preprocess.freebase86m("freebase86m_32/", num_partitions=32)
+
+    run_marius(gpu_memory, exp_dir, "d20")
+    run_marius(cpu_memory, exp_dir, "d50")
+
+    config_args = "--storage.buffer_capacity=16"
+    run_marius(disk, exp_dir, "d100", config_args)
+
+    # config_args = "--storage.buffer_capacity=4 --model.embedding_size=400"
+    # run_marius(disk, exp_dir, "d400", config_args)
+    #
+    # if not os.path.exists("freebase86m_64/"):
+    #     print("==== Preprocessing Freebase86m P=64 =====")
+    #     preprocess.freebase86m("freebase86m_64/", num_partitions=64)
+
+    # config_args = "--storage.buffer_capacity=4 --model.embedding_size=800"
+    # run_marius(disk, exp_dir, "d800", config_args)
 
 
 def run_all():

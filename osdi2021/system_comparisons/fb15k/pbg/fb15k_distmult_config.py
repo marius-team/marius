@@ -1,13 +1,13 @@
 def get_torchbiggraph_config():
     config = dict(  # noqa
         # I/O data
-        entity_path="data/fb15k",
+        entity_path="data/fb15k_distmult",
         edge_paths=[
             "data/FB15k/freebase_mtr100_mte100-train_partitioned",
             "data/FB15k/freebase_mtr100_mte100-valid_partitioned",
             "data/FB15k/freebase_mtr100_mte100-test_partitioned",
         ],
-        checkpoint_path="model/fb15k",
+        checkpoint_path="model/fb15k_distmult",
         # Graph structure
         entities={"all": {"num_partitions": 1}},
         relations=[
