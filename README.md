@@ -10,7 +10,7 @@ For example, the following command will train marius on the configuration used t
 
 `marius_train osdi2021/system_comparisons/fb15k/marius/complex.ini`
 
-However, instead of directly running the Marius executable on configuration files, we have a provided a python script which handles running each experiment, collecting results, and plotting results. This is described in the following section.
+However, instead of directly running the Marius executable on configuration files, we have provided a python script which handles running each experiment, collecting results, and plotting results. This is described in the following section.
 
 ### Reproducing experiments ###
 
@@ -44,7 +44,7 @@ To reproduce table 2 with the above script the following command can be run:
 
 ### Hit an issue? ###
 
-If you have hit an issue with the system, the scripts, or the results, please let us know and we will investigate and fix the issue if needed.
+If you have hit an issue with the system, the scripts, or the results, please let us know (contact: mohoney2@wisc.edu) and we will investigate and fix the issue if needed.
 
 
 ## Detailed Instructions ##
@@ -182,6 +182,7 @@ For the artifact reviewers, we will set up an AWS P3.2xLarge instance with the s
 * cmake >= 3.12
 * make >= 3.8
 
+Please also see instructions below.
 
 ### Installation ###
 
