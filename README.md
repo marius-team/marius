@@ -41,7 +41,7 @@ all                        // Will run all of the above
 
 ### Hit an issue? ###
 
-If you have hit an issue with the system, the scripts, or the results, please let us know and investigate and fix the issue if needed.
+If you have hit an issue with the system, the scripts, or the results, please let us know and we will investigate and fix the issue if needed.
 
 
 ## Detailed Instructions ##
