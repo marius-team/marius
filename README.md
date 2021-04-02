@@ -14,7 +14,7 @@ However, instead of directly running the Marius executable on configuration file
 
 ### Reproducing experiments ###
 
-To reproduce the experiments we have provided python scripts to run each experiment in the paper.
+To reproduce the experiments we have provided python scripts to run each experiment in the paper. **All experiments can be run on a single Amazon EC2 p3.2xlarge instance.**
 
 Experiments are run from the repository root directory with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
 
