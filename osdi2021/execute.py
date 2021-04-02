@@ -38,7 +38,7 @@ def run_dglke(args):
 
 
 def run_pbg(script_path, config_path, args=None):
-    script = "%s --config %s" % (script_path, config_path)
+    script = "python3 %s --config %s" % (script_path, config_path)
     with open("tmp.txt", "w") as tmp_file:
         subprocess.check_call(script, shell=True, stdout=tmp_file)
 
