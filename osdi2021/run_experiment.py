@@ -69,6 +69,8 @@ def run_livejournal():
 
     run_marius(dot_config, exp_dir, "dot_livejournal")
 
+    osdi_plot.print_table_3()
+
 
 def run_twitter():
     exp_dir = "osdi2021/system_comparisons/twitter/marius/"
@@ -81,6 +83,8 @@ def run_twitter():
 
     run_marius(dot_config, exp_dir, "dot_twitter")
 
+    osdi_plot.print_table_4()
+
 
 def run_freebase86m():
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
@@ -91,6 +95,8 @@ def run_freebase86m():
         preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
 
     run_marius(complex_config, exp_dir, "freebase86m_16")
+
+    osdi_plot.print_table_5()
 
 
 def run_utilization():
@@ -248,6 +254,8 @@ def run_big_embeddings():
 
     config_args = "--storage.buffer_capacity=16"
     run_marius(disk, exp_dir, "d100", config_args)
+
+    osdi_plot.print_table_6()
 
     # config_args = "--storage.buffer_capacity=4 --model.embedding_size=400"
     # run_marius(disk, exp_dir, "d400", config_args)

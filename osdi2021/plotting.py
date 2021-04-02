@@ -1,14 +1,18 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import parse_output
-import cycler
-from matplotlib.lines import Line2D
 import json
 
+import cycler
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.lines import Line2D
+
+import parse_output
+
+
 def smooth(y, box_pts):
-    box = np.ones(box_pts)/box_pts
+    box = np.ones(box_pts) / box_pts
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth
+
 
 def print_table_2():
     exp_dir = "osdi2021/system_comparisons/fb15k/"
@@ -39,20 +43,94 @@ def print_table_2():
 
     pass
 
+
 def print_table_3():
-    pass
+    exp_dir = "osdi2021/system_comparisons/livejournal/"
+
+    marius_dot = exp_dir + "marius/dot_livejournal_result.json"
+
+    with open(marius_dot) as f:
+        marius_dot_res = json.load(f)
+
+    MRR = marius_dot_res["MRR"][-1]
+    hits1 = marius_dot_res["Hits@1"][-1]
+    hits5 = marius_dot_res["Hits@5"][-1]
+    hits10 = marius_dot_res["Hits@10"][-1]
+    time = sum(marius_dot_res["Train Time"]) / 1000.0
+
+    print("Marius Dot: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
+
 
 def print_table_4():
-    pass
+    exp_dir = "osdi2021/system_comparisons/twitter/"
+
+    marius_dot = exp_dir + "marius/dot_twitter_result.json"
+
+    with open(marius_dot) as f:
+        marius_dot_res = json.load(f)
+
+    MRR = marius_dot_res["MRR"][-1]
+    hits1 = marius_dot_res["Hits@1"][-1]
+    hits5 = marius_dot_res["Hits@5"][-1]
+    hits10 = marius_dot_res["Hits@10"][-1]
+    time = sum(marius_dot_res["Train Time"]) / 1000.0
+
+    print("Marius Dot: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
+
 
 def print_table_5():
-    pass
+    exp_dir = "osdi2021/system_comparisons/freebase86m/"
+
+    marius_complex = exp_dir + "marius/freebase86m_16_result.json"
+
+    with open(marius_complex) as f:
+        marius_complex_res = json.load(f)
+
+    MRR = marius_complex_res["MRR"][-1]
+    hits1 = marius_complex_res["Hits@1"][-1]
+    hits5 = marius_complex_res["Hits@5"][-1]
+    hits10 = marius_complex_res["Hits@10"][-1]
+    time = sum(marius_complex_res["Train Time"]) / 1000.0
+
+    print("Marius Complex, P=16: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (
+    MRR, hits1, hits5, hits10, time))
+
 
 def print_table_6():
-    pass
+    exp_dir = "osdi2021/large_embeddings/"
+
+    d20 = exp_dir + "d20_result.json"
+    d50 = exp_dir + "d50_result.json"
+    d100 = exp_dir + "d100_result.json"
+
+    with open(d20) as f:
+        d20_res = json.load(f)
+
+    with open(d50) as f:
+        d50_res = json.load(f)
+
+    with open(d100) as f:
+        d100_res = json.load(f)
+
+    MRR = d20_res["MRR"][-1]
+    time = d20_res["Train Time"][0]
+
+    print("Marius D=20, P=16: MRR %s, Runtime %s s" % (MRR, time))
+
+    MRR = d50_res["MRR"][-1]
+    time = d50_res["Train Time"][0]
+
+    print("Marius D=50, P=16: MRR %s, Runtime %s s" % (MRR, time))
+
+    MRR = d100_res["MRR"][-1]
+    time = d100_res["Train Time"][0]
+
+    print("Marius D=100, P=16: MRR %s, Runtime %s s" % (MRR, time))
+
 
 def plot_figure_7():
     pass
+
 
 def plot_figure_8():
     exp_dir = "osdi2021/system_comparisons/freebase86m/"
@@ -81,7 +159,6 @@ def plot_figure_8():
     plt.rcParams['ytick.color'] = COLOR
     plt.rcParams.update(params)
 
-
     gpus_dfs = []
     gpus_dfs.append(marius8_df)
     gpus_dfs.append(marius_mem_df)
@@ -92,7 +169,6 @@ def plot_figure_8():
     dstat_dfs.append(marius8_dstat_df)
     dstat_dfs.append(marius_mem_dstat_df)
     dstat_dfs.append(pbg_dstat_df)
-
 
     offsets = []
     # to get proper offsets for each line these need to be tuned
@@ -105,7 +181,6 @@ def plot_figure_8():
     offsets.append((0, -1))
     offsets.append((0, -1))
 
-
     color = plt.cm.viridis(np.linspace(0, 1, 4))
     color_cycler = cycler.cycler('color', color)
 
@@ -115,12 +190,11 @@ def plot_figure_8():
 
     orders = [2, 3, 1, 0]
 
-    experiment_ids = ["Marius (On Disk, 8 Partitions)", "Marius (In Memory)", "PBG (On Disk, 8 Partitions)", "DGL-KE (In Memory)"]
+    experiment_ids = ["Marius (On Disk, 8 Partitions)", "Marius (In Memory)", "PBG (On Disk, 8 Partitions)",
+                      "DGL-KE (In Memory)"]
     # experiment_ids = ["PBG", "DGL-KE"]
     experiment_handles = []
     for e in experiment_ids:
-
-
         gpu_res = gpus_dfs[i]
         # cpu_res = dstat_dfs[i]
         gpu_util = smooth(gpu_res["GPU Compute Utilization"].to_numpy(), 30) * 100.0
@@ -129,10 +203,10 @@ def plot_figure_8():
         color = color_cycler.by_key()['color'][i]
 
         offset = offsets[i]
-        ax.plot(np.arange(len(gpu_util[offset[0]:offset[1]])), gpu_util[offset[0]:offset[1]], color=color, linewidth=4, linestyle = "-", label=e, zorder=orders[i])
+        ax.plot(np.arange(len(gpu_util[offset[0]:offset[1]])), gpu_util[offset[0]:offset[1]], color=color, linewidth=4,
+                linestyle="-", label=e, zorder=orders[i])
         ax.set_ylabel("GPU Util (%)")
         ax.set_xlabel("Time (s)")
-
 
         i += 1
 
@@ -145,15 +219,16 @@ def plot_figure_8():
 
     plt.savefig(exp_dir + "figure_8.png")
 
+
 def plot_figure_9():
     pass
+
 
 def plot_figure_10():
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     labels = []
     fig, ax = plt.subplots(figsize=(6, 4))
-
 
     plt.rc('font', family='serif')
     plt.rcParams['font.size'] = 16
@@ -168,7 +243,6 @@ def plot_figure_10():
     colors = plt.cm.viridis(np.linspace(0, 1, 16))
     color_cycler = cycler.cycler('color', colors)
 
-
     mem = [77, 0]
     elim = [100, 150]
     hilbert_sym = [130, 207]
@@ -176,30 +250,31 @@ def plot_figure_10():
     # d100 = [0, 150, 207, 354]
     colors = ["k", "b", "g", "r"]
 
-    ind = np.arange(len(mem)) / 2.25 # the x locations for the groups
+    ind = np.arange(len(mem)) / 2.25  # the x locations for the groups
     width = 0.1  # the width of the bars
-
 
     rects1 = ax.bar(ind - (width / 2) - width, mem, width, label='In Memory', color=color_cycler.by_key()['color'][0])
     rects2 = ax.bar(ind - (width / 2), elim, width, label='Elimination', color=color_cycler.by_key()['color'][3])
 
-    rects1 = ax.bar(ind + (width / 2), hilbert_sym, width, label='HilbertSymmetric', color=color_cycler.by_key()['color'][6])
-    rects2 = ax.bar(ind + (width / 2) + width, hilbert, width, label='Hilbert', color=color_cycler.by_key()['color'][10])
-
+    rects1 = ax.bar(ind + (width / 2), hilbert_sym, width, label='HilbertSymmetric',
+                    color=color_cycler.by_key()['color'][6])
+    rects2 = ax.bar(ind + (width / 2) + width, hilbert, width, label='Hilbert',
+                    color=color_cycler.by_key()['color'][10])
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
 
     ax.tick_params(axis='both', which='major', labelsize=16)
     ax.tick_params(axis='both', which='minor', labelsize=16)
 
-    ax.set_ylabel('Runtime (m)', fontsize=16, fontdict={'weight' : "bold", "family": 'serif'})
+    ax.set_ylabel('Runtime (m)', fontsize=16, fontdict={'weight': "bold", "family": 'serif'})
     ax.set_xticks(ind)
-    ax.set_xticklabels(('d=50', 'd=100'), fontsize=16, fontdict={'weight' : "bold", "family": 'serif'})
+    ax.set_xticklabels(('d=50', 'd=100'), fontsize=16, fontdict={'weight': "bold", "family": 'serif'})
     ax.set_ylim([0, 500])
     ax.legend(loc="upper left")
     fig.tight_layout()
     plt.savefig(exp_dir + "figure_10.png")
     # plt.show()
+
 
 def plot_figure_11():
     exp_dir = "osdi2021/partition_orderings/twitter/"
@@ -227,7 +302,6 @@ def plot_figure_11():
     ind = np.arange(len(elim)) / 2.25  # the x locations for the groups
     width = 0.1  # the width of the bars
 
-
     rects2 = ax.bar(ind - width, elim, width, label='Elimination', color=color_cycler.by_key()['color'][3])
     rects1 = ax.bar(ind, hilbert_sym, width, label='HilbertSymmetric', color=color_cycler.by_key()['color'][6])
     rects2 = ax.bar(ind + width, hilbert, width, label='Hilbert', color=color_cycler.by_key()['color'][10])
@@ -238,7 +312,7 @@ def plot_figure_11():
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Runtime (m)', fontsize=16)
     ax.set_xticks(ind)
-    ax.set_xticklabels(("d=100", "d=200"), fontsize=16, fontdict={'weight' : "bold", "family": 'serif'})
+    ax.set_xticklabels(("d=100", "d=200"), fontsize=16, fontdict={'weight': "bold", "family": 'serif'})
     ax.legend(loc="upper left")
     ax.set_ylim([0, 550])
 
@@ -246,8 +320,10 @@ def plot_figure_11():
 
     plt.savefig(exp_dir + "figure_11.png")
 
+
 def plot_figure_12():
     pass
+
 
 def plot_figure_13():
     pass
