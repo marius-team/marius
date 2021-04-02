@@ -33,15 +33,14 @@ def run_marius(config_path, args):
 
 
 def run_dglke(args):
-    script = """
-    dglke_train %s
-    """ % args
-
-    subprocess.check_call(script.split())
+    with open("tmp.txt", "w") as tmp_file:
+        subprocess.check_call(args, shell=True, stdout=tmp_file)
 
 
 def run_pbg(script_path, config_path, args):
-    pass
+    script = "%s --config %s" % (script_path, config_path)
+    with open("tmp.txt", "w") as tmp_file:
+        subprocess.check_call(script, shell=True, stdout=tmp_file)
 
 
 def stop_metric_collection(dstat_pid, nvidiasmi_pid):
@@ -53,8 +52,13 @@ def stop_metric_collection(dstat_pid, nvidiasmi_pid):
     subprocess.check_call(script, shell=True)
 
 
-def collect_metrics(info_log_only=False):
-    info_log = p.parse_info_log("logs/marius_info.log")
+def collect_metrics(info_log_only=False, dglke=False, pbg=False):
+    if dglke:
+        info_log = p.parse_dglke("tmp.txt")
+    elif pbg:
+        info_log = p.parse_pbg("tmp.txt")
+    else:
+        info_log = p.parse_info_log("logs/marius_info.log")
 
     dstat_df = None
     nvidia_smi_df = None

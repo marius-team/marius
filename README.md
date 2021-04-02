@@ -14,7 +14,7 @@ However, instead of directly running the Marius executable on configuration file
 
 ### Reproducing experiments ###
 
-To reproduce the experiments we have provided python scripts to run each experiment in the paper. **Nearly all experiments can be run on a single Amazon EC2 p3.2xlarge instance.** The few exceptions to this are described in the Detailed Instructions.
+To reproduce the experiments we have provided python scripts to run each experiment in the paper. **Nearly all experiments can be run on a single Amazon EC2 p3.2xlarge instance.** The few exceptions to this are described in the detailed instructions.
 
 Experiments are run from the repository root directory with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
 
@@ -60,6 +60,16 @@ While the submission of this artifact for evaluation points to a specific commit
 
 Additionally, if the reviewers of this artifact encounter any issues/bugs, please contact us and we will fix the issue and push an update to the branch. 
 
+#### What's missing? ####
+In this current version of the artifact the following experiments have not been added as they require a large amount of additional code. These will be added in future versions of the artifact.
+
+Experiments not yet added:
+ - DGL-KE Livejournal 
+ - DGL-KE Twitter
+ - PBG Twitter
+ - PBG Freebase86m
+
+These experiments require additional preprocessing code to prepare the input dataset for each respective system.
 
 #### Experiments that require extra effort to reproduce ####
 Some experiments will not run on the single P3.2xLarge instance due to memory requirements and need to be run on a machine with a large amount of memory.

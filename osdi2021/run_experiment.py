@@ -35,12 +35,51 @@ def run_marius(config, exp_dir, name, config_args="", overwrite=False):
         print("Marius: %s already run" % name)
 
 
-def run_pbg(config, exp_dir, name, overwrite=False):
-    pass
+def run_pbg(runner_file, config, exp_dir, name, overwrite=False):
+    e.cleanup_experiments()
+    if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
+        print("==== Running PBG: %s =====" % name)
+        dstat_pid, nvidia_smi_pid = e.start_tracing()
+        e.run_pbg(runner_file, config)
+        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(pbg=True)
+        e.cleanup_experiments()
+
+        with open(exp_dir + name + "_result.json", 'w') as out_file:
+            json.dump(info_log, out_file)
+            print("PBG output results written to: %s" % exp_dir + name + "_result.json")
+        with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
+            dstat_df.to_csv(out_file)
+            print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
+        with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
+            nvidia_smi_df.to_csv(out_file)
+            print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+    else:
+        print("PBG: %s already run" % name)
 
 
 def run_dglke(cmd, exp_dir, name, overwrite=False):
-    pass
+    e.cleanup_experiments()
+    if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
+        print("==== Running DGL-KE: %s =====" % name)
+        dstat_pid, nvidia_smi_pid = e.start_tracing()
+        e.run_dglke(cmd)
+        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(dglke=True)
+        e.cleanup_experiments()
+
+        with open(exp_dir + name + "_result.json", 'w') as out_file:
+            json.dump(info_log, out_file)
+            print("DGL-KE output results written to: %s" % exp_dir + name + "_result.json")
+        with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
+            dstat_df.to_csv(out_file)
+            print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
+        with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
+            nvidia_smi_df.to_csv(out_file)
+            print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+    else:
+        print("DGL-KE: %s already run" % name)
+
 
 
 def run_fb15k():
@@ -55,6 +94,23 @@ def run_fb15k():
 
     run_marius(distmult_config, exp_dir, "distmult_fb15k")
     run_marius(complex_config, exp_dir, "complex_fb15k")
+
+    exp_dir = "osdi2021/system_comparisons/fb15k/dgl-ke/"
+    with open(exp_dir + "complex.txt", "r") as f:
+        dglke_complex_cmd = f.readlines()[0]
+    with open(exp_dir + "distmult.txt", "r") as f:
+        dglke_distmult_cmd = f.readlines()[0]
+
+    run_dglke(dglke_complex_cmd, exp_dir, "complex_fb15k")
+    run_dglke(dglke_distmult_cmd, exp_dir, "distmult_fb15k")
+
+    exp_dir = "osdi2021/system_comparisons/fb15k/pbg/"
+
+    runner_file = exp_dir + "run_fb15k.py"
+    complex_config = exp_dir + "fb15k_complex_config.py"
+    distmult_config = exp_dir + "fb15k_distmult_config.py"
+    run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k")
+    run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k")
 
     osdi_plot.print_table_2()
 
