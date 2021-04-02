@@ -1,13 +1,125 @@
-# Marius #
+# OSDI 21' Artifact Evaluation #
 
-Marius is a system under active development for training embeddings for large-scale graphs on a single machine.
+## Getting Started ##
 
-Training on large scale graphs requires a large amount of data movement to get embedding parameters from storage to the computational device. 
-Marius is designed to mitigate/reduce data movement overheads using:
-- Pipelined training and IO
-- Partition caching and locality-aware data orderings
+Experiment configuration, scripts and a copy of the paper are located in the `osdi2021` directory. The directory is structured in the following format.
 
-Details on how Marius works can be found in the documentation, or in our [OSDI 21' Paper](https://arxiv.org/abs/2101.08358).
+
+### How Marius works ### 
+
+Marius is run from the command line by supplying a .ini format configuration file which defines the training procedure. 
+
+For example, the following command will train marius on the configuration used to obtain the ComplEx entry in Table 2.
+
+`marius_train osdi2021/system_comparisons/fb15k/marius/complex.ini`
+
+### Reproducing experiments ###
+
+To reproduce the experiments we have provided python scripts to run each experiment in the paper.
+
+Experiments are run with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
+
+The list of experiments and their corresponding figures/tables are:
+```
+fb15k                      // Table 2
+livejournal                // Table 3
+twitter                    // Table 4
+freebase86m                // Table 5
+buffer_simulator           // Figure 7
+utilization                // Figure 8 
+ordering_total_io          // Figure 9 
+orderings_freebase86m      // Figure 10 
+orderings_twitter          // Figure 11
+staleness_bound            // Figure 12
+prefatching                // Figure 13
+big_embeddings             // Table 6
+all                        // Will run all of the above
+```
+
+### Reproducing plots ###
+
+### Differences from the original version ###
+
+## Detailed Instructions ##
+
+### Artifact claims ###
+
+
+
+### Artifact structure ###
+
+Experiment scripts and results are located in the `osdi2021` directory. The directory structure is as follows:
+```
+osdi2021/
+   preprocessors/
+      pbg/
+      dgl-ke/ 
+   buffer_simulator/                         // contains the code for the buffer simulator to reproduce figure 7.
+   large_embeddings/                         // configuration and results for Table 6
+      cpu_memory.ini                            // d=50 
+      disk.ini                                  // d=100 
+      gpu_memory.ini                            // d=20
+      large_scale.ini                           // d=400 and d=800
+   microbenchmarks/                          // configuration and results for figures 12 and 13
+      bounded_staleness/                        // configuration and results for figure 12 
+         all_async.ini                             // async relations           
+         all_sync.ini                              // staleness bound = 1
+         sync_relations_async_nodes.ini            // sync relations 
+      prefetching/                              // configuration and results for figure 13
+         no_prefetching.ini                        // prefetching off
+         prefetching.ini                           // prefetching on
+   partition_orderings/                      // configuration and results for figures 9, 10 and 11
+      freebase86m/                              // figures 9 and 10
+         elimination.ini                           // elimination ordering d=50 and d=100
+         hilbert.ini                               // hilbert ordering d=50 and d=100
+         hilbert_symmetric.ini                     // hilbert symmetric ordering d=50 and d=100
+         memory.ini                                // in memory configuration d=50
+      twitter/                                  // figure 11
+         elimination.ini                           // elimination ordering d=100 and d=200
+         hilbert.ini                               // hilbert ordering d=100 and d=200
+         hilbert_symmetric.ini                     // hilbert symmetric ordering d=100 and d=200
+         memory.ini                                // in memory configuration d=100
+   system_comparisons/                       // configuration and results for tables 2, 3, 4, 5 and figure 8
+      fb15k/                                    // table 2
+         dgl-ke/                                   // commands to run dgl-ke   
+            complex.txt                               // complex cmd
+            distmult.txt                              // distmult cmd
+         marius/                                   // configuration files for marius
+            complex.ini                               // complex config 
+            distmult.ini                              // distmult config
+         pbg/                                      // configuration files for pbg
+            fb15k_complex_config.py                   // complex config 
+            fb15k_distmult_config.py                  // distmult config
+      freebase86m/                              // table 5 and figure 8
+         dgl-ke/                                   // commands to run dgl-ke
+            d50.txt                                   // d=50 for figure 8
+         marius/                                   // configuration files for marius
+            d50.ini                                   // d=50 in memory for figure 8
+            d50_8.ini                                 // d=50 on disk for figure 8
+            d100.ini                                  // d=100 for table 5
+         pbg/                                      // configuration files for pbg
+            d50_p8.py                                 // d=50 on disk for figure 8
+            d100_p16.py                               // d=100 on disk for table 5 
+      livejournal/                              // table 3
+         dgl-ke/                                   // command to run dgl-ke
+            dot.txt                                   // dot cmd
+         marius/                                   // configuration file for marius
+            dot.ini                                   // dot config
+         pbg/                                      // configuration file for marius
+            dot.py                                    // dot config
+      twitter/                                  // table 4
+         dgl-ke/                                   // command to run dgl-ke
+            dot.txt                                   // dot cmd
+         marius/                                   // configuration file for marius
+            dot.ini                                   // dot config
+         pbg/                                      // configuration file for marius
+            dot.py                                    // dot config
+   execute.py                                // executes training for each system and starts/stop results collection
+   parse_output.py                           // parses the output of each systems output and dstat and nvidia-smi
+   run_experiment.py                         // run each experiment 
+   utils.py                                  // handles special routines for preprocessing datasets for other systems
+```
+
 
 ## Requirements ##
 (Other versions may work, but are untested)
@@ -56,145 +168,3 @@ cmake ../ -DUSE_CUDA=1
 make marius_train -j
 ```
 
-## Training a graph ##
-
-Training embeddings on a graph requires three steps. 
-
-1. Define a configuration file. This example will use the config already defined in `examples/training/configs/fb15k_gpu.ini`
-
-   See `docs/configuration.rst` for full details on the configuration options.
-
-2. Preprocess the dataset `python3 tools/preprocess.py fb15k output_dir/`
-
-   The first argument of tools/preprocess.py defines the dataset we wish to download and preprocess, in this case fb15k. 
-   The second argument tells the preprocessor where to put the preprocessed dataset.
-
-3. Run the training executable with the config file. `build/marius_train examples/training/configs/fb15k_gpu.ini`
-
-The output of the first epoch should be similar to the following.
-```[info] [03/18/21 01:33:16.173] Start preprocessing
-[info] [03/18/21 01:33:18.778] Metadata initialized
-[info] [03/18/21 01:33:18.778] Training set initialized
-[info] [03/18/21 01:33:18.779] Evaluation set initialized
-[info] [03/18/21 01:33:18.779] Preprocessing Complete: 2.605s
-[info] [03/18/21 01:33:18.791] ################ Starting training epoch 1 ################
-[info] [03/18/21 01:33:18.836] Total Edges Processed: 40000, Percent Complete: 0.082
-[info] [03/18/21 01:33:18.862] Total Edges Processed: 80000, Percent Complete: 0.163
-[info] [03/18/21 01:33:18.892] Total Edges Processed: 120000, Percent Complete: 0.245
-[info] [03/18/21 01:33:18.918] Total Edges Processed: 160000, Percent Complete: 0.327
-[info] [03/18/21 01:33:18.944] Total Edges Processed: 200000, Percent Complete: 0.408
-[info] [03/18/21 01:33:18.970] Total Edges Processed: 240000, Percent Complete: 0.490
-[info] [03/18/21 01:33:18.996] Total Edges Processed: 280000, Percent Complete: 0.571
-[info] [03/18/21 01:33:19.021] Total Edges Processed: 320000, Percent Complete: 0.653
-[info] [03/18/21 01:33:19.046] Total Edges Processed: 360000, Percent Complete: 0.735
-[info] [03/18/21 01:33:19.071] Total Edges Processed: 400000, Percent Complete: 0.816
-[info] [03/18/21 01:33:19.096] Total Edges Processed: 440000, Percent Complete: 0.898
-[info] [03/18/21 01:33:19.122] Total Edges Processed: 480000, Percent Complete: 0.980
-[info] [03/18/21 01:33:19.130] ################ Finished training epoch 1 ################
-[info] [03/18/21 01:33:19.130] Epoch Runtime (Before shuffle/sync): 339ms
-[info] [03/18/21 01:33:19.130] Edges per Second (Before shuffle/sync): 1425197.8
-[info] [03/18/21 01:33:19.130] Edges Shuffled
-[info] [03/18/21 01:33:19.130] Epoch Runtime (Including shuffle/sync): 339ms
-[info] [03/18/21 01:33:19.130] Edges per Second (Including shuffle/sync): 1425197.8
-[info] [03/18/21 01:33:19.148] Starting evaluating
-[info] [03/18/21 01:33:19.254] Pipeline flush complete
-[info] [03/18/21 01:33:19.271] Num Eval Edges: 50000
-[info] [03/18/21 01:33:19.271] Num Eval Batches: 50
-[info] [03/18/21 01:33:19.271] Auc: 0.973, Avg Ranks: 24.477, MRR: 0.491, Hits@1: 0.357, Hits@5: 0.651, Hits@10: 0.733, Hits@20: 0.806, Hits@50: 0.895, Hits@100: 0.943
-```
-
-To train using CPUs only, use the `examples/training/configs/fb15k_cpu.ini` configuration file instead.
-
-## Using the Python API ##
-
-### Building the Python Bindings ###
-
-After following the installation steps, the bindings can be installed by making the pymarius target: `make pymarius -j`
-
-*The location of the bindings needs to be added to the system path* in order to access them.
-The following is a sample python script for training a single epoch on fb15k.
-
-```
-import sys
-sys.path.insert(0, 'build/') # need to add the build directory to the system path so python can find the bindings
-import pymarius as m
-
-def marius():
-    config_path = "examples/training/configs/fb15k_cpu.ini"
-    config = m.parseConfig(config_path)
-
-    train_set, eval_set = m.initializeDatasets(config)
-
-    model = m.initializeModel(config.model.encoder_model, config.model.decoder_model)
-
-    trainer = m.SynchronousTrainer(train_set, model)
-    evaluator = m.SynchronousEvaluator(eval_set, model)
-
-    trainer.train(1)
-    evaluator.evaluate(True)
-
-
-if __name__ == "__main__":
-    marius()
-```
-
-## Marius in Docker ##
-
-Marius can be deployed within a docker container. Here is a sample ubuntu dockerfile (located at `examples/docker/dockerfile`) which contains the necessary dependencies preinstalled for GPU training.
-
-### Building and running the container ###
-
-Build an image with the name `marius` and the tag `example`:  
-`docker build -t marius:example -f examples/docker/dockerfile examples/docker`
-
-Create and start a new container instance named `gaius` with:  
-`docker run --name gaius -itd marius:example`
-
-Run `docker ps` to verify the container is running
-
-Start a bash session inside the container:  
-`docker exec -it gaius bash`
-
-
-### Sample Dockerfile ###
-See `examples/docker/dockerfile`
-```
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
-RUN apt update
-
-RUN apt install -y g++ \ 
-         make \
-         wget \
-         unzip \
-         vim \
-         git \
-         python3-pip
-
-# install gcc-9
-RUN apt install -y software-properties-common
-RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
-RUN apt update
-RUN apt install -y gcc-9 g++-9
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
-
-# install cmake 3.20
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.sh
-RUN mkdir /opt/cmake
-RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
-RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
-
-# install pytorch
-RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
-```
-
-## Citing Marius ##
-```
-@inproceedings {MariusOSDI2021,
-    author = {Jason Mohoney and Roger Waleffe and Yiheng Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
-    title = {Marius: Learning Massive Graph Embeddings on a Single Machine},
-    booktitle = {15th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 21)},
-    year = {2021},
-    publisher = {{USENIX} Association},
-}
-```
