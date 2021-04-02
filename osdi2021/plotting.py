@@ -16,10 +16,26 @@ def print_table_2():
     marius_complex = exp_dir + "marius/complex_fb15k_result.json"
     marius_distmult = exp_dir + "marius/distmult_fb15k_result.json"
 
-    complex_res = json.loads(marius_complex)
-    distmul_res = json.loads(marius_distmult)
+    with open(marius_complex) as f:
+        complex_res = json.load(f)
+    with open(marius_distmult) as f:
+        distmul_res = json.load(f)
 
-    print(complex_res)
+    MRR = complex_res["MRR"][-1]
+    hits1 = complex_res["Hits@1"][-1]
+    hits5 = complex_res["Hits@5"][-1]
+    hits10 = complex_res["Hits@10"][-1]
+    time = sum(complex_res["Train Time"]) / 1000.0
+
+    print("Marius Complex: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
+
+    MRR = distmul_res["MRR"][-1]
+    hits1 = distmul_res["Hits@1"][-1]
+    hits5 = distmul_res["Hits@5"][-1]
+    hits10 = distmul_res["Hits@10"][-1]
+    time = sum(distmul_res["Train Time"]) / 1000.0
+
+    print("Marius DistMult: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
 
     pass
 
