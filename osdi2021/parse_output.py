@@ -88,10 +88,6 @@ def parse_info_log(log_path):
                 runtime = float(log_string.split(":")[1][1:-3])
                 info_log_results["Eval Time"].append(runtime)
 
-            elif log_string.startswith("Total Edges Processed:"):
-                edges_processed = int(log_string.split(":")[1][1:].split(",")[0])
-                info_log_results["Epoch Progress"].append((timestamp, edges_processed))
-
     info_log_results["Shuffle Time"] = [info_log_results["Train Time (shuffle)"][i] - info_log_results["Train Time"][i] for i in range(len(info_log_results["Train Time"]))]
 
     return info_log_results

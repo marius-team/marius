@@ -18,6 +18,8 @@ To reproduce the experiments we have provided python scripts to run each experim
 
 Experiments are run from the repository root directory with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
 
+By running experiments with this command, results and generated plots will be output in the corresponding directory for the experiment. See the artifact structure section for the locations of the experiment directories.
+
 The list of experiments and their corresponding figures/tables are:
 ```
 fb15k                      // Table 2
@@ -34,8 +36,6 @@ prefetching                // Figure 13
 big_embeddings             // Table 6
 all                        // Will run all of the above
 ```
-
-### Reproducing plots ###
 
 ### Example ###
 

@@ -6,3 +6,4 @@ tox
 pytest
 hilbertcurve==1.0.3
 matplotlib
+cycler

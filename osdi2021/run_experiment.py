@@ -5,6 +5,7 @@ from os import path
 import execute as e
 import json
 from buffer_simulator import plotting as plot_buff
+import plotting as osdi_plot
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))) + "/tools")
@@ -12,6 +13,7 @@ import tools.preprocess as preprocess
 
 
 def run_marius(config, exp_dir, name, config_args="", overwrite=False):
+    e.cleanup_experiments()
     if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
         print("==== Running Marius: %s =====" % name)
         dstat_pid, nvidia_smi_pid = e.start_tracing()
@@ -53,6 +55,8 @@ def run_fb15k():
 
     run_marius(distmult_config, exp_dir, "distmult_fb15k")
     run_marius(complex_config, exp_dir, "complex_fb15k")
+
+    osdi_plot.print_table_2()
 
 
 def run_livejournal():
