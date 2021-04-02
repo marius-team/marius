@@ -257,7 +257,30 @@ def run_big_embeddings():
 
 
 def run_all():
-    pass
+    experiment_dict = {
+        "fb15k": run_fb15k,
+        "livejournal": run_livejournal,
+        "twitter": run_twitter,
+        "freebase86m": run_freebase86m,
+        "utilization": run_utilization,
+        "buffer_simulator": run_buffer_simulator,
+        "orderings_total_io": run_orderings_total_io,
+        "orderings_freebase86m": run_orderings_freebase86m,
+        "orderings_twitter": run_orderings_twitter,
+        "staleness_bound": run_staleness_bound,
+        "prefetching": run_prefetching,
+        "big_embeddings": run_big_embeddings
+    }
+
+    print("#### Running all experiments ####\n")
+    for k, v in experiment_dict.items():
+        print("#### Running %s ####\n" %k)
+        try:
+            v()
+            print("#### %s Complete ####\n" %k)
+        except Exception as e:
+            print(e)
+            print("#### %s Failed ####\n" %k)
 
 
 if __name__ == "__main__":
