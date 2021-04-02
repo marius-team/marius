@@ -39,6 +39,9 @@ all                        // Will run all of the above
 
 ### Example ###
 
+### Hit an issue? ###
+
+If you have hit an issue with the system, the scripts, or the results, please let us know and investigate and fix the issue if needed.
 
 
 ## Detailed Instructions ##
@@ -149,7 +152,7 @@ osdi2021/
    plotting.py                               // produces plots after experiments have been run 
 ```
 
-## Build Information ##
+## Build Information and Environment ##
 
 For the artifact reviewers, we will set up an AWS P3.2xLarge instance with the system pre-built and provide access to them. But if one wishes to build the system from scratch, the following instructions denote dependencies and how to build Marius.
 

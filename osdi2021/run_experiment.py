@@ -2,12 +2,13 @@ import argparse
 import os
 import sys
 from os import path
+import execute as e
+import json
+from buffer_simulator import plotting as plot_buff
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))) + "/tools")
 import tools.preprocess as preprocess
-import execute as e
-import json
 
 
 def run_marius(config, exp_dir, name, config_args="", overwrite=False):
@@ -21,10 +22,13 @@ def run_marius(config, exp_dir, name, config_args="", overwrite=False):
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
+            print("Marius output results written to: %s" % exp_dir + name + "_result.json")
         with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
             dstat_df.to_csv(out_file)
+            print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
         with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
             nvidia_smi_df.to_csv(out_file)
+            print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
     else:
         print("Marius: %s already run" % name)
 
@@ -106,7 +110,14 @@ def run_utilization():
 
 
 def run_buffer_simulator():
-    pass
+    exp_dir = "osdi2021/buffer_simulator/"
+
+    n_start = 8
+    c_start = 2
+    num = 5
+    total_size = 86E6 * 4 * 2 * 100 # total embedding size for freebase86m d=100
+    plot_buff.plot_varying_num_partitions_io(n_start, c_start, num, total_size, exp_dir + "figure7.png")
+    print("Figure written to %s" % exp_dir + "figure7.png")
 
 
 def run_orderings_total_io():
