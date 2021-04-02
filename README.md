@@ -2,10 +2,6 @@
 
 ## Getting Started ##
 
-Experiment configuration, scripts and a copy of the paper are located in the `osdi2021` directory. The directory is structured in the following format.
-
-See the detailed instructions for how to build Marius.
-
 ### How to use Marius ### 
 
 Marius is run from the command line by supplying a .ini format configuration file which defines the training procedure. 
