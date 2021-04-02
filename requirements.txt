@@ -4,5 +4,5 @@ numpy
 pandas
 tox
 pytest
-hilbertcurve=1.0.3
+hilbertcurve==1.0.3
 matplotlib
