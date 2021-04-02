@@ -130,7 +130,7 @@ def run_livejournal():
     exp_dir = "osdi2021/system_comparisons/livejournal/pbg/"
 
     runner_file = exp_dir + "run_dot.py"
-    dot_config = exp_dir + "fb15k_complex_config.py"
+    dot_config = exp_dir + "dot.py"
     run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal")
 
     osdi_plot.print_table_3()
