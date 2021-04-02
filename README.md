@@ -10,6 +10,8 @@ For example, the following command will train marius on the configuration used t
 
 `marius_train osdi2021/system_comparisons/fb15k/marius/complex.ini`
 
+However, instead of directly running the Marius executable on configuration files, we have a provided a python script which handles running each experiment, collecting results, and plotting results. This is described in the following section.
+
 ### Reproducing experiments ###
 
 To reproduce the experiments we have provided python scripts to run each experiment in the paper.
@@ -69,7 +71,7 @@ Experiments that have large memory requirements:
 - Evaluating D=800 sized embeddings on Marius for Table 6
   - Same as above
    
-If the reviewers of this artifact wish to reproduce these experiments, we will be happy to provide a machine which can accommodate these experiments
+If the reviewers of this artifact wish to reproduce these experiments, we will be happy to provide a machine which can accommodate these experiments.
 
 
 ### Artifact structure ###
