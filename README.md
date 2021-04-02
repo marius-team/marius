@@ -53,10 +53,23 @@ As a result of the full refactor, the accuracy differences are no longer as larg
 #### Updates to this artifact ####
 While the submission of this artifact for evaluation points to a specific commit, we will keep this branch up to date with our latest experiment configuration, scripts and plotting code. Such that for the final version of the paper, all produced results will correspond exactly to the scripts and configuration in the most up to date version of this branch. 
 
-Additionally, if the reviewers of this artifact encounter any issues/bugs, please contact us and we will fix the issue and push and update to the branch. 
+Additionally, if the reviewers of this artifact encounter any issues/bugs, please contact us and we will fix the issue and push an update to the branch. 
 
 
 #### Experiments that require extra effort to reproduce ####
+Some experiments will not run on the single P3.2xLarge instance due to memory requirements and need to be run on a machine with a large amount of memory.
+
+Experiments that have large memory requirements: 
+- DGL-KE Twitter
+  - Will run into an out of memory error on a P3.2xLarge machine, requires > 64 GB of CPU memory to run.
+- DGL-KE Freebase86m
+  - Will run into an out of memory error on a P3.2xLarge machine, requires > 64 GB of CPU memory to run.
+- Evaluating D=400 sized embeddings on Marius for Table 6
+  - The embeddings for this configuration can be trained with limited memory, but to evaluate the MRR of the embeddings requires that the embeddings fit in memory. For the paper, we transferred the embeddings trained on the P3.2xLarge machine to a machine with 500 GB of memory for evaluation.
+- Evaluating D=800 sized embeddings on Marius for Table 6
+  - Same as above
+   
+If the reviewers of this artifact wish to reproduce these experiments, we will be happy to provide a machine which can accommodate these experiments
 
 
 ### Artifact structure ###
