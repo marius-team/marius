@@ -104,14 +104,14 @@ def run_fb15k():
     run_dglke(dglke_complex_cmd, exp_dir, "complex_fb15k")
     run_dglke(dglke_distmult_cmd, exp_dir, "distmult_fb15k")
 
-    # PBG is not installing properly based on the readme instructions in the PBG repository
-    # exp_dir = "osdi2021/system_comparisons/fb15k/pbg/"
-    #
-    # runner_file = exp_dir + "run_fb15k.py"
-    # complex_config = exp_dir + "fb15k_complex_config.py"
-    # distmult_config = exp_dir + "fb15k_distmult_config.py"
-    # run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k")
-    # run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k")
+    # PBG may throw errors
+    exp_dir = "osdi2021/system_comparisons/fb15k/pbg/"
+
+    runner_file = exp_dir + "run_fb15k.py"
+    complex_config = exp_dir + "fb15k_complex_config.py"
+    distmult_config = exp_dir + "fb15k_distmult_config.py"
+    run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k")
+    run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k")
 
     osdi_plot.print_table_2()
 
@@ -125,6 +125,13 @@ def run_livejournal():
         preprocess.live_journal("livejournal/")
 
     run_marius(dot_config, exp_dir, "dot_livejournal")
+
+    # PBG may throw errors
+    exp_dir = "osdi2021/system_comparisons/livejournal/pbg/"
+
+    runner_file = exp_dir + "run_dot.py"
+    dot_config = exp_dir + "fb15k_complex_config.py"
+    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal")
 
     osdi_plot.print_table_3()
 
@@ -174,6 +181,15 @@ def run_utilization():
         preprocess.freebase86m("freebase86m_p8/", num_partitions=8)
 
     run_marius(complex_50_8_config, exp_dir, "complex_50_8_util", config_args)
+
+    exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
+    with open(exp_dir + "complex.txt", "r") as f:
+        dglke_complex_cmd = f.readlines()[0]
+
+    try:
+        run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util")
+    except Exception as e:
+        print(e)
 
 
 def run_buffer_simulator():

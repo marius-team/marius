@@ -64,9 +64,8 @@ In this current version of the artifact the following experiments have not been 
 Experiments not yet added:
  - DGL-KE Livejournal 
  - DGL-KE Twitter
- - All PBG experiments
-
-The experiments scripts for PBG are available but we encountered issues building PBG from the source repository. We will fix this issue and update the artifact.
+ - PBG Twitter
+ - PBG Freebase86m
 
 #### Experiments that require extra effort to reproduce ####
 Some experiments will not run on the single P3.2xLarge instance due to memory requirements and need to be run on a machine with a large amount of memory.
@@ -190,6 +189,8 @@ Please also see instructions below.
 
 4. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
 
+5. Download and build PyTorch-BigGraph `git clone https://github.com/facebookresearch/PyTorch-BigGraph.git; cd PyTorch-BigGraph; export PBG_INSTALL_CPP=1; python3 -m pip install .; cd ..`
+
 5. Create build directory `mkdir build; cd build`
 
 6. Run cmake in the build directory `cmake ../ -DUSE_CUDA=1` (GPU build)
@@ -202,6 +203,11 @@ git clone https://github.com/marius-team/marius.git
 git checkout osdi2021
 cd marius
 python3 -m pip install -r requirements.txt
+git clone https://github.com/facebookresearch/PyTorch-BigGraph.git
+export PBG_INSTALL_CPP=1
+cd PyTorch-BigGraph 
+python3 -m pip install .
+cd ..
 mkdir build
 cd build
 cmake ../ -DUSE_CUDA=1

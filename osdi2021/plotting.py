@@ -41,17 +41,17 @@ def print_table_2():
     print("Marius DistMult: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
 
     dglke_complex = exp_dir + "dgl-ke/complex_fb15k_result.json"
-    dglke_distmult = exp_dir + "dgl/distmult_fb15k_result.json"
+    dglke_distmult = exp_dir + "dgl-ke/distmult_fb15k_result.json"
 
     with open(dglke_complex) as f:
         complex_res = json.load(f)
     with open(dglke_distmult) as f:
         distmul_res = json.load(f)
 
-    MRR = distmul_res["MRR"]
-    hits1 = distmul_res["Hits@1"]
-    hits10 = distmul_res["Hits@10"]
-    time = distmul_res["Train Time"]
+    MRR = complex_res["MRR"]
+    hits1 = complex_res["Hits@1"]
+    hits10 = complex_res["Hits@10"]
+    time = complex_res["Train Time"]
 
     print("DGL-KE Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
 
@@ -60,7 +60,28 @@ def print_table_2():
     hits10 = distmul_res["Hits@10"]
     time = distmul_res["Train Time"]
 
-    print("DGL-KE Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
+    print("DGL-KE DistMult: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
+
+    pbg_complex = exp_dir + "pbg/complex_fb15k_result.json"
+    pbg_distmult = exp_dir + "pbg/distmult_fb15k_result.json"
+
+    with open(pbg_complex) as f:
+        complex_res = json.load(f)
+    with open(pbg_distmult) as f:
+        distmul_res = json.load(f)
+
+    MRR = complex_res["MRR"]
+    hits1 = complex_res["Hits@1"]
+    hits10 = complex_res["Hits@10"]
+
+    print("PBG Complex: MRR %s, Hits@1 %s, Hits@10 %s" % (MRR, hits1, hits10))
+
+    MRR = distmul_res["MRR"]
+    hits1 = distmul_res["Hits@1"]
+    hits10 = distmul_res["Hits@10"]
+
+    print("PBG DistMult: MRR %s, Hits@1 %s, Hits@10 %s" % (MRR, hits1, hits10))
+
 
 
 def print_table_3():
