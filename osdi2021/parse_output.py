@@ -11,6 +11,10 @@ def parse_dglke(filename):
                 result["MRR"] = float(line.split()[-1])
             if line.startswith("training takes"):
                 result["Train Time"] = float(line.split()[-2])
+            if line.startswith("[0]Test average HITS@1:"):
+                result["Hits@1"] = float(line.split()[-1])
+            if line.startswith("[0]Test average HITS@10:"):
+                result["Hits@10"] = float(line.split()[-1])
 
     return result
 
@@ -22,6 +26,10 @@ def parse_pbg(filename):
         for line in f.readlines():
             if "Stats for edge path" in line:
                 result["MRR"] = float(line.split()[16])
+                result["Hits@1"] = float(line.split()[19])
+                result["Hits@10"] = float(line.split()[22])
+
+    return result
 
 def read_dstat(filename):
     map_columns = {"time": "Timestamp",

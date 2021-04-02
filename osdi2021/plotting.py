@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 import parse_output
+from buffer_simulator import plotting as plot_buff
 
 
 def smooth(y, box_pts):
@@ -27,19 +28,41 @@ def print_table_2():
 
     MRR = complex_res["MRR"][-1]
     hits1 = complex_res["Hits@1"][-1]
-    hits5 = complex_res["Hits@5"][-1]
     hits10 = complex_res["Hits@10"][-1]
     time = sum(complex_res["Train Time"]) / 1000.0
 
-    print("Marius Complex: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
+    print("Marius Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
 
     MRR = distmul_res["MRR"][-1]
     hits1 = distmul_res["Hits@1"][-1]
-    hits5 = distmul_res["Hits@5"][-1]
     hits10 = distmul_res["Hits@10"][-1]
     time = sum(distmul_res["Train Time"]) / 1000.0
 
-    print("Marius DistMult: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
+    print("Marius DistMult: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
+
+    dglke_complex = exp_dir + "dgl-ke/complex_fb15k_result.json"
+    dglke_distmult = exp_dir + "dgl/distmult_fb15k_result.json"
+
+    with open(dglke_complex) as f:
+        complex_res = json.load(f)
+    with open(dglke_distmult) as f:
+        distmul_res = json.load(f)
+
+    MRR = distmul_res["MRR"]
+    hits1 = distmul_res["Hits@1"]
+    hits10 = distmul_res["Hits@10"]
+    time = distmul_res["Train Time"]
+
+    print("DGL-KE Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
+
+
+    MRR = distmul_res["MRR"]
+    hits1 = distmul_res["Hits@1"]
+    hits10 = distmul_res["Hits@10"]
+    time = distmul_res["Train Time"]
+
+    print("DGL-KE Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
+
 
     pass
 
@@ -127,9 +150,15 @@ def print_table_6():
 
     print("Marius D=100, P=16: MRR %s, Runtime %s s" % (MRR, time))
 
-
 def plot_figure_7():
-    pass
+    exp_dir = "osdi2021/buffer_simulator/"
+
+    n_start = 8
+    c_start = 2
+    num = 5
+    total_size = 86E6 * 4 * 2 * 100 # total embedding size for freebase86m d=100
+    plot_buff.plot_varying_num_partitions_io(n_start, c_start, num, total_size, exp_dir + "figure7.png")
+    print("Figure written to %s" % exp_dir + "figure7.png")
 
 
 def plot_figure_8():
@@ -243,6 +272,7 @@ def plot_figure_10():
     colors = plt.cm.viridis(np.linspace(0, 1, 16))
     color_cycler = cycler.cycler('color', colors)
 
+    #TODO Obtain these numbers from the experiment output
     mem = [77, 0]
     elim = [100, 150]
     hilbert_sym = [130, 207]
@@ -293,6 +323,7 @@ def plot_figure_11():
     colors = plt.cm.viridis(np.linspace(0, 1, 16))
     color_cycler = cycler.cycler('color', colors)
 
+    #TODO Obtain these numbers from the experiment output
     elim = [222, 322]
     hilbert_sym = [223, 410]
     hilbert = [236, 495]
@@ -320,10 +351,10 @@ def plot_figure_11():
 
     plt.savefig(exp_dir + "figure_11.png")
 
-
+#TODO
 def plot_figure_12():
     pass
 
-
+#TODO
 def plot_figure_13():
     pass

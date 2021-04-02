@@ -37,11 +37,6 @@ big_embeddings             // Table 6
 all                        // Will run all of the above
 ```
 
-### Example ###
-
-To reproduce table 2 with the above script the following command can be run:  
-`python3 osdi2021/run_experiment --experiment fb15k`
-
 ### Hit an issue? ###
 
 If you have hit an issue with the system, the scripts, or the results, please let us know (contact: mohoney2@wisc.edu) and we will investigate and fix the issue if needed.
