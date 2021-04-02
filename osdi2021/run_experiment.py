@@ -271,6 +271,7 @@ if __name__ == "__main__":
         "orderings_total_io": run_orderings_total_io,
         "orderings_freebase86m": run_orderings_freebase86m,
         "orderings_twitter": run_orderings_twitter,
+        "staleness_bound": run_staleness_bound,
         "prefetching": run_prefetching,
         "big_embeddings": run_big_embeddings,
         "all": run_all

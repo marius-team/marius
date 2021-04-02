@@ -26,7 +26,7 @@ twitter                    // Table 4
 freebase86m                // Table 5
 buffer_simulator           // Figure 7
 utilization                // Figure 8 
-ordering_total_io          // Figure 9 
+orderings_total_io         // Figure 9 
 orderings_freebase86m      // Figure 10 
 orderings_twitter          // Figure 11
 staleness_bound            // Figure 12
