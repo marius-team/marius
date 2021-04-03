@@ -184,7 +184,6 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
                                             [output_dir], dataset_split=split)
 
 
-
 def openbiolink_hq(output_dir, num_partitions=1):
     download_path = download_file("https://zenodo.org/record/3834052/files/HQ_DIR.zip?download=1", output_dir)
     extract_file(download_path)
@@ -194,7 +193,6 @@ def openbiolink_hq(output_dir, num_partitions=1):
          str(Path(output_dir) / Path("HQ_DIR/train_test_data/val_sample.csv")),
          str(Path(output_dir) / Path("HQ_DIR/train_test_data/test_sample.csv"))],
         ["srd"], [output_dir], num_partitions=num_partitions, num_line_skip=0)
-
 
 def openbiolink_lq(output_dir, num_partitions=1):
     download_path = download_file("https://samwald.info/res/OpenBioLink_2020_final/ALL_DIR.zip", output_dir)
