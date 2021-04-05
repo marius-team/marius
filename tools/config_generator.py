@@ -135,6 +135,14 @@ def readTemplate(file):
     return d                       
 
 def updateParam(devices, dicts, args, opts, arg_dict):
+    device_idx = -1
+    if args.generate_config == None:
+        for opt in opts:
+            if arg_dict.get(opt) != None:
+                raise RuntimeError(
+                    "Please specify --generate_config when specifying generating options"
+                )
+
     for i in range(3):
         if (args.generate_config == devices[i]):
             device_idx = i
@@ -145,8 +153,8 @@ def updateParam(devices, dicts, args, opts, arg_dict):
                     else:
                         raise RuntimeError(
                             str("Unmatching parameter for " + devices[i] + " config: " + opt))
-    
-    return device_idx
+
+    return device_idx, dicts
 
 if __name__=="__main__":
     print("This is a config generator.")
