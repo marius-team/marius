@@ -20,7 +20,6 @@ from config_generator import updateParam
 from csv_converter import general_parser
 
 
-
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
     download_path = download_file("https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz", output_dir)
     extract_file(download_path)
@@ -413,7 +412,7 @@ def setArgs():
     opts = opts.union(cpu_dict, gpu_dict, mgpu_dict)
 
     for opt in opts:
-        parser.add_argument(str("--" + opt), metavar=opt, type = str, help=opt)
+        parser.add_argument(str("--" + opt), metavar=opt, type = str)
 
     return parser, opts, cpu_dict, gpu_dict, mgpu_dict
 
@@ -423,7 +422,7 @@ def prepareFiles(output_directory, config_dir):
         if not Path(output_directory).exists():
             Path(output_directory).mkdir(parents=False, exist_ok=False)
             fileCreated = 1
-        if args.config_dir != None:
+        if config_dir != None:
             if not Path(config_dir).exists():
                 Path(config_dir).mkdir(parents=False, exist_ok=False)
                 fileCreated = 2
@@ -435,17 +434,21 @@ def prepareFiles(output_directory, config_dir):
         else:
             print("Incorrect parent path given for output_dir.")
 
-if __name__ == "__main__":
-    parser, opts, cpu_dict, gpu_dict, mgpu_dict = setArgs()
-    args = parser.parse_args()
+def parseArgs(devices, dicts, args, opts):
     arg_dict = vars(args)
-
-    devices = ["CPU", "GPU", "Multi_GPU"]
-    dicts = [cpu_dict, gpu_dict, mgpu_dict]
-    device_idx = updateParam(devices, dicts, args, opts, arg_dict)
+    device_idx, dicts = updateParam(devices, dicts, args, opts, arg_dict)
     if args.generate_config == None:
         assert(args.config_dir == None), "Must specify --generate_config when setting --config_dir."
     prepareFiles(args.output_directory, args.config_dir)
+
+    return device_idx, dicts, arg_dict
+
+if __name__ == "__main__":
+    parser, opts, cpu_dict, gpu_dict, mgpu_dict = setArgs()
+    args = parser.parse_args()
+    devices = ["CPU", "GPU", "Multi_GPU"]
+    dicts = [cpu_dict, gpu_dict, mgpu_dict]
+    device_idx, dicts, arg_dict = parseArgs(devices, dicts, args, opts)
 
     print(args.dataset)
 
