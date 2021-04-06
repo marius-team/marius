@@ -33,7 +33,6 @@ jobs:
     - name: Install Torch
       working-directory: ${{github.workspace}}
       shell: bash
-      run: pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
       run:   |
        if [ "$RUNNER_OS" == "Linux" ]; then
             pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
