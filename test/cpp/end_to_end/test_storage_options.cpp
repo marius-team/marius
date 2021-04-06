@@ -10,12 +10,13 @@ TEST(TestStorageOptions, TestEdgesBackend) {
     const char* conf = conf_str.c_str();
 
     int num_args = 3;
-    const char* n_argv1[] = {"marius_train", conf,  "--storage.edges_backend=FlatFile"};
+    const char* n_argv1[] = {"marius_train", conf,  "--storage.edges_backend=HostMemory"};
     marius(num_args, (char **)(n_argv1));
-    const char* n_argv2[] = {"marius_train", conf,  "--storage.edges_backend=HostMemory"};
+    const char* n_argv2[] = {"marius_train", conf,  "--storage.edges_backend=DeviceMemory"};
     marius(num_args, (char **)(n_argv2));
-    const char* n_argv3[] = {"marius_train", conf,  "--storage.edges_backend=DeviceMemory"};
+    const char* n_argv3[] = {"marius_train", conf,  "--storage.edges_backend=FlatFile"};
     marius(num_args, (char **)(n_argv3));
+
 }
 
 TEST(TestStorageOptions, TestEmbeddingsBackend) {
