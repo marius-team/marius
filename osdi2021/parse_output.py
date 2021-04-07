@@ -23,10 +23,10 @@ def parse_pbg(filename):
     #2020-09-16 03:32:24,833   [Evaluator] Stats for edge path 1 / 1: loss:  2.3353 , pos_rank:  16.8775 , mrr:  0.826554 , r1:  0.773254 , r10:  0.912942 , r50:  0.955042 , auc:  0.985117 , count:  3449689
     with open(filename) as f:
         for line in f.readlines():
-            if "Stats for edge path" in line:
-                result["MRR"] = float(line.split()[16])
-                result["Hits@1"] = float(line.split()[19])
-                result["Hits@10"] = float(line.split()[22])
+            if "Stats for edge path" in line and "bucket" not in line:
+                result["MRR"] = float(line.split()[17])
+                result["Hits@1"] = float(line.split()[20])
+                result["Hits@10"] = float(line.split()[23])
 
     return result
 
