@@ -61,12 +61,12 @@ jobs:
       shell: bash
       run: python3 -m pip install -r requirements.txt
 
-    - name: ccache
+    - name: Run CCache
       uses: hendrikmuhs/ccache-action@v1
       with:
         key: ${{ matrix.os }}
         
-    - name: build with cmake
+    - name: CMake Build
       uses: lukka/run-cmake@v3
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
@@ -75,7 +75,7 @@ jobs:
         buildWithCMake: true
         buildDirectory: '${{ github.workspace }}/build'
 
-    - name: Run tests
+    - name: Run C++ Tests
       shell: cmake -P {0}
       run: |
         include(ProcessorCount)
@@ -96,7 +96,7 @@ jobs:
           message(FATAL_ERROR "Running tests failed!")
         endif()
 
-    - name: Test Python
+    - name: Run Python Tests
       working-directory: ${{github.workspace}}
       shell: bash
       # Run python tests with tox
