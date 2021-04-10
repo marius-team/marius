@@ -187,8 +187,8 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
     KINSHIPS_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/kinship/kinship.data"
     download_path = download_file(KINSHIPS_URL, output_dir)
     edges = []
-    pattern = re.compile("^(?P<rel>[a-z]+)\
-                         ((?P<n1>[A-Za-z]+).{2}(?P<n2>[A-Za-z]+)\)\n$")
+    pattern = re.compile("^(?P<rel>[a-z]+)" +
+                         "\((?P<n1>[A-Za-z]+).{2}(?P<n2>[A-Za-z]+)\)\n$")
 
     f = open(download_path, "r")
     lines = f.readlines()
@@ -286,7 +286,7 @@ def ogbl_collab(output_dir, num_partitions=1):
 
 
 def ogbn_arxiv(output_dir, num_partitions=1):
-    OGBN_ARXIV_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip	"
+    OGBN_ARXIV_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip"
     download_path = download_file(OGBN_ARXIV_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("arxiv/split/time/train.csv.gz")),
@@ -441,8 +441,9 @@ def extract_file(filepath):
                     with tarfile.open(filepath, "r:gz") as tar:
                         tar.extractall(path=filepath.parent)
                 except tarfile.TarError:
-                    raise RuntimeError("Unrecognized file format, need to \
-                                extract and call general converter manually.")
+                    raise RuntimeError(
+                        "Unrecognized file format, need to " +
+                        "extract and call general converter manually.")
         elif zipfile.is_zipfile(str(filepath)):
             with ZipFile(filepath, "r") as zip:
                 zip.extractall(filepath.parent)
@@ -468,9 +469,9 @@ def extract_file(filepath):
 def setArgs():
     parser = argparse.ArgumentParser(
                 description='Preprocess Datasets', prog='preprocessor',
-                usage=('%(prog)s [-h] [--generate_config [device]] \
-                       [--<section>.<option> [value]] \
-                       \ndataset output_directory'))
+                usage=(('%(prog)s [-h] [--generate_config [device]] ' +
+                       '[--<section>.<option> [value]] ' +
+                        '\ndataset output_directory')), add_help=False)
     parser.add_argument('dataset', metavar='dataset',
                         type=str, help='Dataset to preprocess')
     parser.add_argument('output_directory', metavar='output_directory',
@@ -481,8 +482,8 @@ def setArgs():
     parser.add_argument('--generate_config', '-gc', metavar='generate_config',
                         choices=["GPU", "CPU"],
                         nargs='?', const="GPU",
-                        help=('Generates a single-GPU/single-CPU/multi-GPU \
-                              training configuration file by default'))
+                        help=('Generates a single-GPU/single-CPU/multi-GPU' +
+                              'training configuration file by default'))
 
     config_dict, valid_dict = readTemplate(DEFAULT_CONFIG_FILE)
 

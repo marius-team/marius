@@ -59,8 +59,8 @@ def updateParam(config_dict, arg_dict):
         for key in config_dict:
             if arg_dict.get(key) is not None:
                 raise RuntimeError(
-                    "Please specify --generate_config when \
-                            specifying generating options"
+                    "Please specify --generate_config when " +
+                    "specifying generating options"
                 )
     else:
         if arg_dict.get("generate_config") is None:

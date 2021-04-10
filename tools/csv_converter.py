@@ -96,12 +96,12 @@ def get_header_length(input_file, entry_regex):
                 if n == 100:
                     raise StopIteration()
         except StopIteration:
-            raise RuntimeError("Please give number of rows to skip \
-                               at file header.")
+            raise RuntimeError("Please give number of rows to skip " +
+                               "at file header.")
 
         if a == n:
-            raise RuntimeWarning("No nodes detected, dataset format may \
-                                 be incorrect.")
+            raise RuntimeWarning("No nodes detected, dataset format may " +
+                                 "be incorrect.")
 
     return num_line_skip
 
@@ -351,8 +351,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='General CSV Converter',
                                      usage="general csv converter")
     parser.add_argument('format', type=str, nargs=1,
-                        metavar="format: source(s), relation(r), \
-                        destination(d)", help="Format of relation")
+                        metavar="format: source(s), relation(r)," +
+                        "destination(d)", help="Format of relation")
     parser.add_argument('output_directory', nargs=1,
                         metavar='output_directory', type=str,
                         help='Directory to put graph data')
