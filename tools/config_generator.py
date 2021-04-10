@@ -1,262 +1,89 @@
 from pathlib import Path
+import argparse
 
-def output_config(stats, num_nodes, num_relations, output_dir, name, device = "cpu"):
-    if device == "gpu":
-        gpu(stats, num_nodes, num_relations, output_dir, name)
-    elif device == "cpu":
-        cpu(stats, num_nodes, num_relations, output_dir, name)
-    else:
-        multi_gpu(stats, num_nodes, num_relations, output_dir, name)
-    
-def cpu(stats, num_nodes, num_relations, output_dir, name):  
-    file = Path(output_dir) / Path(str(name) + "_cpu.ini")
+DEFAULT_CONFIG_FILE = "./tools/config_templates/default_configs.txt"
+
+
+def output_config(config_dict, output_dir):
+    device = config_dict.get("device")
+    ds_name = config_dict.get("dataset")
+
+    file = Path(output_dir) / Path(str(ds_name) + "_" +
+                                   device.lower() + ".ini")
+    sections = ["model", "storage", "training", "training_pipeline",
+                "evaluation", "evaluation_pipeline", "path", "reporting"]
+    opts = list(config_dict.keys())
+
     with open(file, "w+") as f:
         f.write("[general]\n")
-        f.write("device=CPU\n\
-random_seed=0\n\
-num_train=" + str(int(stats[0])) + "\n\
-num_nodes=" + str(int(num_nodes)) + "\n\
-num_relations=" + str(int(num_relations)) + "\n\
-num_valid=" + str(int(stats[1])) + "\n\
-num_test=" + str(int(stats[2])) + "\n\n")
-        
-        f.write("\
-[model]\n\
-embedding_size=100\n\
-decoder=ComplEx\n\n")
+        f.write("device=" + config_dict.get("general.device") + "\n")
+        f.write("gpu_ids=" + config_dict.get("general.gpu_ids") + "\n")
+        f.write("num_train=" + config_dict.get("num_train") + "\n")
+        f.write("num_nodes=" + config_dict.get("num_nodes") + "\n")
+        f.write("num_relations=" + config_dict.get("num_relations") + "\n")
+        f.write("num_valid=" + config_dict.get("num_valid") + "\n")
+        f.write("num_test=" + config_dict.get("num_test") + "\n")
+        f.write("experiment_name=" +
+                config_dict.get("general.experiment_name") + "\n")
 
-        f.write("\
-[storage]\n\
-edges_backend=HostMemory\n\
-embeddings_backend=HostMemory\n\
-relations_backend=HostMemory\n\n")
-
-        f.write("\
-[training]\n\
-batch_size=1000\n\
-number_of_chunks=16\n\
-negatives=512\n\
-degree_fraction=.5\n\
-num_epochs=50\n\
-learning_rate=.1\n\
-regularization_coef=0\n\
-regularization_norm=2\n\
-synchronous=false\n\
-shuffle_interval=1\n\n")
-        
-        f.write("\
-[training_pipeline]\n\
-max_batches_in_flight=16\n\
-num_embedding_loader_threads=4\n\
-num_embedding_transfer_threads=2\n\
-num_compute_threads=4\n\
-num_gradient_transfer_threads=2\n\
-num_embedding_update_threads=4\n\n")
-        
-        f.write("\
-[evaluation_pipeline]\n\
-max_batches_in_flight=16\n\
-num_embedding_loader_threads=2\n\
-num_embedding_transfer_threads=2\n\
-num_evaluate_threads=4\n\n")
-        
-        f.write("\
-[evaluation]\n\
-epochs_per_eval=1\n\
-batch_size=1000\n\
-number_of_chunks=1\n\
-negatives=1000\n\
-degree_fraction=0\n\
-negative_sampling_access=Uniform\n\
-evaluation_method=LinkPrediction\n\
-filtered_evaluation=false\n\n")
-        
-        f.write("\
-[path]\n\
-base_directory=training_data/\n\
-train_edges=output_dir/train_edges.pt\n\
-validation_edges=output_dir/valid_edges.pt\n\
-test_edges=output_dir/test_edges.pt\n\n")
-        
-        f.write("\
-[reporting] \n\
-log_level=info\n\n")
+        for sec in sections:
+            f.write("\n[" + sec + "]\n")
+            for key in opts:
+                if key.split(".")[0] == sec:
+                    f.write(key.split(".")[1] +
+                            "=" + config_dict.get(key) + "\n")
 
 
-def gpu(stats, num_nodes, num_relations, output_dir, name):
-    file = Path(output_dir) / Path(str(name) + "_gpu.ini")
-    with open(file, "w+") as f:
-        f.write("[general]\n\
-device=GPU\n\
-random_seed=0\n\
-num_train=" + str(int(stats[0])) + "\n\
-num_nodes=" + str(int(num_nodes)) + "\n\
-num_relations=" + str(int(num_relations)) + "\n\
-num_valid=" + str(int(stats[1])) + "\n\
-num_test=" + str(int(stats[2])) + "\n\n\
-[model]\n\
-embedding_size=100\n\
-decoder=ComplEx\n\n\
-[storage]\n\
-edges_backend=DeviceMemory\n\
-embeddings_backend=DeviceMemory\n\
-relations_backend=DeviceMemory\n\n\
-[training]\n\
-batch_size=10000\n\
-number_of_chunks=16\n\
-negatives=512\n\
-degree_fraction=0\n\
-num_epochs=5\n\
-learning_rate=.1\n\
-regularization_coef=0\n\
-regularization_norm=2\n\
-synchronous=true\n\
-shuffle_interval=1\n\n\
-[training_pipeline]\n\
-max_batches_in_flight=16\n\
-num_embedding_loader_threads=4\n\
-num_embedding_transfer_threads=2\n\
-num_compute_threads=1\n\
-num_gradient_transfer_threads=2\n\
-num_embedding_update_threads=4\n\n\
-[evaluation_pipeline]\n\
-max_batches_in_flight=16\n\
-num_embedding_loader_threads=2\n\
-num_embedding_transfer_threads=2\n\
-num_evaluate_threads=1\n\n\
-[evaluation]\n\
-epochs_per_eval=1\n\
-batch_size=1000\n\
-number_of_chunks=1\n\
-negatives=1000\n\
-degree_fraction=0\n\
-negative_sampling_access=Uniform\n\
-evaluation_method=LinkPrediction\n\
-filtered_evaluation=false\n\n\
-[path]\n\
-base_directory=training_data/\n\
-train_edges=output_dir/train_edges.pt\n\
-validation_edges=output_dir/valid_edges.pt\n\
-test_edges=output_dir/test_edges.pt\n\n\
-[reporting]\n\
-log_level=info")
+def read_template(file):
+    with open(file, "r") as f:
+        lines = f.readlines()
 
-def multi_gpu(stats, num_nodes, num_relations, output_dir, name):
-    file = Path(output_dir) / Path(str(name) + "_multi_gpu.ini")
-    with open(file, "w+") as f:
-        f.write("[general]\n\
-scale_factor=.001\n\
-embedding_size=100\n\
-device=GPU\n\
-gpu_ids=0 1\n\
-comparator_type=Dot\n\
-relation_type=ComplexHadamard\n\
-random_seed=0\n\
-num_train=" + str(int(stats[0])) + "\n\
-num_nodes=" + str(int(num_nodes)) + "\n\
-num_relations=" + str(int(num_relations)) + "\n\
-num_valid=" + str(int(stats[1])) + "\n\
-num_test=" + str(int(stats[2])) + "\n\n\
-[storage]\n\
-edges_backend=HostMemory\n\
-embeddings_backend=HostMemory\n\
-relations_backend=HostMemory\n\n\
-[training]\n\
-batch_size=10000\n\
-number_of_chunks=10\n\
-negatives=256\n\
-degree_fraction=256\n\
-num_epochs=5\n\
-optimizer_type=Adagrad\n\
-loss=SoftMax\n\
-epsilon=1e-8\n\
-learning_rate=.1\n\
-negative_sampling_access=Uniform\n\
-negative_sampling_policy=DegreeBased\n\
-edge_bucket_ordering=Shuffle\n\
-synchronous=false\n\
-shuffle_epochs=1\n\n\
-[training_pipeline]\n\
-max_batches_in_flight=8\n\
-update_in_flight=false\n\
-embeddings_host_queue_size=4\n\
-embeddings_device_queue_size=4\n\
-gradients_host_queue_size=4\n\
-gradients_device_queue_size=4\n\
-num_embedding_loader_threads=2\n\
-num_embedding_transfer_threads=1\n\
-num_compute_threads=2\n\
-num_gradient_transfer_threads=1\n\
-num_embedding_update_threads=2\n\n\
-[evaluation_pipeline]\n\
-max_batches_in_flight=16\n\
-embeddings_host_queue_size=4\n\
-embeddings_device_queue_size=4\n\
-num_embedding_loader_threads=4\n\
-num_embedding_transfer_threads=1\n\
-num_evaluate_threads=2\n\n\
-[evaluation]\n\
-epochs_per_eval=1\n\
-batch_size=1000\n\
-number_of_chunks=1\n\
-negatives=1000\n\
-degree_fraction=1000\n\
-valid_fraction=0\n\
-test_fraction=0\n\
-negative_sampling_access=Uniform\n\
-negative_sampling_policy=DegreeBased\n\
-evaluation_method=MRR\n\n\
-[path]\n\
-base_directory=training_data/\n\
-train_edges=output_dir/train_edges.pt\n\
-validation_edges=output_dir/valid_edges.pt\n\
-test_edges=output_dir/test_edges.pt")
+    keys = []
+    values = []
+    valid_dict = {}
+    for line in lines:
+        line = line.split("=")
+        line[1] = line[1].rstrip()
+        keys.append(line[0])
+        sub_line = line[1].split("*")
+        values.append(sub_line[0])
+        if len(sub_line) > 1:
+            valid_dict.update({line[0]: [sub_line[1:]]})
+    config_dict = dict(zip(keys, values))
+
+    return config_dict, valid_dict
 
 
-def output_bash_cmds(output_dir, dataset_name):
-    cpu_file = Path(output_dir) / Path(dataset_name + "_cpu.sh")
-    gpu_file = Path(output_dir) / Path(dataset_name + "_gpu.sh")
-    mgpu_file = Path(output_dir) / Path(dataset_name + "_multi_gpu.sh")
-    with open(cpu_file, "w+") as f:
-        f.write("# preprocess the " + dataset_name + " graph and put preprocessed graph into output dir\n")
-        f.write("python3 tools/preprocess.py " +  dataset_name + " output_dir/ \n\n")
-        f.write("# run marius on the preprocessed input\n")
-        f.write("build/marius_train examples/training/configs/" + dataset_name + "_cpu.ini info")
-    with open(gpu_file, "w+") as f:
-        f.write("# preprocess the " + dataset_name + " graph and put preprocessed graph into output dir\n")
-        f.write("python3 tools/preprocess.py " +  dataset_name + " output_dir/ \n\n")
-        f.write("# run marius on the preprocessed input\n")
-        f.write("build/marius_train examples/training/configs/" + dataset_name + "_gpu.ini info")
-    with open(mgpu_file, "w+") as f:
-        f.write("# preprocess the " + dataset_name + " graph and put preprocessed graph into output dir\n")
-        f.write("python3 tools/preprocess.py " +  dataset_name + " output_dir/ \n\n")
-        f.write("# run marius on the preprocessed input\n")
-        f.write("build/marius_train examples/training/configs/" + dataset_name + "_multi_gpu.ini info")
-if __name__=="__main__":
-    print("This is a configuration file generator.")
-    ds_name = [
-        "fb15k",
-        "live_journal",
-        "freebase86m",
-        "wn18",
-        "fb15k_237",
-        "wn18rr",
-        "codex_s",
-        "codex_m",
-        "codex_l",
-        "drkg",
-        "hetionet",
-        "kinships",
-        "openbiolink_hq",
-        "openbiolink_lq",
-        "ogbl_biokg",
-        "ogbl_ppa",
-        "ogbl_ddi",
-        "ogbl_collab",
-        "ogbn_arxiv",
-        "ogbn_proteins",
-        "ogbn_products",
-    ]
+def update_param(config_dict, arg_dict):
+    if arg_dict.get("generate_config") is None:
+        for key in config_dict:
+            if arg_dict.get(key) is not None:
+                raise RuntimeError(
+                    "Please specify --generate_config when " +
+                    "specifying generating options"
+                )
+    else:
+        if arg_dict.get("generate_config") is None:
+            config_dict.update({"device": "GPU"})
+            config_dict.update({"general.device": "GPU"})
+        elif arg_dict.get("generate_config") == "multi-GPU":
+            config_dict.update({"device": "multi_GPU"})
+            config_dict.update({"general.device": "multi-GPU"})
+        else:
+            config_dict.update({"general.device":
+                                arg_dict.get("generate_config")})
+            config_dict.update({"device":
+                                arg_dict.get("generate_config")})
 
-    for n in ds_name:
-        output_bash_cmds("./examples/training/scripts/", n)
+        for key in config_dict.keys():
+            if arg_dict.get(key) is not None:
+                config_dict.update({key: arg_dict.get(key)})
+
+    if config_dict.get("general.random_seed") == "*":
+        del config_dict["general.random_seed"]
+
+    return config_dict
+
+
+if __name__ == "__main__":
+    print("This is a config generator.")
