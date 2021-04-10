@@ -167,9 +167,9 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     if src_idx == -1 or dst_idx == -1:
         raise RuntimeError("Wrong format: source or destination not found.")
     elif rel_idx == -1:
-        regex = "^[^\s]+" + delim + "[^\s]+$"
+        regex = r"^[^\s]+" + delim + r"[^\s]+$"
     else:
-        regex = "^[^\s]+" + delim + "[^\s]+" + delim + "[^\s]+$"
+        regex = r"^[^\s]+" + delim + r"[^\s]+" + delim + r"[^\s]+$"
 
     nodes = set()
     if rel_idx != -1:

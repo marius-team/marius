@@ -11,7 +11,7 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
-#import torch
+import torch
 
 from config_generator import output_config
 from config_generator import readTemplate
@@ -188,7 +188,7 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
     download_path = download_file(KINSHIPS_URL, output_dir)
     edges = []
     pattern = re.compile("^(?P<rel>[a-z]+)" +
-                         "\((?P<n1>[A-Za-z]+).{2}(?P<n2>[A-Za-z]+)\)\n$")
+                         r"\((?P<n1>[A-Za-z]+).{2}(?P<n2>[A-Za-z]+)\)\n$")
 
     f = open(download_path, "r")
     lines = f.readlines()
@@ -355,46 +355,46 @@ def parse_ogbn(files, output_dir, num_partitions=1):
     return stats, num_nodes, num_edges
 
 
-# def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
-#     if has_rel is True:
-#         train_idx = torch.load(str(files[0]))
-#         valid_idx = torch.load(str(files[1]))
-#         test_idx = torch.load(str(files[2]))
-#         train_list = np.array([train_idx.get("head"),
-#                                train_idx.get("relation"),
-#                                train_idx.get("tail")]).T
-#         valid_list = np.array([valid_idx.get("head"),
-#                                valid_idx.get("relation"),
-#                                valid_idx.get("tail")]).T
-#         test_list = np.array([test_idx.get("head"),
-#                               test_idx.get("relation"),
-#                               test_idx.get("tail")]).T
-#     else:
-#         train_list = torch.load(files[0]).get("edge")
-#         valid_list = torch.load(files[1]).get("edge")
-#         test_list = torch.load(files[2]).get("edge")
+def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
+    if has_rel is True:
+        train_idx = torch.load(str(files[0]))
+        valid_idx = torch.load(str(files[1]))
+        test_idx = torch.load(str(files[2]))
+        train_list = np.array([train_idx.get("head"),
+                               train_idx.get("relation"),
+                               train_idx.get("tail")]).T
+        valid_list = np.array([valid_idx.get("head"),
+                               valid_idx.get("relation"),
+                               valid_idx.get("tail")]).T
+        test_list = np.array([test_idx.get("head"),
+                              test_idx.get("relation"),
+                              test_idx.get("tail")]).T
+    else:
+        train_list = torch.load(files[0]).get("edge")
+        valid_list = torch.load(files[1]).get("edge")
+        test_list = torch.load(files[2]).get("edge")
 
-#     np.savetxt(str(Path(output_dir) / Path("train.txt")),
-#                train_list, fmt="%s", delimiter="\t", newline="\n")
-#     np.savetxt(str(Path(output_dir) / Path("valid.txt")),
-#                valid_list, fmt="%s", delimiter="\t", newline="\n")
-#     np.savetxt(str(Path(output_dir) / Path("test.txt")),
-#                test_list, fmt="%s", delimiter="\t", newline="\n")
-#     print("Conversion completed.")
+    np.savetxt(str(Path(output_dir) / Path("train.txt")),
+               train_list, fmt="%s", delimiter="\t", newline="\n")
+    np.savetxt(str(Path(output_dir) / Path("valid.txt")),
+               valid_list, fmt="%s", delimiter="\t", newline="\n")
+    np.savetxt(str(Path(output_dir) / Path("test.txt")),
+               test_list, fmt="%s", delimiter="\t", newline="\n")
+    print("Conversion completed.")
 
-#     if has_rel is True:
-#         stats, num_nodes, num_edges = general_parser(
-#             [str(Path(output_dir) / Path("train.txt")),
-#              str(Path(output_dir) / Path("valid.txt")),
-#              str(Path(output_dir) / Path("test.txt"))], ["srd"],
-#             [output_dir], num_partitions=num_partitions)
-#     else:
-#         stats, num_nodes, num_edges = general_parser(
-#             [str(Path(output_dir) / Path("train.txt")),
-#              str(Path(output_dir) / Path("valid.txt")),
-#              str(Path(output_dir) / Path("test.txt"))], ["sd"],
-#             [output_dir], num_partitions=num_partitions)
-#     return stats, num_nodes, num_edges
+    if has_rel is True:
+        stats, num_nodes, num_edges = general_parser(
+            [str(Path(output_dir) / Path("train.txt")),
+             str(Path(output_dir) / Path("valid.txt")),
+             str(Path(output_dir) / Path("test.txt"))], ["srd"],
+            [output_dir], num_partitions=num_partitions)
+    else:
+        stats, num_nodes, num_edges = general_parser(
+            [str(Path(output_dir) / Path("train.txt")),
+             str(Path(output_dir) / Path("valid.txt")),
+             str(Path(output_dir) / Path("test.txt"))], ["sd"],
+            [output_dir], num_partitions=num_partitions)
+    return stats, num_nodes, num_edges
 
 
 def download_file(url, output_dir):
