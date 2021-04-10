@@ -34,7 +34,7 @@ def output_config(config_dict, output_dir):
                             "=" + config_dict.get(key) + "\n")
 
 
-def readTemplate(file):
+def read_template(file):
     with open(file, "r") as f:
         lines = f.readlines()
 
@@ -54,7 +54,7 @@ def readTemplate(file):
     return config_dict, valid_dict
 
 
-def updateParam(config_dict, arg_dict):
+def update_param(config_dict, arg_dict):
     if arg_dict.get("generate_config") is None:
         for key in config_dict:
             if arg_dict.get(key) is not None:

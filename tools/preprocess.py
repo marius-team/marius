@@ -14,8 +14,8 @@ import pandas as pd
 import torch
 
 from config_generator import output_config
-from config_generator import readTemplate
-from config_generator import updateParam
+from config_generator import read_template
+from config_generator import update_param
 from config_generator import DEFAULT_CONFIG_FILE
 from csv_converter import general_parser
 
@@ -466,7 +466,7 @@ def extract_file(filepath):
     return filepath.parent
 
 
-def setArgs():
+def set_args():
     parser = argparse.ArgumentParser(
                 description='Preprocess Datasets', prog='preprocessor',
                 formatter_class=argparse.RawTextHelpFormatter,
@@ -487,7 +487,7 @@ def setArgs():
                               '\nValid options (default to GPU): ' +
                               '[GPU, CPU, multi-GPU]'))
 
-    config_dict, valid_dict = readTemplate(DEFAULT_CONFIG_FILE)
+    config_dict, valid_dict = read_template(DEFAULT_CONFIG_FILE)
 
     for key in list(config_dict.keys())[1:]:
         if valid_dict.get(key) is not None:
@@ -501,7 +501,7 @@ def setArgs():
     return parser, config_dict
 
 
-def setUpFiles(output_directory):
+def set_up_files(output_directory):
     try:
         if not Path(output_directory).exists():
             Path(output_directory).mkdir(parents=False, exist_ok=False)
@@ -511,19 +511,19 @@ def setUpFiles(output_directory):
         print("Incorrect parent path given for output directory.")
 
 
-def parseArgs(config_dict, args):
+def parse_args(config_dict, args):
     arg_dict = vars(args)
-    config_dict = updateParam(config_dict, arg_dict)
-    setUpFiles(args.output_directory)
+    config_dict = update_param(config_dict, arg_dict)
+    set_up_files(args.output_directory)
 
     config_dict.update({"dataset": arg_dict.get("dataset")})
     return config_dict, arg_dict
 
 
 if __name__ == "__main__":
-    parser, config_dict = setArgs()
+    parser, config_dict = set_args()
     args = parser.parse_args()
-    config_dict, arg_dict = parseArgs(config_dict, args)
+    config_dict, arg_dict = parse_args(config_dict, args)
 
     print(args.dataset)
 

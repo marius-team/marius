@@ -3,8 +3,8 @@ import argparse
 import subprocess
 import shutil
 from pathlib import Path
-from tools.preprocess import setArgs
-from tools.preprocess import parseArgs
+from tools.preprocess import set_args
+from tools.preprocess import parse_args
 
 
 class TestCmdOptParser(unittest.TestCase):
@@ -40,9 +40,9 @@ class TestCmdOptParser(unittest.TestCase):
         """
         Check if default value of --generate_config is assigned correctly
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[0])
-        config_dict, arg_dict = parseArgs(config_dict, args)
+        config_dict, arg_dict = parse_args(config_dict, args)
         self.assertTrue(config_dict.get("dataset") == "wn18")
         self.assertTrue(config_dict.get("device") == "GPU")
         self.assertTrue(arg_dict.get("num_partitions") == 5)
@@ -51,9 +51,9 @@ class TestCmdOptParser(unittest.TestCase):
         """
         Check if --gc can parse device choice correctly
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[1])
-        config_dict, arg_dict = parseArgs(config_dict, args)
+        config_dict, arg_dict = parse_args(config_dict, args)
         self.assertTrue(config_dict.get("dataset") == "wn18")
         self.assertTrue(config_dict.get("device") == "GPU")
         self.assertTrue(arg_dict.get("output_directory") == "./output_dir")
@@ -62,9 +62,9 @@ class TestCmdOptParser(unittest.TestCase):
         """
         Check if training configs can be parsed correctly
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[2])
-        config_dict, arg_dict = parseArgs(config_dict, args)
+        config_dict, arg_dict = parse_args(config_dict, args)
         self.assertTrue(config_dict.get("dataset") == "wn18")
         self.assertTrue(config_dict.get("device") == "CPU")
         self.assertTrue(arg_dict.get("output_directory") == "./output_dir")
@@ -77,7 +77,7 @@ class TestCmdOptParser(unittest.TestCase):
         Check if exception is thrown when config with unmatching
             section is given
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[3])
 
@@ -86,26 +86,26 @@ class TestCmdOptParser(unittest.TestCase):
         Check if excpetion is thrown if trainig config is specified without
             --generate_config being specified
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[4])
-            config_dict, arg_dict = parseArgs(config_dict, args)
+            config_dict, arg_dict = parse_args(config_dict, args)
 
     def test_required_args(self):
         """
         Check if args.generate_config is set correctly if --generate_config
             is not specified
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[5])
-        config_dict, arg_dict = parseArgs(config_dict, args)
+        config_dict, arg_dict = parse_args(config_dict, args)
         self.assertTrue(arg_dict.get("generate_config") is None)
 
     def test_required_arg_omitted(self):
         """
         Check if exception is thrown when output_directory is given
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[6])
 
@@ -114,7 +114,7 @@ class TestCmdOptParser(unittest.TestCase):
         Check if exception is thrown when config name is missing and
             value is given
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[7])
 
@@ -122,7 +122,7 @@ class TestCmdOptParser(unittest.TestCase):
         """
         Check if exception is thrown when config value is missing
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[8])
 
@@ -130,7 +130,7 @@ class TestCmdOptParser(unittest.TestCase):
         """
         Check if exception is thrown when no arg is given
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[9])
 
@@ -138,7 +138,7 @@ class TestCmdOptParser(unittest.TestCase):
         """
         Check if exception is thrown when invalid arg value is given
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[10])
 
@@ -146,7 +146,7 @@ class TestCmdOptParser(unittest.TestCase):
         """
         Check if exception is thrown if invalid config value is given
         """
-        parser, config_dict = setArgs()
+        parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[11])
 
