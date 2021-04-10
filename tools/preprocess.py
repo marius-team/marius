@@ -469,9 +469,9 @@ def extract_file(filepath):
 def setArgs():
     parser = argparse.ArgumentParser(
                 description='Preprocess Datasets', prog='preprocessor',
-                usage=(('%(prog)s [-h] [--generate_config [device]] ' +
-                       '[--<section>.<option> [value]] ' +
-                        '\ndataset output_directory')), add_help=False)
+                formatter_class=argparse.RawTextHelpFormatter,
+                epilog=(('Specify certain config (optional): ' +
+                        '[--<section>.<key>=<value>]')))
     parser.add_argument('dataset', metavar='dataset',
                         type=str, help='Dataset to preprocess')
     parser.add_argument('output_directory', metavar='output_directory',
@@ -480,19 +480,23 @@ def setArgs():
                         required=False, type=int, default=1,
                         help='Number of partitions to split the edges into')
     parser.add_argument('--generate_config', '-gc', metavar='generate_config',
-                        choices=["GPU", "CPU"],
+                        choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', const="GPU",
-                        help=('Generates a single-GPU/single-CPU/multi-GPU' +
-                              'training configuration file by default'))
+                        help=('Generates a single-GPU/multi-CPU/multii-GPU ' +
+                              'training configuration file by default. ' +
+                              '\nValid options (default to GPU): ' +
+                              '[GPU, CPU, multi-GPU]'))
 
     config_dict, valid_dict = readTemplate(DEFAULT_CONFIG_FILE)
 
     for key in list(config_dict.keys())[1:]:
         if valid_dict.get(key) is not None:
-            parser.add_argument(str("--" + key), metavar=key,
-                                type=str, choices=valid_dict.get(key))
+            parser.add_argument(str("--" + key), metavar=key, type=str,
+                                choices=valid_dict.get(key),
+                                help=argparse.SUPPRESS)
         else:
-            parser.add_argument(str("--" + key), metavar=key, type=str)
+            parser.add_argument(str("--" + key), metavar=key, type=str,
+                                help=argparse.SUPPRESS)
 
     return parser, config_dict
 

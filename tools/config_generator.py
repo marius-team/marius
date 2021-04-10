@@ -16,7 +16,7 @@ def output_config(config_dict, output_dir):
 
     with open(file, "w+") as f:
         f.write("[general]\n")
-        f.write("device=" + config_dict.get("general.device").lower() + "\n")
+        f.write("device=" + config_dict.get("general.device") + "\n")
         f.write("gpu_ids=" + config_dict.get("general.gpu_ids") + "\n")
         f.write("num_train=" + config_dict.get("num_train") + "\n")
         f.write("num_nodes=" + config_dict.get("num_nodes") + "\n")
@@ -65,8 +65,15 @@ def updateParam(config_dict, arg_dict):
     else:
         if arg_dict.get("generate_config") is None:
             config_dict.update({"device": "GPU"})
+            config_dict.update({"general.device": "GPU"})
+        elif arg_dict.get("generate_config") == "multi-GPU":
+            config_dict.update({"device": "multi_GPU"})
+            config_dict.update({"general.device": "multi-GPU"})
         else:
-            config_dict.update({"device": arg_dict.get("generate_config")})
+            config_dict.update({"general.device":
+                                arg_dict.get("generate_config")})
+            config_dict.update({"device":
+                                arg_dict.get("generate_config")})
 
         for key in config_dict.keys():
             if arg_dict.get(key) is not None:
