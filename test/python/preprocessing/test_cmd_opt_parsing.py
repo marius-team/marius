@@ -1,20 +1,25 @@
 import unittest
 import argparse
-from pathlib import Path
+import subprocess
 import shutil
+from pathlib import Path
 from tools.preprocess import setArgs
 from tools.preprocess import parseArgs
+
 
 class TestCmdOptParser(unittest.TestCase):
     """
     Tests for functions parsing command line arguments
     """
     cmd_args = [
-            ["wn18", "./output_dir", "--generate_config", "--num_partitions", "5"],
+            ["wn18", "./output_dir", "--generate_config",
+             "--num_partitions", "5"],
             ["wn18", "./output_dir", "-gc", "GPU"],
-            ["wn18", "./output_dir", "-gc", "CPU", "--model.embedding_size=400",
-                "--training.batch_size=51200", "--training.num_epochs=23"],
-            ["wn18", "./output_dir", "-gc", "GPU", "--general.embedding_size=400"],      
+            ["wn18", "./output_dir", "-gc", "CPU",
+             "--model.embedding_size=400", "--training.batch_size=51200",
+             "--training.num_epochs=23"],
+            ["wn18", "./output_dir", "-gc", "GPU",
+             "--general.embedding_size=400"],
             ["wn18", "./output_dir", "--general.embedding_size=200"],
             ["wn18", "./output_dir"],
             ["wn18"],
@@ -22,7 +27,9 @@ class TestCmdOptParser(unittest.TestCase):
             ["wn18", "./output_dir", "--gc", "--model.decoder"],
             [],
             ["wn18", "./output_dir", "multi_cpu"],
-            ["wn18", "./output_dir", "--gc", "--storage.edge_bucket_ordering=EliminationCus"]
+            ["wn18", "./output_dir", "--gc",
+             "--storage.edge_bucket_ordering=EliminationCus"],
+            ["python3", "./tools/preprocess.py", "wn18", "./output_dir", "-gc"]
         ]
 
     def tearDown(self):
@@ -67,15 +74,16 @@ class TestCmdOptParser(unittest.TestCase):
 
     def test_unmatching_training_config(self):
         """
-        Check if exception is thrown when config with unmatching section is given
+        Check if exception is thrown when config with unmatching
+            section is given
         """
         parser, config_dict = setArgs()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[3])
-    
+
     def test_inconsistent_training_config(self):
         """
-        Check if excpetion is thrown if trainig config is specified without 
+        Check if excpetion is thrown if trainig config is specified without
             --generate_config being specified
         """
         parser, config_dict = setArgs()
@@ -85,14 +93,14 @@ class TestCmdOptParser(unittest.TestCase):
 
     def test_required_args(self):
         """
-        Check if args.generate_config is set correctly if --generate_config 
+        Check if args.generate_config is set correctly if --generate_config
             is not specified
         """
         parser, config_dict = setArgs()
         args = parser.parse_args(self.cmd_args[5])
         config_dict, arg_dict = parseArgs(config_dict, args)
-        self.assertTrue(arg_dict.get("generate_config") == None)
-    
+        self.assertTrue(arg_dict.get("generate_config") is None)
+
     def test_required_arg_omitted(self):
         """
         Check if exception is thrown when output_directory is given
@@ -100,10 +108,10 @@ class TestCmdOptParser(unittest.TestCase):
         parser, config_dict = setArgs()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[6])
-        
+
     def test_training_config_missing(self):
         """
-        Check if exception is thrown when config name is missing and 
+        Check if exception is thrown when config name is missing and
             value is given
         """
         parser, config_dict = setArgs()
@@ -133,7 +141,7 @@ class TestCmdOptParser(unittest.TestCase):
         parser, config_dict = setArgs()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[10])
-    
+
     def test_invalid_training_config_value(self):
         """
         Check if exception is thrown if invalid config value is given
@@ -142,57 +150,9 @@ class TestCmdOptParser(unittest.TestCase):
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[11])
 
-
-    # def test_parseArgs(self):
-    #     """
-    #     Check if command line arguments are parsed correctly
-    #     """
-        
-
-    #     args = []
-    #     for i in range(len(cmd_args)):
-    #         if i > len(cmd_args) - 4: continue
-    #         a = cmd_args[i]
-    #         arg = parser.parse_args(a)
-    #         args.append(arg)
-        
-    #     for i in range(len(cmd_args)):
-    #         devices_idx = -1
-    #         if i < 4:
-    #             devices_idx, dicts, arg_dict = parseArgs(devices, dicts, args[i], opts)
-    #             arg_dict = vars(args[i])
-            
-    #         if i == 0:
-    #             self.assertTrue(arg_dict.get("dataset") == "wn18")
-    #             self.assertTrue(devices_idx == 1)
-    #             self.assertTrue(args[i].num_partitions  == 5)
-    #             self.assertTrue(arg_dict.get("config_dir") == "./config_output_dir")
-    #         elif i == 1:
-    #             self.assertTrue(devices_idx == 2)
-    #         elif i == 2:
-    #             self.assertTrue(devices_idx == 2)
-    #             self.assertTrue(arg_dict.get("general.embedding_size") == "400")
-    #         elif i == 3:
-    #             self.assertTrue(devices_idx == 0)
-    #             self.assertTrue(arg_dict.get("model.embedding_size") == "400")
-    #             self.assertTrue(arg_dict.get("training.batch_size") == "51200")
-    #             self.assertTrue(arg_dict.get("training.num_epochs") == "23")
-    #         elif i == 4:
-    #             with self.assertRaises(RuntimeError):
-    #                 devices_idx, dicts, arg_dict = parseArgs(devices, dicts, args[i], opts)
-    #         elif i == 5:
-    #             with self.assertRaises(AssertionError):
-    #                 devices_idx, dicts, arg_dict = parseArgs(devices, dicts, args[i], opts)
-    #         elif i == 6:
-    #             with self.assertRaises(RuntimeError):
-    #                 devices_idx, dicts, arg_dict = parseArgs(devices, dicts, args[i], opts)
-    #         elif i == 7:
-    #             with self.assertRaises(SystemExit):
-    #                 arg = parser.parse_args(cmd_args[i])
-    #         elif i == 8:
-    #             with self.assertRaises(SystemExit):
-    #                 arg = parser.parse_args(cmd_args[i])
-    #         elif i == 9:
-    #             with self.assertRaises(SystemExit):
-    #                 arg = parser.parse_args(cmd_args[i])
-    #
+    def test_output(self):
+        """
+        Check if config file is generated into the correct directory
+        """
+        subprocess.run(self.cmd_args[12])
+        self.assertTrue(Path("./output_dir/wn18_gpu.ini").exists())

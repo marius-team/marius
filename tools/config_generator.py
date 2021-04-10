@@ -1,17 +1,18 @@
 from pathlib import Path
 import argparse
 
-DEFAULT_CONFIG_FILE="./tools/config_templates/default_configs.txt"
+DEFAULT_CONFIG_FILE = "./tools/config_templates/default_configs.txt"
+
 
 def output_config(config_dict, output_dir):
     device = config_dict.get("device")
     ds_name = config_dict.get("dataset")
 
-    file = Path(output_dir) / Path(str(ds_name) + "_" + device.lower() + ".ini")
-    sections = ["model", "storage", "training", "training_pipeline", 
-            "evaluation", "evaluation_pipeline", "path", "reporting"]
+    file = Path(output_dir) / Path(str(ds_name) + "_" +
+                                   device.lower() + ".ini")
+    sections = ["model", "storage", "training", "training_pipeline",
+                "evaluation", "evaluation_pipeline", "path", "reporting"]
     opts = list(config_dict.keys())
-    
 
     with open(file, "w+") as f:
         f.write("[general]\n")
@@ -22,52 +23,53 @@ def output_config(config_dict, output_dir):
         f.write("num_relations=" + config_dict.get("num_relations") + "\n")
         f.write("num_valid=" + config_dict.get("num_valid") + "\n")
         f.write("num_test=" + config_dict.get("num_test") + "\n")
-        f.write("experiment_name=" + config_dict.get("general.experiment_name") + "\n")
+        f.write("experiment_name=" +
+                config_dict.get("general.experiment_name") + "\n")
 
         for sec in sections:
             f.write("\n[" + sec + "]\n")
             for key in opts:
                 if key.split(".")[0] == sec:
-                    f.write(key.split(".")[1] + "=" + config_dict.get(key) + "\n")   
+                    f.write(key.split(".")[1] +
+                            "=" + config_dict.get(key) + "\n")
 
 
 def readTemplate(file):
     with open(file, "r") as f:
         lines = f.readlines()
 
-    keys = []   
+    keys = []
     values = []
     valid_dict = {}
-    for l in lines:
-        l = l.split("=")
-        l[1] = l[1].rstrip()
-        keys.append(l[0])
-        sub_line = l[1].split("*")
+    for line in lines:
+        line = line.split("=")
+        line[1] = line[1].rstrip()
+        keys.append(line[0])
+        sub_line = line[1].split("*")
         values.append(sub_line[0])
         if len(sub_line) > 1:
-            valid_dict.update({l[0]: [sub_line[1:]]})
-        
-
+            valid_dict.update({line[0]: [sub_line[1:]]})
     config_dict = dict(zip(keys, values))
-    
+
     return config_dict, valid_dict
 
+
 def updateParam(config_dict, arg_dict):
-    if arg_dict.get("generate_config") == None:
+    if arg_dict.get("generate_config") is None:
         for key in config_dict:
-            if arg_dict.get(key) != None:
+            if arg_dict.get(key) is not None:
                 raise RuntimeError(
                     "Please specify --generate_config when \
                             specifying generating options"
                 )
     else:
-        if arg_dict.get("generate_config") == None:
+        if arg_dict.get("generate_config") is None:
             config_dict.update({"device": "GPU"})
         else:
             config_dict.update({"device": arg_dict.get("generate_config")})
 
         for key in config_dict.keys():
-            if arg_dict.get(key) != None:
+            if arg_dict.get(key) is not None:
                 config_dict.update({key: arg_dict.get(key)})
 
     if config_dict.get("general.random_seed") == "*":
@@ -75,5 +77,6 @@ def updateParam(config_dict, arg_dict):
 
     return config_dict
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     print("This is a config generator.")
