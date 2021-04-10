@@ -3,8 +3,8 @@ file(GLOB SRCS *.cpp)
 ADD_EXECUTABLE(integration ${SRCS})
 
 TARGET_LINK_LIBRARIES(integration
-        marius
-        libgtest
+        ${PROJECT_NAME}
+        gtest gtest_main
         )
 
 add_test(NAME integration COMMAND integration)

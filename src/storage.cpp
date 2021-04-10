@@ -314,7 +314,7 @@ void FlatFile::shuffle() {
     if (edge_bucket_sizes_.empty()) {
         unload(true);
         mem_load();
-        auto opts = torch::TensorOptions().dtype(dtype_).device(data_.device());
+        auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
         auto perm = torch::randperm(dim0_size_, opts);
         data_.copy_(data_.index_select(0, perm));
         mem_unload(true);
@@ -322,7 +322,7 @@ void FlatFile::shuffle() {
         unload(true);
         mem_load();
         int64_t start = 0;
-        auto opts = torch::TensorOptions().dtype(dtype_).device(data_.device());
+        auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
         for (auto itr = edge_bucket_sizes_.begin(); itr + 1 != edge_bucket_sizes_.end(); itr++) {
             torch::Tensor edge_bucket = data_.narrow(0, start, *itr);
             edge_bucket.copy_(edge_bucket.index_select(0, torch::randperm(edge_bucket.size(0), opts)));
