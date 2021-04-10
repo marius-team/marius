@@ -11,24 +11,27 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
-import torch
+#import torch
 
 from config_generator import output_config
-from config_generator import output_bash_cmds
 from config_generator import readTemplate
 from config_generator import updateParam
+from config_generator import DEFAULT_CONFIG_FILE
 from csv_converter import general_parser
 
 
+
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
-    download_path = download_file("https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz", output_dir)
+    LIVE_JOURNAL_URL="https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
+    download_path = download_file(LIVE_JOURNAL_URL, output_dir)
     extract_file(download_path)
     return general_parser([str(Path(output_dir) / Path("soc-LiveJournal1.txt"))], ["sd"],
                                                  [output_dir], num_partitions=num_partitions, dataset_split=split)
 
 
 def fb15k(output_dir, num_partitions=1):
-    download_path = download_file("https://dl.fbaipublicfiles.com/starspace/fb15k.tgz", output_dir)
+    FB15K_URL = "https://dl.fbaipublicfiles.com/starspace/fb15k.tgz"
+    download_path = download_file(FB15K_URL, output_dir)
     extract_file(download_path)
     for file in (output_dir / Path("FB15k")).iterdir():
         file.rename(output_dir / Path(file.name))
@@ -41,7 +44,8 @@ def fb15k(output_dir, num_partitions=1):
 
 
 def twitter(output_dir, num_partitions=1, split=(.05, .05)):
-    download_path = download_file("https://snap.stanford.edu/data/twitter-2010.txt.gz", output_dir)
+    TWITTER_URL = "https://snap.stanford.edu/data/twitter-2010.txt.gz"
+    download_path = download_file(TWITTER_URL, output_dir)
     extract_file(download_path)
 
     return general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))], ["srd"],
@@ -49,7 +53,8 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def freebase86m(output_dir, num_partitions=1):
-    download_path = download_file("https://data.dgl.ai/dataset/Freebase.zip", output_dir)
+    FREEBASE86M_URL = "https://data.dgl.ai/dataset/Freebase.zip"
+    download_path = download_file(FREEBASE86M_URL, output_dir)
     extract_file(download_path)
     for file in (output_dir / Path("Freebase")).iterdir():
         file.rename(output_dir / Path(file.name))
@@ -61,21 +66,22 @@ def freebase86m(output_dir, num_partitions=1):
 
 
 def wn18(output_dir, num_partitions=1):
-    download_path = download_file("https://everest.hds.utc.fr/lib/exe/fetch.php?media=en:wordnet-mlj12.tar.gz",
-                                  output_dir)
+    WN18_URL = "https://everest.hds.utc.fr/lib/exe/fetch.php?media=en:wordnet-mlj12.tar.gz"
+    download_path = download_file(WN18_URL, output_dir)
     extract_file(download_path)
     for file in (output_dir / Path("wordnet-mlj12")).iterdir():
         file.rename(output_dir / Path(file.name))
     (output_dir / Path("wordnet-mlj12")).rmdir()
 
     return general_parser([str(Path(output_dir) / Path("wordnet-mlj12-train.txt")),
-                                                  str(Path(output_dir) / Path("wordnet-mlj12-valid.txt")),
-                                                  str(Path(output_dir) / Path("wordnet-mlj12-test.txt"))], ["srd"],
-                                                 [output_dir], num_partitions=num_partitions)
+                            str(Path(output_dir) / Path("wordnet-mlj12-valid.txt")),
+                            str(Path(output_dir) / Path("wordnet-mlj12-test.txt"))], ["srd"],
+                            [output_dir], num_partitions=num_partitions)
 
 
 def fb15k_237(output_dir, num_partitions=1):
-    download_path = download_file("https://data.deepai.org/FB15K-237.2.zip", output_dir)
+    FB15K_237 = "https://data.deepai.org/FB15K-237.2.zip"
+    download_path = download_file(FB15K_237, output_dir)
     extract_file(download_path)
     for file in (output_dir / Path("Release")).iterdir():
         file.rename(output_dir / Path(file.name))
@@ -87,7 +93,8 @@ def fb15k_237(output_dir, num_partitions=1):
 
 
 def wn18rr(output_dir, num_partitions=1):
-    download_path = download_file("https://data.dgl.ai/dataset/wn18rr.zip", output_dir)
+    WN18RR_URL = "https://data.dgl.ai/dataset/wn18rr.zip"
+    download_path = download_file(WN18RR_URL, output_dir)
     extract_file(download_path)
     for file in (output_dir / Path("wn18rr")).iterdir():
         file.rename(output_dir / Path(file.name))
@@ -99,49 +106,51 @@ def wn18rr(output_dir, num_partitions=1):
 
 
 def codex_s(output_dir, num_partitions=1):
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/train.txt", output_dir)
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/valid.txt", output_dir)
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/test.txt", output_dir)
+    CODEX_S_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/train.txt"
+    CODEX_S_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/valid.txt"
+    CODEX_S_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/test.txt"
+
+    download_path = download_file(CODEX_S_TRAIN_URL, output_dir)
+    download_path = download_file(CODEX_S_VALID_URL, output_dir)
+    download_path = download_file(CODEX_S_TEST_URL, output_dir)
 
     return general_parser([str(Path(output_dir) / Path("train.txt")),
-                                                  str(Path(output_dir) / Path("valid.txt")),
-                                                  str(Path(output_dir) / Path("test.txt"))],
-                                                 ["srd"], [output_dir], num_partitions=num_partitions)
+                            str(Path(output_dir) / Path("valid.txt")),
+                            str(Path(output_dir) / Path("test.txt"))],
+                            ["srd"], [output_dir], num_partitions=num_partitions)
 
 
 def codex_m(output_dir, num_partitions=1):
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/train.txt", output_dir)
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/valid.txt", output_dir)
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/test.txt", output_dir)
+    CODEX_M_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/train.txt"
+    CODEX_M_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/valid.txt"
+    CODEX_M_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/test.txt"
+    download_path = download_file(CODEX_M_TRAIN_URL, output_dir)
+    download_path = download_file(CODEX_M_VALID_URL, output_dir)
+    download_path = download_file(CODEX_M_TEST_URL, output_dir)
 
     return general_parser([str(Path(output_dir) / Path("train.txt")),
-                                                  str(Path(output_dir) / Path("valid.txt")),
-                                                  str(Path(output_dir) / Path("test.txt"))],
-                                                 ["srd"], [output_dir], num_partitions=num_partitions)
+                            str(Path(output_dir) / Path("valid.txt")),
+                            str(Path(output_dir) / Path("test.txt"))],
+                            ["srd"], [output_dir], num_partitions=num_partitions)
 
 
 def codex_l(output_dir, num_partitions=1):
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/train.txt", output_dir)
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/valid.txt", output_dir)
-    download_path = download_file(
-        "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/test.txt", output_dir)
+    CODEX_L_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/train.txt"
+    CODEX_L_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/valid.txt"
+    CODEX_L_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/test.txt"
+    download_path = download_file(CODEX_L_TRAIN_URL, output_dir)
+    download_path = download_file(CODEX_L_VALID_URL, output_dir)
+    download_path = download_file(CODEX_L_TEST_URL, output_dir)
 
     return general_parser([str(Path(output_dir) / Path("train.txt")),
-                                                  str(Path(output_dir) / Path("valid.txt")),
-                                                  str(Path(output_dir) / Path("test.txt"))],
-                                                 ["srd"], [output_dir], num_partitions=num_partitions)
+                            str(Path(output_dir) / Path("valid.txt")),
+                            str(Path(output_dir) / Path("test.txt"))],
+                            ["srd"], [output_dir], num_partitions=num_partitions)
 
 
 def drkg(output_dir, num_partitions=1, split=(.05, .05)):
-    download_path = download_file("https://dgl-data.s3-us-west-2.amazonaws.com/dataset/DRKG/drkg.tar.gz", output_dir)
+    DRKG_URL = "https://dgl-data.s3-us-west-2.amazonaws.com/dataset/DRKG/drkg.tar.gz"
+    download_path = download_file(DRKG_URL, output_dir)
     extract_file(download_path)
 
     return general_parser([str(Path(output_dir) / Path("drkg.tsv"))], ["srd"], [output_dir],
@@ -149,8 +158,8 @@ def drkg(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
-    download_path = download_file("https://github.com/hetio/hetionet/raw/master/hetnet/tsv/hetionet-v1.0-edges.sif.gz",
-                                  output_dir)
+    HETIONET_URL = "https://github.com/hetio/hetionet/raw/master/hetnet/tsv/hetionet-v1.0-edges.sif.gz"
+    download_path = download_file(HETIONET_URL, output_dir)
     extract_file(download_path)
 
     return general_parser([str(Path(output_dir) / Path("hetionet-v1.0-edges.sif"))], ["srd"],
@@ -158,8 +167,8 @@ def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def kinships(output_dir, num_partitions=1, split=(.05, .05)):
-    download_path = download_file("https://archive.ics.uci.edu/ml/machine-learning-databases/kinship/kinship.data",
-                                  output_dir)
+    KINSHIPS_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/kinship/kinship.data"
+    download_path = download_file(KINSHIPS_URL, output_dir)
     edges = []
     pattern = re.compile("^(?P<rel>[a-z]+)\((?P<n1>[A-Za-z]+).{2}(?P<n2>[A-Za-z]+)\)\n$")
 
@@ -184,7 +193,8 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def openbiolink_hq(output_dir, num_partitions=1):
-    download_path = download_file("https://zenodo.org/record/3834052/files/HQ_DIR.zip?download=1", output_dir)
+    OPENBIOLINK_HQ_URL = "https://zenodo.org/record/3834052/files/HQ_DIR.zip?download=1"
+    download_path = download_file(OPENBIOLINK_HQ_URL, output_dir)
     extract_file(download_path)
 
     return general_parser(
@@ -194,7 +204,8 @@ def openbiolink_hq(output_dir, num_partitions=1):
         ["srd"], [output_dir], num_partitions=num_partitions, num_line_skip=0)
 
 def openbiolink_lq(output_dir, num_partitions=1):
-    download_path = download_file("https://samwald.info/res/OpenBioLink_2020_final/ALL_DIR.zip", output_dir)
+    OPENBIOLINK_LQ_URL = "https://samwald.info/res/OpenBioLink_2020_final/ALL_DIR.zip"
+    download_path = download_file(OPENBIOLINK_LQ_URL, output_dir)
     extract_file(download_path)
 
     return general_parser(
@@ -205,7 +216,8 @@ def openbiolink_lq(output_dir, num_partitions=1):
 
 
 def ogbl_biokg(output_dir, num_partitions=1):
-    download_path = download_file("https://snap.stanford.edu/ogb/data/linkproppred/biokg.zip", output_dir)
+    OGBL_BIOKG_URL = "https://snap.stanford.edu/ogb/data/linkproppred/biokg.zip"
+    download_path = download_file(OGBL_BIOKG_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("biokg/split/random/train.pt")),
              str(Path(output_dir) / Path("biokg/split/random/valid.pt")),
@@ -215,7 +227,8 @@ def ogbl_biokg(output_dir, num_partitions=1):
 
 
 def ogbl_ppa(output_dir, num_partitions=1):
-    download_path = download_file("https://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip", output_dir)
+    OGBL_PPA_URL = "https://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip"
+    download_path = download_file(OGBL_PPA_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("ppassoc/split/throughput/train.pt")),
              str(Path(output_dir) / Path("ppassoc/split/throughput/valid.pt")),
@@ -225,7 +238,8 @@ def ogbl_ppa(output_dir, num_partitions=1):
 
 
 def ogbl_ddi(output_dir, num_partitions=1):
-    download_path = download_file("https://snap.stanford.edu/ogb/data/linkproppred/ddi.zip", output_dir)
+    OGBL_DDI_URL = "https://snap.stanford.edu/ogb/data/linkproppred/ddi.zip"
+    download_path = download_file(OGBL_DDI_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("ddi/split/target/train.pt")),
              str(Path(output_dir) / Path("ddi/split/target/valid.pt")),
@@ -235,7 +249,8 @@ def ogbl_ddi(output_dir, num_partitions=1):
 
 
 def ogbl_collab(output_dir, num_partitions=1):
-    download_path = download_file("https://snap.stanford.edu/ogb/data/linkproppred/collab.zip", output_dir)
+    OGBL_COLLAB_URL = "https://snap.stanford.edu/ogb/data/linkproppred/collab.zip"
+    download_path = download_file(OGBL_COLLAB_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("collab/split/time/train.pt")),
              str(Path(output_dir) / Path("collab/split/time/valid.pt")),
@@ -245,7 +260,8 @@ def ogbl_collab(output_dir, num_partitions=1):
 
 
 def ogbn_arxiv(output_dir, num_partitions=1):
-    download_path = download_file("http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip	", output_dir)
+    OGBN_ARXIV_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip	"
+    download_path = download_file(OGBN_ARXIV_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("arxiv/split/time/train.csv.gz")),
              str(Path(output_dir) / Path("arxiv/split/time/valid.csv.gz")),
@@ -256,7 +272,8 @@ def ogbn_arxiv(output_dir, num_partitions=1):
 
 
 def ogbn_proteins(output_dir, num_partitions=1):
-    download_path = download_file("http://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip", output_dir)
+    OGBN_PROTEINS_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip"
+    download_path = download_file(OGBN_PROTEINS_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("proteins/split/species/train.csv.gz")),
              str(Path(output_dir) / Path("proteins/split/species/valid.csv.gz")),
@@ -266,7 +283,8 @@ def ogbn_proteins(output_dir, num_partitions=1):
     return parse_ogbn(files, output_dir, num_partitions=num_partitions)
 
 def ogbn_products(output_dir, num_partitions=1):
-    download_path = download_file("http://snap.stanford.edu/ogb/data/nodeproppred/products.zip", output_dir)
+    OGBN_PRODUCTS_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/products.zip"
+    download_path = download_file(OGBN_PRODUCTS_URL, output_dir)
     extract_file(download_path)
     files = [str(Path(output_dir) / Path("products/split/sales_ranking/train.csv.gz")),
              str(Path(output_dir) / Path("products/split/sales_ranking/valid.csv.gz")),
@@ -297,35 +315,35 @@ def parse_ogbn(files, output_dir, num_partitions=1):
                                                  num_partitions=num_partitions)
     return stats, num_nodes, num_edges
 
-def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
-    if has_rel == True:
-        train_idx = torch.load(str(files[0]))
-        valid_idx = torch.load(str(files[1]))
-        test_idx = torch.load(str(files[2]))
-        train_list = np.array([train_idx.get("head"), train_idx.get("relation"), train_idx.get("tail")]).T
-        valid_list = np.array([valid_idx.get("head"), valid_idx.get("relation"), valid_idx.get("tail")]).T
-        test_list = np.array([test_idx.get("head"), test_idx.get("relation"), test_idx.get("tail")]).T
-    else:
-        train_list = torch.load(files[0]).get("edge")
-        valid_list = torch.load(files[1]).get("edge")
-        test_list = torch.load(files[2]).get("edge")
+# def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
+#     if has_rel == True:
+#         train_idx = torch.load(str(files[0]))
+#         valid_idx = torch.load(str(files[1]))
+#         test_idx = torch.load(str(files[2]))
+#         train_list = np.array([train_idx.get("head"), train_idx.get("relation"), train_idx.get("tail")]).T
+#         valid_list = np.array([valid_idx.get("head"), valid_idx.get("relation"), valid_idx.get("tail")]).T
+#         test_list = np.array([test_idx.get("head"), test_idx.get("relation"), test_idx.get("tail")]).T
+#     else:
+#         train_list = torch.load(files[0]).get("edge")
+#         valid_list = torch.load(files[1]).get("edge")
+#         test_list = torch.load(files[2]).get("edge")
 
-    np.savetxt(str(Path(output_dir) / Path("train.txt")), train_list, fmt="%s", delimiter="\t", newline="\n")
-    np.savetxt(str(Path(output_dir) / Path("valid.txt")), valid_list, fmt="%s", delimiter="\t", newline="\n")
-    np.savetxt(str(Path(output_dir) / Path("test.txt")), test_list, fmt="%s", delimiter="\t", newline="\n")
-    print("Conversion completed.")
+#     np.savetxt(str(Path(output_dir) / Path("train.txt")), train_list, fmt="%s", delimiter="\t", newline="\n")
+#     np.savetxt(str(Path(output_dir) / Path("valid.txt")), valid_list, fmt="%s", delimiter="\t", newline="\n")
+#     np.savetxt(str(Path(output_dir) / Path("test.txt")), test_list, fmt="%s", delimiter="\t", newline="\n")
+#     print("Conversion completed.")
 
-    if has_rel == True:
-        stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("train.txt")),
-                                                      str(Path(output_dir) / Path("valid.txt")),
-                                                      str(Path(output_dir) / Path("test.txt"))], ["srd"],
-                                                     [output_dir], num_partitions=num_partitions)
-    else:
-        stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("train.txt")),
-                                                      str(Path(output_dir) / Path("valid.txt")),
-                                                      str(Path(output_dir) / Path("test.txt"))], ["sd"],
-                                                     [output_dir], num_partitions=num_partitions)
-    return stats, num_nodes, num_edges
+#     if has_rel == True:
+#         stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("train.txt")),
+#                                                       str(Path(output_dir) / Path("valid.txt")),
+#                                                       str(Path(output_dir) / Path("test.txt"))], ["srd"],
+#                                                      [output_dir], num_partitions=num_partitions)
+#     else:
+#         stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("train.txt")),
+#                                                       str(Path(output_dir) / Path("valid.txt")),
+#                                                       str(Path(output_dir) / Path("test.txt"))], ["sd"],
+#                                                      [output_dir], num_partitions=num_partitions)
+#     return stats, num_nodes, num_edges
 
 
 def download_file(url, output_dir):
@@ -393,62 +411,50 @@ def extract_file(filepath):
 
 
 def setArgs():
-    parser = argparse.ArgumentParser(description='Preprocess Datasets')
+    parser = argparse.ArgumentParser(description='Preprocess Datasets', prog='preprocessor',
+                usage='%(prog)s [-h] [--generate_config [device]] [--<section>.<option> [value]] \
+                \ndataset output_directory')
     parser.add_argument('dataset', metavar='dataset', type=str, help='Dataset to preprocess')
     parser.add_argument('output_directory', metavar='output_directory', type=str, help='Directory to put graph data')
-    parser.add_argument('--config_dir', '-cfd', metavar='output_directory', type=str, help='Directory to put configuration generated')
     parser.add_argument('--num_partitions', metavar='num_partitions', required=False, type=int, default=1,
                         help='Number of partitions to split the edges into')
     parser.add_argument('--generate_config', '-gc', metavar='generate_config', 
-                        choices=["GPU", "CPU", "Multi_GPU"], 
+                        choices=["GPU", "CPU"], 
                         nargs = '?', const="GPU",
                         help='Generates a single-GPU/single-CPU/multi-GPU training configuration file by default')
 
-    cpu_dict = readTemplate("./tools/cpu_default_config.txt")
-    gpu_dict = readTemplate("./tools/gpu_default_config.txt")
-    mgpu_dict = readTemplate("./tools/mult_gpu_default_config.txt")
+    config_dict, valid_dict = readTemplate(DEFAULT_CONFIG_FILE)
 
-    opts = set()
-    opts = opts.union(cpu_dict, gpu_dict, mgpu_dict)
+    for key in list(config_dict.keys())[1:]:
+        if valid_dict.get(key) != None:
+            parser.add_argument(str("--" + key), metavar=key, 
+                type = str, choices=valid_dict.get(key))
+        else:
+            parser.add_argument(str("--" + key), metavar=key, type = str)
 
-    for opt in opts:
-        parser.add_argument(str("--" + opt), metavar=opt, type = str)
+    return parser, config_dict
 
-    return parser, opts, cpu_dict, gpu_dict, mgpu_dict
-
-def prepareFiles(output_directory, config_dir):
+def setUpFiles(output_directory):
     try:
-        fileCreated = 0
         if not Path(output_directory).exists():
             Path(output_directory).mkdir(parents=False, exist_ok=False)
-            fileCreated = 1
-        if config_dir != None:
-            if not Path(config_dir).exists():
-                Path(config_dir).mkdir(parents=False, exist_ok=False)
-                fileCreated = 2
     except FileExistsError:
         print("Directory already exists.")
     except FileNotFoundError:
-        if 1 == fileCreated:
-            print("Incorrect parent path given for config_dir.")
-        else:
-            print("Incorrect parent path given for output_dir.")
+            print("Incorrect parent path given for output directory.")
 
-def parseArgs(devices, dicts, args, opts):
+def parseArgs(config_dict, args):
     arg_dict = vars(args)
-    device_idx, dicts = updateParam(devices, dicts, args, opts, arg_dict)
-    if args.generate_config == None:
-        assert(args.config_dir == None), "Must specify --generate_config when setting --config_dir."
-    prepareFiles(args.output_directory, args.config_dir)
+    config_dict = updateParam(config_dict, arg_dict)
+    setUpFiles(args.output_directory)
 
-    return device_idx, dicts, arg_dict
+    config_dict.update({"dataset": arg_dict.get("dataset")})
+    return config_dict, arg_dict
 
 if __name__ == "__main__":
-    parser, opts, cpu_dict, gpu_dict, mgpu_dict = setArgs()
+    parser, config_dict = setArgs()
     args = parser.parse_args()
-    devices = ["CPU", "GPU", "Multi_GPU"]
-    dicts = [cpu_dict, gpu_dict, mgpu_dict]
-    device_idx, dicts, arg_dict = parseArgs(devices, dicts, args, opts)
+    config_dict, arg_dict = parseArgs(config_dict, args)
 
     print(args.dataset)
 
@@ -483,23 +489,19 @@ if __name__ == "__main__":
         raise RuntimeError("Unrecognized dataset.")
 
     if args.generate_config != None:
-        if args.config_dir == None:
-            dir = args.output_directory
-        else:
-            dir = args.config_dir
+        dir = args.output_directory
+        config_dict.update({"num_train": str(int(stats[0]))})
+        config_dict.update({"num_nodes": str(int(num_nodes))})
+        config_dict.update({"num_relations": str(int(num_relations))})
+        config_dict.update({"num_valid": str(int(stats[1]))})    
+        config_dict.update({"num_test":  str(int(stats[2]))})
+        config_dict.update({"path.train_edges": str(dir.strip("/") + "/train_edges.pt")})
+        config_dict.update({"path.train_edges_partitions": str(dir.strip("/") + "/train_edges_partitions.txt")})
+        config_dict.update({"path.valid_edges": str(dir.strip("/") + "/valid_edges.pt")})
+        config_dict.update({"path.test_edges": str(dir.strip("/") + "/test_edges.pt")})
+        config_dict.update({"path.node_labels": str(dir.strip("/") + "/node_mapping.txt")})
+        config_dict.update({"path.relation_labels": str(dir.strip("/") + "/rel_mapping.txt")})
+        config_dict.update({"path.node_ids": str(dir.strip("/") + "/node_mapping.bin")})
+        config_dict.update({"path.relation_ids": str(dir.strip("/") + "/rel_mapping.bin")})
 
-        if device_idx == 0:
-            dicts[device_idx].update({"device": "CPU"})    
-        elif device_idx == 1:
-            dicts[device_idx].update({"device": "GPU"})
-        elif device_idx == 2:
-            dicts[device_idx].update({"device": "multi-GPU"})
-
-        dicts[device_idx].update({"dataset": arg_dict.get("dataset")})
-        dicts[device_idx].update({"num_train": str(int(stats[0]))})
-        dicts[device_idx].update({"num_nodes": str(int(num_nodes))})
-        dicts[device_idx].update({"num_relations": str(int(num_relations))})
-        dicts[device_idx].update({"num_valid": str(int(stats[1]))})    
-        dicts[device_idx].update({"num_test":  str(int(stats[2]))})
-        
-        output_config(dicts[device_idx], dir)
+        output_config(config_dict, dir)
