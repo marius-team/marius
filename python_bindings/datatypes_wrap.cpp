@@ -68,20 +68,4 @@ void init_datatypes(py::module &m) {
         .value("ComplexHadamard", RelationOperatorType::ComplexHadamard)
         .value("Hadamard", RelationOperatorType::Hadamard)
         .value("NoOp", RelationOperatorType::NoOp);
-
-    #ifdef MARIUS_CUDA
-        #include <ATen/cuda/CUDAContext.h>
-        #include <c10/cuda/CUDAStream.h>
-        #include <c10/cuda/CUDAGuard.h>
-        #include <ATen/cuda/Exceptions.h>
-        #include <c10/util/Exception.h>
-        #include <ATen/cuda/CUDAEvent.h>
-        typedef at::cuda::CUDAEvent CudaEvent;
-        py::class_<CudaEvent>(m, "CudaEvent")
-            .def(py::init<int>(), py::arg("val"))
-            .def("start", &CudaEvent::start)
-            .def("record", &CudaEvent::record)
-            .def("synchronize", &CudaEvent::synchronize)
-            .def("elapsed_time", &CudaEvent::elapsed_time)
-    #endif
 }
