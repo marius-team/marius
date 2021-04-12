@@ -10,6 +10,7 @@
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <filesystem>
+#include <INIReader.h>
 
 using std::string;
 using std::mutex;

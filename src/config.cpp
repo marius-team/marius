@@ -134,7 +134,9 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
     spdlog::level::level_enum log_level;
     string s_log_level;
 
-    std::ifstream config_fstream(config_path.c_str());
+    INIReader reader(config_path);
+
+    std::cout << reader.Sections() << '\n';
 //    po::options_description config_options("Configuration");
 //    po::variables_map variables_map;
 //

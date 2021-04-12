@@ -14,6 +14,7 @@ endfunction(initialize_submodule)
 initialize_submodule(pybind11)
 initialize_submodule(spdlog)
 initialize_submodule(googletest)
+initialize_submodule(inih)
 
 add_subdirectory(googletest EXCLUDE_FROM_ALL)
 add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
