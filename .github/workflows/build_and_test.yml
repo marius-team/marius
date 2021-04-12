@@ -31,7 +31,7 @@ jobs:
       if: startsWith(runner.os, 'Linux')
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.cfg') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
 
@@ -39,7 +39,7 @@ jobs:
       if: startsWith(runner.os, 'macOS')
       with:
         path: ~/Library/Caches/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.cfg') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
     
@@ -102,3 +102,58 @@ jobs:
       shell: bash
       # Run python tests with tox
       run: tox
+
+
+  packaging:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.7z",
+            os: ubuntu-latest,
+            cc: "gcc", cxx: "g++"
+          }
+          - {
+            name: "macOS Latest Clang", artifact: "macOS.7z",
+            os: macos-latest,
+            cc: "clang", cxx: "clang++"
+          }
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Linux')
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'macOS')
+        with:
+          path: ~/Library/Caches/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Torch
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run:   |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+               python3 -m pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+              python3 -m pip install torch==1.7.1
+          else
+               echo "$RUNNER_OS not supported"
+               exit 1
+          fi
+
+      - name: Run Pip Install
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: pip install .
