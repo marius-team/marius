@@ -156,4 +156,4 @@ jobs:
       - name: Run Pip Install
         working-directory: ${{github.workspace}}
         shell: bash
-        run: pip install .
+        run: python3 -m pip install .
