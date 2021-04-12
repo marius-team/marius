@@ -66,7 +66,11 @@ class CMakeBuild(build_ext):
         print()  # Add an empty line for cleaner output
 
 
-setup(
-    ext_modules=[CMakeExtension('marius._pymarius')],
-    cmdclass=dict(build_ext=CMakeBuild),
-)
+only_python = os.environ.get("MARIUS_ONLY_PYTHON", None)
+if only_python:
+    setup()
+else:
+    setup(
+        ext_modules=[CMakeExtension('marius._pymarius')],
+        cmdclass=dict(build_ext=CMakeBuild),
+    )
