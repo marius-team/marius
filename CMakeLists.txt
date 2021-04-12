@@ -27,7 +27,6 @@ if(NOT IS_ABSOLUTE ${MARIUS_TORCH_DIR})
 endif()
 
 set(Torch_DIR ${MARIUS_TORCH_DIR}/share/cmake/Torch)
-set(Boost_USE_MULTITHREADED TRUE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 if(${USE_CUDA})
@@ -70,7 +69,6 @@ if (EXISTS ${project_BINDINGS_DIR})
 endif ()
 
 add_subdirectory(${project_THIRD_PARTY_DIR})
-set_property(TARGET Boost_program_options PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET spdlog PROPERTY POSITION_INDEPENDENT_CODE ON)
 include_directories(${project_INCLUDE_DIR})
 include_directories(${TORCH_INCLUDE_DIRS})
@@ -78,7 +76,6 @@ add_library(${PROJECT_NAME} SHARED ${project_SOURCES} ${project_HEADERS})
 
 find_package(Torch REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${TORCH_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} Boost::program_options)
 target_link_libraries(${PROJECT_NAME} spdlog)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${project_HEADERS}")

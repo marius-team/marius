@@ -4,15 +4,13 @@
 
 #include <config.h>
 
-namespace po = boost::program_options;
-
 MariusOptions marius_options = MariusOptions();
 TimestampAllocator global_timestamp_allocator = TimestampAllocator();
 
 MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
     // config_path validity check
     std::filesystem::path config_file_path = config_path;
-    if (false == std::filesystem::exists(config_file_path)){
+    if (!std::filesystem::exists(config_file_path)){
         SPDLOG_ERROR("Unable to find configuration file: {}", config_path);
         exit(1);
     }
@@ -137,112 +135,112 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
     string s_log_level;
 
     std::ifstream config_fstream(config_path.c_str());
-    po::options_description config_options("Configuration");
-    po::variables_map variables_map;
-
-    config_options.add_options()
-        ("general.device", po::value<string>(&s_device)->default_value("CPU"), "Device to use for training")
-        ("general.gpu_ids", po::value<string>(&s_gpu_ids)->default_value("0"), "Ids of the gpus to use")
-        ("general.random_seed", po::value<int64_t>(&rand_seed)->default_value(time(0)), "Random seed to use")
-        ("general.num_train", po::value<int64_t>(&num_train)->default_value(-1), "Number of edges in the graph")
-        ("general.num_valid", po::value<int64_t>(&num_valid)->default_value(0), "Number of edges in the graph")
-        ("general.num_test", po::value<int64_t>(&num_test)->default_value(0), "Number of edges in the graph")
-        ("general.num_nodes", po::value<int64_t>(&num_nodes)->default_value(-1), "Number of nodes in the graph")
-        ("general.num_relations", po::value<int64_t>(&num_relations)->default_value(-1), "Number of relations in the graph")
-        ("general.experiment_name", po::value<string>(&experiment_name)->default_value("marius"), "Name for the current experiment")
-
-        ("model.scale_factor", po::value<float>(&scale_factor)->default_value(.001), "Factor to scale the embeddings upon initialization")
-        ("model.initialization_distribution", po::value<string>(&s_initialization_distribution)->default_value("Normal"), "Which distribution to use for initializing embeddings")
-        ("model.embedding_size", po::value<int>(&embedding_size)->default_value(128), "Dimension of the embedding vectors")
-        ("model.encoder", po::value<string>(&s_encoder_model)->default_value("None"), "Encoder model to use.")
-        ("model.decoder", po::value<string>(&s_decoder_model)->default_value("DistMult"), "Decoder model to use.")
-
-        ("storage.edges_backend", po::value<string>(&s_edges_backend_type)->default_value("HostMemory"), "Storage backend to use")
-        ("storage.reinit_edges", po::value<bool>(&reinit_edges)->default_value(true), "If true, the edges in the data directory will be reinitialized")
-        ("storage.remove_preprocessed", po::value<bool>(&remove_preprocessed)->default_value(false), "If true, the input edge files will be removed.")
-        ("storage.shuffle_input_edges", po::value<bool>(&shuffle_input_edges)->default_value(true), "If true, the input edge files will be shuffled.")
-        ("storage.edges_dtype", po::value<string>(&s_edges_dtype)->default_value("int32"), "Type of the embedding vectors")
-        ("storage.embeddings_backend", po::value<string>(&s_embeddings_backend_type)->default_value("HostMemory"), "Storage backend to use")
-        ("storage.reinit_embeddings", po::value<bool>(&reinit_embeddings)->default_value(true), "If true, the embeddings in the data directory will be reinitialized")
-        ("storage.relations_backend", po::value<string>(&s_relations_backend_type)->default_value("HostMemory"), "Storage backend to use")
-        ("storage.embeddings_dtype", po::value<string>(&s_embeddings_dtype)->default_value("float32"), "Type of the embedding vectors")
-        ("storage.edge_bucket_ordering", po::value<string>(&s_edge_bucket_ordering)->default_value("Elimination"), "How to order edge buckets")
-        ("storage.num_partitions", po::value<int>(&num_partitions)->default_value(1), "Number of partitions for training")
-        ("storage.buffer_capacity", po::value<int>(&buffer_capacity)->default_value(2), "Number of partitions to hold in memory")
-        ("storage.prefetching", po::value<bool>(&prefetching)->default_value(true), "Whether to prefetch partitions or not")
-        ("storage.conserve_memory", po::value<bool>(&conserve_memory)->default_value(false), "Will try to conserve memory at the cost of extra IO for some configurations.")
-
-        ("training.batch_size", po::value<int>(&training_batch_size)->default_value(10000), "Number of positive edges in a batch")
-        ("training.number_of_chunks", po::value<int>(&training_num_chunks)->default_value(16), "Number of chunks to split up positives into")
-        ("training.negatives", po::value<int>(&training_negatives)->default_value(512), "Number of negatives to sample per chunk")
-        ("training.degree_fraction", po::value<float>(&training_degree_fraction)->default_value(.5), "Fraction of negatives which are sampled by degree")
-        ("training.negative_sampling_access", po::value<string>(&s_training_negative_sampling_access)->default_value("Uniform"), "How negative samples are generated")
-        ("training.learning_rate", po::value<float>(&learning_rate)->default_value(.1), "Learning rate to use")
-        ("training.regularization_coef", po::value<float>(&regularization_coef)->default_value(2e-6), "Regularization Coefficient")
-        ("training.regularization_norm", po::value<int>(&regularization_norm)->default_value(2), "Norm of the regularization")
-        ("training.optimizer", po::value<string>(&s_optimizer_type)->default_value("Adagrad"), "Optimizer to use")
-        ("training.loss", po::value<string>(&s_loss_function_type)->default_value("SoftMax"), "Loss to use")
-        ("training.margin", po::value<float>(&margin)->default_value(0), "Margin to use in ranking loss")
-        ("training.average_gradients", po::value<bool>(&average_gradients)->default_value(false), "If true gradients will be averaged when accumulated, summed if false")
-        ("training.synchronous", po::value<bool>(&synchronous)->default_value(false), "If true training will be synchronous")
-        ("training.num_epochs", po::value<int>(&num_epochs)->default_value(10), "Number of epochs to train")
-        ("training.checkpoint_interval", po::value<int>(&checkpoint_interval)->default_value(9999), "Will checkpoint model after each interval of epochs")
-        ("training.shuffle_interval", po::value<int>(&shuffle_interval)->default_value(1), "How many epochs until a shuffle of the edges is performed")
-
-        ("training_pipeline.max_batches_in_flight", po::value<int>(&max_batches_in_flight)->default_value(16), "Vary the amount of batches allowed in the pipeline at once")
-        ("training_pipeline.update_in_flight", po::value<bool>(&update_in_flight)->default_value(false), "If true, batches in the pipeline will receive gradient updates")
-        ("training_pipeline.embeddings_host_queue_size", po::value<int>(&embeddings_host_queue_size)->default_value(4), "Size of embeddings host queue")
-        ("training_pipeline.embeddings_device_queue_size", po::value<int>(&embeddings_device_queue_size)->default_value(4), "Size of embeddings device queue")
-        ("training_pipeline.gradients_host_queue_size", po::value<int>(&gradients_host_queue_size)->default_value(4), "Size of gradients host queue")
-        ("training_pipeline.gradients_device_queue_size", po::value<int>(&gradients_device_queue_size)->default_value(4), "Size of gradients device queue")
-        ("training_pipeline.num_embedding_loader_threads", po::value<int>(&num_embedding_loader_threads)->default_value(2), "Number of embedding loader threads")
-        ("training_pipeline.num_embedding_transfer_threads", po::value<int>(&num_embedding_transfer_threads)->default_value(2), "Number of embedding transfer threads")
-        ("training_pipeline.num_compute_threads", po::value<int>(&num_compute_threads)->default_value(1), "Number of compute threads")
-        ("training_pipeline.num_gradient_transfer_threads", po::value<int>(&num_gradient_transfer_threads)->default_value(2), "Number of gradient transfer threads")
-        ("training_pipeline.num_embedding_update_threads", po::value<int>(&num_embedding_update_threads)->default_value(2), "Number of embedding updater threads")
-
-        ("evaluation.batch_size", po::value<int>(&evaluation_batch_size)->default_value(1000), "Number of positive edges in a batch")
-        ("evaluation.number_of_chunks", po::value<int>(&evaluation_num_chunks)->default_value(1), "Number of chunks to split up positives into")
-        ("evaluation.negatives", po::value<int>(&evaluation_negatives)->default_value(1000), "Number of negatives to sample per chunk")
-        ("evaluation.degree_fraction", po::value<float>(&evaluation_degree_fraction)->default_value(.5), "Fraction of negatives to sample by degree")
-        ("evaluation.negative_sampling_access", po::value<string>(&s_eval_negative_sampling_access)->default_value("Uniform"), "Negative sampling policy to use for evaluation")
-        ("evaluation.epochs_per_eval", po::value<int>(&epochs_per_eval)->default_value(1), "Number of positive edges in a batch")
-        ("evaluation.synchronous", po::value<bool>(&eval_synchronous)->default_value(false), "Amount of data to hold out for validation set")
-        ("evaluation.evaluation_method", po::value<string>(&s_evaluation_method)->default_value("LinkPrediction"), "Evaluation method to use")
-        ("evaluation.filtered_evaluation", po::value<bool>(&filtered_eval)->default_value(false), "If true false negatives will be filtered.")
-        ("evaluation.checkpoint_id", po::value<int>(&checkpoint_to_eval)->default_value(-1), "Checkpoint to evaluate")
-
-        ("evaluation_pipeline.max_batches_in_flight", po::value<int>(&evaluate_max_batches_in_flight)->default_value(32), "Vary the amount of batches allowed in the pipeline at once")
-        ("evaluation_pipeline.embeddings_host_queue_size", po::value<int>(&evaluate_embeddings_host_queue_size)->default_value(8), "Size of embeddings host queue")
-        ("evaluation_pipeline.embeddings_device_queue_size", po::value<int>(&evaluate_embeddings_device_queue_size)->default_value(8), "Size of embeddings device queue")
-        ("evaluation_pipeline.num_embedding_loader_threads", po::value<int>(&evaluate_num_embedding_loader_threads)->default_value(4), "Number of embedding loader threads")
-        ("evaluation_pipeline.num_embedding_transfer_threads", po::value<int>(&evaluate_num_embedding_transfer_threads)->default_value(4), "Number of embedding transfer threads")
-        ("evaluation_pipeline.num_evaluate_threads", po::value<int>(&num_evaluate_threads)->default_value(1), "Number of evaluate threads")
-
-        ("path.train_edges", po::value<string>(&train_edges)->required(), "Path to training edges file")
-        ("path.train_edges_partitions", po::value<string>(&train_edges_partitions), "Path to training edge partition file")
-        ("path.validation_edges", po::value<string>(&validation_edges), "Path to validation edges file")
-        ("path.validation_partitions", po::value<string>(&validation_edges_partitions), "Path to training edge partition file")
-        ("path.test_edges", po::value<string>(&test_edges), "Path to edges used for testing")
-        ("path.test_edges_partitions", po::value<string>(&test_edges_partitions), "Path to training edge partition file")
-        ("path.node_labels", po::value<string>(&node_labels), "Path to node labels for Node classification")
-        ("path.relation_labels", po::value<string>(&relation_labels), "Path to relation labels for Relation classification")
-        ("path.node_ids", po::value<string>(&node_ids), "Path to node ids")
-        ("path.relations_ids", po::value<string>(&relation_ids), "Path to relations ids")
-        ("path.custom_ordering", po::value<string>(&custom_ordering), "Path to file where edge bucket ordering is stored.")
-        ("path.base_directory", po::value<string>(&base_directory)->default_value("data/"), "Path to directory where data is stored")
-
-        ("reporting.logs_per_epoch", po::value<int>(&logs_per_epoch)->default_value(10), "How many times log statements will be output during a single epoch of training or evaluation")
-        ("reporting.log_level", po::value<string>(&s_log_level)->default_value("info"), "Log level to use.");
-
-    try {
-        store(parse_command_line(argc, argv, config_options), variables_map);
-        store(parse_config_file(config_fstream, config_options), variables_map);
-        notify(variables_map);
-    } catch(std::exception& e) {
-        SPDLOG_ERROR(e.what());
-        exit(-1);
-    }
+//    po::options_description config_options("Configuration");
+//    po::variables_map variables_map;
+//
+//    config_options.add_options()
+//        ("general.device", po::value<string>(&s_device)->default_value("CPU"), "Device to use for training")
+//        ("general.gpu_ids", po::value<string>(&s_gpu_ids)->default_value("0"), "Ids of the gpus to use")
+//        ("general.random_seed", po::value<int64_t>(&rand_seed)->default_value(time(0)), "Random seed to use")
+//        ("general.num_train", po::value<int64_t>(&num_train)->default_value(-1), "Number of edges in the graph")
+//        ("general.num_valid", po::value<int64_t>(&num_valid)->default_value(0), "Number of edges in the graph")
+//        ("general.num_test", po::value<int64_t>(&num_test)->default_value(0), "Number of edges in the graph")
+//        ("general.num_nodes", po::value<int64_t>(&num_nodes)->default_value(-1), "Number of nodes in the graph")
+//        ("general.num_relations", po::value<int64_t>(&num_relations)->default_value(-1), "Number of relations in the graph")
+//        ("general.experiment_name", po::value<string>(&experiment_name)->default_value("marius"), "Name for the current experiment")
+//
+//        ("model.scale_factor", po::value<float>(&scale_factor)->default_value(.001), "Factor to scale the embeddings upon initialization")
+//        ("model.initialization_distribution", po::value<string>(&s_initialization_distribution)->default_value("Normal"), "Which distribution to use for initializing embeddings")
+//        ("model.embedding_size", po::value<int>(&embedding_size)->default_value(128), "Dimension of the embedding vectors")
+//        ("model.encoder", po::value<string>(&s_encoder_model)->default_value("None"), "Encoder model to use.")
+//        ("model.decoder", po::value<string>(&s_decoder_model)->default_value("DistMult"), "Decoder model to use.")
+//
+//        ("storage.edges_backend", po::value<string>(&s_edges_backend_type)->default_value("HostMemory"), "Storage backend to use")
+//        ("storage.reinit_edges", po::value<bool>(&reinit_edges)->default_value(true), "If true, the edges in the data directory will be reinitialized")
+//        ("storage.remove_preprocessed", po::value<bool>(&remove_preprocessed)->default_value(false), "If true, the input edge files will be removed.")
+//        ("storage.shuffle_input_edges", po::value<bool>(&shuffle_input_edges)->default_value(true), "If true, the input edge files will be shuffled.")
+//        ("storage.edges_dtype", po::value<string>(&s_edges_dtype)->default_value("int32"), "Type of the embedding vectors")
+//        ("storage.embeddings_backend", po::value<string>(&s_embeddings_backend_type)->default_value("HostMemory"), "Storage backend to use")
+//        ("storage.reinit_embeddings", po::value<bool>(&reinit_embeddings)->default_value(true), "If true, the embeddings in the data directory will be reinitialized")
+//        ("storage.relations_backend", po::value<string>(&s_relations_backend_type)->default_value("HostMemory"), "Storage backend to use")
+//        ("storage.embeddings_dtype", po::value<string>(&s_embeddings_dtype)->default_value("float32"), "Type of the embedding vectors")
+//        ("storage.edge_bucket_ordering", po::value<string>(&s_edge_bucket_ordering)->default_value("Elimination"), "How to order edge buckets")
+//        ("storage.num_partitions", po::value<int>(&num_partitions)->default_value(1), "Number of partitions for training")
+//        ("storage.buffer_capacity", po::value<int>(&buffer_capacity)->default_value(2), "Number of partitions to hold in memory")
+//        ("storage.prefetching", po::value<bool>(&prefetching)->default_value(true), "Whether to prefetch partitions or not")
+//        ("storage.conserve_memory", po::value<bool>(&conserve_memory)->default_value(false), "Will try to conserve memory at the cost of extra IO for some configurations.")
+//
+//        ("training.batch_size", po::value<int>(&training_batch_size)->default_value(10000), "Number of positive edges in a batch")
+//        ("training.number_of_chunks", po::value<int>(&training_num_chunks)->default_value(16), "Number of chunks to split up positives into")
+//        ("training.negatives", po::value<int>(&training_negatives)->default_value(512), "Number of negatives to sample per chunk")
+//        ("training.degree_fraction", po::value<float>(&training_degree_fraction)->default_value(.5), "Fraction of negatives which are sampled by degree")
+//        ("training.negative_sampling_access", po::value<string>(&s_training_negative_sampling_access)->default_value("Uniform"), "How negative samples are generated")
+//        ("training.learning_rate", po::value<float>(&learning_rate)->default_value(.1), "Learning rate to use")
+//        ("training.regularization_coef", po::value<float>(&regularization_coef)->default_value(2e-6), "Regularization Coefficient")
+//        ("training.regularization_norm", po::value<int>(&regularization_norm)->default_value(2), "Norm of the regularization")
+//        ("training.optimizer", po::value<string>(&s_optimizer_type)->default_value("Adagrad"), "Optimizer to use")
+//        ("training.loss", po::value<string>(&s_loss_function_type)->default_value("SoftMax"), "Loss to use")
+//        ("training.margin", po::value<float>(&margin)->default_value(0), "Margin to use in ranking loss")
+//        ("training.average_gradients", po::value<bool>(&average_gradients)->default_value(false), "If true gradients will be averaged when accumulated, summed if false")
+//        ("training.synchronous", po::value<bool>(&synchronous)->default_value(false), "If true training will be synchronous")
+//        ("training.num_epochs", po::value<int>(&num_epochs)->default_value(10), "Number of epochs to train")
+//        ("training.checkpoint_interval", po::value<int>(&checkpoint_interval)->default_value(9999), "Will checkpoint model after each interval of epochs")
+//        ("training.shuffle_interval", po::value<int>(&shuffle_interval)->default_value(1), "How many epochs until a shuffle of the edges is performed")
+//
+//        ("training_pipeline.max_batches_in_flight", po::value<int>(&max_batches_in_flight)->default_value(16), "Vary the amount of batches allowed in the pipeline at once")
+//        ("training_pipeline.update_in_flight", po::value<bool>(&update_in_flight)->default_value(false), "If true, batches in the pipeline will receive gradient updates")
+//        ("training_pipeline.embeddings_host_queue_size", po::value<int>(&embeddings_host_queue_size)->default_value(4), "Size of embeddings host queue")
+//        ("training_pipeline.embeddings_device_queue_size", po::value<int>(&embeddings_device_queue_size)->default_value(4), "Size of embeddings device queue")
+//        ("training_pipeline.gradients_host_queue_size", po::value<int>(&gradients_host_queue_size)->default_value(4), "Size of gradients host queue")
+//        ("training_pipeline.gradients_device_queue_size", po::value<int>(&gradients_device_queue_size)->default_value(4), "Size of gradients device queue")
+//        ("training_pipeline.num_embedding_loader_threads", po::value<int>(&num_embedding_loader_threads)->default_value(2), "Number of embedding loader threads")
+//        ("training_pipeline.num_embedding_transfer_threads", po::value<int>(&num_embedding_transfer_threads)->default_value(2), "Number of embedding transfer threads")
+//        ("training_pipeline.num_compute_threads", po::value<int>(&num_compute_threads)->default_value(1), "Number of compute threads")
+//        ("training_pipeline.num_gradient_transfer_threads", po::value<int>(&num_gradient_transfer_threads)->default_value(2), "Number of gradient transfer threads")
+//        ("training_pipeline.num_embedding_update_threads", po::value<int>(&num_embedding_update_threads)->default_value(2), "Number of embedding updater threads")
+//
+//        ("evaluation.batch_size", po::value<int>(&evaluation_batch_size)->default_value(1000), "Number of positive edges in a batch")
+//        ("evaluation.number_of_chunks", po::value<int>(&evaluation_num_chunks)->default_value(1), "Number of chunks to split up positives into")
+//        ("evaluation.negatives", po::value<int>(&evaluation_negatives)->default_value(1000), "Number of negatives to sample per chunk")
+//        ("evaluation.degree_fraction", po::value<float>(&evaluation_degree_fraction)->default_value(.5), "Fraction of negatives to sample by degree")
+//        ("evaluation.negative_sampling_access", po::value<string>(&s_eval_negative_sampling_access)->default_value("Uniform"), "Negative sampling policy to use for evaluation")
+//        ("evaluation.epochs_per_eval", po::value<int>(&epochs_per_eval)->default_value(1), "Number of positive edges in a batch")
+//        ("evaluation.synchronous", po::value<bool>(&eval_synchronous)->default_value(false), "Amount of data to hold out for validation set")
+//        ("evaluation.evaluation_method", po::value<string>(&s_evaluation_method)->default_value("LinkPrediction"), "Evaluation method to use")
+//        ("evaluation.filtered_evaluation", po::value<bool>(&filtered_eval)->default_value(false), "If true false negatives will be filtered.")
+//        ("evaluation.checkpoint_id", po::value<int>(&checkpoint_to_eval)->default_value(-1), "Checkpoint to evaluate")
+//
+//        ("evaluation_pipeline.max_batches_in_flight", po::value<int>(&evaluate_max_batches_in_flight)->default_value(32), "Vary the amount of batches allowed in the pipeline at once")
+//        ("evaluation_pipeline.embeddings_host_queue_size", po::value<int>(&evaluate_embeddings_host_queue_size)->default_value(8), "Size of embeddings host queue")
+//        ("evaluation_pipeline.embeddings_device_queue_size", po::value<int>(&evaluate_embeddings_device_queue_size)->default_value(8), "Size of embeddings device queue")
+//        ("evaluation_pipeline.num_embedding_loader_threads", po::value<int>(&evaluate_num_embedding_loader_threads)->default_value(4), "Number of embedding loader threads")
+//        ("evaluation_pipeline.num_embedding_transfer_threads", po::value<int>(&evaluate_num_embedding_transfer_threads)->default_value(4), "Number of embedding transfer threads")
+//        ("evaluation_pipeline.num_evaluate_threads", po::value<int>(&num_evaluate_threads)->default_value(1), "Number of evaluate threads")
+//
+//        ("path.train_edges", po::value<string>(&train_edges)->required(), "Path to training edges file")
+//        ("path.train_edges_partitions", po::value<string>(&train_edges_partitions), "Path to training edge partition file")
+//        ("path.validation_edges", po::value<string>(&validation_edges), "Path to validation edges file")
+//        ("path.validation_partitions", po::value<string>(&validation_edges_partitions), "Path to training edge partition file")
+//        ("path.test_edges", po::value<string>(&test_edges), "Path to edges used for testing")
+//        ("path.test_edges_partitions", po::value<string>(&test_edges_partitions), "Path to training edge partition file")
+//        ("path.node_labels", po::value<string>(&node_labels), "Path to node labels for Node classification")
+//        ("path.relation_labels", po::value<string>(&relation_labels), "Path to relation labels for Relation classification")
+//        ("path.node_ids", po::value<string>(&node_ids), "Path to node ids")
+//        ("path.relations_ids", po::value<string>(&relation_ids), "Path to relations ids")
+//        ("path.custom_ordering", po::value<string>(&custom_ordering), "Path to file where edge bucket ordering is stored.")
+//        ("path.base_directory", po::value<string>(&base_directory)->default_value("data/"), "Path to directory where data is stored")
+//
+//        ("reporting.logs_per_epoch", po::value<int>(&logs_per_epoch)->default_value(10), "How many times log statements will be output during a single epoch of training or evaluation")
+//        ("reporting.log_level", po::value<string>(&s_log_level)->default_value("info"), "Log level to use.");
+//
+//    try {
+//        store(parse_command_line(argc, argv, config_options), variables_map);
+//        store(parse_config_file(config_fstream, config_options), variables_map);
+//        notify(variables_map);
+//    } catch(std::exception& e) {
+//        SPDLOG_ERROR(e.what());
+//        exit(-1);
+//    }
 
     if (s_device == "GPU") {
         device = torch::kCUDA;

@@ -11,12 +11,10 @@ function(initialize_submodule DIRECTORY)
     endif()
 endfunction(initialize_submodule)
 
-initialize_submodule(boost-cmake)
 initialize_submodule(pybind11)
 initialize_submodule(spdlog)
 initialize_submodule(googletest)
 
 add_subdirectory(googletest EXCLUDE_FROM_ALL)
-add_subdirectory(boost-cmake EXCLUDE_FROM_ALL)
 add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
 add_subdirectory(spdlog EXCLUDE_FROM_ALL)

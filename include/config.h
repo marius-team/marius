@@ -7,7 +7,6 @@
 #include <string>
 #include <exception>
 #include <datatypes.h>
-#include <boost/program_options.hpp>
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <filesystem>
