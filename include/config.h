@@ -11,10 +11,25 @@
 #include <iostream>
 #include <filesystem>
 #include <INIReader.h>
+#include <cxxopts.hpp>
+#include <variant>
+#include <sstream>
+#include <iostream>
 
 using std::string;
 using std::mutex;
 
+typedef std::variant<string, int64_t, int, float, bool> OptionTypes;
+typedef std::unordered_map<string, OptionTypes> SectionMap;
+typedef std::unordered_map<string, SectionMap> OptionsMap;
+
+struct getType {
+    std::string operator()(bool value) { return value ? "true" : "false"; }
+    std::string operator()(int64_t value) { return std::string(1, value); }
+    std::string operator()(int value) { return std::to_string(value); }
+    std::string operator()(double value) { return std::to_string(value); }
+    std::string operator()(const std::string& value) { return value; }
+};
 
 class TimestampAllocator {
   private:
@@ -181,7 +196,10 @@ struct MariusOptions {
     ReportingOptions reporting{};
 };
 
-MariusOptions parseConfig(string path, int64_t argc, char *argv[]);
+
+OptionsMap getOptionsMap();
+
+MariusOptions parseConfig(int64_t argc, char *argv[]);
 
 extern MariusOptions marius_options;
 

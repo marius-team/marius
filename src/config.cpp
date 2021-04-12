@@ -7,8 +7,70 @@
 MariusOptions marius_options = MariusOptions();
 TimestampAllocator global_timestamp_allocator = TimestampAllocator();
 
-MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
-    // config_path validity check
+MariusOptions parseConfig(int64_t argc, char *argv[]) {
+
+    string config_path;
+    cxxopts::Options cmd_options(argv[0], "Train and evaluate graph embeddings");
+    cmd_options.allow_unrecognised_options();
+    cmd_options.positional_help("");
+    cmd_options.custom_help("config_file [OPTIONS...] [<section>.<option>=<value>...]");
+    cmd_options.add_options()
+        ("config_file", "Configuration file", cxxopts::value<std::string>())
+        ("h, help", "Print help and exit.");
+
+    OptionsMap options_map = getOptionsMap();
+
+    try {
+        cmd_options.parse_positional({"config_file"});
+        auto result = cmd_options.parse(argc, argv);
+
+        if (result.count("help")) {
+            std::cout << cmd_options.help() << std::endl;
+            exit(0);
+        }
+
+        if (!result.count("config_file")) {
+            std::cout << cmd_options.help() << std::endl;
+            throw cxxopts::option_required_exception("config_file");
+        }
+
+        if (!result.unmatched().empty()) {
+            try {
+                for (string opt : result.unmatched()) {
+                    if (opt.substr(0, 2) == "--") {
+
+                        int section_end = opt.find(".");
+                        int option_end = opt.find("=");
+
+                        if (section_end == - 1 or option_end == - 1) {
+                            break;
+                        }
+
+                        std::string section = opt.substr(2, section_end - 2);
+                        std::string option_name = opt.substr(section_end + 1, option_end - section_end - 1);
+                        std::string value = opt.substr(option_end + 1, opt.size() - option_end - 1);
+
+                        std::cout << section << '\n';
+                        std::cout << option_name << '\n';
+                        std::cout << value << '\n';
+
+                        options_map[section][option_name] = value;
+                    } else {
+                        throw std::exception();
+                    }
+                }
+            } catch (std::exception ) {
+                throw cxxopts::option_syntax_exception("Unable to parse supplied command line configuration options");
+            }
+
+        }
+        config_path = result["config_file"].as<string>();
+
+    } catch (const cxxopts::OptionException& e) {
+        SPDLOG_ERROR("Error parsing options: {}", e.what());
+        exit(-1);
+    }
+
     std::filesystem::path config_file_path = config_path;
     if (!std::filesystem::exists(config_file_path)){
         SPDLOG_ERROR("Unable to find configuration file: {}", config_path);
@@ -136,7 +198,10 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
 
     INIReader reader(config_path);
 
-    std::cout << reader.Sections() << '\n';
+    // assign options to option_map with
+    // option_map[section][option] = value
+    // If the option already has a value that was parsed in the command line then the option from the config won't be applied
+
 //    po::options_description config_options("Configuration");
 //    po::variables_map variables_map;
 //
@@ -243,6 +308,8 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
 //        SPDLOG_ERROR(e.what());
 //        exit(-1);
 //    }
+
+
 
     if (s_device == "GPU") {
         device = torch::kCUDA;
@@ -715,6 +782,33 @@ bool validateNumericalOptions(MariusOptions options) {
 
     return true;
 }
+
+OptionsMap getOptionsMap() {
+    OptionsMap options_map;
+
+    SectionMap general_map;
+    SectionMap model_map;
+    SectionMap storage_map;
+    SectionMap training_map;
+    SectionMap training_pipeline_map;
+    SectionMap evaluation_map;
+    SectionMap evaluation_pipeline_map;
+    SectionMap path_map;
+    SectionMap reporting_map;
+
+
+    options_map["general"] = general_map;
+    options_map["model"] = model_map;
+    options_map["storage"] = storage_map;
+    options_map["training"] = training_map;
+    options_map["training_pipeline"] = training_pipeline_map;
+    options_map["evaluation"] = evaluation_map;
+    options_map["evaluation_pipeline"] = evaluation_pipeline_map;
+    options_map["path"] = path_map;
+    options_map["reporting"] = reporting_map;
+
+    return options_map;
+};
 
 void logConfig() {
     SPDLOG_DEBUG("########## General Options ##########");
