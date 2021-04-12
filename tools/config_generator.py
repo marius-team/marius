@@ -1,14 +1,16 @@
 from pathlib import Path
 
-def output_config(stats, num_nodes, num_relations, output_dir, name, device = "cpu"):
+
+def output_config(stats, num_nodes, num_relations, output_dir, name, device="cpu"):
     if device == "gpu":
         gpu(stats, num_nodes, num_relations, output_dir, name)
     elif device == "cpu":
         cpu(stats, num_nodes, num_relations, output_dir, name)
     else:
         multi_gpu(stats, num_nodes, num_relations, output_dir, name)
-    
-def cpu(stats, num_nodes, num_relations, output_dir, name):  
+
+
+def cpu(stats, num_nodes, num_relations, output_dir, name):
     file = Path(output_dir) / Path(str(name) + "_cpu.ini")
     with open(file, "w+") as f:
         f.write("[general]\n")
@@ -19,7 +21,7 @@ num_nodes=" + str(int(num_nodes)) + "\n\
 num_relations=" + str(int(num_relations)) + "\n\
 num_valid=" + str(int(stats[1])) + "\n\
 num_test=" + str(int(stats[2])) + "\n\n")
-        
+
         f.write("\
 [model]\n\
 embedding_size=100\n\
@@ -43,7 +45,7 @@ regularization_coef=0\n\
 regularization_norm=2\n\
 synchronous=false\n\
 shuffle_interval=1\n\n")
-        
+
         f.write("\
 [training_pipeline]\n\
 max_batches_in_flight=16\n\
@@ -52,14 +54,14 @@ num_embedding_transfer_threads=2\n\
 num_compute_threads=4\n\
 num_gradient_transfer_threads=2\n\
 num_embedding_update_threads=4\n\n")
-        
+
         f.write("\
 [evaluation_pipeline]\n\
 max_batches_in_flight=16\n\
 num_embedding_loader_threads=2\n\
 num_embedding_transfer_threads=2\n\
 num_evaluate_threads=4\n\n")
-        
+
         f.write("\
 [evaluation]\n\
 epochs_per_eval=1\n\
@@ -70,14 +72,14 @@ degree_fraction=0\n\
 negative_sampling_access=Uniform\n\
 evaluation_method=LinkPrediction\n\
 filtered_evaluation=false\n\n")
-        
+
         f.write("\
 [path]\n\
 base_directory=training_data/\n\
 train_edges=output_dir/train_edges.pt\n\
 validation_edges=output_dir/valid_edges.pt\n\
 test_edges=output_dir/test_edges.pt\n\n")
-        
+
         f.write("\
 [reporting] \n\
 log_level=info\n\n")
@@ -140,6 +142,7 @@ validation_edges=output_dir/valid_edges.pt\n\
 test_edges=output_dir/test_edges.pt\n\n\
 [reporting]\n\
 log_level=info")
+
 
 def multi_gpu(stats, num_nodes, num_relations, output_dir, name):
     file = Path(output_dir) / Path(str(name) + "_multi_gpu.ini")
@@ -219,20 +222,22 @@ def output_bash_cmds(output_dir, dataset_name):
     mgpu_file = Path(output_dir) / Path(dataset_name + "_multi_gpu.sh")
     with open(cpu_file, "w+") as f:
         f.write("# preprocess the " + dataset_name + " graph and put preprocessed graph into output dir\n")
-        f.write("python3 tools/preprocess.py " +  dataset_name + " output_dir/ \n\n")
+        f.write("marius_preprocess " + dataset_name + " output_dir/ \n\n")
         f.write("# run marius on the preprocessed input\n")
-        f.write("build/marius_train examples/training/configs/" + dataset_name + "_cpu.ini info")
+        f.write("marius_train examples/training/configs/" + dataset_name + "_cpu.ini info")
     with open(gpu_file, "w+") as f:
         f.write("# preprocess the " + dataset_name + " graph and put preprocessed graph into output dir\n")
-        f.write("python3 tools/preprocess.py " +  dataset_name + " output_dir/ \n\n")
+        f.write("marius_preprocess " + dataset_name + " output_dir/ \n\n")
         f.write("# run marius on the preprocessed input\n")
-        f.write("build/marius_train examples/training/configs/" + dataset_name + "_gpu.ini info")
+        f.write("marius_train examples/training/configs/" + dataset_name + "_gpu.ini info")
     with open(mgpu_file, "w+") as f:
         f.write("# preprocess the " + dataset_name + " graph and put preprocessed graph into output dir\n")
-        f.write("python3 tools/preprocess.py " +  dataset_name + " output_dir/ \n\n")
+        f.write("marius_preprocess " + dataset_name + " output_dir/ \n\n")
         f.write("# run marius on the preprocessed input\n")
-        f.write("build/marius_train examples/training/configs/" + dataset_name + "_multi_gpu.ini info")
-if __name__=="__main__":
+        f.write("marius_train examples/training/configs/" + dataset_name + "_multi_gpu.ini info")
+
+
+def main():
     print("This is a configuration file generator.")
     ds_name = [
         "fb15k",
@@ -260,3 +265,7 @@ if __name__=="__main__":
 
     for n in ds_name:
         output_bash_cmds("./examples/training/scripts/", n)
+
+
+if __name__ == "__main__":
+    main()

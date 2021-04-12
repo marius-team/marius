@@ -64,12 +64,12 @@ Training embeddings on a graph requires three steps.
 
    See `docs/configuration.rst` for full details on the configuration options.
 
-2. Preprocess the dataset `python3 tools/preprocess.py fb15k output_dir/`
+2. Preprocess the dataset `marius_preprocess fb15k output_dir/`
 
-   The first argument of tools/preprocess.py defines the dataset we wish to download and preprocess, in this case fb15k. 
+   The first argument of marius/tools/preprocess.py defines the dataset we wish to download and preprocess, in this case fb15k. 
    The second argument tells the preprocessor where to put the preprocessed dataset.
 
-3. Run the training executable with the config file. `build/marius_train examples/training/configs/fb15k_gpu.ini`
+3. Run the training executable with the config file. `marius_train examples/training/configs/fb15k_gpu.ini`
 
 The output of the first epoch should be similar to the following.
 ```[info] [03/18/21 01:33:16.173] Start preprocessing

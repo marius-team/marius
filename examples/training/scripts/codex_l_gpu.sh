@@ -1,5 +1,5 @@
 # preprocess the codex_l graph and put preprocessed graph into output dir
-python3 tools/preprocess.py codex_l output_dir/ 
+marius_preprocess codex_l output_dir/
 
 # run marius on the preprocessed input
-build/marius_train examples/training/configs/codex_l_gpu.ini info
+marius_train examples/training/configs/codex_l_gpu.ini info

@@ -1,17 +1,18 @@
 import argparse
+import csv
+import itertools
 import re
 from pathlib import Path
-import csv
-import pandas as pd
+
 import numpy as np
-import itertools
+import pandas as pd
 
 
-def split_dataset(input_dataset, validation_fraction, test_fraction, 
-                entry_regex, num_line_skip, data_cols, delim, dtype=np.int32):
+def split_dataset(input_dataset, validation_fraction, test_fraction,
+                  entry_regex, num_line_skip, data_cols, delim, dtype=np.int32):
     train_fraction = 1 - validation_fraction - test_fraction
 
-    assert(train_fraction > 0)
+    assert (train_fraction > 0)
     assert (validation_fraction + test_fraction > 0)
     base_path = "/".join(input_dataset.split("/")[:-1])
     train_file = base_path + "/train_edges.txt"
@@ -26,8 +27,9 @@ def split_dataset(input_dataset, validation_fraction, test_fraction,
     chunksize = 10 ** 7
     if validation_fraction == 0:
         with open(train_file, "a") as f, open(test_file, "a") as h:
-            for chunk in pd.read_csv(input_dataset, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip, usecols=data_cols, dtype=str):
-                train, test = np.split(chunk.sample(frac=1), [int(train_fraction*len(chunk))])
+            for chunk in pd.read_csv(input_dataset, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip,
+                                     usecols=data_cols, dtype=str):
+                train, test = np.split(chunk.sample(frac=1), [int(train_fraction * len(chunk))])
 
                 train = np.asarray(train, dtype=np.str_)
                 test = np.asarray(test, dtype=np.str_)
@@ -37,8 +39,9 @@ def split_dataset(input_dataset, validation_fraction, test_fraction,
         files += [train_file, test_file]
     elif test_fraction == 0:
         with open(train_file, "a") as f, open(valid_file, "a") as g:
-            for chunk in pd.read_csv(input_dataset, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip, usecols=data_cols, dtype=str):
-                train, valid = np.split(chunk.sample(frac=1), [int(train_fraction*len(chunk))])
+            for chunk in pd.read_csv(input_dataset, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip,
+                                     usecols=data_cols, dtype=str):
+                train, valid = np.split(chunk.sample(frac=1), [int(train_fraction * len(chunk))])
 
                 train = np.asarray(train, dtype=np.str_)
                 valid = np.asarray(valid, dtype=np.str_)
@@ -48,10 +51,11 @@ def split_dataset(input_dataset, validation_fraction, test_fraction,
         files += [train_file, valid_file]
     else:
         with open(train_file, "a") as f, open(valid_file, "a") as g, open(test_file, "a") as h:
-            for chunk in pd.read_csv(input_dataset, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip, usecols=data_cols, dtype=str):
+            for chunk in pd.read_csv(input_dataset, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip,
+                                     usecols=data_cols, dtype=str):
                 train, valid, test = np.split(chunk.sample(frac=1),
-                                                 [int(train_fraction*len(chunk)),
-                                                  int((train_fraction + validation_fraction)*len(chunk))])
+                                              [int(train_fraction * len(chunk)),
+                                               int((train_fraction + validation_fraction) * len(chunk))])
 
                 train = np.asarray(train, dtype=np.str_)
                 valid = np.asarray(valid, dtype=np.str_)
@@ -73,8 +77,8 @@ def get_header_length(input_file, entry_regex):
             a = next(f)
             while not re.search(entry_regex, a):
                 a = next(f)
-                num_line_skip+=1
-                n+=1
+                num_line_skip += 1
+                n += 1
                 if n == 100:
                     raise StopIteration()
         except StopIteration:
@@ -98,8 +102,9 @@ def partition_edges(edges, num_partitions, num_nodes):
 
     return edges, offsets
 
+
 def join_files(files, regex, num_line_skip, data_cols, delim):
-    assert(len(files) > 1)
+    assert (len(files) > 1)
     base_path = "/".join(files[0].split("/")[:-1])
     joined_file = base_path + "/joined_file.txt"
     if Path(joined_file).exists(): Path(joined_file).unlink()
@@ -108,15 +113,17 @@ def join_files(files, regex, num_line_skip, data_cols, delim):
         nl = 0
         for file in files:
             num_line_skip = num_line_skip if num_line_skip != None else get_header_length(file, regex)
-            for chunk in pd.read_csv(file, header = None, 
-                skiprows = num_line_skip, chunksize=10 ** 7, sep=delim, usecols=data_cols, dtype=str):
+            for chunk in pd.read_csv(file, header=None,
+                                     skiprows=num_line_skip, chunksize=10 ** 7, sep=delim, usecols=data_cols,
+                                     dtype=str):
                 np.savetxt(f, np.array(chunk, dtype=np.str_), fmt="%s", delimiter=delim)
                 nl += chunk.shape[0]
 
     return [joined_file], 0, list(range(len(data_cols)))
 
-def general_parser(files, format, output_dir, delim="", num_partitions=1, 
-                    dtype=np.int32, remap_ids=True, dataset_split=(0, 0), start_col=0, num_line_skip=None):
+
+def general_parser(files, format, output_dir, delim="", num_partitions=1,
+                   dtype=np.int32, remap_ids=True, dataset_split=(0, 0), start_col=0, num_line_skip=None):
     rel_idx = format[0].find('r')
     src_idx = format[0].find('s')
     dst_idx = format[0].find('d')
@@ -124,9 +131,9 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     output_dir = output_dir[0]
 
     if rel_idx == -1:
-        data_cols=[(i+start_col) for i in [0, 1]]
+        data_cols = [(i + start_col) for i in [0, 1]]
     else:
-        data_cols=[(i+start_col) for i in [0, 1, 2]]
+        data_cols = [(i + start_col) for i in [0, 1, 2]]
 
     if delim == "":
         with open(files[0], 'r') as input_f:
@@ -137,10 +144,10 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     if src_idx == -1 or dst_idx == -1:
         raise RuntimeError("Wrong format: source or destination not found.")
     elif rel_idx == -1:
-        regex = "^[^\s]+" + delim + "[^\s]+$" 
+        regex = "^[^\s]+" + delim + "[^\s]+$"
     else:
         regex = "^[^\s]+" + delim + "[^\s]+" + delim + "[^\s]+$"
-    
+
     nodes = set()
     if rel_idx != -1: rels = set()
     num_edges = 0
@@ -149,13 +156,13 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
 
     if (len(files) > 3):
         print("Reconstructing data")
-        files, num_line_skip, data_cols = join_files(files, regex, 
-                                                num_line_skip, data_cols, delim)
+        files, num_line_skip, data_cols = join_files(files, regex,
+                                                     num_line_skip, data_cols, delim)
 
     if (len(files) == 1 and dataset_split != (0, 0)):
         print("Splitting data")
-        files, num_line_skip, data_cols = split_dataset(files[0], dataset_split[0], dataset_split[1], 
-                                                regex, num_line_skip, data_cols, delim)
+        files, num_line_skip, data_cols = split_dataset(files[0], dataset_split[0], dataset_split[1],
+                                                        regex, num_line_skip, data_cols, delim)
 
     for file in files:
         numlines = 0
@@ -164,7 +171,8 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
         num_line_skip = num_line_skip if num_line_skip != None else get_header_length(file, regex)
         chunksize = 10 ** 7
         try:
-            for chunk in pd.read_csv(file, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip, usecols=data_cols, dtype=str):
+            for chunk in pd.read_csv(file, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip,
+                                     usecols=data_cols, dtype=str):
                 num_edges += chunk.shape[0]
                 numlines += chunk.shape[0]
                 un_set = set(np.unique(chunk[chunk.columns.values[src_idx]]))
@@ -210,7 +218,8 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
         train_out = output_dir + "train_edges.pt"
         with open(train_out, "wb") as f:
             for file in temp_files:
-                for chunk in pd.read_csv(file, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip, usecols=data_cols, dtype=str):
+                for chunk in pd.read_csv(file, sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip,
+                                         usecols=data_cols, dtype=str):
                     src_nodes = np.vectorize(nodes_dict.get)(np.asarray(chunk[chunk.columns.values[src_idx]]))
                     dst_nodes = np.vectorize(nodes_dict.get)(np.asarray(chunk[chunk.columns.values[dst_idx]]))
                     if rel_idx != -1:
@@ -230,12 +239,13 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                 f.write(bytes(edges))
                 with open(output_dir + "train_edges_partitions.txt", "w") as g:
                     g.writelines([str(o) + "\n" for o in offsets])
-    
+
     if len(files) > 1 and len(files) < 4:
         test_out = output_dir + "test_edges.pt"
         valid_out = output_dir + "valid_edges.pt"
         with open(valid_out, "wb") as f:
-            for chunk in pd.read_csv(files[1], sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip, usecols=data_cols, dtype=str):
+            for chunk in pd.read_csv(files[1], sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip,
+                                     usecols=data_cols, dtype=str):
                 src_nodes = np.vectorize(nodes_dict.get)(np.asarray(chunk[chunk.columns.values[src_idx]]))
                 dst_nodes = np.vectorize(nodes_dict.get)(np.asarray(chunk[chunk.columns.values[dst_idx]]))
                 if rel_idx != -1:
@@ -249,7 +259,8 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                 i += chunksize
         if len(files) > 2:
             with open(test_out, "wb") as f:
-                for chunk in pd.read_csv(files[2], sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip, usecols=data_cols, dtype=str):
+                for chunk in pd.read_csv(files[2], sep=delim, header=None, chunksize=chunksize, skiprows=num_line_skip,
+                                         usecols=data_cols, dtype=str):
                     src_nodes = np.vectorize(nodes_dict.get)(np.asarray(chunk[chunk.columns.values[src_idx]]))
                     dst_nodes = np.vectorize(nodes_dict.get)(np.asarray(chunk[chunk.columns.values[dst_idx]]))
                     if rel_idx != -1:
@@ -282,20 +293,25 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     return output_stats, len(node_ids), num_rels
 
 
-if __name__ == "__main__":
+def main():
     '''
         Args: format(s,d,r) output_directory csv_file(s)
     '''
     parser = argparse.ArgumentParser(description='General CSV Converter'
-        , usage="general csv converter")
+                                     , usage="general csv converter")
     parser.add_argument('format', type=str, nargs=1,
-        metavar="format: source(s), relation(r), destination(d)", help="Format of relation")
+                        metavar="format: source(s), relation(r), destination(d)", help="Format of relation")
     parser.add_argument('output_directory', nargs=1,
-        metavar='output_directory', type=str, help='Directory to put graph data')
-    parser.add_argument("files", metavar="dataset file paths", type=str, nargs='+',  
-        help="path to dateset files([train, valid, test])") # train, test, valid sets
+                        metavar='output_directory', type=str, help='Directory to put graph data')
+    parser.add_argument("files", metavar="dataset file paths", type=str, nargs='+',
+                        help="path to dateset files([train, valid, test])")  # train, test, valid sets
     parser.add_argument('num_partitions', metavar='num_partitions',
                         type=int, help='Number of partitions to split the edges into')
     args = parser.parse_args()
 
-    general_parser(np.array(args.files).flatten(), args.format, args.output_directory, num_partitions=args.num_partitions)
+    general_parser(np.array(args.files).flatten(), args.format, args.output_directory,
+                   num_partitions=args.num_partitions)
+
+
+if __name__ == "__main__":
+    main()
