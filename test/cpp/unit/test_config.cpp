@@ -2,7 +2,7 @@
 // Created by Jason Mohoney on 4/12/21.
 //
 
-#include <config.h.h>
+#include <config.h>
 #include <string>
 
 std::string conf_str = std::string(MARIUS_TEST_DIRECTORY) + "/test_configs/default.ini";
