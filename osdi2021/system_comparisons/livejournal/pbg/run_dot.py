@@ -18,7 +18,7 @@ from torchbiggraph.util import (
 import sys
 from os import path
 
-sys.path.append(path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__))))))
+sys.path.append(path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))))))
 from osdi2021.utils import make_tsv
 
 URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
