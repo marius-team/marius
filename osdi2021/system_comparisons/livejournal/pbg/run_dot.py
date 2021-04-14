@@ -15,6 +15,8 @@ from torchbiggraph.util import (
     setup_logging,
 )
 
+from osdi2021.utils import make_tsv
+
 URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
 TRAIN_FILENAME = "lj_train.txt"
 VALID_FILENAME = "lj_valid.txt"
@@ -110,6 +112,8 @@ def main():
 
     eval_config = attr.evolve(config, edge_paths=[output_test_path])
     do_eval(eval_config, subprocess_init=subprocess_init)
+
+    make_tsv(eval_config)
 
 
 if __name__ == "__main__":

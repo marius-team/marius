@@ -25,8 +25,6 @@ def get_torchbiggraph_config():
         num_uniform_negs=500,
         num_batch_negs=500,
         loss_fn="softmax",
-        eval_num_uniform_negs=10000,
-        eval_num_batch_negs=0,
         lr=0.1,
         # Evaluation during training
         eval_fraction=0,
