@@ -21,6 +21,50 @@ VALID_FILENAME = "lj_valid.txt"
 TEST_FILENAME = "lj_valid.txt"
 FILENAMES = [TRAIN_FILENAME, VALID_FILENAME, TEST_FILENAME]
 
+TRAIN_FRACTION = .9
+VALID_FRACTION = .05
+TEST_FRACTION = .05
+
+def random_split_file(fpath: Path) -> None:
+    train_file = fpath.parent / TRAIN_FILENAME
+    valid_file = fpath.parent / VALID_FILENAME
+    test_file = fpath.parent / TEST_FILENAME
+
+    if train_file.exists() and test_file.exists():
+        print(
+            "Found some files that indicate that the input data "
+            "has already been shuffled and split, not doing it again."
+        )
+        print(f"These files are: {train_file} and {test_file}")
+        return
+
+    print("Shuffling and splitting train/test file. This may take a while.")
+
+    print(f"Reading data from file: {fpath}")
+    with fpath.open("rt") as in_tf:
+        lines = in_tf.readlines()
+
+    # The first few lines are comments
+    lines = lines[4:]
+    print("Shuffling data")
+    random.shuffle(lines)
+    split_len = int(len(lines) * TRAIN_FRACTION)
+
+    valid_len = int(len(lines) * (TRAIN_FRACTION + VALID_FRACTION))
+
+    print("Splitting to train and test files")
+    with train_file.open("wt") as out_tf_train:
+        for line in lines[:split_len]:
+            out_tf_train.write(line)
+
+    with valid_file.open("wt") as out_tf_train:
+        for line in lines[split_len:valid_len]:
+            out_tf_train.write(line)
+
+    with test_file.open("wt") as out_tf_test:
+        for line in lines[valid_len:]:
+            out_tf_test.write(line)
+
 def main():
     setup_logging()
     parser = argparse.ArgumentParser(description="Example on Livejournal")
