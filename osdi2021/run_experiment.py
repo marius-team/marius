@@ -81,8 +81,7 @@ def run_dglke(cmd, exp_dir, name, overwrite=False):
         print("DGL-KE: %s already run" % name)
 
 
-
-def run_fb15k():
+def run_fb15k(overwrite=False):
     exp_dir = "osdi2021/system_comparisons/fb15k/marius/"
 
     distmult_config = exp_dir + "distmult.ini"
@@ -92,8 +91,8 @@ def run_fb15k():
         print("==== Preprocessing FB15K =====")
         preprocess.fb15k("fb15k/")
 
-    run_marius(distmult_config, exp_dir, "distmult_fb15k")
-    run_marius(complex_config, exp_dir, "complex_fb15k")
+    run_marius(distmult_config, exp_dir, "distmult_fb15k", overwrite=overwrite)
+    run_marius(complex_config, exp_dir, "complex_fb15k", overwrite=overwrite)
 
     exp_dir = "osdi2021/system_comparisons/fb15k/dgl-ke/"
     with open(exp_dir + "complex.txt", "r") as f:
@@ -101,8 +100,8 @@ def run_fb15k():
     with open(exp_dir + "distmult.txt", "r") as f:
         dglke_distmult_cmd = f.readlines()[0]
 
-    run_dglke(dglke_complex_cmd, exp_dir, "complex_fb15k")
-    run_dglke(dglke_distmult_cmd, exp_dir, "distmult_fb15k")
+    run_dglke(dglke_complex_cmd, exp_dir, "complex_fb15k", overwrite=overwrite)
+    run_dglke(dglke_distmult_cmd, exp_dir, "distmult_fb15k", overwrite=overwrite)
 
     # PBG may throw errors
     exp_dir = "osdi2021/system_comparisons/fb15k/pbg/"
@@ -110,13 +109,13 @@ def run_fb15k():
     runner_file = exp_dir + "run_fb15k.py"
     complex_config = exp_dir + "fb15k_complex_config.py"
     distmult_config = exp_dir + "fb15k_distmult_config.py"
-    run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k")
-    run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k")
+    run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k", overwrite=overwrite)
+    run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k", overwrite=overwrite)
 
     osdi_plot.print_table_2()
 
 
-def run_livejournal():
+def run_livejournal(overwrite=False):
     exp_dir = "osdi2021/system_comparisons/livejournal/marius/"
     dot_config = exp_dir + "dot.ini"
 
@@ -124,19 +123,19 @@ def run_livejournal():
         print("==== Preprocessing Livejournal =====")
         preprocess.live_journal("livejournal/")
 
-    run_marius(dot_config, exp_dir, "dot_livejournal")
+    run_marius(dot_config, exp_dir, "dot_livejournal", overwrite=overwrite)
 
     # PBG may throw errors
     exp_dir = "osdi2021/system_comparisons/livejournal/pbg/"
 
     runner_file = exp_dir + "run_dot.py"
     dot_config = exp_dir + "dot.py"
-    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal")
+    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal", overwrite=overwrite)
 
     osdi_plot.print_table_3()
 
 
-def run_twitter():
+def run_twitter(overwrite=False):
     exp_dir = "osdi2021/system_comparisons/twitter/marius/"
 
     dot_config = exp_dir + "dot.ini"
@@ -145,12 +144,12 @@ def run_twitter():
         print("==== Preprocessing Twitter =====")
         preprocess.twitter("twitter/")
 
-    run_marius(dot_config, exp_dir, "dot_twitter")
+    run_marius(dot_config, exp_dir, "dot_twitter", overwrite=overwrite)
 
     osdi_plot.print_table_4()
 
 
-def run_freebase86m():
+def run_freebase86m(overwrite=False):
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
     complex_config = exp_dir + "d100.ini"
 
@@ -158,12 +157,12 @@ def run_freebase86m():
         print("==== Preprocessing Freebase86m P=16 D=100 =====")
         preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
 
-    run_marius(complex_config, exp_dir, "freebase86m_16")
+    run_marius(complex_config, exp_dir, "freebase86m_16", overwrite=overwrite)
 
     osdi_plot.print_table_5()
 
 
-def run_utilization():
+def run_utilization(overwrite=False):
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
 
     complex_50_config = exp_dir + "d50.ini"
@@ -174,25 +173,25 @@ def run_utilization():
         preprocess.freebase86m("freebase86m/")
 
     config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2"
-    run_marius(complex_50_config, exp_dir, "complex_50_util", config_args)
+    run_marius(complex_50_config, exp_dir, "complex_50_util", config_args, overwrite=overwrite)
 
     if not os.path.exists("freebase86m_p8/"):
         print("==== Preprocessing Freebase86m P=8 D=50 =====")
         preprocess.freebase86m("freebase86m_p8/", num_partitions=8)
 
-    run_marius(complex_50_8_config, exp_dir, "complex_50_8_util", config_args)
+    run_marius(complex_50_8_config, exp_dir, "complex_50_8_util", config_args, overwrite=overwrite)
 
     exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
     with open(exp_dir + "complex.txt", "r") as f:
         dglke_complex_cmd = f.readlines()[0]
 
     try:
-        run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util")
+        run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite)
     except Exception as e:
         print(e)
 
 
-def run_buffer_simulator():
+def run_buffer_simulator(overwrite=False):
     exp_dir = "osdi2021/buffer_simulator/"
 
     n_start = 8
@@ -203,7 +202,7 @@ def run_buffer_simulator():
     print("Figure written to %s" % exp_dir + "figure7.png")
 
 
-def run_orderings_total_io():
+def run_orderings_total_io(overwrite=False):
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -215,14 +214,14 @@ def run_orderings_total_io():
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
     config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2 --reporting.logs_per_epoch=1000"
-    run_marius(elimination_config, exp_dir, "elimination100_util", config_args)
+    run_marius(elimination_config, exp_dir, "elimination100_util", config_args, overwrite=overwrite)
 
-    run_marius(hilbert_config, exp_dir, "hilbert100_util", config_args)
+    run_marius(hilbert_config, exp_dir, "hilbert100_util", config_args, overwrite=overwrite)
 
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args, overwrite=overwrite)
 
 
-def run_orderings_freebase86m():
+def run_orderings_freebase86m(overwrite=False):
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -234,22 +233,22 @@ def run_orderings_freebase86m():
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    run_marius(elimination_config, exp_dir, "elimination100")
-    run_marius(hilbert_config, exp_dir, "hilbert100")
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100")
+    run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite)
+    run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", overwrite=overwrite)
 
     if not os.path.exists("freebase86m/"):
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
     config_args = "--model.embedding_size=50"
-    run_marius(elimination_config, exp_dir, "elimination50")
-    run_marius(hilbert_config, exp_dir, "hilbert50", config_args)
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric50", config_args)
-    run_marius(memory_config, exp_dir, "memory50", config_args)
+    run_marius(elimination_config, exp_dir, "elimination50", overwrite=overwrite)
+    run_marius(hilbert_config, exp_dir, "hilbert50", config_args, overwrite=overwrite)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric50", config_args, overwrite=overwrite)
+    run_marius(memory_config, exp_dir, "memory50", config_args, overwrite=overwrite)
 
 
-def run_orderings_twitter():
+def run_orderings_twitter(overwrite=False):
     exp_dir = "osdi2021/partition_orderings/twitter/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -265,18 +264,18 @@ def run_orderings_twitter():
         print("==== Preprocessing Twitter P=1 D=100 =====")
         preprocess.freebase86m("twitter/")
 
-    run_marius(elimination_config, exp_dir, "elimination100")
-    run_marius(hilbert_config, exp_dir, "hilbert100")
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100")
-    run_marius(memory_config, exp_dir, "memory100")
+    run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite)
+    run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", overwrite=overwrite)
+    run_marius(memory_config, exp_dir, "memory100", overwrite=overwrite)
 
     config_args = "--model.embedding_size=200"
-    run_marius(elimination_config, exp_dir, "elimination200", config_args)
-    run_marius(hilbert_config, exp_dir, "hilbert200", config_args)
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric200", config_args)
+    run_marius(elimination_config, exp_dir, "elimination200", config_args, overwrite=overwrite)
+    run_marius(hilbert_config, exp_dir, "hilbert200", config_args, overwrite=overwrite)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric200", config_args, overwrite=overwrite)
 
 
-def run_staleness_bound():
+def run_staleness_bound(overwrite=False):
     exp_dir = "osdi2021/microbenchmarks/bounded_staleness/"
 
     all_async_config = exp_dir + "all_async.ini"
@@ -287,15 +286,15 @@ def run_staleness_bound():
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
-    run_marius(all_sync, exp_dir, "all_sync")
+    run_marius(all_sync, exp_dir, "all_sync", overwrite=overwrite)
 
     for bound in [2, 4, 8, 16, 32, 64]:
         config_args = "--training_pipeline.max_batches_in_flight=%i" % bound
-        run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args)
-        run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args)
+        run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args, overwrite=overwrite)
+        run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite)
 
 
-def run_prefetching():
+def run_prefetching(overwrite=False):
     exp_dir = "osdi2021/microbenchmarks/prefetching/"
 
     no_prefetching_config = exp_dir + "no_prefetching.ini"
@@ -305,11 +304,11 @@ def run_prefetching():
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    run_marius(no_prefetching_config, exp_dir, "no_prefetching")
-    run_marius(prefetching_config, exp_dir, "prefetching")
+    run_marius(no_prefetching_config, exp_dir, "no_prefetching", overwrite=overwrite)
+    run_marius(prefetching_config, exp_dir, "prefetching", overwrite=overwrite)
 
 
-def run_big_embeddings():
+def run_big_embeddings(overwrite=False):
     exp_dir = "osdi2021/large_embeddings/"
     cpu_memory = exp_dir + "cpu_memory.ini"
     gpu_memory = exp_dir + "gpu_memory.ini"
@@ -322,11 +321,11 @@ def run_big_embeddings():
         print("==== Preprocessing Freebase86m P=32 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    run_marius(gpu_memory, exp_dir, "d20")
-    run_marius(cpu_memory, exp_dir, "d50")
+    run_marius(gpu_memory, exp_dir, "d20", overwrite=overwrite)
+    run_marius(cpu_memory, exp_dir, "d50", overwrite=overwrite)
 
     config_args = "--storage.buffer_capacity=16"
-    run_marius(disk, exp_dir, "d100", config_args)
+    run_marius(disk, exp_dir, "d100", config_args, overwrite=overwrite)
 
     osdi_plot.print_table_6()
 
@@ -387,6 +386,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Reproduce experiments ')
     parser.add_argument('--experiment', metavar='experiment', type=str, choices=experiment_dict.keys(),
                         help='Experiment choices: %(choices)s')
+    parser.add_argument('--overwrite', metavar='overwrite', action='store_true',
+                        help='If true, the results of previously run experiments will be overwritten.')
 
     args = parser.parse_args()
-    experiment_dict.get(args.experiment)()
+    experiment_dict.get(args.experiment)(args.overwrite)

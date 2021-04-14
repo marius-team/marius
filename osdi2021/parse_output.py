@@ -1,6 +1,7 @@
 from datetime import datetime
 import pandas as pd
 
+
 def parse_dglke(filename):
     result = {}
     # [0]Test average MRR: 0.7992962475244683
@@ -18,6 +19,7 @@ def parse_dglke(filename):
 
     return result
 
+
 def parse_pbg(filename):
     result = {}
     #2020-09-16 03:32:24,833   [Evaluator] Stats for edge path 1 / 1: loss:  2.3353 , pos_rank:  16.8775 , mrr:  0.826554 , r1:  0.773254 , r10:  0.912942 , r50:  0.955042 , auc:  0.985117 , count:  3449689
@@ -30,6 +32,7 @@ def parse_pbg(filename):
 
     return result
 
+
 def read_dstat(filename):
     map_columns = {"time": "Timestamp",
                    "usr": "CPU User Utilization",
@@ -39,6 +42,7 @@ def read_dstat(filename):
                    "used": "Memory Used"}
 
     df = pd.read_csv(filename, header=5).rename(columns=map_columns)
+    df = df[:-1] # last line might not have been completely written, ignore it
     df["Timestamp"] = pd.to_datetime(df['Timestamp'], format="%d-%m %H:%M:%S") + pd.offsets.DateOffset(years=120)
     return df
 
@@ -49,6 +53,7 @@ def read_nvidia_smi(filename):
                    "timestamp": "Timestamp"}
 
     df = pd.read_csv(filename).rename(columns=map_columns)
+    df = df[:-1] # last line might not have been completely written, ignore it
     df["Timestamp"] = pd.to_datetime(df['Timestamp'], format="%Y/%m/%d %H:%M:%S.%f")
     df['GPU Memory Utilization'] = df['GPU Memory Utilization'].str.rstrip('%').astype('float') / 100.0
     df['GPU Compute Utilization'] = df['GPU Compute Utilization'].str.rstrip('%').astype('float') / 100.0
