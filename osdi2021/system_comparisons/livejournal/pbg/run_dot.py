@@ -84,6 +84,8 @@ def main():
     print("Downloaded and extracted file.")
 
     # random split file for train and test
+    random_split_file(fpath)
+
     loader = ConfigFileLoader()
     config = loader.load_config(args.config, args.param)
     set_logging_verbosity(config.verbose)
