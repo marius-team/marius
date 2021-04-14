@@ -23,13 +23,24 @@ def parse_dglke(filename):
 def parse_pbg(filename):
     result = {}
     #2020-09-16 03:32:24,833   [Evaluator] Stats for edge path 1 / 1: loss:  2.3353 , pos_rank:  16.8775 , mrr:  0.826554 , r1:  0.773254 , r10:  0.912942 , r50:  0.955042 , auc:  0.985117 , count:  3449689
+    start_time = None
+    end_time = None
     with open(filename) as f:
         for line in f.readlines():
             if "Stats for edge path" in line and "bucket" not in line:
                 result["MRR"] = float(line.split()[17])
                 result["Hits@1"] = float(line.split()[20])
                 result["Hits@10"] = float(line.split()[23])
+            if "Starting epoch" in line:
+                if start_time is None:
+                    start_time = " ".join(line.split()[:1])
+                    start_time = datetime.strptime(start_time, "%y-%m-%d %H:%M:%S,%f")
+            if "Finished epoch" in line:
+                end_time = " ".join(line.split()[:1])
+                end_time = datetime.strptime(start_time, "%y-%m-%d %H:%M:%S,%f")
 
+    runtime = (end_time - start_time).total_seconds()
+    result["Train Time"] = runtime
     return result
 
 

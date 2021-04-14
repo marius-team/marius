@@ -73,14 +73,16 @@ def print_table_2():
     MRR = complex_res["MRR"]
     hits1 = complex_res["Hits@1"]
     hits10 = complex_res["Hits@10"]
+    time = complex_res["Train Time"]
 
-    print("PBG Complex: MRR %s, Hits@1 %s, Hits@10 %s" % (MRR, hits1, hits10))
+    print("PBG Complex: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
 
     MRR = distmul_res["MRR"]
     hits1 = distmul_res["Hits@1"]
     hits10 = distmul_res["Hits@10"]
+    time = distmul_res["Train Time"]
 
-    print("PBG DistMult: MRR %s, Hits@1 %s, Hits@10 %s" % (MRR, hits1, hits10))
+    print("PBG DistMult: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
 
 
 
