@@ -1,7 +1,9 @@
 from pathlib import Path
 import argparse
+import pandas as pd
 
 DEFAULT_CONFIG_FILE = "./tools/config_templates/default_configs.txt"
+DATASET_STATS = "./tools/dataset_stats/dataset_stats.tsv"
 
 
 def output_config(config_dict, output_dir):
@@ -18,11 +20,15 @@ def output_config(config_dict, output_dir):
         f.write("[general]\n")
         f.write("device=" + config_dict.get("general.device") + "\n")
         f.write("gpu_ids=" + config_dict.get("general.gpu_ids") + "\n")
-        f.write("num_train=" + config_dict.get("num_train") + "\n")
-        f.write("num_nodes=" + config_dict.get("num_nodes") + "\n")
-        f.write("num_relations=" + config_dict.get("num_relations") + "\n")
-        f.write("num_valid=" + config_dict.get("num_valid") + "\n")
-        f.write("num_test=" + config_dict.get("num_test") + "\n")
+        if config_dict.get("general.random_seed") is not None:
+            f.write("random_seed=" + config_dict.get("general.random_seed")
+                    + "\n")
+        f.write("num_train=" + str(config_dict.get("num_train")) + "\n")
+        f.write("num_nodes=" + str(config_dict.get("num_nodes")) + "\n")
+        f.write("num_relations=" + str(config_dict.get("num_relations"))
+                + "\n")
+        f.write("num_valid=" + str(config_dict.get("num_valid")) + "\n")
+        f.write("num_test=" + str(config_dict.get("num_test")) + "\n")
         f.write("experiment_name=" +
                 config_dict.get("general.experiment_name") + "\n")
 
@@ -54,6 +60,16 @@ def read_template(file):
     return config_dict, valid_dict
 
 
+def set_up_files(output_directory):
+    try:
+        if not Path(output_directory).exists():
+            Path(output_directory).mkdir(parents=False, exist_ok=False)
+    except FileExistsError:
+        print("Directory already exists.")
+    except FileNotFoundError:
+        print("Incorrect parent path given for output directory.")
+
+
 def update_param(config_dict, arg_dict):
     if arg_dict.get("generate_config") is None:
         for key in config_dict:
@@ -79,11 +95,123 @@ def update_param(config_dict, arg_dict):
             if arg_dict.get(key) is not None:
                 config_dict.update({key: arg_dict.get(key)})
 
-    if config_dict.get("general.random_seed") == "*":
-        del config_dict["general.random_seed"]
+    if config_dict.get("general.random_seed") == "#":
+        config_dict.pop("general.random_seed")
 
     return config_dict
 
 
+def update_dataset_stats(dataset, config_dict):
+    dataset_stats = pd.read_csv(DATASET_STATS, sep='\t', header=None)
+    index = dataset_stats.index[dataset_stats[0] == dataset]
+    if (len(index) != 0):
+        stats = []
+        indices = [1, 3, 4, 5, 6]
+        for i in indices:
+            stats.append(dataset_stats.loc[index[0]].tolist()[i])
+        config_dict = update_stats(stats, config_dict)
+    else:
+        raise RuntimeError("Unrecognized dataset")
+
+    return config_dict
+
+
+def update_stats(stats, config_dict):
+    config_dict.update({"num_train": str(stats[2])})
+    config_dict.update({"num_nodes": str(stats[0])})
+    config_dict.update({"num_relations": str(stats[1])})
+    config_dict.update({"num_valid": str(stats[3])})
+    config_dict.update({"num_test": str(stats[4])})
+
+    return config_dict
+
+
+def set_args():
+    parser = argparse.ArgumentParser(
+                description='Generate configs', prog='config_generator',
+                formatter_class=argparse.RawTextHelpFormatter,
+                epilog=('Specify certain config (optional): ' +
+                        '[--<section>.<key>=<value>]'))
+    mode = parser.add_mutually_exclusive_group()
+    parser.add_argument('output_directory', metavar='output_directory',
+                        type=str, help='Directory to put configs')
+    mode.add_argument('--dataset', '-d', metavar='dataset', type=str,
+                      help='Dataset to preprocess')
+    mode.add_argument('--stats', '-s',
+                      metavar=('num_nodes', 'num_relations', 'num_train',
+                               'num_valid', 'num_test'),
+                      nargs=5, help='Dataset statistics\n' +
+                      'Enter in order of num_nodes, num_relations, num_train' +
+                      ' num_valid, num_test')
+    parser.add_argument('--device', '-dev', metavar='generate_config',
+                        choices=["GPU", "CPU", "multi-GPU"],
+                        nargs='?', default='GPU',
+                        help=('Generates configs for a single-GPU/multi-CPU' +
+                              '/multi-GPU training configuration file by ' +
+                              'default. \nValid options (default to GPU): ' +
+                              '[GPU, CPU, multi-GPU]'))
+
+    config_dict, valid_dict = read_template(DEFAULT_CONFIG_FILE)
+
+    for key in list(config_dict.keys())[1:]:
+        if valid_dict.get(key) is not None:
+            parser.add_argument(str("--" + key), metavar=key, type=str,
+                                choices=valid_dict.get(key),
+                                default=config_dict.get(key),
+                                help=argparse.SUPPRESS)
+        else:
+            parser.add_argument(str("--" + key), metavar=key, type=str,
+                                default=config_dict.get(key),
+                                help=argparse.SUPPRESS)
+
+    return parser, config_dict
+
+
+def parse_args(args):
+    arg_dict = vars(args)
+    set_up_files(args.output_directory)
+
+    arg_dict.update({"general.device": arg_dict.get("device")})
+    if arg_dict.get("device") == "multi-GPU":
+        arg_dict.update({"device": "multi_GPU"})
+    else:
+        arg_dict.update({"device": arg_dict.get("device")})
+
+    if arg_dict.get("general.random_seed") == "#":
+        arg_dict.pop("general.random_seed")
+
+    if arg_dict.get("dataset") is not None:
+        arg_dict.update({"dataset": arg_dict.get("dataset")})
+        arg_dict = update_dataset_stats(arg_dict.get("dataset"), arg_dict)
+    elif arg_dict.get("stats") is not None:
+        arg_dict = update_stats(arg_dict.get("stats"), arg_dict)
+    else:
+        raise RuntimeError("Must specify either dataset or dataset stats.")
+
+    return arg_dict
+
+
 if __name__ == "__main__":
-    print("This is a config generator.")
+    parser, config_dict = set_args()
+    args = parser.parse_args()
+    config_dict = parse_args(args)
+
+    dir = args.output_directory
+    config_dict.update({"path.train_edges": str(dir.strip("/") +
+                        "/train_edges.pt")})
+    config_dict.update({"path.train_edges_partitions": str(dir.strip("/") +
+                        "/train_edges_partitions.txt")})
+    config_dict.update({"path.valid_edges": str(dir.strip("/") +
+                        "/valid_edges.pt")})
+    config_dict.update({"path.test_edges": str(dir.strip("/") +
+                        "/test_edges.pt")})
+    config_dict.update({"path.node_labels": str(dir.strip("/") +
+                        "/node_mapping.txt")})
+    config_dict.update({"path.relation_labels": str(dir.strip("/") +
+                        "/rel_mapping.txt")})
+    config_dict.update({"path.node_ids": str(dir.strip("/") +
+                        "/node_mapping.bin")})
+    config_dict.update({"path.relation_ids": str(dir.strip("/") +
+                        "/rel_mapping.bin")})
+
+    output_config(config_dict, dir)

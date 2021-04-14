@@ -16,6 +16,7 @@ import torch
 from config_generator import output_config
 from config_generator import read_template
 from config_generator import update_param
+from config_generator import set_up_files
 from config_generator import DEFAULT_CONFIG_FILE
 from csv_converter import general_parser
 
@@ -482,7 +483,7 @@ def set_args():
     parser.add_argument('--generate_config', '-gc', metavar='generate_config',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', const="GPU",
-                        help=('Generates a single-GPU/multi-CPU/multii-GPU ' +
+                        help=('Generates a single-GPU/multi-CPU/multi-GPU ' +
                               'training configuration file by default. ' +
                               '\nValid options (default to GPU): ' +
                               '[GPU, CPU, multi-GPU]'))
@@ -499,16 +500,6 @@ def set_args():
                                 help=argparse.SUPPRESS)
 
     return parser, config_dict
-
-
-def set_up_files(output_directory):
-    try:
-        if not Path(output_directory).exists():
-            Path(output_directory).mkdir(parents=False, exist_ok=False)
-    except FileExistsError:
-        print("Directory already exists.")
-    except FileNotFoundError:
-        print("Incorrect parent path given for output directory.")
 
 
 def parse_args(config_dict, args):
