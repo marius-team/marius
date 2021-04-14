@@ -15,7 +15,7 @@ from torchbiggraph.util import (
     setup_logging,
 )
 
-from osdi2021.utils import make_tsv
+from ....utils import make_tsv
 
 URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
 TRAIN_FILENAME = "lj_train.txt"
