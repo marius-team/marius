@@ -15,7 +15,11 @@ from torchbiggraph.util import (
     setup_logging,
 )
 
-from ....utils import make_tsv
+import sys
+from os import path
+
+sys.path.append(path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__))))))
+from osdi2021.utils import make_tsv
 
 URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
 TRAIN_FILENAME = "lj_train.txt"
