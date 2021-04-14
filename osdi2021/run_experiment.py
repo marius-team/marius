@@ -366,6 +366,12 @@ def run_all():
             print(e)
             print("#### %s Failed ####\n" %k)
 
+def run_multi_gpu(overwrite=False):
+    exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
+    with open(exp_dir + "complex_multi_gpu.txt", "r") as f:
+        dglke_complex_cmd = f.readlines()[0]
+
+    run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite)
 
 if __name__ == "__main__":
     experiment_dict = {
@@ -381,12 +387,13 @@ if __name__ == "__main__":
         "staleness_bound": run_staleness_bound,
         "prefetching": run_prefetching,
         "big_embeddings": run_big_embeddings,
+        "multi_gpu": run_multi_gpu,
         "all": run_all
     }
     parser = argparse.ArgumentParser(description='Reproduce experiments ')
     parser.add_argument('--experiment', metavar='experiment', type=str, choices=experiment_dict.keys(),
                         help='Experiment choices: %(choices)s')
-    parser.add_argument('--overwrite', metavar='overwrite', action='store_true',
+    parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                         help='If true, the results of previously run experiments will be overwritten.')
 
     args = parser.parse_args()
