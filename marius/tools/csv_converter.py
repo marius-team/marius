@@ -344,7 +344,7 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     return output_stats, len(node_ids), num_rels
 
 
-if __name__ == "__main__":
+def main():
     '''
         Args: format(s,d,r) output_directory csv_file(s)
     '''
@@ -367,3 +367,6 @@ if __name__ == "__main__":
     general_parser(np.array(args.files).flatten(), args.format,
                    args.output_directory,
                    num_partitions=args.num_partitions)
+
+if __name__ == "__main__":
+    main()

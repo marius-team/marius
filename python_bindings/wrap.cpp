@@ -11,10 +11,11 @@ void init_decoder(py::module &);
 void init_encoder(py::module &);
 void init_evaluator(py::module &);
 void init_model(py::module &);
+void init_marius(py::module &);
 void init_io(py::module &);
 void init_trainer(py::module &);
 
-PYBIND11_MODULE(pymarius, m) {
+PYBIND11_MODULE(_pymarius, m) {
 
 	m.doc() = "pybind11 marius plugin";
 
@@ -26,6 +27,7 @@ PYBIND11_MODULE(pymarius, m) {
 	init_encoder(m);
 	init_evaluator(m);
 	init_model(m);
+	init_marius(m);
 	init_io(m);
 	init_trainer(m);
 }

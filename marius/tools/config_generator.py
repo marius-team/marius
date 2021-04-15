@@ -1,7 +1,6 @@
 from pathlib import Path
-import argparse
 
-DEFAULT_CONFIG_FILE = "./tools/config_templates/default_configs.txt"
+DEFAULT_CONFIG_FILE = "marius/tools/config_templates/default_configs.txt"
 
 
 def output_config(config_dict, output_dir):

@@ -116,9 +116,9 @@ add_executable(marius_eval src/marius.cpp)
 target_link_libraries(marius_train ${PROJECT_NAME})
 target_link_libraries(marius_eval ${PROJECT_NAME})
 
-pybind11_add_module(pymarius ${project_SOURCES} ${project_BINDINGS})
+pybind11_add_module(_pymarius ${project_SOURCES} ${project_BINDINGS})
 
 find_library(TORCH_PYTHON_LIBRARY torch_python PATHS "${TORCH_INSTALL_PREFIX}/lib")
 message(STATUS "TORCH_PYTHON_LIBRARY: ${TORCH_PYTHON_LIBRARY}")
-target_link_libraries(pymarius PRIVATE ${PROJECT_NAME} ${TORCH_PYTHON_LIBRARY})
-target_include_directories(pymarius PRIVATE ${project_INCLUDE_DIR})
+target_link_libraries(_pymarius PRIVATE ${PROJECT_NAME} ${TORCH_PYTHON_LIBRARY})
+target_include_directories(_pymarius PRIVATE ${project_INCLUDE_DIR})

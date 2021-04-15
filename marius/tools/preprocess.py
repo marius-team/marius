@@ -13,11 +13,11 @@ import numpy as np
 import pandas as pd
 import torch
 
-from config_generator import output_config
-from config_generator import read_template
-from config_generator import update_param
-from config_generator import DEFAULT_CONFIG_FILE
-from csv_converter import general_parser
+from marius.tools.config_generator import output_config
+from marius.tools.config_generator import read_template
+from marius.tools.config_generator import update_param
+from marius.tools.config_generator import DEFAULT_CONFIG_FILE
+from marius.tools.csv_converter import general_parser
 
 
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
@@ -520,7 +520,7 @@ def parse_args(config_dict, args):
     return config_dict, arg_dict
 
 
-if __name__ == "__main__":
+def main():
     parser, config_dict = set_args()
     args = parser.parse_args()
     config_dict, arg_dict = parse_args(config_dict, args)
@@ -583,3 +583,6 @@ if __name__ == "__main__":
                             "/rel_mapping.bin")})
 
         output_config(config_dict, dir)
+
+if __name__ == "__main__":
+    main()
