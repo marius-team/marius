@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_CONFIG_FILE = os.path.join(HERE, "config_templates", "default_configs.txt")
