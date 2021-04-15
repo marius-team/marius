@@ -117,7 +117,7 @@ def main():
     eval_config = attr.evolve(config, edge_paths=[output_test_path])
     do_eval(eval_config, subprocess_init=subprocess_init)
 
-    make_tsv(eval_config)
+    make_tsv(eval_config, False)
 
 
 if __name__ == "__main__":
