@@ -7,7 +7,7 @@ from tools.preprocess import set_args
 from tools.preprocess import parse_args
 
 
-class TestCmdOptParser(unittest.TestCase):
+class TestPreprocessCmdOptParser(unittest.TestCase):
     """
     Tests for functions parsing command line arguments
     """
