@@ -36,7 +36,7 @@ Details on how Marius works can be found in the documentation, or in our [OSDI 2
 
 2. Clone the repository `git clone https://github.com/marius-team/marius.git`
 
-3. Install dependencies `cd marius; python3 -m pip install .`
+3. Build and install Marius `cd marius; python3 -m pip install .`
 
 
 #### Full script (without torch install) ####
@@ -68,7 +68,7 @@ python3 -m pip install -r requirements.txt
 mkdir build
 cd build
 cmake ../ -DUSE_CUDA=1
-make marius_train -j
+make -j
 ```
 
 ## Training a graph ##
