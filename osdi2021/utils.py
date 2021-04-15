@@ -45,11 +45,11 @@ def write(outf: TextIO, key: Iterable[str], value: Iterable[float]) -> None:
 
 
 def make_tsv(
-        config: ConfigSchema
+        config: ConfigSchema,
+        relations: bool
 ) -> None:
     print("Loading relation types and entities...")
     entity_storage = ENTITY_STORAGES.make_instance(config.entity_path)
-    relation_type_storage = RELATION_TYPE_STORAGES.make_instance(config.entity_path)
     test_edge_storage = EDGE_STORAGES.make_instance(config.edge_paths[0])
 
     print("Initializing model...")
@@ -64,13 +64,13 @@ def make_tsv(
     for k, v in model.entities.items():
         num_partitions = v.num_partitions
 
-
-
     offsets = convert_embeddings(model, checkpoint_manager, entity_storage)
-
     convert_edges(test_edge_storage, num_partitions, offsets)
 
-    convert_relations(model, relation_type_storage)
+    if relations:
+        relation_type_storage = RELATION_TYPE_STORAGES.make_instance(config.entity_path)
+        convert_relations(model, relation_type_storage)
+
 
 def convert_edges(
         edges: AbstractEdgeStorage,
@@ -91,13 +91,11 @@ def convert_edges(
                 f.write(bytes(tmp))
 
 
-
-
 def convert_embeddings(
         model: MultiRelationEmbedder,
         checkpoint_manager: CheckpointManager,
         entity_storage: AbstractEntityStorage,
-) -> None:
+) -> list:
 
     offsets = []
     embedding_sizes = []
@@ -126,7 +124,6 @@ def convert_embeddings(
 
                 print(f"- Processed all {len(embeddings)} entities")
 
-
     for i, size in enumerate(embedding_sizes):
         if i == 0:
             offsets.append(0)
@@ -134,9 +131,7 @@ def convert_embeddings(
             prev = offsets[i - 1]
             offsets.append(prev + embedding_sizes[i - 1])
 
-
     return offsets
-
 
 
 def convert_relations(
@@ -166,7 +161,6 @@ def convert_relations(
                         rhs_real = all_params
                     else:
                         rhs_imag = all_params
-
 
         lhs = torch.cat([lhs_real, lhs_imag], dim=1)
         rhs = torch.cat([rhs_real, rhs_imag], dim=1)
