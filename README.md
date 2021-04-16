@@ -126,10 +126,13 @@ To train using CPUs only, use the `examples/training/configs/fb15k_cpu.ini` conf
 
 Below is a sample python script which trains a single epoch of embeddings on fb15k.
 ```
-import sys
 import marius as m
+from marius.tools import preprocess
 
 def fb15k_example():
+
+    preprocess.fb15k(output_dir="output_dir/")
+    
     config_path = "examples/training/configs/fb15k_cpu.ini"
     config = m.parseConfig(config_path)
 
