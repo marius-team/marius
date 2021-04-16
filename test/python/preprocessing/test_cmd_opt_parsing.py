@@ -32,6 +32,7 @@ class TestCmdOptParser(unittest.TestCase):
             ["marius_preprocess", "wn18", "./output_dir", "-gc"]
         ]
 
+    @classmethod
     def tearDown(self):
         if Path("./output_dir").exists():
             shutil.rmtree(Path("./output_dir"))

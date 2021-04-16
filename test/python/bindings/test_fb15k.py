@@ -8,13 +8,14 @@ from marius.tools import preprocess
 
 class TestFB15K(unittest.TestCase):
 
+    @classmethod
     def tearDown(self):
         if Path("output_dir").exists():
             shutil.rmtree(Path("output_dir"))
         if Path("training_data").exists():
             shutil.rmtree(Path("training_data"))
 
-    def test_one_epoch(slef):
+    def test_one_epoch(self):
         preprocess.fb15k(output_dir="output_dir/")
         config_path = "examples/training/configs/fb15k_cpu.ini"
         config = m.parseConfig(config_path)
