@@ -163,6 +163,6 @@ jobs:
         shell: bash
         run:   |
           python3 -c "import marius as m"
-          python3 -c "from marius.tools import preprocessing"
-          marius_preprocessing fb15k output_dir/
+          python3 -c "from marius.tools import preprocess"
+          marius_preprocess fb15k output_dir/
 
