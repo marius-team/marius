@@ -22,7 +22,7 @@ Details on how Marius works can be found in the documentation, or in our [OSDI 2
 * make >= 3.8
 
 
-## Installation ##
+## Installation from source with Pip ##
 
 1. Install latest version of PyTorch for your CUDA version:
 
@@ -34,26 +34,41 @@ Details on how Marius works can be found in the documentation, or in our [OSDI 2
     MacOS:
     - CPU Only: `python3 -m pip install torch==1.7.1`
 
-2. Clone the repository `git clone https://github.com/rekords-uw/marius.git`
+2. Clone the repository `git clone https://github.com/marius-team/marius.git`
 
-3. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
+3. Build and install Marius `cd marius; python3 -m pip install .`
 
-4. Create build directory `mkdir build; cd build`
-
-5. Run cmake in the build directory `cmake ../` (CPU-only build) or `cmake ../ -DUSE_CUDA=1` (GPU build)
-
-6. Make the marius executable. `make marius_train -j`
 
 #### Full script (without torch install) ####
 
 ```
-git clone https://github.com/rekords-uw/marius.git
+git clone https://github.com/marius-team/marius.git
+cd marius
+python3 -m pip install .
+```
+
+## Installation from source with CMake ##
+
+1. Clone the repository `git clone https://github.com/marius-team/marius.git`
+
+2. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
+
+3. Create build directory `mkdir build; cd build`
+
+4. Run cmake in the build directory `cmake ../` (CPU-only build) or `cmake ../ -DUSE_CUDA=1` (GPU build)
+
+5. Make the marius executable. `make marius_train -j`
+
+#### Full script (without torch install) ####
+
+```
+git clone https://github.com/marius-team/marius.git
 cd marius
 python3 -m pip install -r requirements.txt
 mkdir build
 cd build
 cmake ../ -DUSE_CUDA=1
-make marius_train -j
+make -j
 ```
 
 ## Training a graph ##
@@ -64,12 +79,12 @@ Training embeddings on a graph requires three steps.
 
    See `docs/configuration.rst` for full details on the configuration options.
 
-2. Preprocess the dataset `python3 tools/preprocess.py fb15k output_dir/`
+2. Preprocess the dataset `marius_preprocess fb15k output_dir/`
 
-   The first argument of tools/preprocess.py defines the dataset we wish to download and preprocess, in this case fb15k. 
+   The first argument of marius/tools/preprocess.py defines the dataset we wish to download and preprocess, in this case fb15k. 
    The second argument tells the preprocessor where to put the preprocessed dataset.
 
-3. Run the training executable with the config file. `build/marius_train examples/training/configs/fb15k_gpu.ini`
+3. Run the training executable with the config file. `marius_train examples/training/configs/fb15k_gpu.ini`
 
 The output of the first epoch should be similar to the following.
 ```[info] [03/18/21 01:33:16.173] Start preprocessing
@@ -107,19 +122,17 @@ To train using CPUs only, use the `examples/training/configs/fb15k_cpu.ini` conf
 
 ## Using the Python API ##
 
-### Building the Python Bindings ###
+### Sample Code ###
 
-After following the installation steps, the bindings can be installed by making the pymarius target: `make pymarius -j`
-
-*The location of the bindings needs to be added to the system path* in order to access them.
-The following is a sample python script for training a single epoch on fb15k.
-
+Below is a sample python script which trains a single epoch of embeddings on fb15k.
 ```
-import sys
-sys.path.insert(0, 'build/') # need to add the build directory to the system path so python can find the bindings
-import pymarius as m
+import marius as m
+from marius.tools import preprocess
 
-def marius():
+def fb15k_example():
+
+    preprocess.fb15k(output_dir="output_dir/")
+    
     config_path = "examples/training/configs/fb15k_cpu.ini"
     config = m.parseConfig(config_path)
 
@@ -135,7 +148,7 @@ def marius():
 
 
 if __name__ == "__main__":
-    marius()
+    fb15k_example()
 ```
 
 ## Marius in Docker ##

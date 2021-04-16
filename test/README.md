@@ -1,25 +1,28 @@
+# Testing Marius #
 
-Run end to end tests: 
+Marius uses GTest for testing C++ code, and uses tox and pytest for testing python code.
+
+Currently only a simple set of end to end tests are written for C++ and Python. 
+
+### C++ Tests ###
+
+Tests must be built before they can be run.
+
+Building the tests (working from `<INSTALL_DIR>/marius`):  
 ```
-cd build/test/end_to_end
+cd build
+make end_to_end -j
+```
+
+Running the tests: 
+```
+cd build/test/cpp/end_to_end
 ./end_to_end
 ```
 
-Run unit tests: 
-```
-cd build/test/unit
-./unit
-```
+### Python Tests ###
 
-Run performance tests: 
+Running the tests (working from `<INSTALL_DIR>/marius`):
 ```
-cd build/test/performance
-./performance
+tox
 ```
-
-Run integration tests: 
-```
-cd build/test/integration
-./integration
-```
-
