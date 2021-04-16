@@ -543,7 +543,7 @@ def parse_args(config_dict, args):
     return config_dict, arg_dict
 
 
-if __name__ == "__main__":
+def main():
     parser, config_dict = set_args()
     args = parser.parse_args()
     config_dict, arg_dict = parse_args(config_dict, args)
@@ -586,3 +586,6 @@ if __name__ == "__main__":
         config_dict = update_stats(stats, config_dict)
         config_dict = update_data_path(dir, config_dict)
         output_config(config_dict, dir)
+
+if __name__ == "__main__":
+    main()

@@ -3,8 +3,8 @@ import argparse
 import subprocess
 import shutil
 from pathlib import Path
-from tools.preprocess import set_args
-from tools.preprocess import parse_args
+from marius.tools.preprocess import set_args
+from marius.tools.preprocess import parse_args
 
 
 class TestPreprocessCmdOptParser(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
             ["wn18", "./output_dir", "multi_cpu"],
             ["wn18", "./output_dir", "--gc",
              "--storage.edge_bucket_ordering=EliminationCus"],
-            ["python3", "./tools/preprocess.py", "wn18", "./output_dir", "-gc"]
+            ["marius_preprocess", "wn18", "./output_dir", "-gc"]
         ]
 
     def tearDown(self):

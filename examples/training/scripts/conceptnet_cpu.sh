@@ -1,5 +1,5 @@
 # preprocess the conceptnet graph and put preprocessed graph into output dir
-python3 tools/preprocess.py conceptnet output_dir/ 
+marius_preprocess conceptnet output_dir/
 
 # run marius on the preprocessed input
-build/marius_train examples/training/configs/conceptnet_cpu.ini info
+marius_train examples/training/configs/conceptnet_cpu.ini info

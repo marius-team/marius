@@ -1,9 +1,12 @@
 from pathlib import Path
 import argparse
 import pandas as pd
+import os
 
-DEFAULT_CONFIG_FILE = "./tools/config_templates/default_configs.txt"
-DATASET_STATS = "./tools/dataset_stats/dataset_stats.tsv"
+HERE = os.path.abspath(os.path.dirname(__file__))
+DEFAULT_CONFIG_FILE = os.path.join(HERE, "config_templates",
+                                   "default_configs.txt")
+DATASET_STATS = os.path.join(HERE, "dataset_stats", "dataset_stats.tsv")
 
 
 def output_config(config_dict, output_dir):

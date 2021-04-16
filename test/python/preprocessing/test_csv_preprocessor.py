@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from tools.csv_converter import general_parser
+from marius.tools.csv_converter import general_parser
 
 
 class TestGeneralParser(unittest.TestCase):
