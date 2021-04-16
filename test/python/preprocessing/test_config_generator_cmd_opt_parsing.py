@@ -3,9 +3,9 @@ import argparse
 import subprocess
 import shutil
 from pathlib import Path
-from tools.config_generator import set_args
-from tools.config_generator import parse_args
-from tools.config_generator import read_template
+from marius.tools.config_generator import set_args
+from marius.tools.config_generator import parse_args
+from marius.tools.config_generator import read_template
 
 
 class TestConfigGeneratorCmdOptParser(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         ["./output_dir", "-s", "23", "2"],
         ["-d", "live_journal"],
         [],
-        ["python3", "./tools/config_generator.py", "./output_dir",
+        ["marius_config_generator", "./output_dir",
          "-d", "wn18"],
         ["./output_dir", "-d", "live_journal",
          "--training.number_of_chunks=32"],
