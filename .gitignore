@@ -17,4 +17,3 @@ marius_env/
 libtorch/
 logs/
 workspace/
-test/test_data/*.pt
