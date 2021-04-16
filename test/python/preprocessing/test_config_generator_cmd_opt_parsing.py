@@ -26,7 +26,9 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
          "-d", "wn18"],
         ["./output_dir", "-d", "live_journal",
          "--training.number_of_chunks=32"],
-        ["./output_dir", "-d", "fb15k", "--reporting.log_level=all"]
+        ["./output_dir", "-d", "fb15k", "--reporting.log_level=all"],
+        ["./output_dir", "-d", "wn18", "--data_directory", "./data_dir"],
+        ["./output_dir"]
     ]
 
     def tearDown(self):
@@ -50,6 +52,8 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         self.assertTrue(str(config_dict.get("num_relations")) == "18")
         self.assertTrue(str(config_dict.get("num_valid")) == "5000")
         self.assertTrue(str(config_dict.get("num_test")) == "5000")
+        self.assertTrue(config_dict.get("data_directory") is None)
+        self.assertTrue(config_dict.get("output_directory") == "./output_dir")
 
     def test_missing_dataset(self):
         """
@@ -149,3 +153,24 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[11])
+
+    def test_data_path(self):
+        """
+        Check if data path is set correctly if --data_directory is specified
+        """
+        parser, config_dict = set_args()
+        args = parser.parse_args(self.cmd_args[12])
+        config_dict = parse_args(args)
+        self.assertTrue(str(config_dict.get("data_directory")) ==
+                        "./data_dir")
+        self.assertTrue(str(config_dict.get("output_directory")) ==
+                        "./output_dir")
+
+    def test_missing_mode_arg(self):
+        """
+        Check if exception is thrown when -d and -s are not specified
+        """
+        parser, config_dict = set_args()
+        with self.assertRaises(RuntimeError):
+            args = parser.parse_args(self.cmd_args[13])
+            config_dict = parse_args(args)
