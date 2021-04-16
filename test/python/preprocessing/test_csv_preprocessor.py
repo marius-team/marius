@@ -1,11 +1,12 @@
+import os
+import shutil
 import unittest
 from pathlib import Path
-import shutil
-import os
+
 from marius.tools.csv_converter import general_parser
 
-
 TEST_DIR = "./output_dir"
+
 
 class TestGeneralParser(unittest.TestCase):
     """
@@ -31,14 +32,14 @@ class TestGeneralParser(unittest.TestCase):
 
         os.makedirs(output_dir)
 
-        stats, num_nodes, num_rels = general_parser(
+        stats = general_parser(
             [str(Path(input_dir) / train_file),
              str(Path(input_dir) / valid_file),
              str(Path(input_dir) / test_file)],
             ["srd"], [output_dir], num_partitions=1)
 
-        assert(stats[2] == 1000)
-        assert(stats[3] == 100)
-        assert(stats[4] == 100)
-        assert(stats[0] == 100)
-        assert(stats[1] == 10)
+        assert (stats[2] == 1000)
+        assert (stats[3] == 100)
+        assert (stats[4] == 100)
+        assert (stats[0] == 100)
+        assert (stats[1] == 10)
