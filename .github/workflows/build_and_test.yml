@@ -157,3 +157,13 @@ jobs:
         working-directory: ${{github.workspace}}
         shell: bash
         run: python3 -m pip install . --verbose
+
+      - name: Test Pip Install
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run:   |
+          python3 -c "import marius as m"
+          python3 -c "from marius.tools import preprocess"
+          marius_preprocess fb15k output_dir/
+          pytest test
+
