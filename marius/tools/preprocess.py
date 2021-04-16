@@ -13,13 +13,13 @@ import numpy as np
 import pandas as pd
 import torch
 
-from config_generator import output_config
-from config_generator import read_template
-from config_generator import set_up_files
-from config_generator import update_stats
-from config_generator import update_data_path
-from config_generator import DEFAULT_CONFIG_FILE
-from csv_converter import general_parser
+from marius.tools.config_generator import output_config
+from marius.tools.config_generator import read_template
+from marius.tools.config_generator import set_up_files
+from marius.tools.config_generator import update_stats
+from marius.tools.config_generator import update_data_path
+from marius.tools.config_generator import DEFAULT_CONFIG_FILE
+from marius.tools.csv_converter import general_parser
 
 
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
