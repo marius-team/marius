@@ -1,6 +1,6 @@
 general.device=CPU*CPU*GPU
 general.gpu_ids=0
-general.random_seed=*
+general.random_seed=#
 general.experiment_name=marius
 model.scale_factor=.001
 model.initialization_distribution=Normal*Uniform*Normal

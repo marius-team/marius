@@ -32,12 +32,13 @@ class TestGeneralParser(unittest.TestCase):
         os.makedirs(output_dir)
 
         stats, num_nodes, num_rels = general_parser(
-                                    [str(Path(input_dir) / train_file),
-                                     str(Path(input_dir) / valid_file),
-                                     str(Path(input_dir) / test_file)],
-                                    ["srd"], [output_dir], num_partitions=1)
-        assert(stats[0] == 1000)
-        assert(stats[1] == 100)
-        assert(stats[2] == 100)
-        assert(num_nodes == 100)
-        assert(num_rels == 10)
+            [str(Path(input_dir) / train_file),
+             str(Path(input_dir) / valid_file),
+             str(Path(input_dir) / test_file)],
+            ["srd"], [output_dir], num_partitions=1)
+
+        assert(stats[2] == 1000)
+        assert(stats[3] == 100)
+        assert(stats[4] == 100)
+        assert(stats[0] == 100)
+        assert(stats[1] == 10)

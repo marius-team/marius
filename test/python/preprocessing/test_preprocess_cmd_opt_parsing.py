@@ -7,7 +7,7 @@ from marius.tools.preprocess import set_args
 from marius.tools.preprocess import parse_args
 
 
-class TestCmdOptParser(unittest.TestCase):
+class TestPreprocessCmdOptParser(unittest.TestCase):
     """
     Tests for functions parsing command line arguments
     """

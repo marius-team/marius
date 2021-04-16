@@ -9,11 +9,15 @@ include(FindPackageHandleStandardArgs)
 add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0)
+        message(FATAL_ERROR "Clang version must be at least 12!")
+    endif()
     set(CLANG TRUE)
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        message(FATAL_ERROR "GCC version must be at least 9.0!")
+    endif()
     set(GCC TRUE)
-elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
-    set(ICC TRUE)
 else ()
     message(FATAL_ERROR "Unknown compiler")
 endif ()
@@ -33,6 +37,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 if(${USE_CUDA})
     add_definitions(-DMARIUS_CUDA=${USE_CUDA})
 endif()
+
 
 # Find torch location
 execute_process(
