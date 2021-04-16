@@ -22,20 +22,6 @@ else ()
     message(FATAL_ERROR "Unknown compiler")
 endif ()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    # require at least gcc 4.8
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
-        message(FATAL_ERROR "GCC version must be at least 4.8!")
-    endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    # require at least clang 3.2
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.2)
-        message(FATAL_ERROR "Clang version must be at least 3.2!")
-    endif()
-else()
-    message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
-endif()
-
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(CMAKE_MACOSX_RPATH 1)
 endif ()
