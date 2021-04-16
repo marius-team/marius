@@ -1,6 +1,8 @@
 from pathlib import Path
+import os
 
-DEFAULT_CONFIG_FILE = "marius/tools/config_templates/default_configs.txt"
+HERE = os.path.abspath(os.path.dirname(__file__))
+DEFAULT_CONFIG_FILE = os.path.join(HERE, "config_templates", "default_configs.txt")
 
 
 def output_config(config_dict, output_dir):
