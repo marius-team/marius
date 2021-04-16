@@ -15,8 +15,9 @@ import torch
 
 from config_generator import output_config
 from config_generator import read_template
-from config_generator import update_param
 from config_generator import set_up_files
+from config_generator import update_stats
+from config_generator import update_data_path
 from config_generator import DEFAULT_CONFIG_FILE
 from csv_converter import general_parser
 
@@ -347,13 +348,13 @@ def parse_ogbn(files, output_dir, num_partitions=1):
     test_edges.to_csv(str(Path(output_dir) /
                       Path("test.txt")), sep="\t", header=False, index=False)
 
-    stats, num_nodes, num_edges = general_parser(
+    stats = general_parser(
                     [str(Path(output_dir) / Path("train.txt")),
                      str(Path(output_dir) / Path("valid.txt")),
                      str(Path(output_dir) / Path("test.txt"))],
                     ["sd"], [output_dir],
                     num_partitions=num_partitions)
-    return stats, num_nodes, num_edges
+    return stats
 
 
 def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
@@ -384,18 +385,18 @@ def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
     print("Conversion completed.")
 
     if has_rel is True:
-        stats, num_nodes, num_edges = general_parser(
+        stats = general_parser(
             [str(Path(output_dir) / Path("train.txt")),
              str(Path(output_dir) / Path("valid.txt")),
              str(Path(output_dir) / Path("test.txt"))], ["srd"],
             [output_dir], num_partitions=num_partitions)
     else:
-        stats, num_nodes, num_edges = general_parser(
+        stats = general_parser(
             [str(Path(output_dir) / Path("train.txt")),
              str(Path(output_dir) / Path("valid.txt")),
              str(Path(output_dir) / Path("test.txt"))], ["sd"],
             [output_dir], num_partitions=num_partitions)
-    return stats, num_nodes, num_edges
+    return stats
 
 
 def download_file(url, output_dir):
@@ -465,6 +466,37 @@ def extract_file(filepath):
 
     print("Extraction completed")
     return filepath.parent
+
+
+def update_param(config_dict, arg_dict):
+    if arg_dict.get("generate_config") is None:
+        for key in config_dict:
+            if arg_dict.get(key) is not None:
+                raise RuntimeError(
+                    "Please specify --generate_config when " +
+                    "specifying generating options"
+                )
+    else:
+        if arg_dict.get("generate_config") is None:
+            config_dict.update({"device": "GPU"})
+            config_dict.update({"general.device": "GPU"})
+        elif arg_dict.get("generate_config") == "multi-GPU":
+            config_dict.update({"device": "multi_GPU"})
+            config_dict.update({"general.device": "multi-GPU"})
+        else:
+            config_dict.update({"general.device":
+                                arg_dict.get("generate_config")})
+            config_dict.update({"device":
+                                arg_dict.get("generate_config")})
+
+        for key in config_dict.keys():
+            if arg_dict.get(key) is not None:
+                config_dict.update({key: arg_dict.get(key)})
+
+    if config_dict.get("general.random_seed") == "#":
+        config_dict.pop("general.random_seed")
+
+    return config_dict
 
 
 def set_args():
@@ -544,33 +576,13 @@ if __name__ == "__main__":
     }
 
     if dataset_dict.get(args.dataset) is not None:
-        stats, num_nodes, num_relations = dataset_dict.get(args.dataset)(
+        stats = dataset_dict.get(args.dataset)(
                                     args.output_directory, args.num_partitions)
     else:
         raise RuntimeError("Unrecognized dataset.")
 
     if args.generate_config is not None:
         dir = args.output_directory
-        config_dict.update({"num_train": str(int(stats[0]))})
-        config_dict.update({"num_nodes": str(int(num_nodes))})
-        config_dict.update({"num_relations": str(int(num_relations))})
-        config_dict.update({"num_valid": str(int(stats[1]))})
-        config_dict.update({"num_test":  str(int(stats[2]))})
-        config_dict.update({"path.train_edges": str(dir.strip("/") +
-                            "/train_edges.pt")})
-        config_dict.update({"path.train_edges_partitions": str(dir.strip("/") +
-                            "/train_edges_partitions.txt")})
-        config_dict.update({"path.valid_edges": str(dir.strip("/") +
-                            "/valid_edges.pt")})
-        config_dict.update({"path.test_edges": str(dir.strip("/") +
-                            "/test_edges.pt")})
-        config_dict.update({"path.node_labels": str(dir.strip("/") +
-                            "/node_mapping.txt")})
-        config_dict.update({"path.relation_labels": str(dir.strip("/") +
-                            "/rel_mapping.txt")})
-        config_dict.update({"path.node_ids": str(dir.strip("/") +
-                            "/node_mapping.bin")})
-        config_dict.update({"path.relation_ids": str(dir.strip("/") +
-                            "/rel_mapping.bin")})
-
+        config_dict = update_stats(stats, config_dict)
+        config_dict = update_data_path(dir, config_dict)
         output_config(config_dict, dir)

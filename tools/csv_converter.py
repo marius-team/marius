@@ -341,7 +341,10 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
 
     output_stats = np.zeros(3)
     output_stats[:len(num_edges_f)] = num_edges_f
-    return output_stats, len(node_ids), num_rels
+    output_stats = list(output_stats)
+    output_stats.insert(0, num_rels)
+    output_stats.insert(0, len(node_ids))
+    return output_stats
 
 
 if __name__ == "__main__":

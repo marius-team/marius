@@ -70,46 +70,14 @@ def set_up_files(output_directory):
         print("Incorrect parent path given for output directory.")
 
 
-def update_param(config_dict, arg_dict):
-    if arg_dict.get("generate_config") is None:
-        for key in config_dict:
-            if arg_dict.get(key) is not None:
-                raise RuntimeError(
-                    "Please specify --generate_config when " +
-                    "specifying generating options"
-                )
-    else:
-        if arg_dict.get("generate_config") is None:
-            config_dict.update({"device": "GPU"})
-            config_dict.update({"general.device": "GPU"})
-        elif arg_dict.get("generate_config") == "multi-GPU":
-            config_dict.update({"device": "multi_GPU"})
-            config_dict.update({"general.device": "multi-GPU"})
-        else:
-            config_dict.update({"general.device":
-                                arg_dict.get("generate_config")})
-            config_dict.update({"device":
-                                arg_dict.get("generate_config")})
-
-        for key in config_dict.keys():
-            if arg_dict.get(key) is not None:
-                config_dict.update({key: arg_dict.get(key)})
-
-    if config_dict.get("general.random_seed") == "#":
-        config_dict.pop("general.random_seed")
-
-    return config_dict
-
-
 def update_dataset_stats(dataset, config_dict):
-    dataset_stats = pd.read_csv(DATASET_STATS, sep='\t', header=None)
-    index = dataset_stats.index[dataset_stats[0] == dataset]
-    if (len(index) != 0):
-        stats = []
-        indices = [1, 3, 4, 5, 6]
-        for i in indices:
-            stats.append(dataset_stats.loc[index[0]].tolist()[i])
-        config_dict = update_stats(stats, config_dict)
+    datasets_stats = pd.read_csv(DATASET_STATS, sep='\t')
+    stats_row = datasets_stats[datasets_stats['dataset'] == dataset]
+    if not stats_row.empty:
+        stats_list = stats_row.iloc[0][['num_nodes', 'num_relations',
+                                        'num_train', 'num_valid',
+                                        'num_test']].tolist()
+        config_dict = update_stats(stats_list, config_dict)
     else:
         raise RuntimeError("Unrecognized dataset")
 
@@ -117,11 +85,32 @@ def update_dataset_stats(dataset, config_dict):
 
 
 def update_stats(stats, config_dict):
-    config_dict.update({"num_train": str(stats[2])})
-    config_dict.update({"num_nodes": str(stats[0])})
-    config_dict.update({"num_relations": str(stats[1])})
-    config_dict.update({"num_valid": str(stats[3])})
-    config_dict.update({"num_test": str(stats[4])})
+    config_dict.update({"num_train": str(int(stats[2]))})
+    config_dict.update({"num_nodes": str(int(stats[0]))})
+    config_dict.update({"num_relations": str(int(stats[1]))})
+    config_dict.update({"num_valid": str(int(stats[3]))})
+    config_dict.update({"num_test": str(int(stats[4]))})
+
+    return config_dict
+
+
+def update_data_path(dir, config_dict):
+    config_dict.update({"path.train_edges": str(dir.strip("/") +
+                        "/train_edges.pt")})
+    config_dict.update({"path.train_edges_partitions": str(dir.strip("/") +
+                        "/train_edges_partitions.txt")})
+    config_dict.update({"path.valid_edges": str(dir.strip("/") +
+                        "/valid_edges.pt")})
+    config_dict.update({"path.test_edges": str(dir.strip("/") +
+                        "/test_edges.pt")})
+    config_dict.update({"path.node_labels": str(dir.strip("/") +
+                        "/node_mapping.txt")})
+    config_dict.update({"path.relation_labels": str(dir.strip("/") +
+                        "/rel_mapping.txt")})
+    config_dict.update({"path.node_ids": str(dir.strip("/") +
+                        "/node_mapping.bin")})
+    config_dict.update({"path.relation_ids": str(dir.strip("/") +
+                        "/rel_mapping.bin")})
 
     return config_dict
 
@@ -134,7 +123,11 @@ def set_args():
                         '[--<section>.<key>=<value>]'))
     mode = parser.add_mutually_exclusive_group()
     parser.add_argument('output_directory', metavar='output_directory',
-                        type=str, help='Directory to put configs')
+                        type=str, help='Directory to put configs \nAlso ' +
+                        'assumed to be the default directory of preprocessed' +
+                        ' data if --data_directory is not specified')
+    parser.add_argument('--data_directory', metavar='data_directory',
+                        type=str, help='Directory of the preprocessed data')
     mode.add_argument('--dataset', '-d', metavar='dataset', type=str,
                       help='Dataset to preprocess')
     mode.add_argument('--stats', '-s',
@@ -197,21 +190,9 @@ if __name__ == "__main__":
     config_dict = parse_args(args)
 
     dir = args.output_directory
-    config_dict.update({"path.train_edges": str(dir.strip("/") +
-                        "/train_edges.pt")})
-    config_dict.update({"path.train_edges_partitions": str(dir.strip("/") +
-                        "/train_edges_partitions.txt")})
-    config_dict.update({"path.valid_edges": str(dir.strip("/") +
-                        "/valid_edges.pt")})
-    config_dict.update({"path.test_edges": str(dir.strip("/") +
-                        "/test_edges.pt")})
-    config_dict.update({"path.node_labels": str(dir.strip("/") +
-                        "/node_mapping.txt")})
-    config_dict.update({"path.relation_labels": str(dir.strip("/") +
-                        "/rel_mapping.txt")})
-    config_dict.update({"path.node_ids": str(dir.strip("/") +
-                        "/node_mapping.bin")})
-    config_dict.update({"path.relation_ids": str(dir.strip("/") +
-                        "/rel_mapping.bin")})
+    if args.data_directory is None:
+        config_dict = update_data_path(dir, config_dict)
+    else:
+        config_dict = update_data_path(args.data_directory, config_dict)
 
     output_config(config_dict, dir)
