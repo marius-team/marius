@@ -2,6 +2,8 @@ import unittest
 import subprocess
 import shutil
 from pathlib import Path
+import pytest
+import os
 import marius as m
 from marius.tools import preprocess
 
@@ -15,6 +17,7 @@ class TestFB15K(unittest.TestCase):
         if Path("training_data").exists():
             shutil.rmtree(Path("training_data"))
 
+    @pytest.mark.skipif(os.environ["MARIUS_ONLY_PYTHON"] == "TRUE", reason="Requires building the bindings")
     def test_one_epoch(self):
         preprocess.fb15k(output_dir="output_dir/")
         config_path = "examples/training/configs/fb15k_cpu.ini"
