@@ -197,10 +197,10 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
 
         // initialize 10 million nodes at a time
         while (offset < num_nodes) {
-            if (num_nodes - offset < 10E7) {
+            if (num_nodes - offset < 1E7) {
                 curr_num_nodes = num_nodes - offset;
             } else {
-                curr_num_nodes = 10E7;
+                curr_num_nodes = 1E7;
             }
 
             Embeddings weights;
