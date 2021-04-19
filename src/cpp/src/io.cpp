@@ -224,16 +224,25 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
     Storage *node_embedding_storage;
     Storage *optimizer_state_storage;
 
+    SPDLOG_DEBUG("Embeddings written to file");
+    process_mem_usage();
+
     switch (marius_options.storage.embeddings) {
         case BackendType::RocksDB: {
             SPDLOG_ERROR("Currently Unsupported");
             exit(-1);
         }
         case BackendType::PartitionBuffer: {
+            SPDLOG_DEBUG("Init Buffer");
+            process_mem_usage();
             node_embedding_storage = new PartitionBufferStorage(node_embedding_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.storage.buffer_capacity, true);
+            SPDLOG_DEBUG("Node Emb Buffer Initialized");
+            process_mem_usage();
             if (train) {
                 optimizer_state_storage = new PartitionBufferStorage(optimizer_state_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.storage.buffer_capacity, false);
             }
+            SPDLOG_DEBUG("Optimizer State Node Emb Buffer Initialized");
+            process_mem_usage();
             break;
         }
         case BackendType::FlatFile: {
