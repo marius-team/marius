@@ -369,9 +369,15 @@ tuple<Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage 
     int64_t num_relations = marius_options.general.num_relations;
 
     bool train = true;
+    SPDLOG_DEBUG("Initializing Edges");
     tuple<Storage *, Storage *, Storage *> edge_storages = initializeEdges(train);
+    SPDLOG_DEBUG("Initialized Edges");
+    SPDLOG_DEBUG("Initializing Node Embeddings");
     tuple<Storage *, Storage *> node_embedding_storages = initializeNodeEmbeddings(train);
+    SPDLOG_DEBUG("Initialized Node Embeddings");
+    SPDLOG_DEBUG("Initializing Relation Embeddings");
     tuple<Storage *, Storage *, Storage *, Storage *> relation_embedding_storages = initializeRelationEmbeddings(train);
+    SPDLOG_DEBUG("Initialized Relation Embeddings");
 
     return std::tuple_cat(edge_storages, node_embedding_storages, relation_embedding_storages);
 }
