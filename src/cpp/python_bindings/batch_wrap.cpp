@@ -53,8 +53,6 @@ void init_batch(py::module &m) {
         .def_readwrite("dst_all_neg_embeddings_", &Batch::dst_all_neg_embeddings_)
         .def_readwrite("load_timestamp_", &Batch::load_timestamp_)
         .def_readwrite("compute_timestamp_", &Batch::compute_timestamp_)
-	    .def_readwrite("device_transfer_", &Batch::device_transfer_)
-        .def_readwrite("host_transfer_", &Batch::host_transfer_)
         .def_readwrite("device_id_", &Batch::device_id_)
         .def_readwrite("timer_", &Batch::timer_)
         .def_readwrite("ranks_", &Batch::ranks_)
