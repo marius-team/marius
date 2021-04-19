@@ -24,17 +24,17 @@ def start_tracing():
 
 def run_marius(config_path, args):
     script = """
-    build/marius_train %s %s
+    marius_train %s %s
     """
 
     script = script % (config_path, args)
     with open("tmp.txt", "w") as tmp_file:
-        subprocess.check_call(script, shell=True, stdout=tmp_file)
+        subprocess.check_call(script, shell=True, stdout=tmp_file, stderr=tmp_file)
 
 
 def run_dglke(args):
     with open("tmp.txt", "w") as tmp_file:
-        subprocess.check_call(args, shell=True, stdout=tmp_file)
+        subprocess.check_call(args, shell=True, stdout=tmp_file, stderr=tmp_file)
 
 
 def run_pbg(script_path, config_path, args=None):
@@ -97,3 +97,14 @@ def cleanup_experiments(info_log_only=False):
         shutil.rmtree("training_dir")
     except FileNotFoundError:
         pass
+
+    try:
+        shutil.rmtree("ckpts")
+    except FileNotFoundError:
+        pass
+
+    try:
+        shutil.rmtree("model")
+    except FileNotFoundError:
+        pass
+

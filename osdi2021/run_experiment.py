@@ -6,10 +6,8 @@ import execute as e
 import json
 from buffer_simulator import plotting as plot_buff
 import plotting as osdi_plot
-
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))) + "/tools")
-import tools.preprocess as preprocess
+import shutil
+import marius.tools.preprocess as preprocess
 
 
 def run_marius(config, exp_dir, name, config_args="", overwrite=False):
@@ -20,7 +18,6 @@ def run_marius(config, exp_dir, name, config_args="", overwrite=False):
         e.run_marius(config, config_args)
         e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
         info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
-        e.cleanup_experiments()
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
@@ -31,6 +28,10 @@ def run_marius(config, exp_dir, name, config_args="", overwrite=False):
         with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
             nvidia_smi_df.to_csv(out_file)
             print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+        shutil.move("tmp.txt", exp_dir + name + "_output.txt")
+        print("Program output written to: %s" % exp_dir + name + "_output.txt")
+
+        e.cleanup_experiments()
     else:
         print("Marius: %s already run" % name)
 
@@ -43,7 +44,6 @@ def run_pbg(runner_file, config, exp_dir, name, overwrite=False):
         e.run_pbg(runner_file, config)
         e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
         info_log, dstat_df, nvidia_smi_df = e.collect_metrics(pbg=True)
-        e.cleanup_experiments()
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
@@ -54,6 +54,11 @@ def run_pbg(runner_file, config, exp_dir, name, overwrite=False):
         with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
             nvidia_smi_df.to_csv(out_file)
             print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+
+        shutil.move("tmp.txt", exp_dir + name + "_output.txt")
+        print("Program output written to: %s" % exp_dir + name + "_output.txt")
+
+        e.cleanup_experiments()
     else:
         print("PBG: %s already run" % name)
 
@@ -66,7 +71,6 @@ def run_dglke(cmd, exp_dir, name, overwrite=False):
         e.run_dglke(cmd)
         e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
         info_log, dstat_df, nvidia_smi_df = e.collect_metrics(dglke=True)
-        e.cleanup_experiments()
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
@@ -77,11 +81,16 @@ def run_dglke(cmd, exp_dir, name, overwrite=False):
         with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
             nvidia_smi_df.to_csv(out_file)
             print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+
+        shutil.move("tmp.txt", exp_dir + name + "_output.txt")
+        print("Program output written to: %s" % exp_dir + name + "_output.txt")
+
+        e.cleanup_experiments()
     else:
         print("DGL-KE: %s already run" % name)
 
 
-def run_fb15k(overwrite=False):
+def run_fb15k(overwrite=False, show_output=False):
     exp_dir = "osdi2021/system_comparisons/fb15k/marius/"
 
     distmult_config = exp_dir + "distmult.ini"
@@ -115,7 +124,7 @@ def run_fb15k(overwrite=False):
     osdi_plot.print_table_2()
 
 
-def run_livejournal(overwrite=False):
+def run_livejournal(overwrite=False, show_output=False):
     exp_dir = "osdi2021/system_comparisons/livejournal/marius/"
     dot_config = exp_dir + "dot.ini"
 
@@ -135,7 +144,7 @@ def run_livejournal(overwrite=False):
     osdi_plot.print_table_3()
 
 
-def run_twitter(overwrite=False):
+def run_twitter(overwrite=False, show_output=False):
     exp_dir = "osdi2021/system_comparisons/twitter/marius/"
 
     dot_config = exp_dir + "dot.ini"
@@ -149,7 +158,7 @@ def run_twitter(overwrite=False):
     osdi_plot.print_table_4()
 
 
-def run_freebase86m(overwrite=False):
+def run_freebase86m(overwrite=False, show_output=False):
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
     complex_config = exp_dir + "d100.ini"
 
@@ -162,7 +171,7 @@ def run_freebase86m(overwrite=False):
     osdi_plot.print_table_5()
 
 
-def run_utilization(overwrite=False):
+def run_utilization(overwrite=False, show_output=False):
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
 
     complex_50_config = exp_dir + "d50.ini"
@@ -191,7 +200,7 @@ def run_utilization(overwrite=False):
         print(e)
 
 
-def run_buffer_simulator(overwrite=False):
+def run_buffer_simulator(overwrite=False, show_output=False):
     exp_dir = "osdi2021/buffer_simulator/"
 
     n_start = 8
@@ -202,7 +211,7 @@ def run_buffer_simulator(overwrite=False):
     print("Figure written to %s" % exp_dir + "figure7.png")
 
 
-def run_orderings_total_io(overwrite=False):
+def run_orderings_total_io(overwrite=False, show_output=False):
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -221,7 +230,7 @@ def run_orderings_total_io(overwrite=False):
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args, overwrite=overwrite)
 
 
-def run_orderings_freebase86m(overwrite=False):
+def run_orderings_freebase86m(overwrite=False, show_output=False):
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -248,7 +257,7 @@ def run_orderings_freebase86m(overwrite=False):
     run_marius(memory_config, exp_dir, "memory50", config_args, overwrite=overwrite)
 
 
-def run_orderings_twitter(overwrite=False):
+def run_orderings_twitter(overwrite=False, show_output=False):
     exp_dir = "osdi2021/partition_orderings/twitter/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -275,7 +284,7 @@ def run_orderings_twitter(overwrite=False):
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric200", config_args, overwrite=overwrite)
 
 
-def run_staleness_bound(overwrite=False):
+def run_staleness_bound(overwrite=False, show_output=False):
     exp_dir = "osdi2021/microbenchmarks/bounded_staleness/"
 
     all_async_config = exp_dir + "all_async.ini"
@@ -294,7 +303,7 @@ def run_staleness_bound(overwrite=False):
         run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite)
 
 
-def run_prefetching(overwrite=False):
+def run_prefetching(overwrite=False, show_output=False):
     exp_dir = "osdi2021/microbenchmarks/prefetching/"
 
     no_prefetching_config = exp_dir + "no_prefetching.ini"
@@ -308,7 +317,7 @@ def run_prefetching(overwrite=False):
     run_marius(prefetching_config, exp_dir, "prefetching", overwrite=overwrite)
 
 
-def run_big_embeddings(overwrite=False):
+def run_big_embeddings(overwrite=False, show_output=False):
     exp_dir = "osdi2021/large_embeddings/"
     cpu_memory = exp_dir + "cpu_memory.ini"
     gpu_memory = exp_dir + "gpu_memory.ini"
@@ -395,6 +404,8 @@ if __name__ == "__main__":
                         help='Experiment choices: %(choices)s')
     parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                         help='If true, the results of previously run experiments will be overwritten.')
+    # parser.add_argument('--show_output', dest='show_output', action='store_true',
+    #                     help='If true, the output of each run will be output to the terminal.')
 
     args = parser.parse_args()
     experiment_dict.get(args.experiment)(args.overwrite)

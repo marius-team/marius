@@ -185,32 +185,22 @@ Please also see instructions below.
 
 2. Clone the repository `git clone https://github.com/marius-team/marius.git`
 
-3. Checkout the artifact evaluation branch `git checkout osdi2021`
+3. Checkout the artifact evaluation branch `cd marius; git checkout osdi2021`
 
-4. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
+4. Build and install Marius `python3 -m pip install .`
 
 5. Download and build PyTorch-BigGraph `git clone https://github.com/facebookresearch/PyTorch-BigGraph.git; cd PyTorch-BigGraph; export PBG_INSTALL_CPP=1; python3 -m pip install .; cd ..`
-
-5. Create build directory `mkdir build; cd build`
-
-6. Run cmake in the build directory `cmake ../ -DUSE_CUDA=1` (GPU build)
-
-7. Make the marius executable. `make marius_train -j`
 
 #### Full script (without torch install) ####
 ```
 git clone https://github.com/marius-team/marius.git
-git checkout osdi2021
 cd marius
-python3 -m pip install -r requirements.txt
+git checkout osdi2021
+python3 -m pip install .
 git clone https://github.com/facebookresearch/PyTorch-BigGraph.git
 export PBG_INSTALL_CPP=1
 cd PyTorch-BigGraph 
 python3 -m pip install .
 cd ..
-mkdir build
-cd build
-cmake ../ -DUSE_CUDA=1
-make marius_train -j
 ```
 
