@@ -48,7 +48,7 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
     download_path = download_file("https://snap.stanford.edu/data/twitter-2010.txt.gz", output_dir)
     extract_file(download_path)
 
-    stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))], ["srd"],
+    stats, num_nodes, num_edges = general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))], ["sd"],
                                                  [output_dir], num_partitions=num_partitions, dataset_split=split, num_line_skip=1)
     output_config(stats, num_nodes, num_edges, output_dir, "twitter")
     output_config(stats, num_nodes, num_edges, output_dir, "twitter", device = "gpu")
