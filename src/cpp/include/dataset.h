@@ -41,40 +41,39 @@ using std::unique_ptr;
 class DataSet {
   protected:
     // misc metadata
-    bool train_;                                         /** True if the dataset is a training set */
-    int epochs_processed_;                               /** Total number of epochs that have been trained on this dataset */
-    int64_t num_edges_;                                  /** Total number of edges in this dataset */
-    int64_t num_nodes_;                                  /** Total number of nodes in this dataset */
-    int64_t num_relations_;                              /** Total number of relations (edge-types) in this dataset */
-    int64_t current_edge_;                               /** ID of the next edge in the dataset which will be processed */
-    int64_t current_negative_id_;                        /** Next negative node to be sampled (only used for shuffled negative sampling) */
-    mutex *negative_lock_;                               /** Used to prevent race conditions when sampling negatives */
+    bool train_;                                         /**< True if the dataset is a training set */
+    int epochs_processed_;                               /**< Total number of epochs that have been trained on this dataset */
+    int64_t num_edges_;                                  /**< Total number of edges in this dataset */
+    int64_t num_nodes_;                                  /**< Total number of nodes in this dataset */
+    int64_t num_relations_;                              /**< Total number of relations (edge-types) in this dataset */
+    int64_t current_edge_;                               /**< ID of the next edge in the dataset which will be processed */
+    int64_t current_negative_id_;                        /**< Next negative node to be sampled (only used for shuffled negative sampling) */
+    mutex *negative_lock_;                               /**< Used to prevent race conditions when sampling negatives */
 
     // batch ordering
-    vector<int64_t> edge_bucket_sizes_;                  /** Total number of edges in each edge bucket */
-    vector<Batch *> batches_;                            /** Ordering of the batch objects that will be processed */
-    vector<Batch *>::iterator batch_iterator_;           /** Iterator for batches_ */
-    mutex *batch_lock_;                                  /** Mutex for batches_ and batch_iterator_ */
+    vector<int64_t> edge_bucket_sizes_;                  /**< Total number of edges in each edge bucket */
+    vector<Batch *> batches_;                            /**< Ordering of the batch objects that will be processed */
+    vector<Batch *>::iterator batch_iterator_;           /**< Iterator for batches_ */
+    mutex *batch_lock_;                                  /**< Mutex for batches_ and batch_iterator_ */
 
     // used for evaluation
-    SparseAdjacencyMatrixMR adjacency_matrix_;           /** TODO Sparse adjancency matrix used to filter false negatives in evaluation */
-    map<pair<int, int>, vector<int>> src_map_;           /** Map keyed by the source node and relation ids, where the destination node is the value. Provides fast lookups for edge existence */
-    map<pair<int, int>, vector<int>> dst_map_;           /** Map keyed by the destination node and relation ids, where the source node is the value. Provides fast lookups for edge existence */
+    map<pair<int, int>, vector<int>> src_map_;           /**< Map keyed by the source node and relation ids, where the destination node is the value. Provides fast lookups for edge existence */
+    map<pair<int, int>, vector<int>> dst_map_;           /**< Map keyed by the destination node and relation ids, where the source node is the value. Provides fast lookups for edge existence */
 
     // Program data storage
     bool storage_loaded_;
-    Storage *edges_;                                     /** Pointer to storage of the edges that are currently being processed */
-    Storage *train_edges_;                               /** Pointer to storage of the training set edges */
-    Storage *validation_edges_;                          /** Pointer to storage of the validation set edges */
-    Storage *test_edges_;                                /** Pointer to storage of the test set edges */
-    Storage *node_embeddings_;                           /** Pointer to storage of the node embeddings */
-    Storage *node_embeddings_optimizer_state_;           /** Pointer to storage of the node embedding optimizer state */
-    Storage *src_relations_;                             /** Pointer to storage of the relation embeddings applied to the source nodes of an edge */
-    Storage *src_relations_optimizer_state_;             /** Pointer to storage of the optimizer state for relation embeddings applied to the source nodes of an edge */
-    Storage *dst_relations_;                             /** Pointer to storage of the relation embeddings applied to the destination nodes of an edge */
-    Storage *dst_relations_optimizer_state_;             /** Pointer to storage of the optimizer state for relation embeddings applied to the source nodes of an edge */
+    Storage *edges_;                                     /**< Pointer to storage of the edges that are currently being processed */
+    Storage *train_edges_;                               /**< Pointer to storage of the training set edges */
+    Storage *validation_edges_;                          /**< Pointer to storage of the validation set edges */
+    Storage *test_edges_;                                /**< Pointer to storage of the test set edges */
+    Storage *node_embeddings_;                           /**< Pointer to storage of the node embeddings */
+    Storage *node_embeddings_optimizer_state_;           /**< Pointer to storage of the node embedding optimizer state */
+    Storage *src_relations_;                             /**< Pointer to storage of the relation embeddings applied to the source nodes of an edge */
+    Storage *src_relations_optimizer_state_;             /**< Pointer to storage of the optimizer state for relation embeddings applied to the source nodes of an edge */
+    Storage *dst_relations_;                             /**< Pointer to storage of the relation embeddings applied to the destination nodes of an edge */
+    Storage *dst_relations_optimizer_state_;             /**< Pointer to storage of the optimizer state for relation embeddings applied to the source nodes of an edge */
 
-    Timestamp timestamp_;                                /** Timestamp of the current state of the program data */
+    Timestamp timestamp_;                                /**< Timestamp of the current state of the program data */
 
   public:
     /**

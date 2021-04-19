@@ -4,8 +4,8 @@
 Welcome to Marius's documentation!
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Contents:
+    :maxdepth: 1
+    :caption: Contents
 
     introduction
     quickstart
@@ -16,4 +16,10 @@ Welcome to Marius's documentation!
     training
     evaluation
     storage_backends
-    api
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+    :caption: API
+
+    api/*
