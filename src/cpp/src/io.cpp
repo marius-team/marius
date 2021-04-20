@@ -86,6 +86,7 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
         } else {
             input_train_file->copy(train_filename, false);
         }
+        delete input_train_file;
 
         if (!input_valid_filename.empty()) {
             FlatFile *input_valid_file = new FlatFile(input_valid_filename, num_valid, 3, marius_options.storage.edges_dtype);

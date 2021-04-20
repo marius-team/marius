@@ -151,6 +151,12 @@ DataSet::DataSet(Storage *test_edges, Storage *embeddings, Storage *src_relation
     timestamp_ = global_timestamp_allocator.getTimestamp();
 }
 
+DataSet::~DataSet() {
+    clearBatches();
+    batch_lock_;
+    negative_lock_;
+}
+
 void DataSet::initializeBatches() {
     int64_t batch_size = 0;
     int64_t batch_id = 0;
