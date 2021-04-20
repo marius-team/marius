@@ -296,6 +296,8 @@ class Worker {
   public:
     Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status);
 
+    ~Worker();
+
     virtual void run() = 0;
 };
 

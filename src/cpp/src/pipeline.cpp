@@ -39,6 +39,11 @@ Worker::Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status) {
     status_ = status;
 }
 
+Worker::~Worker() {
+    delete pipeline_->max_batches_lock_;
+    delete pipeline_->max_batches_cv_;
+}
+
 void LoadEmbeddingsWorker::run() {
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
