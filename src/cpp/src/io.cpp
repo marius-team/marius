@@ -397,3 +397,172 @@ tuple<Storage *, Storage *, Storage *, Storage *> initializeEval() {
 
     return std::forward_as_tuple(std::get<2>(edge_storages), std::get<0>(node_embedding_storages), std::get<0>(relation_embedding_storages), std::get<2>(relation_embedding_storages));
 }
+
+void freeTrainStorage(Storage *train_edges,
+                      Storage *eval_edges,
+                      Storage *test_edges,
+                      Storage *embeddings,
+                      Storage *emb_state,
+                      Storage *src_rel,
+                      Storage *src_rel_state,
+                      Storage *dst_rel,
+                      Storage *dst_rel_state) {
+
+    switch (marius_options.storage.edges) {
+        case BackendType::RocksDB: {
+            SPDLOG_ERROR("Currently Unsupported");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            SPDLOG_ERROR("Backend type not available for edges.");
+            exit(-1);
+        }
+        case BackendType::FlatFile: {
+            delete (FlatFile *) train_edges;
+            delete (FlatFile *) eval_edges;
+            delete (FlatFile *) test_edges;
+            break;
+        }
+        case BackendType::HostMemory: {
+            delete (InMemory *) train_edges;
+            delete (InMemory *) eval_edges;
+            delete (InMemory *) test_edges;
+            break;
+        }
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) train_edges;
+            delete (InMemory *) eval_edges;
+            delete (InMemory *) test_edges;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.embeddings) {
+        case BackendType::RocksDB: {
+            SPDLOG_ERROR("Currently Unsupported");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            delete (PartitionBufferStorage *) embeddings;
+            delete (PartitionBufferStorage *) emb_state;
+            break;
+        }
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for embeddings.");
+            exit(-1);
+        }
+        case BackendType::HostMemory: {
+            delete (InMemory *) embeddings;
+            delete (InMemory *) emb_state;
+            break;
+        }
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) embeddings;
+            delete (InMemory *) emb_state;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.relations) {
+        case BackendType::RocksDB: {
+            SPDLOG_ERROR("Currently Unsupported");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            SPDLOG_ERROR("Backend type not available for relation embeddings.");
+            exit(-1);
+        }
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for relation embeddings.");
+            exit(-1);
+        }
+        case BackendType::HostMemory: {
+            delete (InMemory *) src_rel;
+            delete (InMemory *) src_rel_state;
+            delete (InMemory *) dst_rel;
+            delete (InMemory *) dst_rel_state;
+            break;
+        }
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) src_rel;
+            delete (InMemory *) src_rel_state;
+            delete (InMemory *) dst_rel;
+            delete (InMemory *) dst_rel_state;
+            break;
+        }
+    }
+}
+
+void freeEvalStorage(Storage *test_edges, Storage *embeddings, Storage *src_rels, Storage *dst_rels) {
+    switch (marius_options.storage.edges) {
+        case BackendType::RocksDB: {
+            SPDLOG_ERROR("Currently Unsupported");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            SPDLOG_ERROR("Backend type not available for edges.");
+            exit(-1);
+        }
+        case BackendType::FlatFile: {
+            delete (FlatFile *) test_edges;
+            break;
+        }
+        case BackendType::HostMemory: {
+            delete (InMemory *) test_edges;
+            break;
+        }
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) test_edges;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.embeddings) {
+        case BackendType::RocksDB: {
+            SPDLOG_ERROR("Currently Unsupported");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            delete (PartitionBufferStorage *) embeddings;
+            break;
+        }
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for embeddings.");
+            exit(-1);
+        }
+        case BackendType::HostMemory: {
+            delete (InMemory *) embeddings;
+            break;
+        }
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) embeddings;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.relations) {
+        case BackendType::RocksDB: {
+            SPDLOG_ERROR("Currently Unsupported");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            SPDLOG_ERROR("Backend type not available for relation embeddings.");
+            exit(-1);
+        }
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for relation embeddings.");
+            exit(-1);
+        }
+        case BackendType::HostMemory: {
+            delete (InMemory *) src_rels;
+            delete (InMemory *) dst_rels;
+            break;
+        }
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) src_rels;
+            delete (InMemory *) dst_rels;
+            break;
+        }
+    }
+}
+}

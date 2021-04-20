@@ -37,6 +37,16 @@ tuple<Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage 
 
 tuple<Storage *, Storage *, Storage *, Storage *> initializeEval();
 
+void freeTrainStorage(Storage *train_edges,
+                      Storage *eval_edges,
+                      Storage *test_edges,
+                      Storage *embeddings,
+                      Storage *emb_state,
+                      Storage *src_rel,
+                      Storage *src_rel_state,
+                      Storage *dst_rel,
+                      Storage *dst_rel_state);
 
+void freeEvalStorage(Storage *test_edges, Storage *embeddings, Storage *src_rels, Storage *dst_rels);
 
 #endif //MARIUS_IO_H
