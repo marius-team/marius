@@ -507,9 +507,10 @@ void freeEvalStorage(Storage *test_edges, Storage *embeddings, Storage *src_rels
     switch (marius_options.storage.relations) {
         case BackendType::RocksDB:
         case BackendType::PartitionBuffer:
-        case BackendType::FlatFile:SPDLOG_ERROR("Backend type not available for relation embeddings.");
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for relation embeddings.");
             exit(-1);
-
+        }
         case BackendType::HostMemory:
         case BackendType::DeviceMemory: {
             delete (InMemory *) src_rels;
