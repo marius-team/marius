@@ -141,8 +141,8 @@ void marius(int argc, char *argv[]) {
                 exit(-1);
             }
             case BackendType::PartitionBuffer: {
-                delete (PartitionBuffer *) embeddings;
-                delete (PartitionBuffer *) emb_state;
+                delete (PartitionBufferStorage *) embeddings;
+                delete (PartitionBufferStorage *) emb_state;
                 break;
             }
             case BackendType::FlatFile: {
