@@ -175,13 +175,17 @@ void marius(int argc, char *argv[]) {
                 exit(-1);
             }
             case BackendType::HostMemory: {
-                delete (InMemory *) embeddings;
-                delete (InMemory *) emb_state;
+                delete (InMemory *) src_rel;
+                delete (InMemory *) src_rel_state;
+                delete (InMemory *) dst_rel;
+                delete (InMemory *) dst_rel_state;
                 break;
             }
             case BackendType::DeviceMemory: {
-                delete (InMemory *) embeddings;
-                delete (InMemory *) emb_state;
+                delete (InMemory *) src_rel;
+                delete (InMemory *) src_rel_state;
+                delete (InMemory *) dst_rel;
+                delete (InMemory *) dst_rel_state;
                 break;
             }
         }
