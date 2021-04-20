@@ -313,22 +313,31 @@ void FlatFile::shuffle() {
     bool loaded = loaded_;
     if (edge_bucket_sizes_.empty()) {
         unload(true);
-        mem_load();
-        auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
-        auto perm = torch::randperm(dim0_size_, opts);
-        data_.copy_(data_.index_select(0, perm));
-        mem_unload(true);
+        int64_t offset = 0;
+        int64_t curr_size = 0;
+        while(offset < dim0_size_) {
+            if (dim0_size_ - offset < MAX_SHUFFLE_SIZE) {
+                curr_size = dim0_size_ - offset;
+            } else {
+                curr_size = MAX_SHUFFLE_SIZE;
+            }
+
+            torch::Tensor chunk = range(offset, curr_size);
+            auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
+            chunk.copy_(chunk.index_select(0, torch::randperm(chunk.size(0), opts)));
+            rangePut(offset, chunk);
+            offset += curr_size;
+        }
     } else {
         unload(true);
-        mem_load();
-        int64_t start = 0;
+        int64_t offset = 0;
         auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
         for (auto itr = edge_bucket_sizes_.begin(); itr + 1 != edge_bucket_sizes_.end(); itr++) {
-            torch::Tensor edge_bucket = data_.narrow(0, start, *itr);
+            torch::Tensor edge_bucket = range(offset, *itr);
             edge_bucket.copy_(edge_bucket.index_select(0, torch::randperm(edge_bucket.size(0), opts)));
-            start += *itr;
+            rangePut(offset, edge_bucket);
+            offset += *itr;
         }
-        mem_unload(true);
     }
     if (!loaded) {
         load();
