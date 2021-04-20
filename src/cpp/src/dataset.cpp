@@ -155,6 +155,10 @@ DataSet::~DataSet() {
     clearBatches();
     delete batch_lock_;
     delete negative_lock_;
+
+    if (marius_options.storage.embeddings == BackendType::PartitionBuffer && !train_) {
+        delete (InMemory *) node_embeddings_;
+    }
 }
 
 void DataSet::initializeBatches() {
