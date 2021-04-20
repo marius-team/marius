@@ -31,17 +31,10 @@ Queue<T>::Queue(uint max_size) {
 
 Worker::Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status) {
     pipeline_ = pipeline;
-    pipeline_->max_batches_lock_ = new std::mutex();
-    pipeline_->max_batches_cv_ = new std::condition_variable();
     sleep_time_.tv_sec = 0;
     sleep_time_.tv_nsec = WAIT_TIME;
     paused_ = paused;
     status_ = status;
-}
-
-Worker::~Worker() {
-    delete pipeline_->max_batches_lock_;
-    delete pipeline_->max_batches_cv_;
 }
 
 void LoadEmbeddingsWorker::run() {
@@ -303,6 +296,12 @@ void UpdateEmbeddingsWorker::run() {
     }
 }
 
+Pipeline::~Pipeline() {
+    delete max_batches_cv_;
+    delete max_batches_lock_;
+    delete pipeline_lock_;
+}
+
 thread Pipeline::initThreadOfType(int worker_type, bool *paused, ThreadStatus *status, int device_id) {
     thread t;
 
@@ -387,6 +386,8 @@ PipelineCPU::PipelineCPU(DataSet *data_set, Model *model, bool train, struct tim
 
     max_batches_in_flight_ = marius_options.training_pipeline.max_batches_in_flight;
     pipeline_lock_ = new std::mutex();
+    max_batches_lock_ = new std::mutex();
+    max_batches_cv_ = new std::condition_variable();
     batches_in_flight_ = 0;
     report_time_ = report_time;
     admitted_batches_ = 0;
@@ -395,6 +396,25 @@ PipelineCPU::PipelineCPU(DataSet *data_set, Model *model, bool train, struct tim
         logger_ = spdlog::get("TrainPipeline");
     } else {
         logger_ = spdlog::get("EvalPipeline");
+    }
+}
+
+PipelineCPU::~PipelineCPU() {
+    for (int i = 0; i < CPU_NUM_WORKER_TYPES; i++) {
+        delete pool_paused_[i];
+        delete pool_status_[i];
+        delete pool_[i];
+        delete trace_[i];
+    }
+
+    if (train_) {
+        delete loaded_batches_;
+        delete prepped_batches_;
+        delete unaccumulated_batches_;
+        delete update_batches_;
+    } else {
+        delete loaded_batches_;
+        delete prepped_batches_;
     }
 }
 
@@ -577,6 +597,8 @@ PipelineGPU::PipelineGPU(DataSet *data_set, Model *model, bool train, struct tim
     }
 
     pipeline_lock_ = new std::mutex();
+    max_batches_lock_ = new std::mutex();
+    max_batches_cv_ = new std::condition_variable();
 
     for (int i = 0; i < GPU_NUM_WORKER_TYPES; i++) {
         pool_paused_[i] = new vector<bool *>;
@@ -596,6 +618,32 @@ PipelineGPU::PipelineGPU(DataSet *data_set, Model *model, bool train, struct tim
         logger_ = spdlog::get("EvalPipeline");
     }
 
+}
+
+
+PipelineGPU::~PipelineGPU() {
+    for (int i = 0; i < GPU_NUM_WORKER_TYPES; i++) {
+        delete pool_paused_[i];
+        delete pool_status_[i];
+        delete pool_[i];
+        delete trace_[i];
+    }
+
+    int num_gpus = marius_options.general.gpu_ids.size();
+
+    if (train_) {
+        delete loaded_batches_;
+        for (int i = 0; i < num_gpus; i++) {
+            delete device_loaded_batches_[i];
+            delete device_update_batches_[i];
+        }
+        delete update_batches_;
+    }  else {
+        delete loaded_batches_;
+        for (int i = 0; i < num_gpus; i++) {
+            delete device_loaded_batches_[i];
+        }
+    }
 }
 
 void PipelineGPU::addWorkersToPool(int worker_type, int num_workers) {
