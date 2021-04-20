@@ -96,6 +96,18 @@ void marius(int argc, char *argv[]) {
         embeddings->unload(true);
         src_rel->unload(true);
         dst_rel->unload(true);
+
+
+        // garbage collect
+        delete trainer;
+        delete train_set;
+        if (will_evaluate) {
+            delete evaluator;
+            delete eval_set;
+        }
+
+        freeTrainStorage(train_edges, eval_edges, test_edges, embeddings, emb_state, src_rel, src_rel_state, dst_rel, dst_rel_state);
+
     } else {
         tuple<Storage *, Storage *, Storage *, Storage *> storage_ptrs = initializeEval();
         Storage *test_edges = get<0>(storage_ptrs);
@@ -118,8 +130,12 @@ void marius(int argc, char *argv[]) {
             evaluator = new PipelineEvaluator(eval_set, model);
         }
         evaluator->evaluate(false);
-    }
 
+        delete eval_set;
+        delete evaluator;
+
+        freeEvalStorage(test_edges, embeddings, src_rel, dst_rel);
+    }
 }
 
 int main(int argc, char *argv[]) {

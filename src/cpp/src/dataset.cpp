@@ -151,6 +151,16 @@ DataSet::DataSet(Storage *test_edges, Storage *embeddings, Storage *src_relation
     timestamp_ = global_timestamp_allocator.getTimestamp();
 }
 
+DataSet::~DataSet() {
+    clearBatches();
+    delete batch_lock_;
+    delete negative_lock_;
+
+    if (marius_options.storage.embeddings == BackendType::PartitionBuffer && !train_) {
+        delete (InMemory *) node_embeddings_;
+    }
+}
+
 void DataSet::initializeBatches() {
     int64_t batch_size = 0;
     int64_t batch_id = 0;
@@ -260,8 +270,14 @@ void DataSet::splitBatches() {
 
 void DataSet::clearBatches() {
     for (auto iter = batches_.begin(); iter != batches_.end(); ++iter) {
-        Batch *b = (Batch *) *iter;
-        delete b;
+        if (marius_options.storage.embeddings == BackendType::PartitionBuffer && train_) {
+            PartitionBatch *b = (PartitionBatch *) *iter;
+            delete b;
+        } else {
+            Batch *b = (Batch *) *iter;
+            delete b;
+        }
+
     }
     batches_ = std::vector<Batch *>();
 }
