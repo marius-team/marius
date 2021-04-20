@@ -266,8 +266,14 @@ void DataSet::splitBatches() {
 
 void DataSet::clearBatches() {
     for (auto iter = batches_.begin(); iter != batches_.end(); ++iter) {
-        Batch *b = (Batch *) *iter;
-        delete b;
+        if (marius_options.storage.embeddings == BackendType::PartitionBuffer && train_) {
+            PartitionBatch *b = (PartitionBatch *) *iter;
+            delete b;
+        } else {
+            Batch *b = (Batch *) *iter;
+            delete b;
+        }
+
     }
     batches_ = std::vector<Batch *>();
 }
