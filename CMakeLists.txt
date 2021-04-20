@@ -63,6 +63,8 @@ set(project_DOCS_DIR ${CMAKE_CURRENT_LIST_DIR}/docs)
 set(project_BINDINGS_DIR ${MARIUS_CPP_SOURCE}/python_bindings)
 set(project_THIRD_PARTY_DIR ${MARIUS_CPP_SOURCE}/third_party)
 
+
+set(project_WORKING_DIR ${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DMARIUS_BASE_DIRECTORY="${CMAKE_CURRENT_LIST_DIR}")
 add_definitions(-DMARIUS_TEST_DIRECTORY="${project_TEST_DIR}")
 

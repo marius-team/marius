@@ -311,8 +311,10 @@ torch::Tensor FlatFile::range(int64_t offset, int64_t n) {
 
 void FlatFile::shuffle() {
     bool loaded = loaded_;
+    if (!loaded) {
+        load();
+    }
     if (edge_bucket_sizes_.empty()) {
-        unload(true);
         int64_t offset = 0;
         int64_t curr_size = 0;
         while(offset < dim0_size_) {
@@ -329,7 +331,6 @@ void FlatFile::shuffle() {
             offset += curr_size;
         }
     } else {
-        unload(true);
         int64_t offset = 0;
         auto opts = torch::TensorOptions().dtype(torch::kInt64).device(torch::kCPU);
         for (auto itr = edge_bucket_sizes_.begin(); itr + 1 != edge_bucket_sizes_.end(); itr++) {
@@ -340,7 +341,7 @@ void FlatFile::shuffle() {
         }
     }
     if (!loaded) {
-        load();
+        unload(true);
     }
 }
 

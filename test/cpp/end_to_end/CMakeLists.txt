@@ -7,4 +7,4 @@ TARGET_LINK_LIBRARIES(end_to_end
         gtest gtest_main
         )
 
-add_test(NAME end_to_end COMMAND end_to_end)
+add_test(NAME end_to_end COMMAND end_to_end WORKING_DIRECTORY ${project_WORKING_DIR})
