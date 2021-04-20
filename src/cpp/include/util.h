@@ -27,6 +27,11 @@ class Timer {
         gpu_ = gpu;
     }
 
+    ~Timer() {
+        delete start_event_;
+        delete end_event_;
+    }
+
     void start() {
         start_time_ = std::chrono::high_resolution_clock::now();
         if (gpu_) {

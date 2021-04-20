@@ -44,6 +44,8 @@ class Storage {
     vector<int64_t> edge_bucket_sizes_;
 
   public:
+    virtual ~Storage() {};
+
     virtual torch::Tensor indexRead(Indices indices) = 0;
 
     virtual void indexAdd(Indices indices, torch::Tensor values) = 0;
@@ -199,6 +201,8 @@ class FlatFile : public Storage {
 
     FlatFile(string filename, torch::ScalarType dtype);
 
+    ~FlatFile() {};
+
     void rangePut(int64_t offset, torch::Tensor values);
 
     void load() override;
@@ -288,6 +292,8 @@ class InMemory : public Storage {
     InMemory(string filename, torch::Tensor data, torch::DeviceType device);
 
     InMemory(string filename, torch::ScalarType dtype);
+
+    ~InMemory() {};
 
     void load() override;
 
