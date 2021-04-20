@@ -56,20 +56,20 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
     // if reinitialize is false but the edge files aren't present, we must reinitialize.
 
     string train_filename = marius_options.path.experiment_directory
-                            + PathConstants::edges_directory
-                            + PathConstants::edges_train_directory
-                            + PathConstants::edges_file
-                            + PathConstants::file_ext;
+        + PathConstants::edges_directory
+        + PathConstants::edges_train_directory
+        + PathConstants::edges_file
+        + PathConstants::file_ext;
     string valid_filename = marius_options.path.experiment_directory
-                            + PathConstants::edges_directory
-                            + PathConstants::edges_validation_directory
-                            + PathConstants::edges_file
-                            + PathConstants::file_ext;
+        + PathConstants::edges_directory
+        + PathConstants::edges_validation_directory
+        + PathConstants::edges_file
+        + PathConstants::file_ext;
     string test_filename = marius_options.path.experiment_directory
-                           + PathConstants::edges_directory
-                           + PathConstants::edges_test_directory
-                           + PathConstants::edges_file
-                           + PathConstants::file_ext;
+        + PathConstants::edges_directory
+        + PathConstants::edges_test_directory
+        + PathConstants::edges_file
+        + PathConstants::file_ext;
 
     Storage *train_edge_storage;
     Storage *valid_edge_storage;
@@ -140,9 +140,9 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
 
     if (marius_options.storage.num_partitions > 1) {
         string train_edges_partitions = marius_options.path.experiment_directory
-                                        + PathConstants::edges_directory
-                                        + PathConstants::edges_train_directory
-                                        + PathConstants::edge_partition_offsets_file;
+            + PathConstants::edges_directory
+            + PathConstants::edges_train_directory
+            + PathConstants::edge_partition_offsets_file;
 //        string validation_edges_partitions = marius_options.path.experiment_directory
 //                                             + PathConstants::edges_directory
 //                                             + PathConstants::edges_validation_directory
@@ -178,13 +178,13 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
 tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
 
     string node_embedding_filename = marius_options.path.experiment_directory
-                                     + PathConstants::embeddings_directory
-                                     + PathConstants::embeddings_file
-                                     + PathConstants::file_ext;
+        + PathConstants::embeddings_directory
+        + PathConstants::embeddings_file
+        + PathConstants::file_ext;
     string optimizer_state_filename = marius_options.path.experiment_directory
-                                      + PathConstants::embeddings_directory
-                                      + PathConstants::state_file
-                                      + PathConstants::file_ext;
+        + PathConstants::embeddings_directory
+        + PathConstants::state_file
+        + PathConstants::file_ext;
 
     int64_t num_nodes = marius_options.general.num_nodes;
     bool reinitialize = marius_options.storage.reinitialize_embeddings;
@@ -263,21 +263,21 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
 tuple<Storage *, Storage *, Storage *, Storage *> initializeRelationEmbeddings(bool train) {
 
     string src_relation_embedding_filename = marius_options.path.experiment_directory
-                                     + PathConstants::relations_directory
-                                     + PathConstants::src_relations_file
-                                     + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::src_relations_file
+        + PathConstants::file_ext;
     string dst_relation_embedding_filename = marius_options.path.experiment_directory
-                                             + PathConstants::relations_directory
-                                             + PathConstants::dst_relations_file
-                                             + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::dst_relations_file
+        + PathConstants::file_ext;
     string src_optimizer_state_filename = marius_options.path.experiment_directory
-                                             + PathConstants::relations_directory
-                                             + PathConstants::src_state_file
-                                             + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::src_state_file
+        + PathConstants::file_ext;
     string dst_optimizer_state_filename = marius_options.path.experiment_directory
-                                             + PathConstants::relations_directory
-                                             + PathConstants::dst_state_file
-                                             + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::dst_state_file
+        + PathConstants::file_ext;
 
     int64_t num_relations = marius_options.general.num_relations;
 
@@ -507,8 +507,7 @@ void freeEvalStorage(Storage *test_edges, Storage *embeddings, Storage *src_rels
     switch (marius_options.storage.relations) {
         case BackendType::RocksDB:
         case BackendType::PartitionBuffer:
-        case BackendType::FlatFile:
-            SPDLOG_ERROR("Backend type not available for relation embeddings.");
+        case BackendType::FlatFile:SPDLOG_ERROR("Backend type not available for relation embeddings.");
             exit(-1);
 
         case BackendType::HostMemory:
