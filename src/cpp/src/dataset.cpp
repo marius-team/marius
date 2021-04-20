@@ -153,8 +153,8 @@ DataSet::DataSet(Storage *test_edges, Storage *embeddings, Storage *src_relation
 
 DataSet::~DataSet() {
     clearBatches();
-    batch_lock_;
-    negative_lock_;
+    delete batch_lock_;
+    delete negative_lock_;
 }
 
 void DataSet::initializeBatches() {
