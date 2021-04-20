@@ -32,7 +32,7 @@ using std::shared_ptr;
 using std::list;
 using std::unordered_map;
 
-#define MAX_SHUFFLE_SIZE 4E8;
+#define MAX_SHUFFLE_SIZE 4E8
 
 /** Abstract storage class */
 class Storage {
