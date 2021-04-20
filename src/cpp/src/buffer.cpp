@@ -145,6 +145,11 @@ LookaheadBlock::LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_
     thread_ = nullptr;
 }
 
+LookaheadBlock::~LookaheadBlock() {
+    delete lock_;
+    free(mem_);
+}
+
 void LookaheadBlock::run() {
     while(!done_) {
         // wait until block is empty
@@ -220,6 +225,12 @@ AsyncWriteBlock::AsyncWriteBlock(int64_t total_size, PartitionedFile *partitione
     present_ = false;
     thread_ = nullptr;
 }
+
+AsyncWriteBlock::~AsyncWriteBlock() {
+    delete lock_;
+    free(mem_);
+}
+
 
 void AsyncWriteBlock::run() {
     while(!done_) {
