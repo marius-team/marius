@@ -44,7 +44,8 @@ class Storage {
     vector<int64_t> edge_bucket_sizes_;
 
   public:
-    virtual torch::Tensor indexRead(Indices indices) = 0
+    virtual torch::Tensor indexRead(Indices indices) = 0;
+
     virtual void indexAdd(Indices indices, torch::Tensor values) = 0;
 
     virtual torch::Tensor range(int64_t offset, int64_t n) = 0;
