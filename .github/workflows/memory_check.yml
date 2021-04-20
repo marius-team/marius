@@ -51,20 +51,14 @@ jobs:
                exit 1
           fi
 
-      - name: Run CCache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: ${{ matrix.os }}
-
       - name: CMake Build with ASAN
-        uses: lukka/run-cmake@v3
-        with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMARIUS_USE_ASAN=1'
-          buildWithCMake: true
-          buildWithCMakeArgs: '-- -j2'
-          buildDirectory: '${{ github.workspace }}/build'
+        shell: bash
+        working-directory: ${{github.workspace}}
+        run: |
+          mkdir build
+          cd build
+          cmake ../ -DCMAKE_BUILD_TYPE=Debug -DMARIUS_USE_ASAN=1
+          make marius_train -j2
 
       - name: Test Host Memory Embeddings Backend
         shell: bash
