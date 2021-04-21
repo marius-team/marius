@@ -92,6 +92,7 @@ class Storage {
 class PartitionBufferStorage : public Storage {
   protected:
     string filename_;
+
     bool loaded_;
 
     int64_t partition_size_;
@@ -114,6 +115,8 @@ class PartitionBufferStorage : public Storage {
     ~PartitionBufferStorage();
 
     void rangePut(int64_t offset, torch::Tensor values);
+
+    void append(torch::Tensor values);
 
     void load() override;
 
@@ -204,6 +207,8 @@ class FlatFile : public Storage {
     ~FlatFile() {};
 
     void rangePut(int64_t offset, torch::Tensor values);
+
+    void append(torch::Tensor values);
 
     void load() override;
 

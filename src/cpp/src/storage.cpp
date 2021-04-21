@@ -27,7 +27,7 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, torch::Tensor da
     dim0_size_ = 0;
     dim1_size_ = data.size(1);
     dtype_ = torch::typeMetaToScalarType(data.dtype());
-    rangePut(0, data);
+    append(data);
     initialized_ = true;
     loaded_ = false;
     capacity_ = capacity;
@@ -53,12 +53,41 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, int64_t capacity
 }
 
 void PartitionBufferStorage::rangePut(int64_t offset, torch::Tensor values) {
+    int fd = open(filename_.c_str(), O_RDWR | IO_FLAGS);
+    if (fd == -1) {
+        SPDLOG_ERROR("Unable to open {}\nError: {}", filename_, errno);
+        exit(-1);
+    }
 
+    int64_t dtype_size = 0;
+
+    if (dtype_ == torch::kFloat64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kFloat32) {
+        dtype_size = 4;
+    } else if (dtype_ == torch::kFloat16) {
+        dtype_size = 2;
+    } else if (dtype_ == torch::kInt64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kInt32) {
+        dtype_size = 4;
+    }
+
+    int64_t ptr_offset = offset * dim1_size_ * dtype_size;
+
+    if (pwrite(fd, values.data_ptr(), values.size(0) * dim1_size_ * dtype_size, ptr_offset) == -1) {
+        SPDLOG_ERROR("Unable to write {}\nError: {}", filename_, errno);
+        exit(-1);
+    }
+
+    close(fd);
+}
+
+void PartitionBufferStorage::append(torch::Tensor values) {
     ios::openmode flags;
 
-    if (offset == 0) {
-        flags = ios::out | ios::binary;
-        dim0_size_ = 0;
+    if (dim0_size_ == 0) {
+        flags = ios::trunc | ios::binary;
     } else {
         flags = ios::binary | ios_base::app;
     }
@@ -180,9 +209,10 @@ FlatFile::FlatFile(string filename, torch::Tensor data) {
     dim0_size_ = 0;
     dim1_size_ = data.size(1);
     dtype_ = torch::typeMetaToScalarType(data.dtype());
-    rangePut(0, data);
-    initialized_ = true;
     loaded_ = false;
+    append(data);
+    initialized_ = true;
+
 }
 
 FlatFile::FlatFile(string filename, torch::ScalarType dtype) {
@@ -194,12 +224,33 @@ FlatFile::FlatFile(string filename, torch::ScalarType dtype) {
 }
 
 void FlatFile::rangePut(int64_t offset, torch::Tensor values) {
+    int64_t dtype_size = 0;
 
+    if (dtype_ == torch::kFloat64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kFloat32) {
+        dtype_size = 4;
+    } else if (dtype_ == torch::kFloat16) {
+        dtype_size = 2;
+    } else if (dtype_ == torch::kInt64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kInt32) {
+        dtype_size = 4;
+    }
+
+    int64_t ptr_offset = offset * dim1_size_ * dtype_size;
+
+    if (pwrite(fd_, values.data_ptr(), values.size(0) * dim1_size_ * dtype_size, ptr_offset) == -1) {
+        SPDLOG_ERROR("Unable to write {}\nError: {}", filename_, errno);
+        exit(-1);
+    }
+}
+
+void FlatFile::append(torch::Tensor values) {
     ios::openmode flags;
 
-    if (offset == 0) {
-        flags = ios::out | ios::binary;
-        dim0_size_ = 0;
+    if (dim0_size_ == 0) {
+        flags = ios::trunc | ios::binary;
     } else {
         flags = ios::binary | ios_base::app;
     }
@@ -227,6 +278,7 @@ void FlatFile::rangePut(int64_t offset, torch::Tensor values) {
     outfile.write((char *) values.data_ptr(), values.size(0) * values.size(1) * dtype_size);
     outfile.close();
 }
+
 
 void FlatFile::load() {
     if (!loaded_ && initialized_) {
