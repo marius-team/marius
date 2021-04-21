@@ -78,7 +78,7 @@ add_library(${PROJECT_NAME} SHARED ${project_SOURCES} ${project_HEADERS})
 find_package(Torch REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${TORCH_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} spdlog)
-
+target_link_libraries(${PROJECT_NAME} cxxopts)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${project_HEADERS}")
 
