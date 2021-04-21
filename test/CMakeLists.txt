@@ -1,1 +1,4 @@
+file(COPY ${PROJECT_SOURCE_DIR}/test/test_data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${PROJECT_SOURCE_DIR}/test/test_configs DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 add_subdirectory(cpp)

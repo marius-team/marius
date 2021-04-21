@@ -186,6 +186,9 @@ class Pipeline {
     bool train_;
 
   public:
+
+    ~Pipeline();
+
     thread initThreadOfType(int worker_type, bool *paused, ThreadStatus *status, int device_id);
 
     virtual void addWorkersToPool(int worker_type, int num_workers) = 0;
@@ -227,6 +230,8 @@ class PipelineCPU : public Pipeline {
 
     PipelineCPU(DataSet *data_set, Model *model, bool train, struct timespec report_time);
 
+    ~PipelineCPU();
+
     void addWorkersToPool(int worker_type, int num_workers) override;
 
     void initialize() override;
@@ -257,6 +262,8 @@ class PipelineGPU : public Pipeline {
     Queue<Batch *> *update_batches_;
 
     PipelineGPU(DataSet *data_set, Model *model, bool train, struct timespec report_time);
+
+    ~PipelineGPU();
 
     void addWorkersToPool(int worker_type, int num_workers) override;
 

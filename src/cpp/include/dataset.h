@@ -93,6 +93,11 @@ class DataSet {
     DataSet(Storage *test_edges, Storage *embeddings, Storage *src_relations, Storage *dst_relations);
 
     /**
+     * Destructor
+     */
+     ~DataSet();
+
+    /**
      * Returns the next uninitialized batch from the batch_iterator_ in a thread safe manner
      * @return Pointer to the next batch object to be processed
      */

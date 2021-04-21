@@ -56,20 +56,20 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
     // if reinitialize is false but the edge files aren't present, we must reinitialize.
 
     string train_filename = marius_options.path.experiment_directory
-                            + PathConstants::edges_directory
-                            + PathConstants::edges_train_directory
-                            + PathConstants::edges_file
-                            + PathConstants::file_ext;
+        + PathConstants::edges_directory
+        + PathConstants::edges_train_directory
+        + PathConstants::edges_file
+        + PathConstants::file_ext;
     string valid_filename = marius_options.path.experiment_directory
-                            + PathConstants::edges_directory
-                            + PathConstants::edges_validation_directory
-                            + PathConstants::edges_file
-                            + PathConstants::file_ext;
+        + PathConstants::edges_directory
+        + PathConstants::edges_validation_directory
+        + PathConstants::edges_file
+        + PathConstants::file_ext;
     string test_filename = marius_options.path.experiment_directory
-                           + PathConstants::edges_directory
-                           + PathConstants::edges_test_directory
-                           + PathConstants::edges_file
-                           + PathConstants::file_ext;
+        + PathConstants::edges_directory
+        + PathConstants::edges_test_directory
+        + PathConstants::edges_file
+        + PathConstants::file_ext;
 
     Storage *train_edge_storage;
     Storage *valid_edge_storage;
@@ -86,6 +86,7 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
         } else {
             input_train_file->copy(train_filename, false);
         }
+        delete input_train_file;
 
         if (!input_valid_filename.empty()) {
             FlatFile *input_valid_file = new FlatFile(input_valid_filename, num_valid, 3, marius_options.storage.edges_dtype);
@@ -139,9 +140,9 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
 
     if (marius_options.storage.num_partitions > 1) {
         string train_edges_partitions = marius_options.path.experiment_directory
-                                        + PathConstants::edges_directory
-                                        + PathConstants::edges_train_directory
-                                        + PathConstants::edge_partition_offsets_file;
+            + PathConstants::edges_directory
+            + PathConstants::edges_train_directory
+            + PathConstants::edge_partition_offsets_file;
 //        string validation_edges_partitions = marius_options.path.experiment_directory
 //                                             + PathConstants::edges_directory
 //                                             + PathConstants::edges_validation_directory
@@ -177,13 +178,13 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
 tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
 
     string node_embedding_filename = marius_options.path.experiment_directory
-                                     + PathConstants::embeddings_directory
-                                     + PathConstants::embeddings_file
-                                     + PathConstants::file_ext;
+        + PathConstants::embeddings_directory
+        + PathConstants::embeddings_file
+        + PathConstants::file_ext;
     string optimizer_state_filename = marius_options.path.experiment_directory
-                                      + PathConstants::embeddings_directory
-                                      + PathConstants::state_file
-                                      + PathConstants::file_ext;
+        + PathConstants::embeddings_directory
+        + PathConstants::state_file
+        + PathConstants::file_ext;
 
     int64_t num_nodes = marius_options.general.num_nodes;
     bool reinitialize = marius_options.storage.reinitialize_embeddings;
@@ -211,8 +212,8 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
             }
 
             OptimizerState emb_state = torch::zeros_like(weights);
-            init_node_embedding_storage->rangePut(offset, weights);
-            init_optimizer_state_storage->rangePut(offset, emb_state);
+            init_node_embedding_storage->append(weights);
+            init_optimizer_state_storage->append(emb_state);
 
             offset += curr_num_nodes;
         }
@@ -262,21 +263,21 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
 tuple<Storage *, Storage *, Storage *, Storage *> initializeRelationEmbeddings(bool train) {
 
     string src_relation_embedding_filename = marius_options.path.experiment_directory
-                                     + PathConstants::relations_directory
-                                     + PathConstants::src_relations_file
-                                     + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::src_relations_file
+        + PathConstants::file_ext;
     string dst_relation_embedding_filename = marius_options.path.experiment_directory
-                                             + PathConstants::relations_directory
-                                             + PathConstants::dst_relations_file
-                                             + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::dst_relations_file
+        + PathConstants::file_ext;
     string src_optimizer_state_filename = marius_options.path.experiment_directory
-                                             + PathConstants::relations_directory
-                                             + PathConstants::src_state_file
-                                             + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::src_state_file
+        + PathConstants::file_ext;
     string dst_optimizer_state_filename = marius_options.path.experiment_directory
-                                             + PathConstants::relations_directory
-                                             + PathConstants::dst_state_file
-                                             + PathConstants::file_ext;
+        + PathConstants::relations_directory
+        + PathConstants::dst_state_file
+        + PathConstants::file_ext;
 
     int64_t num_relations = marius_options.general.num_relations;
 
@@ -395,4 +396,126 @@ tuple<Storage *, Storage *, Storage *, Storage *> initializeEval() {
     tuple<Storage *, Storage *, Storage *, Storage *> relation_embedding_storages = initializeRelationEmbeddings(train);
 
     return std::forward_as_tuple(std::get<2>(edge_storages), std::get<0>(node_embedding_storages), std::get<0>(relation_embedding_storages), std::get<2>(relation_embedding_storages));
+}
+
+void freeTrainStorage(Storage *train_edges,
+                      Storage *eval_edges,
+                      Storage *test_edges,
+                      Storage *embeddings,
+                      Storage *emb_state,
+                      Storage *src_rel,
+                      Storage *src_rel_state,
+                      Storage *dst_rel,
+                      Storage *dst_rel_state) {
+
+    switch (marius_options.storage.edges) {
+        case BackendType::RocksDB:
+        case BackendType::PartitionBuffer: {
+            SPDLOG_ERROR("Backend type not available for edges.");
+            exit(-1);
+        }
+        case BackendType::FlatFile: {
+            delete (FlatFile *) train_edges;
+            delete (FlatFile *) eval_edges;
+            delete (FlatFile *) test_edges;
+            break;
+        }
+        case BackendType::HostMemory:
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) train_edges;
+            delete (InMemory *) eval_edges;
+            delete (InMemory *) test_edges;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.embeddings) {
+        case BackendType::RocksDB:
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for embeddings.");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            delete (PartitionBufferStorage *) embeddings;
+            delete (PartitionBufferStorage *) emb_state;
+            break;
+        }
+        case BackendType::HostMemory:
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) embeddings;
+            delete (InMemory *) emb_state;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.relations) {
+        case BackendType::RocksDB:
+        case BackendType::PartitionBuffer:
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for relation embeddings.");
+            exit(-1);
+        }
+        case BackendType::HostMemory:
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) src_rel;
+            delete (InMemory *) src_rel_state;
+            delete (InMemory *) dst_rel;
+            delete (InMemory *) dst_rel_state;
+            break;
+        }
+    }
+}
+
+void freeEvalStorage(Storage *test_edges, Storage *embeddings, Storage *src_rels, Storage *dst_rels) {
+    switch (marius_options.storage.edges) {
+        case BackendType::RocksDB: {
+            SPDLOG_ERROR("Currently Unsupported");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            SPDLOG_ERROR("Backend type not available for edges.");
+            exit(-1);
+        }
+        case BackendType::FlatFile: {
+            delete (FlatFile *) test_edges;
+            break;
+        }
+        case BackendType::HostMemory:
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) test_edges;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.embeddings) {
+        case BackendType::RocksDB:
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for embeddings.");
+            exit(-1);
+        }
+        case BackendType::PartitionBuffer: {
+            delete (PartitionBufferStorage *) embeddings;
+            break;
+        }
+        case BackendType::HostMemory:
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) embeddings;
+            break;
+        }
+    }
+
+    switch (marius_options.storage.relations) {
+        case BackendType::RocksDB:
+        case BackendType::PartitionBuffer:
+        case BackendType::FlatFile: {
+            SPDLOG_ERROR("Backend type not available for relation embeddings.");
+            exit(-1);
+        }
+        case BackendType::HostMemory:
+        case BackendType::DeviceMemory: {
+            delete (InMemory *) src_rels;
+            delete (InMemory *) dst_rels;
+            break;
+        }
+    }
 }

@@ -90,6 +90,8 @@ class LookaheadBlock {
 
     LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_file);
 
+    ~LookaheadBlock();
+
     void start(Partition *first_partition);
 
     void stop();
@@ -114,6 +116,8 @@ class AsyncWriteBlock {
     std::atomic<bool> done_;
 
     AsyncWriteBlock(int64_t total_size, PartitionedFile *partitioned_file);
+
+    ~AsyncWriteBlock();
 
     void start();
 

@@ -7,4 +7,4 @@ TARGET_LINK_LIBRARIES(integration
         gtest gtest_main
         )
 
-add_test(NAME integration COMMAND integration)
+add_test(NAME integration COMMAND integration WORKING_DIRECTORY ${project_WORKING_DIR})
