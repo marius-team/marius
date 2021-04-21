@@ -7,3 +7,9 @@
 [submodule "src/cpp/third_party/googletest"]
 	path = src/cpp/third_party/googletest
 	url = https://github.com/google/googletest.git
+[submodule "src/cpp/third_party/cxxopts"]
+	path = src/cpp/third_party/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
+[submodule "src/cpp/third_party/inih"]
+	path = src/cpp/third_party/inih
+	url = https://github.com/jtilly/inih.git
