@@ -87,7 +87,7 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[4])
         config_dict = parse_args(args)
-        self.assertTrue(config_dict.get("general.device") == "multi-GPU")
+        self.assertTrue(config_dict.get("general.device") == "GPU")
 
     def test_stats_parsing(self):
         """
