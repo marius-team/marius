@@ -10,9 +10,6 @@ def start_tracing():
     dstat -t -r -c -m -d --nocolor --output dstat_output.txt
     """
 
-    shutil.rmtree("dstat_output.txt")
-    shutil.rmtree("dstat_tmp.txt")
-
     try:
         shutil.rmtree("dstat_output.txt")
     except FileNotFoundError:
