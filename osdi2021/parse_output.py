@@ -34,10 +34,10 @@ def parse_pbg(filename):
             if "Starting epoch" in line:
                 if start_time is None:
                     start_time = " ".join(line.split()[:2])
-                    start_time = datetime.strptime(start_time, "%y-%m-%d %H:%M:%S,%f")
+                    start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S,%f")
             if "Finished epoch" in line:
                 end_time = " ".join(line.split()[:2])
-                end_time = datetime.strptime(start_time, "%y-%m-%d %H:%M:%S,%f")
+                end_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S,%f")
 
     runtime = (end_time - start_time).total_seconds()
     result["Train Time"] = runtime
