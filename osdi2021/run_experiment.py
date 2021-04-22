@@ -20,7 +20,16 @@ def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_t
         if collect_tracing_metrics:
             dstat_pid, nvidia_smi_pid = e.start_tracing()
 
-        e.run_marius(config, config_args, show_output=show_output)
+        try:
+            e.run_marius(config, config_args, show_output=show_output)
+        except Exception as ex:
+            print("Run Failed: %s" % ex)
+
+            if collect_tracing_metrics:
+                e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+
+            e.cleanup_experiments()
+            return
 
         if collect_tracing_metrics:
             e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
@@ -57,8 +66,16 @@ def run_pbg(runner_file, config, exp_dir, name, overwrite=False, collect_tracing
         nvidia_smi_pid = None
         if collect_tracing_metrics:
             dstat_pid, nvidia_smi_pid = e.start_tracing()
+        try:
+            e.run_pbg(runner_file, config, show_output=show_output)
+        except Exception as ex:
+            print("Run Failed: %s" % ex)
 
-        e.run_pbg(runner_file, config, show_output=show_output)
+            if collect_tracing_metrics:
+                e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+
+            e.cleanup_experiments()
+            return
 
         if collect_tracing_metrics:
             e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
@@ -95,7 +112,16 @@ def run_dglke(cmd, exp_dir, name, overwrite=False, collect_tracing_metrics=False
         if collect_tracing_metrics:
             dstat_pid, nvidia_smi_pid = e.start_tracing()
 
-        e.run_dglke(cmd, show_output=show_output)
+        try:
+            e.run_dglke(cmd, show_output=show_output)
+        except Exception as ex:
+            print("Run Failed: %s" % ex)
+
+            if collect_tracing_metrics:
+                e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+
+            e.cleanup_experiments()
+            return
 
         if collect_tracing_metrics:
             e.stop_metric_collection(dstat_pid, nvidia_smi_pid)

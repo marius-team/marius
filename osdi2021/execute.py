@@ -50,8 +50,9 @@ def run_marius(config_path, args, show_output=False):
     with open("tmp.txt", "w") as tmp_file:
         proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         for line in proc.stdout:
+            line = line.decode("utf-8")
             if show_output:
-                sys.stdout.write(str(line))
+                sys.stdout.write(line)
             tmp_file.write(line)
         proc.wait()
 
@@ -60,8 +61,9 @@ def run_dglke(args, show_output=False):
     with open("tmp.txt", "w") as tmp_file:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         for line in proc.stdout:
+            line = line.decode("utf-8")
             if show_output:
-                sys.stdout.write(str(line))
+                sys.stdout.write(line)
             tmp_file.write(line)
         proc.wait()
 
@@ -71,8 +73,9 @@ def run_pbg(script_path, config_path, args=None, show_output=False):
     with open("tmp.txt", "w") as tmp_file:
         proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         for line in proc.stdout:
+            line = line.decode("utf-8")
             if show_output:
-                sys.stdout.write(str(line))
+                sys.stdout.write(line)
             tmp_file.write(line)
         proc.wait()
 
