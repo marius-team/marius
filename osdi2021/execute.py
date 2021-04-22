@@ -10,14 +10,37 @@ def start_tracing():
     dstat -t -r -c -m -d --nocolor --output dstat_output.txt
     """
 
+    shutil.rmtree("dstat_output.txt")
+    shutil.rmtree("dstat_tmp.txt")
+
+    try:
+        shutil.rmtree("dstat_output.txt")
+    except FileNotFoundError:
+        pass
+
+    try:
+        shutil.rmtree("dstat_tmp.txt")
+    except FileNotFoundError:
+        pass
+
+
     with open("dstat_tmp.txt", "w") as f:
         dstat_pid = subprocess.Popen(dstat_script.split(), stdout=f).pid
+
+    print("Started dstat")
+
+    try:
+        shutil.rmtree("nvidia_smi_output.txt")
+    except FileNotFoundError:
+        pass
 
     nvidiasmi_script = """
     nvidia-smi --query-gpu=timestamp,name,pci.bus_id,driver_version,pstate,pcie.link.gen.max,pcie.link.gen.current,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv -l 1 -f nvidia_smi_output.txt
     """
 
     nvidiasmi_pid = subprocess.Popen(nvidiasmi_script.split()).pid
+
+    print("Started nvidia-smi")
 
     return dstat_pid, nvidiasmi_pid
 
@@ -44,12 +67,21 @@ def run_pbg(script_path, config_path, args=None):
 
 
 def stop_metric_collection(dstat_pid, nvidiasmi_pid):
-    script = """
-    kill %s
-    kill %s
-    """ % (dstat_pid, nvidiasmi_pid)
+    try:
+        script = """
+        kill %s
+        """ % dstat_pid
+        subprocess.check_call(script, shell=True)
+    except Exception as e:
+        print("Unable to kill dstat: %s" % e)
 
-    subprocess.check_call(script, shell=True)
+    try:
+        script = """
+        kill %s
+        """ % nvidiasmi_pid
+        subprocess.check_call(script, shell=True)
+    except Exception as e:
+        print("Unable to kill nvidia-smi: %s" % e)
 
 
 def collect_metrics(info_log_only=False, dglke=False, pbg=False):

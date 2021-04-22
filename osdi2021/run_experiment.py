@@ -385,8 +385,8 @@ def run_big_embeddings(overwrite=False, collect_tracing_metrics=False):
     # run_marius(disk, exp_dir, "d800", config_args)
 
 
-def run_all():
-    experiment_dict = {
+def run_all(overwrite=False, collect_tracing_metrics=False):
+    experiments = {
         "fb15k": run_fb15k,
         "livejournal": run_livejournal,
         "twitter": run_twitter,
@@ -402,21 +402,22 @@ def run_all():
     }
 
     print("#### Running all experiments ####\n")
-    for k, v in experiment_dict.items():
+    for k, v in experiments.items():
         print("#### Running %s ####\n" %k)
         try:
-            v()
+            v(overwrite, collect_tracing_metrics)
             print("#### %s Complete ####\n" %k)
         except Exception as e:
             print(e)
             print("#### %s Failed ####\n" %k)
 
-def run_multi_gpu(overwrite=False):
+
+def run_multi_gpu(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
     with open(exp_dir + "complex_multi_gpu.txt", "r") as f:
         dglke_complex_cmd = f.readlines()[0]
 
-    run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite)
+    run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
 
 if __name__ == "__main__":
@@ -443,6 +444,8 @@ if __name__ == "__main__":
                         help='If true, the results of previously run experiments will be overwritten.')
     parser.add_argument('--collect_tracing_metrics', dest='collect_tracing_metrics', action='store_true',
                         help='If true, dstat and nvidia-smi will collect resource utilization metrics.')
+    parser.add_argument('--show_output', dest='show_output', action='store_true',
+                        help='If true, the output .')
 
     args = parser.parse_args()
     experiment_dict.get(args.experiment)(args.overwrite, args.collect_tracing_metrics)
