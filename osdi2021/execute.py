@@ -61,6 +61,7 @@ def run_marius(config_path, args, show_output=False):
 def run_dglke(args, show_output=False):
     with open("tmp.txt", "w") as tmp_file:
         os.environ["PYTHONUNBUFFERED"] = "1"
+        os.environ["DGLBACKEND"] = "pytorch"
         print(args.split())
         proc = subprocess.Popen(args.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in proc.stdout:
@@ -75,6 +76,7 @@ def run_pbg(script_path, config_path, args=None, show_output=False):
     script = "python3 %s --config %s" % (script_path, config_path)
     with open("tmp.txt", "w") as tmp_file:
         os.environ["PYTHONUNBUFFERED"] = "1"
+        os.environ["MKL_THREADING_LAYER"] = "GNU"
         proc = subprocess.Popen(script.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in proc.stdout:
             line = line.decode("utf-8")
