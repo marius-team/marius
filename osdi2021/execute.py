@@ -48,7 +48,7 @@ def run_marius(config_path, args, show_output=False):
 
     script = script % (config_path, args)
     with open("tmp.txt", "w") as tmp_file:
-        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         for line in proc.stdout:
             if show_output:
                 sys.stdout.write(line)
@@ -58,7 +58,7 @@ def run_marius(config_path, args, show_output=False):
 
 def run_dglke(args, show_output=False):
     with open("tmp.txt", "w") as tmp_file:
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         for line in proc.stdout:
             if show_output:
                 sys.stdout.write(line)
@@ -69,7 +69,7 @@ def run_dglke(args, show_output=False):
 def run_pbg(script_path, config_path, args=None, show_output=False):
     script = "python3 %s --config %s" % (script_path, config_path)
     with open("tmp.txt", "w") as tmp_file:
-        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         for line in proc.stdout:
             if show_output:
                 sys.stdout.write(line)
