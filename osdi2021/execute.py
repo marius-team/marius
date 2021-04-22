@@ -1,7 +1,7 @@
 import pathlib
 import shutil
 import subprocess
-
+import sys
 import parse_output as p
 
 
@@ -22,7 +22,6 @@ def start_tracing():
         shutil.rmtree("dstat_tmp.txt")
     except FileNotFoundError:
         pass
-
 
     with open("dstat_tmp.txt", "w") as f:
         dstat_pid = subprocess.Popen(dstat_script.split(), stdout=f).pid
@@ -45,25 +44,40 @@ def start_tracing():
     return dstat_pid, nvidiasmi_pid
 
 
-def run_marius(config_path, args):
+def run_marius(config_path, args, show_output=False):
     script = """
     marius_train %s %s
     """
 
     script = script % (config_path, args)
     with open("tmp.txt", "w") as tmp_file:
-        subprocess.check_call(script, shell=True, stdout=tmp_file, stderr=tmp_file)
+        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in proc.stdout:
+            if show_output:
+                sys.stdout.write(line)
+            tmp_file.write(line)
+        proc.wait()
 
 
-def run_dglke(args):
+def run_dglke(args, show_output=False):
     with open("tmp.txt", "w") as tmp_file:
-        subprocess.check_call(args, shell=True, stdout=tmp_file, stderr=tmp_file)
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in proc.stdout:
+            if show_output:
+                sys.stdout.write(line)
+            tmp_file.write(line)
+        proc.wait()
 
 
-def run_pbg(script_path, config_path, args=None):
+def run_pbg(script_path, config_path, args=None, show_output=False):
     script = "python3 %s --config %s" % (script_path, config_path)
     with open("tmp.txt", "w") as tmp_file:
-        subprocess.check_call(script, shell=True, stdout=tmp_file)
+        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in proc.stdout:
+            if show_output:
+                sys.stdout.write(line)
+            tmp_file.write(line)
+        proc.wait()
 
 
 def stop_metric_collection(dstat_pid, nvidiasmi_pid):
