@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import sys
 import parse_output as p
+import os
 
 
 def start_tracing():
@@ -48,7 +49,7 @@ def run_marius(config_path, args, show_output=False):
 
     script = script % (config_path, args)
     with open("tmp.txt", "w") as tmp_file:
-        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        proc = subprocess.Popen(script.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in proc.stdout:
             line = line.decode("utf-8")
             if show_output:
@@ -59,7 +60,8 @@ def run_marius(config_path, args, show_output=False):
 
 def run_dglke(args, show_output=False):
     with open("tmp.txt", "w") as tmp_file:
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        os.environ["PYTHONUNBUFFERED"] = "1"
+        proc = subprocess.Popen(args.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in proc.stdout:
             line = line.decode("utf-8")
             if show_output:
@@ -71,7 +73,8 @@ def run_dglke(args, show_output=False):
 def run_pbg(script_path, config_path, args=None, show_output=False):
     script = "python3 %s --config %s" % (script_path, config_path)
     with open("tmp.txt", "w") as tmp_file:
-        proc = subprocess.Popen(script, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        os.environ["PYTHONUNBUFFERED"] = "1"
+        proc = subprocess.Popen(script.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in proc.stdout:
             line = line.decode("utf-8")
             if show_output:
