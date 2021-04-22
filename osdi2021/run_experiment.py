@@ -10,24 +10,36 @@ import shutil
 import marius.tools.preprocess as preprocess
 
 
-def run_marius(config, exp_dir, name, config_args="", overwrite=False):
+def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_tracing_metrics=False):
     e.cleanup_experiments()
     if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
         print("==== Running Marius: %s =====" % name)
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
+
+        dstat_pid = None
+        nvidia_smi_pid = None
+        if collect_tracing_metrics:
+            dstat_pid, nvidia_smi_pid = e.start_tracing()
+
         e.run_marius(config, config_args)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics()
+
+        if collect_tracing_metrics:
+            e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+
+        info_log_only = not collect_tracing_metrics
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(info_log_only=info_log_only)
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
             print("Marius output results written to: %s" % exp_dir + name + "_result.json")
-        with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
-            dstat_df.to_csv(out_file)
-            print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
-        with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
-            nvidia_smi_df.to_csv(out_file)
-            print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+
+        if collect_tracing_metrics:
+            with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
+                dstat_df.to_csv(out_file)
+                print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
+            with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
+                nvidia_smi_df.to_csv(out_file)
+                print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+
         shutil.move("tmp.txt", exp_dir + name + "_output.txt")
         print("Program output written to: %s" % exp_dir + name + "_output.txt")
 
@@ -36,24 +48,34 @@ def run_marius(config, exp_dir, name, config_args="", overwrite=False):
         print("Marius: %s already run" % name)
 
 
-def run_pbg(runner_file, config, exp_dir, name, overwrite=False):
+def run_pbg(runner_file, config, exp_dir, name, overwrite=False, collect_tracing_metrics=False):
     e.cleanup_experiments()
     if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
         print("==== Running PBG: %s =====" % name)
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
+
+        dstat_pid = None
+        nvidia_smi_pid = None
+        if collect_tracing_metrics:
+            dstat_pid, nvidia_smi_pid = e.start_tracing()
+
         e.run_pbg(runner_file, config)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(pbg=True)
+
+        if collect_tracing_metrics:
+            e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+
+        info_log_only = not collect_tracing_metrics
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(info_log_only=info_log_only, pbg=True)
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
             print("PBG output results written to: %s" % exp_dir + name + "_result.json")
-        with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
-            dstat_df.to_csv(out_file)
-            print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
-        with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
-            nvidia_smi_df.to_csv(out_file)
-            print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+        if collect_tracing_metrics:
+            with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
+                dstat_df.to_csv(out_file)
+                print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
+            with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
+                nvidia_smi_df.to_csv(out_file)
+                print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
 
         shutil.move("tmp.txt", exp_dir + name + "_output.txt")
         print("Program output written to: %s" % exp_dir + name + "_output.txt")
@@ -63,24 +85,35 @@ def run_pbg(runner_file, config, exp_dir, name, overwrite=False):
         print("PBG: %s already run" % name)
 
 
-def run_dglke(cmd, exp_dir, name, overwrite=False):
+def run_dglke(cmd, exp_dir, name, overwrite=False, collect_tracing_metrics=False):
     e.cleanup_experiments()
     if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
         print("==== Running DGL-KE: %s =====" % name)
-        dstat_pid, nvidia_smi_pid = e.start_tracing()
+
+        dstat_pid = None
+        nvidia_smi_pid = None
+        if collect_tracing_metrics:
+            dstat_pid, nvidia_smi_pid = e.start_tracing()
+
         e.run_dglke(cmd)
-        e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(dglke=True)
+
+        if collect_tracing_metrics:
+            e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
+
+        info_log_only = not collect_tracing_metrics
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(info_log_only=info_log_only, dglke=True)
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
             print("DGL-KE output results written to: %s" % exp_dir + name + "_result.json")
-        with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
-            dstat_df.to_csv(out_file)
-            print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
-        with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
-            nvidia_smi_df.to_csv(out_file)
-            print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
+
+        if collect_tracing_metrics:
+            with open(exp_dir + name + "_dstat.csv", 'w') as out_file:
+                dstat_df.to_csv(out_file)
+                print("Dstat tracing results written to: %s" % exp_dir + name + "_dstat.csv")
+            with open(exp_dir + name + "_nvidia_smi.csv", 'w') as out_file:
+                nvidia_smi_df.to_csv(out_file)
+                print("Nvidia-smi tracing results written to: %s" % exp_dir + name + "_nvidia_smi.csv")
 
         shutil.move("tmp.txt", exp_dir + name + "_output.txt")
         print("Program output written to: %s" % exp_dir + name + "_output.txt")
@@ -90,7 +123,7 @@ def run_dglke(cmd, exp_dir, name, overwrite=False):
         print("DGL-KE: %s already run" % name)
 
 
-def run_fb15k(overwrite=False, show_output=False):
+def run_fb15k(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/system_comparisons/fb15k/marius/"
 
     distmult_config = exp_dir + "distmult.ini"
@@ -100,8 +133,8 @@ def run_fb15k(overwrite=False, show_output=False):
         print("==== Preprocessing FB15K =====")
         preprocess.fb15k("fb15k/")
 
-    run_marius(distmult_config, exp_dir, "distmult_fb15k", overwrite=overwrite)
-    run_marius(complex_config, exp_dir, "complex_fb15k", overwrite=overwrite)
+    run_marius(distmult_config, exp_dir, "distmult_fb15k", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(complex_config, exp_dir, "complex_fb15k", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     exp_dir = "osdi2021/system_comparisons/fb15k/dgl-ke/"
     with open(exp_dir + "complex.txt", "r") as f:
@@ -109,8 +142,8 @@ def run_fb15k(overwrite=False, show_output=False):
     with open(exp_dir + "distmult.txt", "r") as f:
         dglke_distmult_cmd = f.readlines()[0]
 
-    run_dglke(dglke_complex_cmd, exp_dir, "complex_fb15k", overwrite=overwrite)
-    run_dglke(dglke_distmult_cmd, exp_dir, "distmult_fb15k", overwrite=overwrite)
+    run_dglke(dglke_complex_cmd, exp_dir, "complex_fb15k", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_dglke(dglke_distmult_cmd, exp_dir, "distmult_fb15k", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     # PBG may throw errors
     exp_dir = "osdi2021/system_comparisons/fb15k/pbg/"
@@ -118,13 +151,13 @@ def run_fb15k(overwrite=False, show_output=False):
     runner_file = exp_dir + "run_fb15k.py"
     complex_config = exp_dir + "fb15k_complex_config.py"
     distmult_config = exp_dir + "fb15k_distmult_config.py"
-    run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k", overwrite=overwrite)
-    run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k", overwrite=overwrite)
+    run_pbg(runner_file, complex_config, exp_dir, "complex_fb15k", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_pbg(runner_file, distmult_config, exp_dir, "distmult_fb15k", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     osdi_plot.print_table_2()
 
 
-def run_livejournal(overwrite=False, show_output=False):
+def run_livejournal(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/system_comparisons/livejournal/marius/"
     dot_config = exp_dir + "dot.ini"
 
@@ -132,19 +165,19 @@ def run_livejournal(overwrite=False, show_output=False):
         print("==== Preprocessing Livejournal =====")
         preprocess.live_journal("livejournal/")
 
-    run_marius(dot_config, exp_dir, "dot_livejournal", overwrite=overwrite)
+    run_marius(dot_config, exp_dir, "dot_livejournal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     # PBG may throw errors
     exp_dir = "osdi2021/system_comparisons/livejournal/pbg/"
 
     runner_file = exp_dir + "run_dot.py"
     dot_config = exp_dir + "dot.py"
-    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal", overwrite=overwrite)
+    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     osdi_plot.print_table_3()
 
 
-def run_twitter(overwrite=False, show_output=False):
+def run_twitter(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/system_comparisons/twitter/marius/"
 
     dot_config = exp_dir + "dot.ini"
@@ -153,12 +186,12 @@ def run_twitter(overwrite=False, show_output=False):
         print("==== Preprocessing Twitter =====")
         preprocess.twitter("twitter/")
 
-    run_marius(dot_config, exp_dir, "dot_twitter", overwrite=overwrite)
+    run_marius(dot_config, exp_dir, "dot_twitter", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     osdi_plot.print_table_4()
 
 
-def run_freebase86m(overwrite=False, show_output=False):
+def run_freebase86m(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
     complex_config = exp_dir + "d100.ini"
 
@@ -166,41 +199,44 @@ def run_freebase86m(overwrite=False, show_output=False):
         print("==== Preprocessing Freebase86m P=16 D=100 =====")
         preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
 
-    run_marius(complex_config, exp_dir, "freebase86m_16", overwrite=overwrite)
+    run_marius(complex_config, exp_dir, "freebase86m_16", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     osdi_plot.print_table_5()
 
 
-def run_utilization(overwrite=False, show_output=False):
+def run_utilization(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
 
     complex_50_config = exp_dir + "d50.ini"
     complex_50_8_config = exp_dir + "d50_8.ini"
+
+    # this experiment requires collecting metrics
+    collect_tracing_metrics = True
 
     if not os.path.exists("freebase86m/"):
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
     config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2"
-    run_marius(complex_50_config, exp_dir, "complex_50_util", config_args, overwrite=overwrite)
+    run_marius(complex_50_config, exp_dir, "complex_50_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     if not os.path.exists("freebase86m_p8/"):
         print("==== Preprocessing Freebase86m P=8 D=50 =====")
         preprocess.freebase86m("freebase86m_p8/", num_partitions=8)
 
-    run_marius(complex_50_8_config, exp_dir, "complex_50_8_util", config_args, overwrite=overwrite)
+    run_marius(complex_50_8_config, exp_dir, "complex_50_8_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
     with open(exp_dir + "complex.txt", "r") as f:
         dglke_complex_cmd = f.readlines()[0]
 
     try:
-        run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite)
+        run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
     except Exception as e:
         print(e)
 
 
-def run_buffer_simulator(overwrite=False, show_output=False):
+def run_buffer_simulator(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/buffer_simulator/"
 
     n_start = 8
@@ -211,7 +247,7 @@ def run_buffer_simulator(overwrite=False, show_output=False):
     print("Figure written to %s" % exp_dir + "figure7.png")
 
 
-def run_orderings_total_io(overwrite=False, show_output=False):
+def run_orderings_total_io(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -223,14 +259,14 @@ def run_orderings_total_io(overwrite=False, show_output=False):
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
     config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2 --reporting.logs_per_epoch=1000"
-    run_marius(elimination_config, exp_dir, "elimination100_util", config_args, overwrite=overwrite)
+    run_marius(elimination_config, exp_dir, "elimination100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
-    run_marius(hilbert_config, exp_dir, "hilbert100_util", config_args, overwrite=overwrite)
+    run_marius(hilbert_config, exp_dir, "hilbert100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args, overwrite=overwrite)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
 
-def run_orderings_freebase86m(overwrite=False, show_output=False):
+def run_orderings_freebase86m(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/partition_orderings/freebase86m/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -242,22 +278,22 @@ def run_orderings_freebase86m(overwrite=False, show_output=False):
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite)
-    run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite)
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", overwrite=overwrite)
+    run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     if not os.path.exists("freebase86m/"):
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
     config_args = "--model.embedding_size=50"
-    run_marius(elimination_config, exp_dir, "elimination50", overwrite=overwrite)
-    run_marius(hilbert_config, exp_dir, "hilbert50", config_args, overwrite=overwrite)
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric50", config_args, overwrite=overwrite)
-    run_marius(memory_config, exp_dir, "memory50", config_args, overwrite=overwrite)
+    run_marius(elimination_config, exp_dir, "elimination50", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_config, exp_dir, "hilbert50", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric50", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(memory_config, exp_dir, "memory50", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
 
-def run_orderings_twitter(overwrite=False, show_output=False):
+def run_orderings_twitter(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/partition_orderings/twitter/"
 
     elimination_config = exp_dir + "elimination.ini"
@@ -273,18 +309,18 @@ def run_orderings_twitter(overwrite=False, show_output=False):
         print("==== Preprocessing Twitter P=1 D=100 =====")
         preprocess.freebase86m("twitter/")
 
-    run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite)
-    run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite)
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", overwrite=overwrite)
+    run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
     run_marius(memory_config, exp_dir, "memory100", overwrite=overwrite)
 
     config_args = "--model.embedding_size=200"
-    run_marius(elimination_config, exp_dir, "elimination200", config_args, overwrite=overwrite)
-    run_marius(hilbert_config, exp_dir, "hilbert200", config_args, overwrite=overwrite)
-    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric200", config_args, overwrite=overwrite)
+    run_marius(elimination_config, exp_dir, "elimination200", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_config, exp_dir, "hilbert200", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric200", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
 
-def run_staleness_bound(overwrite=False, show_output=False):
+def run_staleness_bound(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/microbenchmarks/bounded_staleness/"
 
     all_async_config = exp_dir + "all_async.ini"
@@ -299,11 +335,11 @@ def run_staleness_bound(overwrite=False, show_output=False):
 
     for bound in [2, 4, 8, 16, 32, 64]:
         config_args = "--training_pipeline.max_batches_in_flight=%i" % bound
-        run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args, overwrite=overwrite)
-        run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite)
+        run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+        run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
 
-def run_prefetching(overwrite=False, show_output=False):
+def run_prefetching(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/microbenchmarks/prefetching/"
 
     no_prefetching_config = exp_dir + "no_prefetching.ini"
@@ -313,11 +349,11 @@ def run_prefetching(overwrite=False, show_output=False):
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    run_marius(no_prefetching_config, exp_dir, "no_prefetching", overwrite=overwrite)
-    run_marius(prefetching_config, exp_dir, "prefetching", overwrite=overwrite)
+    run_marius(no_prefetching_config, exp_dir, "no_prefetching", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(prefetching_config, exp_dir, "prefetching", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
 
-def run_big_embeddings(overwrite=False, show_output=False):
+def run_big_embeddings(overwrite=False, collect_tracing_metrics=False):
     exp_dir = "osdi2021/large_embeddings/"
     cpu_memory = exp_dir + "cpu_memory.ini"
     gpu_memory = exp_dir + "gpu_memory.ini"
@@ -330,11 +366,11 @@ def run_big_embeddings(overwrite=False, show_output=False):
         print("==== Preprocessing Freebase86m P=32 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    run_marius(gpu_memory, exp_dir, "d20", overwrite=overwrite)
-    run_marius(cpu_memory, exp_dir, "d50", overwrite=overwrite)
+    run_marius(gpu_memory, exp_dir, "d20", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
+    run_marius(cpu_memory, exp_dir, "d50", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     config_args = "--storage.buffer_capacity=16"
-    run_marius(disk, exp_dir, "d100", config_args, overwrite=overwrite)
+    run_marius(disk, exp_dir, "d100", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics)
 
     osdi_plot.print_table_6()
 
@@ -382,6 +418,7 @@ def run_multi_gpu(overwrite=False):
 
     run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite)
 
+
 if __name__ == "__main__":
     experiment_dict = {
         "fb15k": run_fb15k,
@@ -404,8 +441,8 @@ if __name__ == "__main__":
                         help='Experiment choices: %(choices)s')
     parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                         help='If true, the results of previously run experiments will be overwritten.')
-    # parser.add_argument('--show_output', dest='show_output', action='store_true',
-    #                     help='If true, the output of each run will be output to the terminal.')
+    parser.add_argument('--collect_tracing_metrics', dest='collect_tracing_metrics', action='store_true',
+                        help='If true, dstat and nvidia-smi will collect resource utilization metrics.')
 
     args = parser.parse_args()
-    experiment_dict.get(args.experiment)(args.overwrite)
+    experiment_dict.get(args.experiment)(args.overwrite, args.collect_tracing_metrics)
