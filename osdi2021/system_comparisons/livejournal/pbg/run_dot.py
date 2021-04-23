@@ -132,6 +132,10 @@ def main():
     os.system("mv lhs_relations.bin pbg_embeddings/live_journal/relations/")
     os.system("mv rhs_relations.bin pbg_embeddings/live_journal/relations/")
 
+    print("Exported embeddings")
+
+    os.system("marius_train osdi2021/system_comparisons/livejournal/pbg/dot_eval.ini")
+
 
 if __name__ == "__main__":
     main()
