@@ -5,7 +5,7 @@ def preprocess_twitter(path: String) : Dataset[Triplet] = {
     val twitter = sc.textFile(path)
     val triplets = twitter.map(line => {
     val parts = line.split(" ")
-    Triplet(parts(0), 0, parts(2))
+    Triplet(parts(0), "0", parts(2))
     })
 
     val filteredTriplets = triplets
@@ -19,7 +19,7 @@ def get_twitter_unified() : Dataset[Triplet] = {
     val twitter = sc.textFile("twitter_16/*edges.txt")
     val triplets = twitter.map(line => {
     val parts = line.split(" ")
-    Triplet(parts(0), 0, parts(2))
+    Triplet(parts(0), "0", parts(2))
     })
 
     val filteredTriplets = triplets
