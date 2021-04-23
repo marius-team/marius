@@ -313,7 +313,7 @@ def run_orderings_freebase86m(overwrite=False, collect_tracing_metrics=False, sh
         preprocess.freebase86m("freebase86m/")
 
     config_args = "--model.embedding_size=50"
-    run_marius(elimination_config, exp_dir, "elimination50", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+    run_marius(elimination_config, exp_dir, "elimination50", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_config, exp_dir, "hilbert50", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric50", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(memory_config, exp_dir, "memory50", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
