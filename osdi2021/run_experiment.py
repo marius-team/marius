@@ -329,11 +329,11 @@ def run_orderings_twitter(overwrite=False, collect_tracing_metrics=False, show_o
 
     if not os.path.exists("twitter_32/"):
         print("==== Preprocessing Twitter P=32 D=200 =====")
-        preprocess.freebase86m("twitter_32/", num_partitions=32)
+        preprocess.twitter("twitter_32/", num_partitions=32)
 
     if not os.path.exists("twitter/"):
         print("==== Preprocessing Twitter P=1 D=100 =====")
-        preprocess.freebase86m("twitter/")
+        preprocess.twitter("twitter/")
 
     run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
@@ -357,7 +357,7 @@ def run_staleness_bound(overwrite=False, collect_tracing_metrics=False, show_out
         print("==== Preprocessing Freebase86m P=1 D=50 =====")
         preprocess.freebase86m("freebase86m/")
 
-    run_marius(all_sync, exp_dir, "all_sync", overwrite=overwrite)
+    run_marius(all_sync, exp_dir, "all_sync", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     for bound in [2, 4, 8, 16, 32, 64]:
         config_args = "--training_pipeline.max_batches_in_flight=%i" % bound

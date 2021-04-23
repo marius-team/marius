@@ -54,7 +54,7 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
     extract_file(download_path)
 
     return general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))],
-                          ["srd"],
+                          ["sd"],
                           [output_dir], num_partitions=num_partitions,
                           dataset_split=split, num_line_skip=1)
 
