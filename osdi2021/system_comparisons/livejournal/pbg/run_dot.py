@@ -17,6 +17,7 @@ from torchbiggraph.util import (
 
 import sys
 from os import path
+import os
 
 sys.path.append(path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))))))
 from osdi2021.utils import make_tsv
@@ -115,9 +116,21 @@ def main():
     train(train_config, subprocess_init=subprocess_init)
 
     eval_config = attr.evolve(config, edge_paths=[output_test_path])
-    do_eval(eval_config, subprocess_init=subprocess_init)
-
     make_tsv(eval_config, False)
+
+    os.makedirs("pbg_embeddings/live_journal/edges/train", exist_ok=True)
+    os.makedirs("pbg_embeddings/live_journal/edges/evaluation", exist_ok=True)
+    os.makedirs("pbg_embeddings/live_journal/edges/test", exist_ok=True)
+    os.makedirs("pbg_embeddings/live_journal/embeddings", exist_ok=True)
+    os.makedirs("pbg_embeddings/live_journal/relations", exist_ok=True)
+
+    os.system("touch pbg_embeddings/live_journal/edges/train/edges.bin")
+    os.system("touch pbg_embeddings/live_journal/edges/evaluation/edges.bin")
+    os.system("mv edges.bin pbg_embeddings/live_journal/edges/test/")
+
+    os.system("mv embeddings.bin pbg_embeddings/live_journal/embeddings/")
+    os.system("mv lhs_relations.bin pbg_embeddings/live_journal/relations/")
+    os.system("mv rhs_relations.bin pbg_embeddings/live_journal/relations/")
 
 
 if __name__ == "__main__":
