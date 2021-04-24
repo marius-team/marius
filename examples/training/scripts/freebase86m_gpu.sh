@@ -1,5 +1,5 @@
 # preprocess the freebase86m graph and put preprocessed graph into output dir
-python3 tools/preprocess.py freebase86m output_dir/ 
+marius_preprocess freebase86m output_dir/
 
 # run marius on the preprocessed input
-build/marius_train examples/training/configs/freebase86m_gpu.ini info
+marius_train examples/training/configs/freebase86m_gpu.ini info
