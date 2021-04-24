@@ -14,7 +14,6 @@ TEST(TestConfig, TestConfigOnly) {
     int num_args = 2;
     const char* n_argv[] = {"marius_train", conf_str.c_str()};
     parseConfig(num_args, (char **)n_argv);
-    int i = 0;
 }
 
 TEST(TestConfig, TestCommandLineOverride) {
