@@ -8,7 +8,6 @@ MariusOptions marius_options = MariusOptions();
 TimestampAllocator global_timestamp_allocator = TimestampAllocator();
 
 MariusOptions parseConfig(int64_t argc, char *argv[]) {
-
     string config_path;
     cxxopts::Options cmd_options(argv[0], "Train and evaluate graph embeddings");
     cmd_options.allow_unrecognised_options();
@@ -297,43 +296,53 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
                         int option_end = opt.find("=");
 
                         if (section_end == - 1 or option_end == - 1) {
-                            break;
+                            throw std::exception();
                         }
 
                         std::string section = opt.substr(2, section_end - 2);
                         std::string option_name = opt.substr(section_end + 1, option_end - section_end - 1);
                         std::string value = opt.substr(option_end + 1, opt.size() - option_end - 1);
 
+                        bool valid = false;
+
                         for (OptInfo<std::string> v : s_var_map) {
                             if (section == v.s_section && option_name == v.s_option) {
                                 *(v.cpp_var) = value;
+                                valid = true;
                             }
                         }
                         for (OptInfo<int64_t> v : i64_var_map) {
                             if (section == v.s_section && option_name == v.s_option) {
                                 *(v.cpp_var) = std::stoll(value);
+                                valid = true;
                             }
                         }
                         for (OptInfo<int> v : i_var_map) {
                             if (section == v.s_section && option_name == v.s_option) {
                                 *(v.cpp_var) = std::stoi(value);
+                                valid = true;
                             }
                         }
                         for (OptInfo<float> v : f_var_map) {
                             if (section == v.s_section && option_name == v.s_option) {
                                 *(v.cpp_var) = std::stof(value);
+                                valid = true;
                             }
                         }
                         for (OptInfo<bool> v : b_var_map) {
                             if (section == v.s_section && option_name == v.s_option) {
                                 *(v.cpp_var) = (value == "true");
+                                valid = true;
                             }
+                        }
+                        if (!valid) {
+                            throw std::exception();
                         }
                     } else {
                         throw std::exception();
                     }
                 }
-            } catch (std::exception ) {
+            } catch (std::exception) {
                 throw cxxopts::option_syntax_exception("Unable to parse supplied command line configuration options");
             }
         }
@@ -364,18 +373,6 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
             exit(-1);
         }
     }
-
-//    po::options_description config_options("Configuration");
-//    po::variables_map variables_map;
-//
-//    try {
-//        store(parse_command_line(argc, argv, config_options), variables_map);
-//        store(parse_config_file(config_fstream, config_options), variables_map);
-//        notify(variables_map);
-//    } catch(std::exception& e) {
-//        SPDLOG_ERROR(e.what());
-//        exit(-1);
-//    }
 
     if (s_device == "GPU") {
         device = torch::kCUDA;
