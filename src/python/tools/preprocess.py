@@ -20,6 +20,7 @@ from marius.tools.config_generator import update_stats
 from marius.tools.config_generator import update_data_path
 from marius.tools.config_generator import DEFAULT_CONFIG_FILE
 from marius.tools.csv_converter import general_parser
+from marius.tools.partitioner import preprocess_dataset
 
 
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
@@ -53,10 +54,15 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
     download_path = download_file(TWITTER_URL, output_dir)
     extract_file(download_path)
 
-    return general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))],
-                          ["sd"],
-                          [output_dir], num_partitions=num_partitions,
-                          dataset_split=split, num_line_skip=1)
+# num_partitions, output_dir, splits=(.05, .05), columns=None
+    preprocess_dataset([str(Path(output_dir) / Path("twitter-2010.txt"))], num_partitions, output_dir, split, ["src", "dst"], header=False)
+
+    return None
+
+    # return general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))],
+    #                       ["sd"],
+    #                       [output_dir], num_partitions=num_partitions,
+    #                       dataset_split=split, num_line_skip=1)
 
 
 def freebase86m(output_dir, num_partitions=1):
