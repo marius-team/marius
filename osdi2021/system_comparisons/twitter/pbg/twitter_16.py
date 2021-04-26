@@ -2,13 +2,13 @@ def get_torchbiggraph_config():
 
     config = dict(  # noqa
         # I/O data
-        entity_path="osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/twitter16/twitter_metadata",
+        entity_path="twitter_16/twitter_metadata",
         edge_paths=[
-            "osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/twitter16/twitter_train",
-            "osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/twitter16/twitter_valid",
-            "osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/twitter16/twitter_test",
+            "twitter_16/twitter_train",
+            "twitter_16/twitter_valid",
+            "twitter_16/twitter_test",
         ],
-        checkpoint_path="model/twitter16",
+        checkpoint_path="model/twitter_16",
         # Graph structure
         entities={"all": {"num_partitions": 16}},
         relations=[

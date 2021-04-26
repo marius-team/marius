@@ -89,7 +89,7 @@ def print_table_2():
 def print_table_3():
     exp_dir = "osdi2021/system_comparisons/livejournal/"
 
-    marius_dot = exp_dir + "marius/dot_livejournal_result.json"
+    marius_dot = exp_dir + "marius/dot_live_journal_result.json"
 
     with open(marius_dot) as f:
         marius_dot_res = json.load(f)
@@ -101,6 +101,19 @@ def print_table_3():
     time = sum(marius_dot_res["Train Time"]) / 1000.0
 
     print("Marius Dot: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
+
+    pbg_dot = exp_dir + "pbg/dot_live_journal_result.json"
+
+    with open(pbg_dot) as f:
+        pbg_dot_res = json.load(f)
+
+    MRR = pbg_dot_res["MRR"][-1]
+    hits1 = pbg_dot_res["Hits@1"][-1]
+    hits5 = marius_dot_res["Hits@5"][-1]
+    hits10 = pbg_dot_res["Hits@10"][-1]
+    time = pbg_dot_res["Train Time"]
+
+    print("PBG Dot: MRR %s, Hits@1 %s, Hits@5 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits5, hits10, time))
 
 
 def print_table_4():

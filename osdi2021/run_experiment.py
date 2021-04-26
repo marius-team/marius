@@ -191,14 +191,14 @@ def run_livejournal(overwrite=False, collect_tracing_metrics=False, show_output=
         print("==== Preprocessing Livejournal =====")
         preprocess.live_journal("livejournal/")
 
-    run_marius(dot_config, exp_dir, "dot_livejournal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+    run_marius(dot_config, exp_dir, "dot_live_journal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     # PBG may throw errors
     exp_dir = "osdi2021/system_comparisons/livejournal/pbg/"
 
     runner_file = exp_dir + "run_dot.py"
     dot_config = exp_dir + "dot.py"
-    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output, eval_in_marius=True)
+    run_pbg(runner_file, dot_config, exp_dir, "dot_live_journal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output, eval_in_marius=True)
 
     osdi_plot.print_table_3()
 

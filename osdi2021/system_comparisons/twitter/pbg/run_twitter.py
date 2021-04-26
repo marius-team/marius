@@ -24,7 +24,7 @@ from osdi2021.utils import make_tsv
 
 def main():
     setup_logging()
-    parser = argparse.ArgumentParser(description="Example on Freebase86m")
+    parser = argparse.ArgumentParser(description="Example on Twitter")
     parser.add_argument("--config", help="Path to config file")
     parser.add_argument("-p", "--param", action="append", nargs="*")
     parser.add_argument(
@@ -45,25 +45,25 @@ def main():
     train(train_config, subprocess_init=subprocess_init)
 
     eval_config = attr.evolve(config, edge_paths=[output_test_path])
-    make_tsv(eval_config, True)
+    make_tsv(eval_config, False)
 
-    os.makedirs("pbg_embeddings/freebase86m_16/edges/train", exist_ok=True)
-    os.makedirs("pbg_embeddings/freebase86m_16/edges/evaluation", exist_ok=True)
-    os.makedirs("pbg_embeddings/freebase86m_16/edges/test", exist_ok=True)
-    os.makedirs("pbg_embeddings/freebase86m_16/embeddings", exist_ok=True)
-    os.makedirs("pbg_embeddings/freebase86m_16/relations", exist_ok=True)
+    os.makedirs("pbg_embeddings/twitter_16/edges/train", exist_ok=True)
+    os.makedirs("pbg_embeddings/twitter_16/edges/evaluation", exist_ok=True)
+    os.makedirs("pbg_embeddings/twitter_16/edges/test", exist_ok=True)
+    os.makedirs("pbg_embeddings/twitter_16/embeddings", exist_ok=True)
+    os.makedirs("pbg_embeddings/twitter_16/relations", exist_ok=True)
 
-    os.system("touch pbg_embeddings/freebase86m_16/edges/train/edges.bin")
-    os.system("touch pbg_embeddings/freebase86m_16/edges/evaluation/edges.bin")
-    os.system("mv edges.bin pbg_embeddings/freebase86m_16/edges/test/")
+    os.system("touch pbg_embeddings/twitter_16/edges/train/edges.bin")
+    os.system("touch pbg_embeddings/twitter_16/edges/evaluation/edges.bin")
+    os.system("mv edges.bin pbg_embeddings/twitter_16/edges/test/")
+    os.system("touch pbg_embeddings/twitter_16/relations/src_relations.bin")
+    os.system("touch pbg_embeddings/twitter_16/relations/dst_relations.bin")
 
-    os.system("mv embeddings.bin pbg_embeddings/freebase86m_16/embeddings/")
-    os.system("mv lhs_relations.bin pbg_embeddings/freebase86m_16/relations/")
-    os.system("mv rhs_relations.bin pbg_embeddings/freebase86m_16/relations/")
+    os.system("mv embeddings.bin pbg_embeddings/twitter_16/embeddings/")
 
     print("Exported embeddings")
 
-    os.system("marius_eval osdi2021/system_comparisons/freebase86m/pbg/complex_d100_eval.ini --path.train_edges foo")
+    os.system("marius_eval osdi2021/system_comparisons/twitter/pbg/dot_eval.ini --path.train_edges foo")
 
 
 if __name__ == "__main__":
