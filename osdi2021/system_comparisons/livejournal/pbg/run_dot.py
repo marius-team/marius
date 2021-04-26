@@ -126,6 +126,8 @@ def main():
 
     os.system("touch pbg_embeddings/live_journal/edges/train/edges.bin")
     os.system("touch pbg_embeddings/live_journal/edges/evaluation/edges.bin")
+    os.system("touch pbg_embeddings/live_journal/relations/src_relations.bin")
+    os.system("touch pbg_embeddings/live_journal/relations/dst_relations.bin")
     os.system("mv edges.bin pbg_embeddings/live_journal/edges/test/")
 
     os.system("mv embeddings.bin pbg_embeddings/live_journal/embeddings/")
