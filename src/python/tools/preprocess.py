@@ -409,7 +409,8 @@ def download_file(url, output_dir):
     filepath = output_dir / filename
 
     if filepath.is_file():
-        print(f"File already exists: {filepath}")
+        print(f"File already exists: {filepath} May be outdated!")
+
     else:
         try:
             print(f"Downloading {filename} to {filepath}")
