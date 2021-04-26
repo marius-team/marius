@@ -8,7 +8,7 @@ from buffer_simulator import plotting as plot_buff
 import plotting as osdi_plot
 import shutil
 import marius.tools.preprocess as preprocess
-from osdi2021.dglke_preprocessing import preprocess_live_journal
+from dglke_preprocessing import preprocess_live_journal
 
 
 def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_tracing_metrics=False, show_output=False):
