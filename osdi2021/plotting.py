@@ -569,7 +569,7 @@ def plot_figure_12():
     ys = []
     for i, v in enumerate(sync_rels_results):
         x = all_bounds[i]
-        y = v["MRR"][-1]
+        y = v["TP"][-1]
         xs.append(x)
         ys.append(y)
 
@@ -583,7 +583,7 @@ def plot_figure_12():
     ys = []
     for i, v in enumerate(async_rels_results):
         x = all_bounds[i]
-        y = v["MRR"][-1]
+        y = v["TP"][-1]
         xs.append(x)
         ys.append(y)
 
