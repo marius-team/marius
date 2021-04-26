@@ -392,7 +392,7 @@ def run_staleness_bound(overwrite=False, collect_tracing_metrics=False, show_out
         run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
         run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
-    osdi_plot.plot_figure_11()
+    osdi_plot.plot_figure_12()
 
 def run_prefetching(overwrite=False, collect_tracing_metrics=False, show_output=False):
     exp_dir = "osdi2021/microbenchmarks/prefetching/"

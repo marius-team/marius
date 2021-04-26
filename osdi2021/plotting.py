@@ -619,7 +619,7 @@ def plot_figure_12():
     plt.gcf().subplots_adjust(bottom=0.15)
     plt.gcf().subplots_adjust(left=0.15)
 
-    plt.savefig(exp_dir + "figure_11.png")
+    plt.savefig(exp_dir + "figure_12.png")
 
 
 
