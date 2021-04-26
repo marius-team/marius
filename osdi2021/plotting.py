@@ -4,6 +4,8 @@ import cycler
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
+from matplotlib.ticker import FuncFormatter
+import matplotlib.ticker as mticker
 
 import parse_output
 from buffer_simulator import plotting as plot_buff
@@ -320,6 +322,73 @@ def plot_figure_8():
 
 
 def plot_figure_9():
+    # def find_nearest(a, a0):
+    #     "Element in nd array `a` closest to the scalar value `a0`"
+    #     idx = np.abs(a - a0).argmin()
+    #     return idx
+    #
+    # plt.figure(num=None, figsize=(6, 2), facecolor='w', edgecolor='k')
+    #
+    # params = {'legend.fontsize': 9,
+    #           'legend.handlelength': 4}
+    # plt.rc('font', family='serif')
+    # plt.rcParams['font.size'] = 9
+    # plt.rcParams['axes.labelsize'] = 9
+    # plt.rcParams['axes.labelweight'] = 'bold'
+    # COLOR = 'black'
+    # plt.rcParams['text.color'] = COLOR
+    # plt.rcParams['axes.labelcolor'] = COLOR
+    # plt.rcParams['xtick.color'] = COLOR
+    # plt.rcParams['ytick.color'] = COLOR
+    # plt.rcParams.update(params)
+    #
+    # exp_dir = "osdi2021/partition_orderings/freebase86m/"
+    #
+    # orderings100_results = {}
+    #
+    # orderings100_results["Hilbert"] = parse_output.read_nvidia_smi(exp_dir + "hilbert100_util_dstat.csv")
+    # orderings100_results["HilbertSymmetric"] = parse_output.read_nvidia_smi(exp_dir + "hilbertsymmetric100_util_dstat.csv")
+    # orderings100_results["Elimination"] = parse_output.read_nvidia_smi(exp_dir + "elimination100_util_dstat.csv")
+    #
+    # colors = ["r", "b", "g", "c"]
+    #
+    # zorders=[0, 2, 1]
+    #
+    # runtimes = [2039, 809, 1159]
+    # # runtimes = [2060, 900, 1300]
+    # start_times = [615, 560, 615]
+    # offsets = []
+    #
+    # for i in range(3):
+    #     offsets.append((start_times[i], start_times[i] + runtimes[i]))
+    #
+    # labels = ["Hilbert", "Elimination", "HilbertSymmetric"]
+    # linestyles = ["--", "-", "-."]
+    #
+    # i = 0
+    # for k, v in orderings100_results.items():
+    #     y = np.cumsum(v[0].disk_util[offsets[i][0]:offsets[i][1]]) / np.power(2, 30)
+    #     cpu_ts = v[0].cpu_trace_timestamp[offsets[i][0]:offsets[i][1]]
+    #     iter_ts = np.asarray([np.datetime64(itr[0]) for itr in v[0].iteration_progress])
+    #
+    #     nearest = [find_nearest(iter_ts, c) for c in cpu_ts]
+    #     # y = smooth(v[0].disk_util[offsets[i][0]:offsets[i][1]], 25) / np.power(2,30)
+    #
+    #     ls = linestyles[i]
+    #
+    #     print(k, y[-1])
+    #     plt.plot(nearest, y, linestyle=ls, linewidth=2, color=colors[i], zorder=zorders[i], label=labels[i])
+    #     # plt.plot(x[-1], y[-1], markersize=12, marker="o", color = colors[i], zorder=zorders[i])
+    #     i+=1
+    #
+    # plt.ylabel("Total IO (GB)")
+    # # plt.ylim(0, 1500)
+    # plt.xlabel("Iteration")
+    # plt.legend(loc="upper left")
+    # plt.gcf().subplots_adjust(bottom=0.3)
+    # plt.show()
+    # # plt.savefig("../../../../figures/orderings_freebase86m.pdf")
+
     pass
 
 
@@ -423,7 +492,130 @@ def plot_figure_11():
 
 #TODO
 def plot_figure_12():
-    pass
+    fig, ax_arr = plt.subplots((2), figsize=(10, 4))
+    ax1 = ax_arr[0]
+    ax2 = ax_arr[1]
+    # ax3 =ax_arr[2]
+
+    plt.rc('font', family='serif', weight="bold")
+    plt.rcParams['font.size'] = 16
+    plt.rcParams['axes.labelsize'] = 18
+    plt.rcParams['axes.labelweight'] = "normal"
+    COLOR = 'black'
+    plt.rcParams['text.color'] = COLOR
+    plt.rcParams['axes.labelcolor'] = COLOR
+    plt.rcParams['xtick.color'] = COLOR
+    plt.rcParams['ytick.color'] = COLOR
+
+    xs = []
+    ys = []
+
+    exp_dir = "osdi2021/microbenchmarks/bounded_staleness/"
+    all_sync_result = parse_output.parse_info_log(exp_dir + "all_sync_result.json")
+    sync_rels_results = [all_sync_result]
+    async_rels_results = [all_sync_result]
+
+    all_bounds = [1, 2, 4, 8, 16, 32, 64]
+
+    for bound in [2, 4, 8, 16, 32, 64]:
+        sync_rels_results.append(parse_output.parse_info_log(exp_dir + "sync_rel_%i_result.json" % bound))
+        async_rels_results.append(parse_output.parse_info_log(exp_dir + "all_async_%i_result.json" % bound))
+
+    for i, v in enumerate(sync_rels_results):
+        x = all_bounds[i]
+        y = v["MRR"][-1]
+        xs.append(x)
+        ys.append(y)
+
+        print(x, y)
+
+    l = sorted((i, j) for i, j in zip(xs, ys))
+    new_x, new_y = zip(*l)
+    ax1.plot(new_x, new_y, "r-", marker="o", lw=4, markersize=12)
+
+    xs = []
+    ys = []
+    for i, v in enumerate(async_rels_results):
+        x = all_bounds[i]
+        y = v["MRR"][-1]
+        xs.append(x)
+        ys.append(y)
+
+        print(x, y)
+
+    l = sorted((i, j) for i, j in zip(xs, ys))
+    new_x, new_y = zip(*l)
+    ax1.plot(new_x, new_y, "b-", marker="x", lw=4, markersize=12)
+
+    ax1.set_xscale("log", basex=2)
+
+    labels = [item.get_text() for item in ax1.get_xticklabels()]
+
+    empty_string_labels = [''] * len(labels)
+    ax1.set_xticklabels(empty_string_labels)
+
+    xs = []
+    ys = []
+    for i, v in enumerate(sync_rels_results):
+        x = all_bounds[i]
+        y = v["MRR"][-1]
+        xs.append(x)
+        ys.append(y)
+
+        print(x, y)
+
+    l = sorted((i, j) for i, j in zip(xs, ys))
+    new_x, new_y = zip(*l)
+    ax2.plot(new_x, new_y, "r", marker="o", linestyle="--", lw=4, markersize=12)
+
+    xs = []
+    ys = []
+    for i, v in enumerate(async_rels_results):
+        x = all_bounds[i]
+        y = v["MRR"][-1]
+        xs.append(x)
+        ys.append(y)
+
+        print(x, y)
+
+    l = sorted((i, j) for i, j in zip(xs, ys))
+    new_x, new_y = zip(*l)
+    ax2.plot(new_x, new_y, "b", marker="x", linestyle="--", lw=4, markersize=12)
+    ax2.set_xscale("log", basex=2)
+    ax2.set_xlabel('Staleness Bound', fontsize=20, fontdict={'weight' : "bold", "family": 'serif'})
+    ax1.set_ylim([.64, .7])
+    ax2.set_ylim([0, 7e5])
+    plt.gca().xaxis.set_major_formatter(FuncFormatter(lambda x, y: '{}'.format(int(x))))
+    f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
+    g = lambda x, pos: "${}$".format(f._formatSciNotation('%1.10e' % x))
+    plt.gca().yaxis.set_major_formatter(mticker.FuncFormatter(g))
+    fig.tight_layout()
+
+    custom_lines = [Line2D([0], [0], marker="o", color='r', lw=4, markersize=12),
+                    Line2D([0], [0], marker="x", color="b", lw=4, markersize=12)]
+
+    ax2.legend(custom_lines, ['Sync Relations', 'Async Relations'], loc="lower right")
+
+    ax1.tick_params(axis="x", labelsize=14)
+    ax1.tick_params(axis="y", labelsize=14)
+    ax2.tick_params(axis="x", labelsize=14)
+    ax2.tick_params(axis="y", labelsize=14)
+
+    ax1.set_ylabel('MRR', fontsize=20, fontdict={"family": 'serif', "weight": "bold"})
+    ax2.set_ylabel('Edges/sec', fontsize=20, fontdict={"family": 'serif', "weight": "bold"})
+
+    ax2.yaxis.set_major_locator(plt.MaxNLocator(4))
+    ax2.set_yticklabels(ax2.get_yticks(), fontdict={"family": 'serif', "weight": "normal"})
+    plt.rc('font', family='serif', weight="normal")
+    f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
+    g = lambda x, pos: "${}$".format(f._formatSciNotation('%1.10e' % x))
+    plt.gca().yaxis.set_major_formatter(mticker.FuncFormatter(g))
+    plt.gcf().subplots_adjust(bottom=0.15)
+    plt.gcf().subplots_adjust(left=0.15)
+
+    plt.savefig(exp_dir + "figure_11.png")
+
+
 
 #TODO
 def plot_figure_13():

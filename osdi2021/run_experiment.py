@@ -275,11 +275,11 @@ def run_utilization(overwrite=False, collect_tracing_metrics=False, show_output=
 
     run_marius(complex_50_8_config, exp_dir, "complex_50_8_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
-    exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
-    with open(exp_dir + "complex.txt", "r") as f:
-        dglke_complex_cmd = f.readlines()[0]
-
-    run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+    # exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
+    # with open(exp_dir + "complex.txt", "r") as f:
+    #     dglke_complex_cmd = f.readlines()[0]
+    #
+    # run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     runner_file = exp_dir + "run_complex.py"
     dot_config = exp_dir + "complex_p8.py"

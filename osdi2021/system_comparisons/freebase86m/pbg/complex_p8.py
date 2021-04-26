@@ -20,7 +20,7 @@ def get_torchbiggraph_config():
         global_emb=False,
         comparator="dot",
         # Training
-        num_epochs=10,
+        num_epochs=1,
         batch_size=10000,
         num_uniform_negs=500,
         num_batch_negs=500,
