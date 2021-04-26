@@ -27,6 +27,9 @@ def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
     LIVE_JOURNAL_URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
     download_path = download_file(LIVE_JOURNAL_URL, output_dir)
     extract_file(download_path)
+    preprocess_dataset([str(Path(output_dir) / Path("soc-LiveJournal1.txt"))], num_partitions, output_dir, split, ["src", "dst"], header=True)
+
+    return None
     return general_parser([str(Path(output_dir) /
                           Path("soc-LiveJournal1.txt"))], ["sd"],
                           [output_dir], num_partitions=num_partitions,

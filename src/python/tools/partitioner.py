@@ -131,7 +131,7 @@ def get_relations_df(spark, edges_df):
     return rels
 
 
-def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05), columns=None, header=False):
+def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05), columns=None, header=False, header_length=0):
 
     map_columns = False
     has_rels = True
@@ -142,7 +142,7 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         if REL_COL not in columns:
             has_rels = False
 
-    spark = SparkSession.builder.appName(SPARK_APP_NAME).config('spark.executor.memory', '10g').getOrCreate()
+    spark = SparkSession.builder.appName(SPARK_APP_NAME).config('spark.driver.memory', '32g').config('spark.executor.memory', '1g').getOrCreate()
 
     all_edges_df = None
     train_edges_df = None
@@ -152,7 +152,8 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         train_split = 1.0 - splits[0] - splits[1]
         valid_split = splits[0]
         test_split = splits[1]
-        all_edges_df = spark.read.option("header", header).csv(edges_files, sep="\t").toDF(*columns)
+
+        all_edges_df = spark.read.option("header", header).option("comment", "#").csv(edges_files, sep="\t").toDF(*columns)
 
         if map_columns:
             all_edges_df = remap_columns(all_edges_df, has_rels)
@@ -170,9 +171,6 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
             train_edges_df = remap_columns(train_edges_df, has_rels)
             valid_edges_df = remap_columns(valid_edges_df, has_rels)
             test_edges_df = remap_columns(test_edges_df, has_rels)
-
-
-
     else:
         print("Incorrect number of input files")
         exit(-1)
