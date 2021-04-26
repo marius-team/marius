@@ -131,8 +131,6 @@ def main():
     os.system("mv edges.bin pbg_embeddings/live_journal/edges/test/")
 
     os.system("mv embeddings.bin pbg_embeddings/live_journal/embeddings/")
-    os.system("mv lhs_relations.bin pbg_embeddings/live_journal/relations/")
-    os.system("mv rhs_relations.bin pbg_embeddings/live_journal/relations/")
 
     print("Exported embeddings")
 
