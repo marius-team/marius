@@ -118,19 +118,19 @@ def main():
     eval_config = attr.evolve(config, edge_paths=[output_test_path])
     make_tsv(eval_config, False)
 
-    os.makedirs("pbg_embeddings/live_journal/edges/train", exist_ok=True)
-    os.makedirs("pbg_embeddings/live_journal/edges/evaluation", exist_ok=True)
-    os.makedirs("pbg_embeddings/live_journal/edges/test", exist_ok=True)
-    os.makedirs("pbg_embeddings/live_journal/embeddings", exist_ok=True)
-    os.makedirs("pbg_embeddings/live_journal/relations", exist_ok=True)
+    os.makedirs("pbg_embeddings/dot_live_journal/edges/train", exist_ok=True)
+    os.makedirs("pbg_embeddings/dot_live_journal/edges/evaluation", exist_ok=True)
+    os.makedirs("pbg_embeddings/dot_live_journal/edges/test", exist_ok=True)
+    os.makedirs("pbg_embeddings/dot_live_journal/embeddings", exist_ok=True)
+    os.makedirs("pbg_embeddings/dot_live_journal/relations", exist_ok=True)
 
-    os.system("touch pbg_embeddings/live_journal/edges/train/edges.bin")
-    os.system("touch pbg_embeddings/live_journal/edges/evaluation/edges.bin")
-    os.system("touch pbg_embeddings/live_journal/relations/src_relations.bin")
-    os.system("touch pbg_embeddings/live_journal/relations/dst_relations.bin")
-    os.system("mv edges.bin pbg_embeddings/live_journal/edges/test/")
+    os.system("touch pbg_embeddings/dot_live_journal/edges/train/edges.bin")
+    os.system("touch pbg_embeddings/dot_live_journal/edges/evaluation/edges.bin")
+    os.system("touch pbg_embeddings/dot_live_journal/relations/src_relations.bin")
+    os.system("touch pbg_embeddings/dot_live_journal/relations/dst_relations.bin")
+    os.system("mv edges.bin pbg_embeddings/dot_live_journal/edges/test/")
 
-    os.system("mv embeddings.bin pbg_embeddings/live_journal/embeddings/")
+    os.system("mv embeddings.bin pbg_embeddings/dot_live_journal/embeddings/")
 
     print("Exported embeddings")
 

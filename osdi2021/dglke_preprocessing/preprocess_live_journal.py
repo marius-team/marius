@@ -40,9 +40,6 @@ def preproccess_live_journal():
                 [int(train_fraction*len(chunk)),
                  int((train_fraction + validation_fraction)*len(chunk))])
 
-            edges = np.stack([src_nodes, np.zeros_like(src_nodes),
-                              dst_nodes]).T
-
             train = np.asarray(train, dtype=np.str_)
             valid = np.asarray(valid, dtype=np.str_)
             test = np.asarray(test, dtype=np.str_)

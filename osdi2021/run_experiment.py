@@ -81,7 +81,7 @@ def run_pbg(runner_file, config, exp_dir, name, overwrite=False, collect_tracing
             e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
 
         info_log_only = not collect_tracing_metrics
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(info_log_only=info_log_only, pbg=True, eval_in_marius=eval_in_marius)
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(info_log_only=info_log_only, pbg=True, eval_in_marius=eval_in_marius, experiment_name=name)
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
