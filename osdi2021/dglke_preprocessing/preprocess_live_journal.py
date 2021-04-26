@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 
 def preproccess_live_journal():
-
     output_dir = "live_journal_dglke"
 
     LIVE_JOURNAL_URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
@@ -48,4 +47,5 @@ def preproccess_live_journal():
             np.savetxt(g, valid, fmt='%s', delimiter="\t")
             np.savetxt(h, test, fmt='%s', delimiter="\t")
 
-
+if __name__ == '__main__':
+    preproccess_live_journal()
