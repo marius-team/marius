@@ -2,11 +2,11 @@ def get_torchbiggraph_config():
 
     config = dict(  # noqa
         # I/O data
-        entity_path="osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/freebase16/freebase_metadata",
+        entity_path="freebase_16/freebase_metadata",
         edge_paths=[
-            "osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/freebase16/freebase_train",
-            "osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/freebase16/freebase_valid",
-            "osdi2021/pybg_converter/pbg-helper/dataset_importer/output_data/freebase16/freebase_test",
+            "freebase_16/freebase_train",
+            "freebase_16/freebase_valid",
+            "freebase_16/freebase_test",
         ],
         checkpoint_path="model/fb86m_16",
         # Graph structure

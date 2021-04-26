@@ -16,7 +16,7 @@ def preprocess_freebase86(path: String) : Dataset[Triplet] = {
 }
 
 def get_freebase86m_unified() : Dataset[Triplet] = {
-    val freebase = sc.textFile("freebase_16/*edges.txt")
+    val freebase = sc.textFile("freebase_16/*.txt")
     val triplets = freebase.map(line => {
     val parts = line.split(" ")
     Triplet(parts(0), parts(2), parts(1))
@@ -30,10 +30,9 @@ def get_freebase86m_unified() : Dataset[Triplet] = {
 }
 
 val unified = get_freebase86m_unified()
-val train_triplets = preprocess_freebase86("freebase_16/train_edges.txt")
-val valid_triplets = preprocess_freebase86("freebase_16/valid_edges.txt")
-val test_triplets = preprocess_freebase86("freebase_16/test_edges.txt")
-
-
+val train_triplets = preprocess_freebase86("freebase_16/train.txt")
+val valid_triplets = preprocess_freebase86("freebase_16/valid.txt")
+val test_triplets = preprocess_freebase86("freebase_16/test.txt")
 create_dataset(unified, train_triplets, valid_triplets, test_triplets, 16, "freebase_16")
+
 //create_dataset(unified, train_triplets, valid_triplets, test_triplets, 32, "freebase16")

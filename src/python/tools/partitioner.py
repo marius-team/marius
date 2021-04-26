@@ -1,16 +1,13 @@
-from pyspark.sql import SparkSession
-from pyspark import SparkContext
-from pyspark.sql import Row
-import pyspark.sql.functions as f
-from pyspark.sql.functions import spark_partition_id, asc, desc, rand, row_number, monotonically_increasing_id, expr, floor, col, count, when
-from pyspark.sql import Window
-from pyspark.sql.types import StructType, StructField, LongType
-import math
 import glob
+import math
 import os
-import path
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+from pyspark.sql import Row
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import rand, floor
+from pyspark.sql.types import StructType, StructField, LongType
 
 SRC_COL = "src"
 REL_COL = "rel"
@@ -38,8 +35,7 @@ def remap_columns(df, has_rels):
 
 
 def convert_to_binary(input_filename, output_filename):
-
-    assert(input_filename != output_filename)
+    assert (input_filename != output_filename)
 
     with open(output_filename, "wb") as output_file:
         for chunk in pd.read_csv(input_filename, header=None, chunksize=10 ** 7, sep="\t", dtype=int):
@@ -57,13 +53,16 @@ def write_df_to_csv(df, output_filename):
 
 
 def write_partitioned_df_to_csv(partition_triples, num_partitions, output_filename):
-    partition_triples.write.partitionBy(SRC_EDGE_BUCKET_COL, DST_EDGE_BUCKET_COL).csv(TMP_DATA_DIRECTORY, mode="overwrite", sep="\t")
+    partition_triples.write.partitionBy(SRC_EDGE_BUCKET_COL, DST_EDGE_BUCKET_COL).csv(TMP_DATA_DIRECTORY,
+                                                                                      mode="overwrite", sep="\t")
 
     partition_offsets = []
     with open(output_filename, "w") as output_file:
         for i in range(num_partitions):
             for j in range(num_partitions):
-                tmp_file = glob.glob("{}/{}={}/{}={}/*.csv".format(TMP_DATA_DIRECTORY, SRC_EDGE_BUCKET_COL, str(i), DST_EDGE_BUCKET_COL, str(j)))[0]
+                tmp_file = glob.glob(
+                    "{}/{}={}/{}={}/*.csv".format(TMP_DATA_DIRECTORY, SRC_EDGE_BUCKET_COL, str(i), DST_EDGE_BUCKET_COL,
+                                                  str(j)))[0]
                 pd.read_csv(tmp_file, sep="\t")
                 with open(tmp_file, 'r') as g:
                     lines = g.readlines()
@@ -84,7 +83,6 @@ def assign_ids(spark, df, offset=0, col_name="index"):
 
 
 def remap_edges(edges_df, nodes, rels):
-
     remapped_edges_df = edges_df.join(nodes, edges_df.src == nodes.node_label) \
         .drop(NODE_LABEL, SRC_COL) \
         .withColumnRenamed(INDEX_COL, SRC_COL) \
@@ -104,9 +102,8 @@ def get_edge_buckets(edges_df, nodes_with_partitions, num_partitions):
         .withColumnRenamed(PARTITION_ID, SRC_EDGE_BUCKET_COL) \
         .join(nodes_with_partitions, edges_df.dst == nodes_with_partitions.index) \
         .drop(NODE_LABEL, INDEX_COL) \
-        .withColumnRenamed(PARTITION_ID, DST_EDGE_BUCKET_COL) \
-
-    partition_triples = partition_triples.repartition(num_partitions**2, SRC_EDGE_BUCKET_COL, DST_EDGE_BUCKET_COL)
+        .withColumnRenamed(PARTITION_ID, DST_EDGE_BUCKET_COL)
+    partition_triples = partition_triples.repartition(num_partitions ** 2, SRC_EDGE_BUCKET_COL, DST_EDGE_BUCKET_COL)
 
     return partition_triples
 
@@ -126,13 +123,14 @@ def get_nodes_df(spark, edges_df):
 
 
 def get_relations_df(spark, edges_df):
-    rels = edges_df.drop(SRC_COL, DST_COL).distinct().repartition(1).orderBy(rand()).withColumnRenamed(REL_COL, RELATION_LABEL)
+    rels = edges_df.drop(SRC_COL, DST_COL).distinct().repartition(1).orderBy(rand()).withColumnRenamed(REL_COL,
+                                                                                                       RELATION_LABEL)
     rels = assign_ids(spark, rels)
     return rels
 
 
-def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05), columns=None, header=False, header_length=0):
-
+def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05), columns=None, header=False,
+                       header_length=0):
     map_columns = False
     has_rels = True
     if columns is None:
@@ -142,7 +140,8 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         if REL_COL not in columns:
             has_rels = False
 
-    spark = SparkSession.builder.appName(SPARK_APP_NAME).config('spark.driver.memory', '32g').config('spark.executor.memory', '1g').getOrCreate()
+    spark = SparkSession.builder.appName(SPARK_APP_NAME).config('spark.driver.memory', '32g').config(
+        'spark.executor.memory', '1g').getOrCreate()
 
     all_edges_df = None
     train_edges_df = None
@@ -154,7 +153,8 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         test_split = splits[1]
 
         # read in the edge file
-        all_edges_df = spark.read.option("header", header).option("comment", "#").csv(edges_files, sep="\t").toDF(*columns)
+        all_edges_df = spark.read.option("header", header).option("comment", "#").csv(edges_files, sep="\t").toDF(
+            *columns)
 
         if map_columns:
             all_edges_df = remap_columns(all_edges_df, has_rels)
