@@ -538,8 +538,6 @@ def plot_figure_12():
         xs.append(x)
         ys.append(y)
 
-        print(x, y)
-
     l = sorted((i, j) for i, j in zip(xs, ys))
     new_x, new_y = zip(*l)
     ax1.plot(new_x, new_y, "r-", marker="o", lw=4, markersize=12)
@@ -551,8 +549,6 @@ def plot_figure_12():
         y = v["MRR"][-1]
         xs.append(x)
         ys.append(y)
-
-        print(x, y)
 
     l = sorted((i, j) for i, j in zip(xs, ys))
     new_x, new_y = zip(*l)
@@ -573,7 +569,6 @@ def plot_figure_12():
         xs.append(x)
         ys.append(y)
 
-        print(x, y)
 
     l = sorted((i, j) for i, j in zip(xs, ys))
     new_x, new_y = zip(*l)
@@ -587,7 +582,6 @@ def plot_figure_12():
         xs.append(x)
         ys.append(y)
 
-        print(x, y)
 
     l = sorted((i, j) for i, j in zip(xs, ys))
     new_x, new_y = zip(*l)
@@ -626,73 +620,72 @@ def plot_figure_12():
 
     plt.savefig(exp_dir + "figure_12.png")
 
+    print("Plot saved to: %s" % exp_dir + "figure_12.png")
 
-
-#TODO
 def plot_figure_13():
 
-    plt.figure(num=None, figsize=(6, 2), facecolor='w', edgecolor='k')
-
-    params = {'legend.fontsize': 9,
-              'legend.handlelength': 4}
-    plt.rc('font', family='serif')
-    plt.rcParams['font.size'] = 9
-    plt.rcParams['axes.labelsize'] = 9
-    plt.rcParams['axes.labelweight'] = 'bold'
-    COLOR = 'black'
-    plt.rcParams['text.color'] = COLOR
-    plt.rcParams['axes.labelcolor'] = COLOR
-    plt.rcParams['xtick.color'] = COLOR
-    plt.rcParams['ytick.color'] = COLOR
-    plt.rcParams.update(params)
-
-    orderings100_results = read_experiment(orderings100_config.local_experiment_directory, orderings100_config.experiment_name)
-
-    new_res = {}
-    new_res["Prefetch"] = orderings100_results["training.graph_ordering:Elimination"]
-
-    print(orderings100_results.keys())
-    new_res["No_prefetch"] = orderings100_results["training.graph_ordering:Elimination_storage.prefetching:False"]
-
-    orderings100_results = new_res
-
-
-
-    colors = ["r", "b", "g", "c"]
-
-    zorders=[0, 2, 1]
-
-    runtimes = [809, 1500]
-    # runtimes = [2060, 900, 1300]
-    start_times = [560, 615]
-    offsets = []
-
-    for i in range(2):
-        offsets.append((start_times[i], start_times[i] + runtimes[i]))
-
-    labels = ["Prefetch", "No Prefetch"]
-    linestyles = ["-", "--"]
-
-    i = 0
-    for k, v in orderings100_results.items():
-        # y = np.cumsum(v[0].disk_util[offsets[i][0]:offsets[i][1]]) / np.power(2, 30)
-        y = smooth(v[0].gpu_compute_util[offsets[i][0]:offsets[i][1]], 25) * 100.0
-        cpu_ts = v[0].gpu_trace_timestamp[offsets[i][0]:offsets[i][1]]
-        iter_ts = np.asarray([np.datetime64(itr[0]) for itr in v[0].iteration_progress])
-
-        nearest = [find_nearest(iter_ts, c) for c in cpu_ts]
-
-        ls = linestyles[i]
-
-        plt.plot(nearest, y, linestyle=ls, linewidth=2, color=colors[i], zorder=zorders[i], label=labels[i])
-        # plt.plot(x[-1], y[-1], markersize=12, marker="o", color = colors[i], zorder=zorders[i])
-        i+=1
-
-    plt.ylabel("GPU Utilization (%)")
-    plt.ylim(0, 100)
-    plt.xlabel("Iteration")
-    plt.legend(loc="upper left")
-    plt.gcf().subplots_adjust(bottom=0.3)
-    # plt.show()
-    plt.savefig("../../../../figures/prefetching.pdf")
+    # plt.figure(num=None, figsize=(6, 2), facecolor='w', edgecolor='k')
+    #
+    # params = {'legend.fontsize': 9,
+    #           'legend.handlelength': 4}
+    # plt.rc('font', family='serif')
+    # plt.rcParams['font.size'] = 9
+    # plt.rcParams['axes.labelsize'] = 9
+    # plt.rcParams['axes.labelweight'] = 'bold'
+    # COLOR = 'black'
+    # plt.rcParams['text.color'] = COLOR
+    # plt.rcParams['axes.labelcolor'] = COLOR
+    # plt.rcParams['xtick.color'] = COLOR
+    # plt.rcParams['ytick.color'] = COLOR
+    # plt.rcParams.update(params)
+    #
+    # orderings100_results = read_experiment(orderings100_config.local_experiment_directory, orderings100_config.experiment_name)
+    #
+    # new_res = {}
+    # new_res["Prefetch"] = orderings100_results["training.graph_ordering:Elimination"]
+    #
+    # print(orderings100_results.keys())
+    # new_res["No_prefetch"] = orderings100_results["training.graph_ordering:Elimination_storage.prefetching:False"]
+    #
+    # orderings100_results = new_res
+    #
+    #
+    #
+    # colors = ["r", "b", "g", "c"]
+    #
+    # zorders=[0, 2, 1]
+    #
+    # runtimes = [809, 1500]
+    # # runtimes = [2060, 900, 1300]
+    # start_times = [560, 615]
+    # offsets = []
+    #
+    # for i in range(2):
+    #     offsets.append((start_times[i], start_times[i] + runtimes[i]))
+    #
+    # labels = ["Prefetch", "No Prefetch"]
+    # linestyles = ["-", "--"]
+    #
+    # i = 0
+    # for k, v in orderings100_results.items():
+    #     # y = np.cumsum(v[0].disk_util[offsets[i][0]:offsets[i][1]]) / np.power(2, 30)
+    #     y = smooth(v[0].gpu_compute_util[offsets[i][0]:offsets[i][1]], 25) * 100.0
+    #     cpu_ts = v[0].gpu_trace_timestamp[offsets[i][0]:offsets[i][1]]
+    #     iter_ts = np.asarray([np.datetime64(itr[0]) for itr in v[0].iteration_progress])
+    #
+    #     nearest = [find_nearest(iter_ts, c) for c in cpu_ts]
+    #
+    #     ls = linestyles[i]
+    #
+    #     plt.plot(nearest, y, linestyle=ls, linewidth=2, color=colors[i], zorder=zorders[i], label=labels[i])
+    #     # plt.plot(x[-1], y[-1], markersize=12, marker="o", color = colors[i], zorder=zorders[i])
+    #     i+=1
+    #
+    # plt.ylabel("GPU Utilization (%)")
+    # plt.ylim(0, 100)
+    # plt.xlabel("Iteration")
+    # plt.legend(loc="upper left")
+    # plt.gcf().subplots_adjust(bottom=0.3)
+    # # plt.show()
+    # plt.savefig("../../../../figures/prefetching.pdf")
 
