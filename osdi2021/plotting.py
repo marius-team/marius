@@ -517,15 +517,20 @@ def plot_figure_12():
     ys = []
 
     exp_dir = "osdi2021/microbenchmarks/bounded_staleness/"
-    all_sync_result = parse_output.parse_info_log(exp_dir + "all_sync_result.json")
+
+    with open(exp_dir + "all_sync_result.json") as f:
+        all_sync_result = json.load(f)
+
     sync_rels_results = [all_sync_result]
     async_rels_results = [all_sync_result]
 
     all_bounds = [1, 2, 4, 8, 16, 32, 64]
 
     for bound in [2, 4, 8, 16, 32, 64]:
-        sync_rels_results.append(parse_output.parse_info_log(exp_dir + "sync_rel_%i_result.json" % bound))
-        async_rels_results.append(parse_output.parse_info_log(exp_dir + "all_async_%i_result.json" % bound))
+        with open(exp_dir + "sync_rel_%i_result.json" % bound) as f:
+            sync_rels_results.append(json.load(f))
+        with open(exp_dir + "all_async_%i_result.json" % bound) as f:
+            async_rels_results.append(json.load(f))
 
     for i, v in enumerate(sync_rels_results):
         x = all_bounds[i]
