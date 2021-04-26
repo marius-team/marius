@@ -9,3 +9,8 @@ matplotlib
 cycler
 dgl==0.4.3
 dglke
+fire
+pyarrow
+h5py
+pandas
+pyspark
