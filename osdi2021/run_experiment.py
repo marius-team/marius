@@ -305,6 +305,9 @@ def run_orderings_total_io(overwrite=False, collect_tracing_metrics=False, show_
     hilbert_config = exp_dir + "hilbert.ini"
     hilbert_symmetric_config = exp_dir + "hilbert_symmetric.ini"
 
+    # this experiment requires collecting metrics
+    collect_tracing_metrics = True
+
     if not os.path.exists("freebase86m_32/"):
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
