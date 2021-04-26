@@ -392,12 +392,16 @@ def run_staleness_bound(overwrite=False, collect_tracing_metrics=False, show_out
         run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
         run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
+    osdi_plot.plot_figure_11()
 
 def run_prefetching(overwrite=False, collect_tracing_metrics=False, show_output=False):
     exp_dir = "osdi2021/microbenchmarks/prefetching/"
 
     no_prefetching_config = exp_dir + "no_prefetching.ini"
     prefetching_config = exp_dir + "prefetching.ini"
+
+    # this experiment requires collecting metrics
+    collect_tracing_metrics = True
 
     if not os.path.exists("freebase86m_32/"):
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
