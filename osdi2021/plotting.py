@@ -524,9 +524,9 @@ def plot_figure_12():
     sync_rels_results = [all_sync_result]
     async_rels_results = [all_sync_result]
 
-    all_bounds = [1, 2, 4, 8, 16, 32, 64]
+    all_bounds = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
 
-    for bound in [2, 4, 8, 16, 32, 64]:
+    for bound in all_bounds[1:]:
         with open(exp_dir + "sync_rel_%i_result.json" % bound) as f:
             sync_rels_results.append(json.load(f))
         with open(exp_dir + "all_async_%i_result.json" % bound) as f:

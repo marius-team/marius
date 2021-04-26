@@ -387,7 +387,7 @@ def run_staleness_bound(overwrite=False, collect_tracing_metrics=False, show_out
 
     run_marius(all_sync, exp_dir, "all_sync", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
-    for bound in [2, 4, 8, 16, 32, 64]:
+    for bound in [2, 4, 8, 16, 32, 64, 128, 256, 512]:
         config_args = "--training_pipeline.max_batches_in_flight=%i" % bound
         run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
         run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
