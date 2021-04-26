@@ -8,6 +8,7 @@ from buffer_simulator import plotting as plot_buff
 import plotting as osdi_plot
 import shutil
 import marius.tools.preprocess as preprocess
+from osdi2021.dglke_preprocessing import preprocess_live_journal
 
 
 def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_tracing_metrics=False, show_output=False):
@@ -191,14 +192,24 @@ def run_livejournal(overwrite=False, collect_tracing_metrics=False, show_output=
         print("==== Preprocessing Livejournal =====")
         preprocess.live_journal("livejournal/")
 
+    if not os.path.exists("live_journal_dglke/"):
+        print("==== Preprocessing Livejournal DGL-KE =====")
+        preprocess_live_journal.preproccess_live_journal()
+
     run_marius(dot_config, exp_dir, "dot_live_journal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
-    # PBG may throw errors
     exp_dir = "osdi2021/system_comparisons/livejournal/pbg/"
 
     runner_file = exp_dir + "run_dot.py"
     dot_config = exp_dir + "dot.py"
     run_pbg(runner_file, dot_config, exp_dir, "dot_live_journal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output, eval_in_marius=True)
+
+    exp_dir = "osdi2021/system_comparisons/livejournal/dgl-ke/"
+
+    with open(exp_dir + "dot.txt", "r") as f:
+        dglke_dot_cmd = f.readlines()[0]
+
+    run_dglke(dglke_dot_cmd, exp_dir, "dot_live_journal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     osdi_plot.print_table_3()
 
@@ -214,6 +225,12 @@ def run_twitter(overwrite=False, collect_tracing_metrics=False, show_output=Fals
 
     run_marius(dot_config, exp_dir, "dot_twitter", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
+    exp_dir = "osdi2021/system_comparisons/twitter/pbg/"
+
+    runner_file = exp_dir + "run_twitter.py"
+    dot_config = exp_dir + "twitter_16.py"
+    run_pbg(runner_file, dot_config, exp_dir, "dot_twitter", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output, eval_in_marius=True)
+
     osdi_plot.print_table_4()
 
 
@@ -226,6 +243,12 @@ def run_freebase86m(overwrite=False, collect_tracing_metrics=False, show_output=
         preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
 
     run_marius(complex_config, exp_dir, "freebase86m_16", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+
+    exp_dir = "osdi2021/system_comparisons/freebase86m/pbg/"
+
+    runner_file = exp_dir + "run_complex.py"
+    dot_config = exp_dir + "complex_p16.py"
+    run_pbg(runner_file, dot_config, exp_dir, "freebase86m_16", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output, eval_in_marius=True)
 
     osdi_plot.print_table_5()
 
@@ -256,10 +279,12 @@ def run_utilization(overwrite=False, collect_tracing_metrics=False, show_output=
     with open(exp_dir + "complex.txt", "r") as f:
         dglke_complex_cmd = f.readlines()[0]
 
-    try:
-        run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
-    except Exception as e:
-        print(e)
+    run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+
+    runner_file = exp_dir + "run_complex.py"
+    dot_config = exp_dir + "complex_p8.py"
+    run_pbg(runner_file, dot_config, exp_dir, "complex_50_8_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+
 
 
 def run_buffer_simulator(overwrite=False, collect_tracing_metrics=False, show_output=False):
