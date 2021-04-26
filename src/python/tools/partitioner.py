@@ -4,9 +4,10 @@ import os
 
 import numpy as np
 import pandas as pd
+from pyspark.sql.window import Window
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import rand, floor
+from pyspark.sql.functions import rand, floor, lit, monotonically_increasing_id, row_number, concat, col
 from pyspark.sql.types import StructType, StructField, LongType
 
 SRC_COL = "src"
@@ -26,12 +27,9 @@ SPARK_APP_NAME = "marius_preprocessor"
 
 
 def remap_columns(df, has_rels):
-    if has_rels:
-        df = df.rdd.map(lambda x: (x.src, x.rel, x.dst)).toDF(COLUMN_SCHEMA)
-    else:
-        df = df.rdd.map(lambda x: (x.src, "0", x.dst)).toDF(COLUMN_SCHEMA)
-
-    return df
+    if not has_rels:
+        df = df.withColumn(REL_COL, lit(0))
+    return df.select(COLUMN_SCHEMA)
 
 
 def convert_to_binary(input_filename, output_filename):
@@ -74,12 +72,8 @@ def write_partitioned_df_to_csv(partition_triples, num_partitions, output_filena
     return partition_offsets
 
 
-def assign_ids(spark, df, offset=0, col_name="index"):
-    new_schema = StructType([StructField(col_name, LongType(), True)] + df.schema.fields)
-    zipped_rdd = df.rdd.zipWithIndex()
-    new_rdd = zipped_rdd.map(lambda args: ([args[1] + offset] + list(args[0])))
-
-    return spark.createDataFrame(new_rdd, new_schema)
+def assign_ids(df):
+    return df.withColumn(INDEX_COL, row_number().over(Window.orderBy(monotonically_increasing_id())) - 1)
 
 
 def remap_edges(edges_df, nodes, rels):
@@ -114,18 +108,18 @@ def assign_partitions(nodes, num_partitions):
     return nodes_with_partitions
 
 
-def get_nodes_df(spark, edges_df):
-    nodes = edges_df.rdd.flatMap(lambda x: (x.src, x.dst))
-    nodes = nodes.distinct()
-    nodes = nodes.map(Row(NODE_LABEL)).toDF().repartition(1).orderBy(rand())
-    nodes = assign_ids(spark, nodes)
+def get_nodes_df(edges_df):
+    nodes = edges_df.select(col(SRC_COL).alias(NODE_LABEL)).union(edges_df.select(col(DST_COL).alias(NODE_LABEL))) \
+        .distinct().coalesce(1).orderBy(rand())
+    nodes = assign_ids(nodes).cache()
+    nodes.show()
     return nodes
 
 
-def get_relations_df(spark, edges_df):
-    rels = edges_df.drop(SRC_COL, DST_COL).distinct().repartition(1).orderBy(rand()).withColumnRenamed(REL_COL,
-                                                                                                       RELATION_LABEL)
-    rels = assign_ids(spark, rels)
+def get_relations_df(edges_df):
+    rels = edges_df.drop(SRC_COL, DST_COL).distinct().coalesce(1).orderBy(rand())\
+        .withColumnRenamed(REL_COL, RELATION_LABEL)
+    rels = assign_ids(rels).cache()
     return rels
 
 
@@ -140,7 +134,7 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         if REL_COL not in columns:
             has_rels = False
 
-    spark = SparkSession.builder.appName(SPARK_APP_NAME).config('spark.driver.memory', '32g').config(
+    spark = SparkSession.builder.appName(SPARK_APP_NAME).config('spark.driver.memory', '8g').config(
         'spark.executor.memory', '1g').getOrCreate()
 
     all_edges_df = None
@@ -178,8 +172,8 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         exit(-1)
 
     # get node and relation labels and assign indices
-    nodes = get_nodes_df(spark, all_edges_df)
-    rels = get_relations_df(spark, all_edges_df)
+    nodes = get_nodes_df(all_edges_df)
+    rels = get_relations_df(all_edges_df)
 
     # replace node and relation labels with indices
     train_edges_df = remap_edges(train_edges_df, nodes, rels)
