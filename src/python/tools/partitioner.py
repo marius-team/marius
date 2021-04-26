@@ -153,11 +153,13 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         valid_split = splits[0]
         test_split = splits[1]
 
+        # read in the edge file
         all_edges_df = spark.read.option("header", header).option("comment", "#").csv(edges_files, sep="\t").toDF(*columns)
 
         if map_columns:
             all_edges_df = remap_columns(all_edges_df, has_rels)
 
+        # split into train/valid/test tests
         train_edges_df, valid_edges_df, test_edges_df = all_edges_df.randomSplit([train_split, valid_split, test_split])
 
     elif len(edges_files) == 3:
@@ -175,13 +177,16 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         print("Incorrect number of input files")
         exit(-1)
 
+    # get node and relation labels and assign indices
     nodes = get_nodes_df(spark, all_edges_df)
     rels = get_relations_df(spark, all_edges_df)
 
+    # replace node and relation labels with indices
     train_edges_df = remap_edges(train_edges_df, nodes, rels)
     valid_edges_df = remap_edges(valid_edges_df, nodes, rels)
     test_edges_df = remap_edges(test_edges_df, nodes, rels)
 
+    # store mapping of labels to indices
     write_df_to_csv(nodes, output_dir + "node_mapping.txt")
     write_df_to_csv(rels, output_dir + "relation_mapping.txt")
 
@@ -190,8 +195,14 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
     tmp_test_file = output_dir + "tmp_test_edges.txt"
 
     if num_partitions > 1:
+
+        # assigns partition to each node
         nodes_with_partitions = assign_partitions(nodes, num_partitions)
+
+        # creates edge buckets for the training set given the partitions for each node
         partition_triples = get_edge_buckets(train_edges_df, nodes_with_partitions, num_partitions)
+
+        # writes edge buckets to a single csv file and returns offsets to the edge buckets in that file
         partition_offsets = write_partitioned_df_to_csv(partition_triples, num_partitions, tmp_train_file)
 
         with open(output_dir + "train_edges_partitions.txt", "w") as g:
@@ -199,9 +210,11 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
     else:
         write_df_to_csv(train_edges_df, tmp_train_file)
 
+    # write valid/test sets to single csv
     write_df_to_csv(valid_edges_df, tmp_valid_file)
     write_df_to_csv(test_edges_df, tmp_test_file)
 
+    # convert csv files to binary output required by Marius
     convert_to_binary(tmp_train_file, output_dir + "train_edges.pt")
     convert_to_binary(tmp_valid_file, output_dir + "valid_edges.pt")
     convert_to_binary(tmp_test_file, output_dir + "test_edges.pt")
