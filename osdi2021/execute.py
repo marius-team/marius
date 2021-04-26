@@ -103,11 +103,16 @@ def stop_metric_collection(dstat_pid, nvidiasmi_pid):
         print("Unable to kill nvidia-smi: %s" % e)
 
 
-def collect_metrics(info_log_only=False, dglke=False, pbg=False):
+def collect_metrics(info_log_only=False, dglke=False, pbg=False, eval_in_marius=False):
     if dglke:
         info_log = p.parse_dglke("tmp.txt")
     elif pbg:
         info_log = p.parse_pbg("tmp.txt")
+        if eval_in_marius:
+            info_log["MRR"] = p.parse_info_log("logs/marius_info.log")["MRR"]
+            info_log["Hits@1"] = p.parse_info_log("logs/marius_info.log")["Hits@1"]
+            info_log["Hits@5"] = p.parse_info_log("logs/marius_info.log")["Hits@5"]
+            info_log["Hits@10"] = p.parse_info_log("logs/marius_info.log")["Hits@10"]
     else:
         info_log = p.parse_info_log("logs/marius_info.log")
 

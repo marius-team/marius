@@ -57,7 +57,7 @@ def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_t
         print("Marius: %s already run" % name)
 
 
-def run_pbg(runner_file, config, exp_dir, name, overwrite=False, collect_tracing_metrics=False, show_output=False):
+def run_pbg(runner_file, config, exp_dir, name, overwrite=False, collect_tracing_metrics=False, show_output=False, eval_in_marius=False):
     e.cleanup_experiments()
     if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
         print("==== Running PBG: %s =====" % name)
@@ -81,7 +81,7 @@ def run_pbg(runner_file, config, exp_dir, name, overwrite=False, collect_tracing
             e.stop_metric_collection(dstat_pid, nvidia_smi_pid)
 
         info_log_only = not collect_tracing_metrics
-        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(info_log_only=info_log_only, pbg=True)
+        info_log, dstat_df, nvidia_smi_df = e.collect_metrics(info_log_only=info_log_only, pbg=True, eval_in_marius=eval_in_marius)
 
         with open(exp_dir + name + "_result.json", 'w') as out_file:
             json.dump(info_log, out_file)
@@ -198,7 +198,7 @@ def run_livejournal(overwrite=False, collect_tracing_metrics=False, show_output=
 
     runner_file = exp_dir + "run_dot.py"
     dot_config = exp_dir + "dot.py"
-    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+    run_pbg(runner_file, dot_config, exp_dir, "dot_livejournal", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output, eval_in_marius=True)
 
     osdi_plot.print_table_3()
 
