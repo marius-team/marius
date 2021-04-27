@@ -475,11 +475,26 @@ def run_all(overwrite=False, collect_tracing_metrics=False, show_output=False):
 
 
 def run_multi_gpu(overwrite=False, collect_tracing_metrics=False, show_output=False):
-    exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
-    with open(exp_dir + "complex_multi_gpu.txt", "r") as f:
-        dglke_complex_cmd = f.readlines()[0]
 
-    run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+    exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
+    complex_config = exp_dir + "d50_multi_gpu.ini"
+
+    # if not os.path.exists("freebase86m_p16/"):
+    #     print("==== Preprocessing Freebase86m P=16 D=100 =====")
+    #     preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
+
+    if not os.path.exists("freebase86m/"):
+        print("==== Preprocessing Freebase86m =====")
+        preprocess.freebase86m("freebase86m/")
+
+    run_marius(complex_config, exp_dir, "complex_8gpu", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+
+    exp_dir = "osdi2021/system_comparisons/freebase86m/dgl-ke/"
+
+    # with open(exp_dir + "complex_multi_gpu.txt", "r") as f:
+    #     dglke_complex_cmd = f.readlines()[0]
+    #
+    # run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
 
 if __name__ == "__main__":
