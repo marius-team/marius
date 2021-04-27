@@ -48,14 +48,11 @@ def make_tsv(
         config: ConfigSchema,
         relations: bool
 ) -> None:
-    print("Loading relation types and entities...")
     entity_storage = ENTITY_STORAGES.make_instance(config.entity_path)
     test_edge_storage = EDGE_STORAGES.make_instance(config.edge_paths[0])
 
-    print("Initializing model...")
     model = make_model(config)
 
-    print("Loading model check point...")
     checkpoint_manager = CheckpointManager(config.checkpoint_path)
     state_dict, _ = checkpoint_manager.read_model()
     if state_dict is not None:
@@ -77,14 +74,12 @@ def convert_edges(
         num_partitions: int,
         offsets: list
 ) -> None:
-    print("Writing Edges embeddings...")
 
     with open("edges.bin", "wb") as f:
         for lhs_partition in range(num_partitions):
             for rhs_partition in range(num_partitions):
                 lhs_offset = offsets[lhs_partition]
                 rhs_offset = offsets[rhs_partition]
-                print(rhs_partition, rhs_offset)
                 edge_part = edges.load_edges(lhs_partition, rhs_partition)
                 out_edges = torch.stack([edge_part.lhs.tensor + lhs_offset, edge_part.rel, edge_part.rhs.tensor + rhs_offset]).to(torch.int32).T
                 tmp = out_edges.flatten(0, 1).numpy()
@@ -99,30 +94,18 @@ def convert_embeddings(
 
     offsets = []
     embedding_sizes = []
-    print("Writing entity embeddings...")
     with open("embeddings.bin", "wb") as f:
         for ent_t_name, ent_t_config in model.entities.items():
             for partition in range(ent_t_config.num_partitions):
-                print(
-                    f"Reading embeddings for entity type {ent_t_name} partition "
-                    f"{partition} from checkpoint..."
-                )
                 entities = entity_storage.load_names(ent_t_name, partition)
                 embeddings, _ = checkpoint_manager.read(ent_t_name, partition)
 
                 if model.global_embs is not None:
                     embeddings += model.global_embs[model.EMB_PREFIX + ent_t_name]
 
-                print(
-                    f"Writing embeddings for entity type {ent_t_name} partition "
-                    f"{partition} to output file..."
-                )
-
                 embedding_sizes.append(embeddings.size(0))
 
                 f.write(bytes(embeddings.flatten(0, 1).numpy()))
-
-                print(f"- Processed all {len(embeddings)} entities")
 
     for i, size in enumerate(embedding_sizes):
         if i == 0:
@@ -138,7 +121,6 @@ def convert_relations(
         model: MultiRelationEmbedder,
         relation_type_storage: AbstractRelationTypeStorage
 ) -> None:
-    print("Writing relation type parameters...")
     relation_types = relation_type_storage.load_names()
     with open("lhs_relations.bin", "wb") as f, open("rhs_relations.bin", "wb") as g:
         rel_t_config, = model.relations

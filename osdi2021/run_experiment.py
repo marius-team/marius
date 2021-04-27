@@ -238,11 +238,15 @@ def run_freebase86m(overwrite=False, collect_tracing_metrics=False, show_output=
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
     complex_config = exp_dir + "d100.ini"
 
-    if not os.path.exists("freebase86m_p16/"):
-        print("==== Preprocessing Freebase86m P=16 D=100 =====")
-        preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
+    # if not os.path.exists("freebase86m_p16/"):
+    #     print("==== Preprocessing Freebase86m P=16 D=100 =====")
+    #     preprocess.freebase86m("freebase86m_p16/", num_partitions=16)
 
-    run_marius(complex_config, exp_dir, "freebase86m_16", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+    if not os.path.exists("freebase86m_p8/"):
+        print("==== Preprocessing Freebase86m P=8 D=100 =====")
+        preprocess.freebase86m("freebase86m_p8/", num_partitions=8)
+
+    run_marius(complex_config, exp_dir, "freebase86m_8", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     exp_dir = "osdi2021/system_comparisons/freebase86m/pbg/"
 
