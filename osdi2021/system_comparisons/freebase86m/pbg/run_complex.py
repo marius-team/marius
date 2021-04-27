@@ -58,8 +58,8 @@ def main():
     os.system("mv edges.bin pbg_embeddings/freebase86m_16/edges/test/")
 
     os.system("mv embeddings.bin pbg_embeddings/freebase86m_16/embeddings/")
-    os.system("mv lhs_relations.bin pbg_embeddings/freebase86m_16/relations/")
-    os.system("mv rhs_relations.bin pbg_embeddings/freebase86m_16/relations/")
+    os.system("mv lhs_relations.bin pbg_embeddings/freebase86m_16/relations/src_relations.bin")
+    os.system("mv rhs_relations.bin pbg_embeddings/freebase86m_16/relations/dst_relations.bin")
 
     print("Exported embeddings")
 

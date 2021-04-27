@@ -5,10 +5,8 @@ import os
 import numpy as np
 import pandas as pd
 from pyspark.sql.window import Window
-from pyspark.sql import Row
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import rand, floor, lit, monotonically_increasing_id, row_number, concat, col
-from pyspark.sql.types import StructType, StructField, LongType
+from pyspark.sql.functions import rand, floor, lit, monotonically_increasing_id, row_number, col
 
 SRC_COL = "src"
 REL_COL = "rel"
@@ -112,7 +110,6 @@ def get_nodes_df(edges_df):
     nodes = edges_df.select(col(SRC_COL).alias(NODE_LABEL)).union(edges_df.select(col(DST_COL).alias(NODE_LABEL))) \
         .distinct().coalesce(1).orderBy(rand())
     nodes = assign_ids(nodes).cache()
-    nodes.show()
     return nodes
 
 
