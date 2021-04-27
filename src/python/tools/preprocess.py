@@ -30,10 +30,7 @@ def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
     preprocess_dataset([str(Path(output_dir) / Path("soc-LiveJournal1.txt"))], num_partitions, output_dir, split, ["src", "dst"], header=True)
 
     return None
-    return general_parser([str(Path(output_dir) /
-                          Path("soc-LiveJournal1.txt"))], ["sd"],
-                          [output_dir], num_partitions=num_partitions,
-                          dataset_split=split)
+
 
 
 def fb15k(output_dir, num_partitions=1):
@@ -58,7 +55,7 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
     extract_file(download_path)
 
 # num_partitions, output_dir, splits=(.05, .05), columns=None
-    preprocess_dataset([str(Path(output_dir) / Path("twitter-2010.txt"))], num_partitions, output_dir, split, ["src", "dst"], header=False)
+    preprocess_dataset([str(Path(output_dir) / Path("twitter-2010.txt"))], num_partitions, output_dir, split, ["src", "dst"], header=False, delim=" ")
 
     return None
 

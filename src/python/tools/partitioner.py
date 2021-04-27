@@ -121,7 +121,7 @@ def get_relations_df(edges_df):
 
 
 def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05), columns=None, header=False,
-                       header_length=0):
+                       header_length=0, delim="\t"):
     map_columns = False
     has_rels = True
     if columns is None:
@@ -144,7 +144,7 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         test_split = splits[1]
 
         # read in the edge file
-        all_edges_df = spark.read.option("header", header).option("comment", "#").csv(edges_files, sep="\t").toDF(
+        all_edges_df = spark.read.option("header", header).option("comment", "#").csv(edges_files, sep=delim).toDF(
             *columns)
 
         if map_columns:
@@ -154,10 +154,10 @@ def preprocess_dataset(edges_files, num_partitions, output_dir, splits=(.05, .05
         train_edges_df, valid_edges_df, test_edges_df = all_edges_df.randomSplit([train_split, valid_split, test_split])
 
     elif len(edges_files) == 3:
-        all_edges_df = spark.read.option("header", header).csv(edges_files, sep="\t").toDF(*columns)
-        train_edges_df = spark.read.option("header", header).csv(edges_files[0], sep="\t").toDF(*columns)
-        valid_edges_df = spark.read.option("header", header).csv(edges_files[1], sep="\t").toDF(*columns)
-        test_edges_df = spark.read.option("header", header).csv(edges_files[2], sep="\t").toDF(*columns)
+        all_edges_df = spark.read.option("header", header).csv(edges_files, sep=delim).toDF(*columns)
+        train_edges_df = spark.read.option("header", header).csv(edges_files[0], sep=delim).toDF(*columns)
+        valid_edges_df = spark.read.option("header", header).csv(edges_files[1], sep=delim).toDF(*columns)
+        test_edges_df = spark.read.option("header", header).csv(edges_files[2], sep=delim).toDF(*columns)
 
         if map_columns:
             all_edges_df = remap_columns(all_edges_df, has_rels)

@@ -219,9 +219,9 @@ def run_twitter(overwrite=False, collect_tracing_metrics=False, show_output=Fals
 
     dot_config = exp_dir + "dot.ini"
 
-    if not os.path.exists("twitter/"):
+    if not os.path.exists("twitter_8/"):
         print("==== Preprocessing Twitter =====")
-        preprocess.twitter("twitter/")
+        preprocess.twitter("twitter_8/", num_partitions=8)
 
     run_marius(dot_config, exp_dir, "dot_twitter", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
