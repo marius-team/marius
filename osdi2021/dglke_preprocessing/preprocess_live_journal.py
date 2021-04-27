@@ -35,7 +35,7 @@ def preproccess_live_journal():
             edges = np.stack([src_nodes, dst_nodes, np.zeros_like(src_nodes)]).T
 
             train, valid, test = np.split(
-                edges,
+                np.random.shuffle(edges),
                 [int(train_fraction*len(chunk)),
                  int((train_fraction + validation_fraction)*len(chunk))])
 
