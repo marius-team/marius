@@ -169,7 +169,7 @@ def print_table_4():
 def print_table_5():
     exp_dir = "osdi2021/system_comparisons/freebase86m/"
 
-    marius_complex = exp_dir + "marius/freebase86m_8_result.json"
+    marius_complex = exp_dir + "marius/freebase86m_16_result.json"
 
     with open(marius_complex) as f:
         marius_complex_res = json.load(f)
