@@ -363,14 +363,9 @@ def run_orderings_twitter(overwrite=False, collect_tracing_metrics=False, show_o
         print("==== Preprocessing Twitter P=32 D=200 =====")
         preprocess.twitter("twitter_32/", num_partitions=32)
 
-    if not os.path.exists("twitter/"):
-        print("==== Preprocessing Twitter P=1 D=100 =====")
-        preprocess.twitter("twitter/")
-
     run_marius(elimination_config, exp_dir, "elimination100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_config, exp_dir, "hilbert100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
-    run_marius(memory_config, exp_dir, "memory100", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     config_args = "--model.embedding_size=200"
     run_marius(elimination_config, exp_dir, "elimination200", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
