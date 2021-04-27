@@ -623,7 +623,7 @@ def plot_figure_12():
     print("Plot saved to: %s" % exp_dir + "figure_12.png")
 
 def plot_figure_13():
-
+    pass
     # plt.figure(num=None, figsize=(6, 2), facecolor='w', edgecolor='k')
     #
     # params = {'legend.fontsize': 9,
