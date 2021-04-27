@@ -21,11 +21,19 @@ using std::mutex;
 
 template <typename T>
 struct OptInfo {
-    T *cpp_var;
+    T *var_ptr;
     T default_val;
     std::string s_section;
     std::string s_option;
     T range[2];
+};
+
+struct AllOptInfo {
+    std::vector<OptInfo<std::string>> s_var_map;
+    std::vector<OptInfo<int64_t>> i64_var_map;
+    std::vector<OptInfo<int>> i_var_map;
+    std::vector<OptInfo<float>> f_var_map;
+    std::vector<OptInfo<bool>> b_var_map;
 };
 
 class TimestampAllocator {

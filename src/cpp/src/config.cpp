@@ -7,17 +7,8 @@
 MariusOptions marius_options = MariusOptions();
 TimestampAllocator global_timestamp_allocator = TimestampAllocator();
 
-MariusOptions parseConfig(int64_t argc, char *argv[]) {
+string getConfigPath(int64_t argc, char *argv[], cxxopts::Options cmd_options) {
     string config_path;
-    cxxopts::Options cmd_options(argv[0], "Train and evaluate graph embeddings");
-    cmd_options.allow_unrecognised_options();
-    cmd_options.positional_help("");
-    cmd_options.custom_help("config_file [OPTIONS...] [<section>.<option>=<value>...]");
-    cmd_options.add_options()
-        ("config_file", "Configuration file", cxxopts::value<std::string>())
-        ("h, help", "Print help and exit.");
-
-    // Get config
     try {
         cmd_options.parse_positional({"config_file"});
         auto result = cmd_options.parse(argc, argv);
@@ -38,22 +29,136 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
         SPDLOG_ERROR("Error parsing options: {}", e.what());
         exit(-1);
     }
+    return config_path;
+}
 
-    std::filesystem::path config_file_path = config_path;
-    if (!std::filesystem::exists(config_file_path)){
-        SPDLOG_ERROR("Unable to find configuration file: {}", config_path);
-        exit(1);
+void assignOptions(AllOptInfo opt_info, string config_path) {
+    INIReader reader(config_path);
+    if (reader.ParseError() != 0) {
+        SPDLOG_ERROR("Can't load {}", config_path);
+        exit(-1);
     }
+    // Assign values as config or default specifications
+    for (OptInfo<std::string> v : opt_info.s_var_map) {
+        *(v.var_ptr) = reader.Get(v.s_section, v.s_option, v.default_val);
+    }
+    for (OptInfo<int64_t> v : opt_info.i64_var_map) {
+        *(v.var_ptr) = (int64_t)(reader.GetInteger(v.s_section, v.s_option, v.default_val));
+    }
+    for (OptInfo<int> v : opt_info.i_var_map) {
+        *(v.var_ptr) = reader.GetInteger(v.s_section, v.s_option, v.default_val);
+    }
+    for (OptInfo<float> v : opt_info.f_var_map) {
+        *(v.var_ptr) = reader.GetFloat(v.s_section, v.s_option, v.default_val);
+    }
+    for (OptInfo<bool> v : opt_info.b_var_map) {
+        *(v.var_ptr) = reader.GetBoolean(v.s_section, v.s_option, v.default_val);
+    }
+}
+
+void parseCommandLine(int64_t argc, char *argv[], AllOptInfo opt_info, cxxopts::Options cmd_options) {
+    try {
+        cmd_options.parse_positional({"config_file"});
+        auto result = cmd_options.parse(argc, argv);
+
+        if (!result.unmatched().empty()) {
+            try {
+                for (string opt : result.unmatched()) {
+                    if (opt.substr(0, 2) == "--") {
+
+                        int section_end = opt.find(".");
+                        int option_end = opt.find("=");
+
+                        if (section_end == - 1 or option_end == - 1) {
+                            throw std::exception();
+                        }
+
+                        std::string section = opt.substr(2, section_end - 2);
+                        std::string option_name = opt.substr(section_end + 1, option_end - section_end - 1);
+                        std::string value = opt.substr(option_end + 1, opt.size() - option_end - 1);
+
+                        bool valid = false;
+
+                        for (OptInfo<std::string> v : opt_info.s_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = value;
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<int64_t> v : opt_info.i64_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = std::stoll(value);
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<int> v : opt_info.i_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = std::stoi(value);
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<float> v : opt_info.f_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = std::stof(value);
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<bool> v : opt_info.b_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = (value == "true");
+                                valid = true;
+                            }
+                        }
+                        if (!valid) {
+                            throw std::exception();
+                        }
+                    } else {
+                        throw std::exception();
+                    }
+                }
+            } catch (std::exception) {
+                throw cxxopts::option_syntax_exception("Unable to parse supplied command line configuration options");
+            }
+        }
+    } catch (const cxxopts::OptionException& e) {
+        SPDLOG_ERROR("Error parsing options: {}", e.what());
+        exit(-1);
+    }
+}
+
+void validateNumericalOptions(AllOptInfo opt_info) {
+    // Validate numerical options
+    for (OptInfo<int64_t> v : opt_info.i64_var_map) {
+        if (*(v.var_ptr) < v.range[0] || *(v.var_ptr) > v.range[1]) {
+            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.var_ptr), v.range[0], v.range[1]);
+            exit(-1);
+        }
+    }
+    for (OptInfo<int> v : opt_info.i_var_map) {
+        if (*(v.var_ptr) < v.range[0] || *(v.var_ptr) > v.range[1]) {
+            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.var_ptr), v.range[0], v.range[1]);
+            exit(-1);
+        }
+    }
+    for (OptInfo<float> v : opt_info.f_var_map) {
+        if (*(v.var_ptr) < v.range[0] || *(v.var_ptr) > v.range[1]) {
+            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.var_ptr), v.range[0], v.range[1]);
+            exit(-1);
+        }
+    }
+}
+
+MariusOptions parseConfig(int64_t argc, char *argv[]) {
 
     // Associate each option with:
-    // C++ variable, default value, section name, user option name, range
+    // variable, default value, section name, user option name, (optional) range
+
     // List for each type of variable
     std::vector<OptInfo<std::string>> s_var_map;
     std::vector<OptInfo<int64_t>> i64_var_map;
     std::vector<OptInfo<int>> i_var_map;
     std::vector<OptInfo<float>> f_var_map;
     std::vector<OptInfo<bool>> b_var_map;
-
 
     float FLOAT_MAX = std::numeric_limits<float>::max();
 
@@ -260,119 +365,29 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
     string s_log_level; 
     s_var_map.push_back((OptInfo<std::string>){&s_log_level, "info", "reporting", "log_level"});
 
-    INIReader reader(config_path);
+    AllOptInfo opt_info = {s_var_map, i64_var_map, i_var_map, f_var_map, b_var_map};
 
-    if (reader.ParseError() != 0)
-        SPDLOG_ERROR("Can't load {}", config_path);
-
-    // Assign values as config or default specifications
-    for (OptInfo<std::string> v : s_var_map) {
-        *(v.cpp_var) = reader.Get(v.s_section, v.s_option, v.default_val);
-    }
-    for (OptInfo<int64_t> v : i64_var_map) {
-        *(v.cpp_var) = (int64_t)(reader.GetInteger(v.s_section, v.s_option, v.default_val));
-    }
-    for (OptInfo<int> v : i_var_map) {
-        *(v.cpp_var) = reader.GetInteger(v.s_section, v.s_option, v.default_val);
-    }
-    for (OptInfo<float> v : f_var_map) {
-        *(v.cpp_var) = reader.GetFloat(v.s_section, v.s_option, v.default_val);
-    }
-    for (OptInfo<bool> v : b_var_map) {
-        *(v.cpp_var) = reader.GetBoolean(v.s_section, v.s_option, v.default_val);
+    // Get config file
+    cxxopts::Options cmd_options(argv[0], "Train and evaluate graph embeddings");
+    cmd_options.allow_unrecognised_options();
+    cmd_options.positional_help("");
+    cmd_options.custom_help("config_file [OPTIONS...] [<section>.<option>=<value>...]");
+    cmd_options.add_options()
+        ("config_file", "Configuration file", cxxopts::value<std::string>())
+        ("h, help", "Print help and exit.");
+    string config_path = getConfigPath(argc, argv, cmd_options);
+    std::filesystem::path config_file_path = config_path;
+    if (!std::filesystem::exists(config_file_path)) {
+        SPDLOG_ERROR("Unable to find configuration file: {}", config_path);
+        exit(1);
     }
 
-    // If user specified command line options, overwrite values with these
-    try {
-        cmd_options.parse_positional({"config_file"});
-        auto result = cmd_options.parse(argc, argv);
-
-        if (!result.unmatched().empty()) {
-            try {
-                for (string opt : result.unmatched()) {
-                    if (opt.substr(0, 2) == "--") {
-
-                        int section_end = opt.find(".");
-                        int option_end = opt.find("=");
-
-                        if (section_end == - 1 or option_end == - 1) {
-                            throw std::exception();
-                        }
-
-                        std::string section = opt.substr(2, section_end - 2);
-                        std::string option_name = opt.substr(section_end + 1, option_end - section_end - 1);
-                        std::string value = opt.substr(option_end + 1, opt.size() - option_end - 1);
-
-                        bool valid = false;
-
-                        for (OptInfo<std::string> v : s_var_map) {
-                            if (section == v.s_section && option_name == v.s_option) {
-                                *(v.cpp_var) = value;
-                                valid = true;
-                            }
-                        }
-                        for (OptInfo<int64_t> v : i64_var_map) {
-                            if (section == v.s_section && option_name == v.s_option) {
-                                *(v.cpp_var) = std::stoll(value);
-                                valid = true;
-                            }
-                        }
-                        for (OptInfo<int> v : i_var_map) {
-                            if (section == v.s_section && option_name == v.s_option) {
-                                *(v.cpp_var) = std::stoi(value);
-                                valid = true;
-                            }
-                        }
-                        for (OptInfo<float> v : f_var_map) {
-                            if (section == v.s_section && option_name == v.s_option) {
-                                *(v.cpp_var) = std::stof(value);
-                                valid = true;
-                            }
-                        }
-                        for (OptInfo<bool> v : b_var_map) {
-                            if (section == v.s_section && option_name == v.s_option) {
-                                *(v.cpp_var) = (value == "true");
-                                valid = true;
-                            }
-                        }
-                        if (!valid) {
-                            throw std::exception();
-                        }
-                    } else {
-                        throw std::exception();
-                    }
-                }
-            } catch (std::exception) {
-                throw cxxopts::option_syntax_exception("Unable to parse supplied command line configuration options");
-            }
-        }
-    } catch (const cxxopts::OptionException& e) {
-        SPDLOG_ERROR("Error parsing options: {}", e.what());
-        exit(-1);
-    }
-
+    // Parse all options from config and command line and validate
+    assignOptions(opt_info, config_path);
+    parseCommandLine(argc, argv, opt_info, cmd_options);
     if (train_edges == "")
         SPDLOG_ERROR("Path to training edges required");
-
-    // Validate numerical options
-    for (OptInfo<int64_t> v : i64_var_map) {
-        if (*(v.cpp_var) < v.range[0] || *(v.cpp_var) > v.range[1]) {
-            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.cpp_var), v.range[0], v.range[1]);
-            exit(-1);
-        }
-    }
-    for (OptInfo<int> v : i_var_map) {
-        if (*(v.cpp_var) < v.range[0] || *(v.cpp_var) > v.range[1]) {
-            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.cpp_var), v.range[0], v.range[1]);
-            exit(-1);
-        }
-    }
-    for (OptInfo<float> v : f_var_map) {
-        if (*(v.cpp_var) < v.range[0] || *(v.cpp_var) > v.range[1]) {
-            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.cpp_var), v.range[0], v.range[1]);
-            exit(-1);
-        }
-    }
+    validateNumericalOptions(opt_info);
 
     if (s_device == "GPU") {
         device = torch::kCUDA;
@@ -535,7 +550,7 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
     if (s_optimizer_type == "SGD") {
         SPDLOG_ERROR("SGD Currently Unsupported");
         exit(-1);
-//        optimizer_type = OptimizerType::SGD;
+        // optimizer_type = OptimizerType::SGD;
     } else if (s_optimizer_type == "Adagrad") {
         optimizer_type = OptimizerType::Adagrad;
     } else {
