@@ -33,9 +33,9 @@ def preproccess_live_journal():
             src_nodes = np.asarray(chunk[chunk.columns.values[0]])
             dst_nodes = np.asarray(chunk[chunk.columns.values[1]])
             edges = np.stack([src_nodes, dst_nodes, np.zeros_like(src_nodes)]).T
-
+            np.random.shuffle(edges)
             train, valid, test = np.split(
-                np.random.shuffle(edges),
+                edges,
                 [int(train_fraction*len(chunk)),
                  int((train_fraction + validation_fraction)*len(chunk))])
 
