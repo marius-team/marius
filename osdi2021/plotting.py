@@ -496,7 +496,7 @@ def plot_figure_11():
 
     plt.savefig(exp_dir + "figure_11.png")
 
-#TODO
+
 def plot_figure_12():
     fig, ax_arr = plt.subplots((2), figsize=(10, 4))
     ax1 = ax_arr[0]
@@ -569,7 +569,6 @@ def plot_figure_12():
         xs.append(x)
         ys.append(y)
 
-
     l = sorted((i, j) for i, j in zip(xs, ys))
     new_x, new_y = zip(*l)
     ax2.plot(new_x, new_y, "r", marker="o", linestyle="--", lw=4, markersize=12)
@@ -581,7 +580,6 @@ def plot_figure_12():
         y = v["TP"][-1]
         xs.append(x)
         ys.append(y)
-
 
     l = sorted((i, j) for i, j in zip(xs, ys))
     new_x, new_y = zip(*l)
