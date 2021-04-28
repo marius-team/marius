@@ -17,10 +17,11 @@ def preprocess_twitter(path: String) : Dataset[Triplet] = {
 
 
 val unified = preprocess_twitter("twitter_16/twitter-2010.txt").orderBy(rand())
-val splits = unified.randomSplit(Array(0.9, 0.05, .05), seed = 11L)
-val train_triplets = splits(0)
-val valid_triplets = splits(1)
-val test_triplets = splits(2)
+val split_one = unified.randomSplit(Array(0.9, 0.1))
+val train_triplets = split_one(0)
+val split_two = split_one(1).randomSplit(Array(0.5, 0.5))
+val valid_triplets = split_two(0)
+val test_triplets = split_two(1)
 
 
 create_dataset(unified, train_triplets, valid_triplets, test_triplets, 16, "twitter_16")
