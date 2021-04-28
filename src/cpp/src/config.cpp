@@ -27,6 +27,7 @@ string getConfigPath(int64_t argc, char *argv[], cxxopts::Options cmd_options) {
 
     } catch (const cxxopts::OptionException& e) {
         SPDLOG_ERROR("Error parsing options: {}", e.what());
+        std::cout << cmd_options.help() << std::endl;
         exit(-1);
     }
     return config_path;
@@ -122,12 +123,12 @@ void parseCommandLine(int64_t argc, char *argv[], AllOptInfo opt_info, cxxopts::
         }
     } catch (const cxxopts::OptionException& e) {
         SPDLOG_ERROR("Error parsing options: {}", e.what());
+        std::cout << cmd_options.help() << std::endl;
         exit(-1);
     }
 }
 
 void validateNumericalOptions(AllOptInfo opt_info) {
-    // Validate numerical options
     for (OptInfo<int64_t> v : opt_info.i64_var_map) {
         if (*(v.var_ptr) < v.range[0] || *(v.var_ptr) > v.range[1]) {
             SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.var_ptr), v.range[0], v.range[1]);

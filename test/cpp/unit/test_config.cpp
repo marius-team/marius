@@ -68,3 +68,31 @@ TEST(TestConfig, TestInvalidEnumString) {
     const char* n_argv[] = {"marius_train", conf_str.c_str(), "--model.initialization_distribution=invalid"};
     EXPECT_DEATH(parseConfig(num_args, (char **)n_argv), "");
 }
+
+TEST(TestConfig, TestHelp) {
+    // test help messages display when flag set
+    int num_args = 3;
+    testing::internal::CaptureStdout();
+    const char* n_argv1[] = {"marius_train", conf_str.c_str(), "-h"};
+    EXPECT_EXIT(parseConfig(num_args, (char **)n_argv1), ::testing::ExitedWithCode(0), "");
+    std::string output = testing::internal::GetCapturedStdout();
+    if (output.find("Usage") == std::string::npos)
+        FAIL();
+    testing::internal::CaptureStdout();
+    const char* n_argv2[] = {"marius_train", conf_str.c_str(), "--help"};
+    EXPECT_EXIT(parseConfig(num_args, (char **)n_argv2), ::testing::ExitedWithCode(0), "");
+    output = testing::internal::GetCapturedStdout();
+    if (output.find("Usage") == std::string::npos)
+        FAIL();
+}
+
+TEST(TestConfig, TestHelpOnInvalidInput) {
+    // test help messages display with bad input
+    int num_args = 3;
+    testing::internal::CaptureStdout();
+    const char* n_argv1[] = {"marius_train", conf_str.c_str(), "bad_argument"};
+    EXPECT_DEATH(parseConfig(num_args, (char **)n_argv1), "");
+    std::string output = testing::internal::GetCapturedStdout();
+    if (output.find("Usage") == std::string::npos)
+        FAIL();
+}
