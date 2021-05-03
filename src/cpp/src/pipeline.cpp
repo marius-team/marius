@@ -679,12 +679,27 @@ void PipelineGPU::addWorkersToPool(int pool_id, int worker_type, int num_workers
     bool *paused;
     ThreadStatus *status;
 
-    for (int i = 0; i < num_workers; i++) {
-        paused = new bool(true);
-        status = new ThreadStatus(ThreadStatus::Paused);
-        pool_paused_[pool_id]->emplace_back(paused);
-        pool_status_[pool_id]->emplace_back(status);
-        pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, i));
+
+    if (worker_type == GPU_COMPUTE_ID) {
+        num_workers = marius_options.general.gpu_ids.size() * num_workers;
+        for (int j = 0; j < marius_options.general.gpu_ids.size(); j++) {
+            for (int i = 0; i < num_workers; i++) {
+                paused = new bool(true);
+                status = new ThreadStatus(ThreadStatus::Paused);
+                pool_paused_[pool_id]->emplace_back(paused);
+                pool_status_[pool_id]->emplace_back(status);
+                pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, j));
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < num_workers; i++) {
+            paused = new bool(true);
+            status = new ThreadStatus(ThreadStatus::Paused);
+            pool_paused_[pool_id]->emplace_back(paused);
+            pool_status_[pool_id]->emplace_back(status);
+            pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, i));
+        }
     }
 }
 
