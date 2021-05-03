@@ -97,6 +97,8 @@ void EmbeddingsToDeviceWorker::run() {
                 }
             }
             batch->embeddingsToDevice(device_id);
+            pipeline_->data_set_->loadGPUParameters(batch);
+            batch->prepareBatch();
 
             Queue<Batch *> *push_queue = ((PipelineGPU *) pipeline_)->device_loaded_batches_[device_id];
             *status_ = ThreadStatus::WaitPush;
@@ -186,14 +188,8 @@ void ComputeWorkerGPU::run() {
             }
 
             *status_ = ThreadStatus::Running;
-            pipeline_->data_set_->loadGPUParameters(batch);
-            batch->prepareBatch();
             if (pipeline_->isTrain()) {
                 pipeline_->model_->train(batch);
-                batch->accumulateGradients();
-                pipeline_->data_set_->updateEmbeddingsForBatch(batch, true);
-                batch->compute_timestamp_ = global_timestamp_allocator.getTimestamp();
-                batch->status_ = BatchStatus::ComputedGradients;
                 Queue<Batch *> *push_queue = ((PipelineGPU *) pipeline_)->device_update_batches_[device_id_];
                 *status_ = ThreadStatus::WaitPush;
                 push_queue->blocking_push(batch);
@@ -245,6 +241,10 @@ void GradientsToHostWorker::run() {
             if (!popped) {
                 break;
             }
+            batch->accumulateGradients();
+            pipeline_->data_set_->updateEmbeddingsForBatch(batch, true);
+            batch->compute_timestamp_ = global_timestamp_allocator.getTimestamp();
+            batch->status_ = BatchStatus::ComputedGradients;
 
             *status_ = ThreadStatus::Running;
             batch->embeddingsToHost();
