@@ -73,6 +73,8 @@ void LoadEmbeddingsWorker::run() {
 }
 
 void EmbeddingsToDeviceWorker::run() {
+
+
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
             *status_ = ThreadStatus::WaitPop;
@@ -96,6 +98,10 @@ void EmbeddingsToDeviceWorker::run() {
                     device_id = i;
                 }
             }
+
+            at::cuda::CUDAStream myStream = at::cuda::getStreamFromPool(false, device_id);
+            at::cuda::setCurrentCUDAStream(myStream);
+
             batch->embeddingsToDevice(device_id);
             pipeline_->data_set_->loadGPUParameters(batch);
             batch->prepareBatch();
@@ -176,6 +182,10 @@ ComputeWorkerGPU::ComputeWorkerGPU(Pipeline *pipeline, int device_id, bool *paus
 }
 
 void ComputeWorkerGPU::run() {
+
+    at::cuda::CUDAStream myStream = at::cuda::getStreamFromPool(true, device_id_);
+    at::cuda::setCurrentCUDAStream(myStream);
+
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
             *status_ = ThreadStatus::WaitPop;
@@ -231,6 +241,7 @@ void AccumulateGradientsWorker::run() {
 }
 
 void GradientsToHostWorker::run() {
+
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
 
@@ -245,6 +256,9 @@ void GradientsToHostWorker::run() {
                     device_id = i;
                 }
             }
+
+            at::cuda::CUDAStream myStream = at::cuda::getStreamFromPool(false, device_id);
+            at::cuda::setCurrentCUDAStream(myStream);
 
             Queue<Batch *> *pop_queue = ((PipelineGPU *) pipeline_)->device_update_batches_[device_id];
             *status_ = ThreadStatus::WaitPop;
