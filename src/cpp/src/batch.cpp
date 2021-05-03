@@ -102,34 +102,34 @@ void Batch::embeddingsToDevice(int device_id) {
         host_transfer_ = CudaEvent(device_id);
         string device_string = "cuda:" + std::to_string(device_id);
 
-        src_pos_indices_mapping_ = src_pos_indices_mapping_.to(device_string);
-        dst_pos_indices_mapping_ = dst_pos_indices_mapping_.to(device_string);
-        src_neg_indices_mapping_ = src_neg_indices_mapping_.to(device_string);
-        dst_neg_indices_mapping_ = dst_neg_indices_mapping_.to(device_string);
+        src_pos_indices_mapping_ = src_pos_indices_mapping_.pin_memory().to(device_string, true);
+        dst_pos_indices_mapping_ = dst_pos_indices_mapping_.pin_memory().to(device_string, true);
+        src_neg_indices_mapping_ = src_neg_indices_mapping_.pin_memory().to(device_string, true);
+        dst_neg_indices_mapping_ = dst_neg_indices_mapping_.pin_memory().to(device_string, true);
         SPDLOG_TRACE("Batch: {} Indices sent to device", batch_id_);
 
         if (marius_options.storage.embeddings != BackendType::DeviceMemory) {
-            unique_node_embeddings_ = unique_node_embeddings_.to(device_string);
+            unique_node_embeddings_ = unique_node_embeddings_.pin_memory().to(device_string, true);
             SPDLOG_TRACE("Batch: {} Embeddings sent to device", batch_id_);
 
             if (train_) {
-                unique_node_embeddings_state_ = unique_node_embeddings_state_.to(device_string);
+                unique_node_embeddings_state_ = unique_node_embeddings_state_.pin_memory().to(device_string, true);
                 SPDLOG_TRACE("Batch: {} Node State sent to device", batch_id_);
             }
         }
 
         if (marius_options.general.num_relations > 1) {
             if (marius_options.storage.relations != BackendType::DeviceMemory) {
-                unique_relation_embeddings_ = unique_relation_embeddings_.to(device_string);
-                rel_indices_mapping_ = rel_indices_mapping_.to(device_string);
+                unique_relation_embeddings_ = unique_relation_embeddings_.pin_memory().to(device_string, true);
+                rel_indices_mapping_ = rel_indices_mapping_.pin_memory().to(device_string, true);
                 SPDLOG_TRACE("Batch: {} Relations sent to device", batch_id_);
                 if (train_) {
-                    unique_relation_embeddings_state_ = unique_relation_embeddings_state_.to(device_string);
+                    unique_relation_embeddings_state_ = unique_relation_embeddings_state_.pin_memory().to(device_string, true);
                     SPDLOG_TRACE("Batch: {} Relation State sent to device", batch_id_);
                 }
             } else {
-                unique_relation_indices_ = unique_relation_indices_.to(device_string);
-                rel_indices_mapping_ = rel_indices_mapping_.to(device_string);
+                unique_relation_indices_ = unique_relation_indices_.pin_memory().to(device_string, true);
+                rel_indices_mapping_ = rel_indices_mapping_.pin_memory().to(device_string, true);
             }
         }
 
