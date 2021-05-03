@@ -10,8 +10,18 @@ Model::Model(Encoder *encoder, Decoder* decoder) {
 }
 
 void Model::train(Batch *batch) {
+    Timer encoder_time = Timer(false);
+    Timer decoder_time = Timer(false);
+
+    encoder_time.start();
     encoder_->forward(batch, true);
+    encoder_time.stop();
+    SPDLOG_INFO("Encoder Took: {}", encoder_time.getDuration());
+
+    decoder_time.start();
     decoder_->forward(batch, true);
+    decoder_time.stop();
+    SPDLOG_INFO("Decoder Took: {}", decoder_time.getDuration());
 }
 
 void Model::evaluate(Batch *batch) {

@@ -207,9 +207,8 @@ void ComputeWorkerGPU::run() {
             pop_time.stop();
             SPDLOG_INFO("Pop Time: {}", pop_time.getDuration());
 
-
-            train_time_host.start();
             train_time_device.start();
+            train_time_host.start();
             *status_ = ThreadStatus::Running;
             if (pipeline_->isTrain()) {
                 pipeline_->model_->train(batch);
