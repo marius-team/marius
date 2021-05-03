@@ -233,7 +233,20 @@ void AccumulateGradientsWorker::run() {
 void GradientsToHostWorker::run() {
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
-            Queue<Batch *> *pop_queue = ((PipelineGPU *) pipeline_)->device_update_batches_[device_id_];
+
+            // transfer data to device
+            // chose device with fewest batches in queue:
+            int num_gpus = marius_options.general.gpu_ids.size();
+            int device_id = 0;
+            int max_size = ((PipelineGPU *) pipeline_)->device_update_batches_[0]->size();
+            for (int i = 1; i < num_gpus; i++) {
+                if (((PipelineGPU *) pipeline_)->device_update_batches_[i]->size() > max_size) {
+                    max_size = ((PipelineGPU *) pipeline_)->device_update_batches_[i]->size();
+                    device_id = i;
+                }
+            }
+
+            Queue<Batch *> *pop_queue = ((PipelineGPU *) pipeline_)->device_update_batches_[device_id];
             *status_ = ThreadStatus::WaitPop;
             auto tup = pop_queue->blocking_pop();
             bool popped = get<0>(tup);
