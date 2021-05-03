@@ -183,12 +183,12 @@ ComputeWorkerGPU::ComputeWorkerGPU(Pipeline *pipeline, int device_id, bool *paus
 
 void ComputeWorkerGPU::run() {
 
+    at::cuda::CUDAStream myStream = at::cuda::getStreamFromPool(true, device_id_);
+    at::cuda::setCurrentCUDAStream(myStream);
+
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
             *status_ = ThreadStatus::WaitPop;
-
-            at::cuda::CUDAStream myStream = at::cuda::getStreamFromPool(true, device_id_);
-            at::cuda::setCurrentCUDAStream(myStream);
 
             Queue<Batch *> *pop_queue = ((PipelineGPU *) pipeline_)->device_loaded_batches_[device_id_];
             auto tup = pop_queue->blocking_pop();
