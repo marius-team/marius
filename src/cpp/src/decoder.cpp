@@ -207,8 +207,8 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
         backward_device_time.start();
         backward_host_time.start();
         loss.backward();
-        backward_host_time.start();
-        backward_device_time.start();
+        backward_host_time.stop();
+        backward_device_time.stop();
         SPDLOG_INFO("Backward Host Took: {}", backward_host_time.getDuration());
         SPDLOG_INFO("Backward Device Took: {}", backward_device_time.getDuration());
     }
