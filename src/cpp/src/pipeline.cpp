@@ -235,7 +235,7 @@ void GradientsToHostWorker::run() {
         while (!*paused_) {
 
             // transfer data to device
-            // chose device with fewest batches in queue:
+            // chose device with most batches in queue:
             int num_gpus = marius_options.general.gpu_ids.size();
             int device_id = 0;
             int max_size = ((PipelineGPU *) pipeline_)->device_update_batches_[0]->size();
