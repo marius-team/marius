@@ -187,15 +187,9 @@ void ComputeWorkerGPU::run() {
         while (!*paused_) {
             *status_ = ThreadStatus::WaitPop;
 
-            Timer pop_time = Timer(false);
-            Timer train_time_host = Timer(false);
-            Timer train_time_device = Timer(true);
-            Timer push_time = Timer(false);
-
             at::cuda::CUDAStream myStream = at::cuda::getStreamFromPool(true, device_id_);
             at::cuda::setCurrentCUDAStream(myStream);
 
-            pop_time.start();
             Queue<Batch *> *pop_queue = ((PipelineGPU *) pipeline_)->device_loaded_batches_[device_id_];
             auto tup = pop_queue->blocking_pop();
             bool popped = get<0>(tup);
@@ -203,25 +197,14 @@ void ComputeWorkerGPU::run() {
             if (!popped) {
                 break;
             }
-            pop_time.stop();
-            SPDLOG_INFO("Pop Time: {}", pop_time.getDuration());
 
-            train_time_device.start();
-            train_time_host.start();
             *status_ = ThreadStatus::Running;
             if (pipeline_->isTrain()) {
                 pipeline_->model_->train(batch);
-                train_time_host.stop();
-                train_time_device.stop();
-                SPDLOG_INFO("Train Time Host: {}", train_time_host.getDuration());
-                SPDLOG_INFO("Train Time Device: {}", train_time_device.getDuration());
 
-                push_time.start();
                 Queue<Batch *> *push_queue = ((PipelineGPU *) pipeline_)->device_update_batches_[device_id_];
                 *status_ = ThreadStatus::WaitPush;
                 push_queue->blocking_push(batch);
-                push_time.stop();
-                SPDLOG_INFO("Push Time: {}", push_time.getDuration());
             } else {
                 pipeline_->model_->evaluate(batch);
                 pipeline_->data_set_->batches_processed_++;

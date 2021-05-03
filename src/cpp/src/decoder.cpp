@@ -142,24 +142,9 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
     torch::Tensor rhs_loss;
 
     // localSample
-
-    Timer local_sample_host_time = Timer(false);
-    Timer local_sample_device_time = Timer(true);
-    local_sample_host_time.start();
-    local_sample_device_time.start();
     batch->localSample();
-    local_sample_host_time.stop();
-    local_sample_device_time.stop();
-    SPDLOG_INFO("Local Sample Host Took: {}", local_sample_host_time.getDuration());
-    SPDLOG_INFO("Local Sample Device Took: {}", local_sample_device_time.getDuration());
 
     // corrupt destination
-
-    Timer forward_host_time = Timer(false);
-    Timer forward_device_time = Timer(true);
-
-    forward_device_time.start();
-    forward_host_time.start();
     Embeddings adjusted_src_pos = (*relation_operator_)(batch->src_pos_embeddings_, batch->src_relation_emebeddings_);
     tie(rhs_pos_scores, rhs_neg_scores) = (*comparator_)(adjusted_src_pos, batch->dst_pos_embeddings_, batch->dst_all_neg_embeddings_);
 
@@ -196,21 +181,9 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
             SPDLOG_DEBUG("Loss: {}, Regularization loss: {}", loss.item<float>(), reg_loss.item<float>());
             loss = loss + reg_loss;
         }
-        forward_host_time.stop();
-        forward_device_time.stop();
-        SPDLOG_INFO("Forward Host Took: {}", forward_host_time.getDuration());
-        SPDLOG_INFO("Forward Device Took: {}", forward_device_time.getDuration());
 
-        Timer backward_host_time = Timer(false);
-        Timer backward_device_time = Timer(true);
-
-        backward_device_time.start();
-        backward_host_time.start();
         loss.backward();
-        backward_host_time.stop();
-        backward_device_time.stop();
-        SPDLOG_INFO("Backward Host Took: {}", backward_host_time.getDuration());
-        SPDLOG_INFO("Backward Device Took: {}", backward_device_time.getDuration());
+
     }
 
     else {
