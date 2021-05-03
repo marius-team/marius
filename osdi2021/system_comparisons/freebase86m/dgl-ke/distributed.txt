@@ -1,0 +1,2 @@
+dglke_dist_train --path ~/my_task --ip_config ~/my_task/ip_config.txt \
+--num_client_proc 16 --model_name ComplEx --dataset Freebase --data_path ~/my_task --batch_size 10000 --neg_sample_size 1000 --neg_deg_sample --hidden_dim 50 --lr 0.1  --regularization_coef 0 --batch_size_eval 1000 --test --max_step 19125 --neg_sample_size_eval 2000 --neg_deg_sample_eval --log_interval 1000 --no_save_emb --no_eval_filter
