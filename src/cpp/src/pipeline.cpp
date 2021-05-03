@@ -664,7 +664,7 @@ void PipelineGPU::initialize() {
         addWorkersToPool(0, EMBEDDINGS_LOADER_ID, marius_options.training_pipeline.num_embedding_loader_threads);
         addWorkersToPool(1, EMBEDDINGS_TRANSFER_ID, marius_options.training_pipeline.num_embedding_transfer_threads);
         addWorkersToPool(2, GPU_COMPUTE_ID, marius_options.training_pipeline.num_compute_threads);
-        addWorkersToPool(3, UPDATE_TRANSFER_ID, marius_options.training_pipeline.num_compute_threads);
+        addWorkersToPool(3, UPDATE_TRANSFER_ID, marius_options.training_pipeline.num_gradient_transfer_threads);
         addWorkersToPool(4, UPDATE_EMBEDDINGS_ID, marius_options.training_pipeline.num_embedding_update_threads);
     } else {
         addWorkersToPool(0, EMBEDDINGS_LOADER_ID, marius_options.evaluation_pipeline.num_embedding_loader_threads);
