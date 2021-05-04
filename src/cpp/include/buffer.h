@@ -10,7 +10,6 @@
 #include <functional>
 #include <spdlog/spdlog.h>
 #include <batch.h>
-#include <boost/lockfree/queue.hpp>
 #include <shared_mutex>
 #include <util.h>
 #include <fcntl.h>
@@ -146,7 +145,7 @@ class PartitionBuffer {
     bool loaded_;
     torch::Tensor buffer_tensor_view_;
     std::vector<Partition *> partition_table_;
-    boost::lockfree::queue<int64_t> *free_list_;
+    std::queue<int> free_list_;
 
     bool prefetching_;
     LookaheadBlock *lookahead_block_;

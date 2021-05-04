@@ -134,8 +134,13 @@ void init_config(py::module &m) {
 
     m.def("parseConfig", [](string config_path) {
 	// hacky, fix this
-        char *argv[1];
-	    marius_options = parseConfig(config_path, 1, argv);
+        char *argv[2];
+
+        char *name = strdup(std::string("marius").c_str());
+        char *config = strdup(config_path.c_str());
+        argv[0] = name;
+        argv[1] = config;
+	    marius_options = parseConfig(2, argv);
         return marius_options;
     }, py::arg("config_path"), py::return_value_policy::reference);
 }

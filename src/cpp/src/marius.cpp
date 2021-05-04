@@ -2,8 +2,7 @@
 #include <marius.h>
 
 void marius(int argc, char *argv[]) {
-    string config_path = argv[1];
-    marius_options = parseConfig(config_path, argc, argv);
+    marius_options = parseConfig(argc, argv);
 
     std::string log_file = marius_options.general.experiment_name;
     MariusLogger marius_logger = MariusLogger(log_file);
