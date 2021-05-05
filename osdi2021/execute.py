@@ -71,8 +71,8 @@ def run_dglke(args, show_output=False):
         proc.wait()
 
 
-def run_pbg(script_path, config_path, args=None, show_output=False):
-    script = "python3 %s --config %s" % (script_path, config_path)
+def run_pbg(script_path, config_path, config_args=None, show_output=False):
+    script = "python3 %s --config %s %s" % (script_path, config_path, config_args)
     with open("tmp.txt", "w") as tmp_file:
         os.environ["PYTHONUNBUFFERED"] = "1"
         os.environ["MKL_THREADING_LAYER"] = "GNU"
