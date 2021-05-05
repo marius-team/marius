@@ -315,7 +315,7 @@ def run_orderings_total_io(overwrite=False, collect_tracing_metrics=False, show_
         print("==== Preprocessing Freebase86m P=32 D=100 =====")
         preprocess.freebase86m("freebase86m_32/", num_partitions=32)
 
-    config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2 --reporting.logs_per_epoch=1000"
+    config_args = "--training.num_epochs=1 --evaluation.epochs_per_eval=2"
     run_marius(elimination_config, exp_dir, "elimination100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_config, exp_dir, "hilbert100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
