@@ -2,11 +2,11 @@ def get_torchbiggraph_config():
 
     config = dict(  # noqa
         # I/O data
-        entity_path="twitter_16/twitter_metadata",
+        entity_path="pbg_twitter_16/twitter_metadata",
         edge_paths=[
-            "twitter_16/twitter_train",
-            "twitter_16/twitter_valid",
-            "twitter_16/twitter_test",
+            "pbg_twitter_16/twitter_train",
+            "pbg_twitter_16/twitter_valid",
+            "pbg_twitter_16/twitter_test",
         ],
         checkpoint_path="model/twitter_16",
         # Graph structure

@@ -2,11 +2,11 @@ def get_torchbiggraph_config():
 
     config = dict(  # noqa
         # I/O data
-        entity_path="freebase_16/freebase_metadata",
+        entity_path="pbg_freebase_16/freebase_metadata",
         edge_paths=[
-            "freebase_16/freebase_train",
-            "freebase_16/freebase_valid",
-            "freebase_16/freebase_test",
+            "pbg_freebase_16/freebase_train",
+            "pbg_freebase_16/freebase_valid",
+            "pbg_freebase_16/freebase_test",
         ],
         checkpoint_path="model/fb86m_16",
         # Graph structure
