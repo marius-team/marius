@@ -247,8 +247,8 @@ def plot_figure_8():
     marius8_dstat_df = parse_output.read_dstat(exp_dir + "marius/complex_50_8_util_dstat.csv")
     marius_mem_dstat_df = parse_output.read_dstat(exp_dir + "marius/complex_50_util_dstat.csv")
 
-    dglke_df = parse_output.read_nvidia_smi(exp_dir + "dgl-ke/complex_50_util_nvidia_smi.csv")
-    dglke_dstat_df = parse_output.read_dstat(exp_dir + "dgl-ke/complex_50_util_dstat.csv")
+    # dglke_df = parse_output.read_nvidia_smi(exp_dir + "dgl-ke/complex_50_util_nvidia_smi.csv")
+    # dglke_dstat_df = parse_output.read_dstat(exp_dir + "dgl-ke/complex_50_util_dstat.csv")
 
     pbg_df = parse_output.read_nvidia_smi(exp_dir + "pbg/complex_50_8_util_nvidia_smi.csv")
     pbg_dstat_df = parse_output.read_dstat(exp_dir + "pbg/complex_50_8_util_dstat.csv")
@@ -270,7 +270,7 @@ def plot_figure_8():
     gpus_dfs.append(marius8_df)
     gpus_dfs.append(marius_mem_df)
     gpus_dfs.append(pbg_df)
-    gpus_dfs.append(dglke_df)
+    # gpus_dfs.append(dglke_df)
 
     dstat_dfs = []
     dstat_dfs.append(marius8_dstat_df)
@@ -295,10 +295,12 @@ def plot_figure_8():
 
     i = 0
 
-    orders = [2, 3, 1, 0]
+    # orders = [2, 3, 1, 0]
+    orders = [1, 2, 0]
 
-    experiment_ids = ["Marius (On Disk, 8 Partitions)", "Marius (In Memory)", "PBG (On Disk, 8 Partitions)",
-                      "DGL-KE (In Memory)"]
+    # experiment_ids = ["Marius (On Disk, 8 Partitions)", "Marius (In Memory)", "PBG (On Disk, 8 Partitions)",
+    #                   "DGL-KE (In Memory)"]
+    experiment_ids = ["Marius (On Disk, 8 Partitions)", "Marius (In Memory)", "PBG (On Disk, 8 Partitions)"]
     # experiment_ids = ["PBG", "DGL-KE"]
     experiment_handles = []
     for e in experiment_ids:
@@ -328,6 +330,36 @@ def plot_figure_8():
 
 
 def plot_figure_9():
+
+    exp_dir = "osdi2021/partition_orderings/freebase86m/"
+
+    elimination = exp_dir + "elimination100_util_dstat.csv"
+    hilbert = exp_dir + "hilbert100_util_dstat.csv"
+    hilbert_sym = exp_dir + "hilbertsymmetric100_util_dstat.csv"
+
+    elimination_dstat = parse_output.read_dstat(elimination)
+    hilbert_dstat = parse_output.read_dstat(hilbert)
+    hilbert_sym_dstat = parse_output.read_dstat(hilbert_sym)
+
+    elimination_total_io = elimination_dstat["Bytes Read"] + elimination_dstat["Bytes Written"]
+    hilbert_total_io = hilbert_dstat["Bytes Read"] + hilbert_dstat["Bytes Written"]
+    hilbert_sym_total_io = hilbert_sym_dstat["Bytes Read"] + hilbert_sym_dstat["Bytes Written"]
+
+    elimination_total_io = elimination_total_io / np.power(2, 30)
+    hilbert_total_io = hilbert_total_io / np.power(2, 30)
+    hilbert_sym_total_io = hilbert_sym_total_io / np.power(2, 30)
+
+    plt.plot(elimination_total_io, linestyle="--", linewidth=2, color="r", label="Elimination")
+    plt.plot(hilbert_total_io, linestyle="-", linewidth=2, color="b", label="Hilbert")
+    plt.plot(hilbert_sym_total_io, linestyle="-.", linewidth=2, color="g", label="Hilbert Symmetric")
+
+    plt.ylabel("Total IO (GB)")
+    plt.xlabel("Time (s)")
+
+    plt.savefig(exp_dir + "figure_9.png")
+    print("Plot saved to: %s" % exp_dir + "figure_9.png")
+
+
     # def find_nearest(a, a0):
     #     "Element in nd array `a` closest to the scalar value `a0`"
     #     idx = np.abs(a - a0).argmin()
@@ -394,8 +426,6 @@ def plot_figure_9():
     # plt.gcf().subplots_adjust(bottom=0.3)
     # plt.show()
     # # plt.savefig("../../../../figures/orderings_freebase86m.pdf")
-
-    pass
 
 
 def plot_figure_10():
