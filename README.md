@@ -18,7 +18,7 @@ To reproduce the experiments we have provided python scripts to run each experim
 
 Experiments are run from the repository root directory with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
 
-By running experiments with this command, results and generated plots will be output in the corresponding directory for the experiment. See the artifact structure section for the locations of the experiment directories.
+By running experiments with this command, results and generated plots will be output to the terminal and in the corresponding directory for the experiment. See the artifact structure section for the locations of the experiment directories. For example, the above command will output results to `osdi2021/system_comparisons/fb15k`.
 
 The list of experiments and their corresponding figures/tables are:
 
@@ -39,6 +39,8 @@ The list of experiments and their corresponding figures/tables are:
 | big_embeddings | Table 6 | 2 hours | - |
 
 #### Experiment runner flags ####
+
+The following are flags for the `osdi2021/run_experiment.py` script
 
 `--overwrite`: Will overwrite previous experiment results. Can be used in case the experiment results get in an inconsistent state.
 
