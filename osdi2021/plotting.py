@@ -316,7 +316,6 @@ def plot_figure_8():
 
     f.set_tight_layout(True)
 
-
     plt.legend()
     plt.ylim(0, 100)
 
@@ -443,11 +442,50 @@ def plot_figure_10():
     colors = plt.cm.viridis(np.linspace(0, 1, 16))
     color_cycler = cycler.cycler('color', colors)
 
-    #TODO Obtain these numbers from the experiment output
-    mem = [77, 0]
-    elim = [100, 150]
-    hilbert_sym = [130, 207]
-    hilbert = [250, 354]
+    mem50 = exp_dir + "memory50_result.json"
+
+    elim50 = exp_dir + "elimination50_result.json"
+    elim100 = exp_dir + "elimination100_result.json"
+
+    hilbert50 = exp_dir + "hilbert50_result.json"
+    hilbert100 = exp_dir + "hilbert100_result.json"
+
+    hilbertsymmetric50 = exp_dir + "hilbertsymmetric50_result.json"
+    hilbertsymmetric100 = exp_dir + "hilbertsymmetric100_result.json"
+
+    # mem = [77, 0]
+    # elim = [100, 150]
+    # hilbert_sym = [130, 207]
+    # hilbert = [250, 354]
+
+    mem = []
+    elim = []
+    hilbert_sym = []
+    hilbert = []
+
+    with open(mem50) as f:
+        mem.append(sum(json.load(f)["Train Time"]) / 1000.0)
+        mem.append(0)
+
+    with open(elim50) as f:
+        elim.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(elim100) as f:
+        elim.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbert50) as f:
+        hilbert.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbert100) as f:
+        hilbert.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbertsymmetric50) as f:
+        hilbert_sym.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbertsymmetric100) as f:
+        hilbert_sym.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+
     # d100 = [0, 150, 207, 354]
     colors = ["k", "b", "g", "r"]
 
@@ -467,14 +505,13 @@ def plot_figure_10():
     ax.tick_params(axis='both', which='major', labelsize=16)
     ax.tick_params(axis='both', which='minor', labelsize=16)
 
-    ax.set_ylabel('Runtime (m)', fontsize=16, fontdict={'weight': "bold", "family": 'serif'})
+    ax.set_ylabel('Runtime (s)', fontsize=16, fontdict={'weight': "bold", "family": 'serif'})
     ax.set_xticks(ind)
     ax.set_xticklabels(('d=50', 'd=100'), fontsize=16, fontdict={'weight': "bold", "family": 'serif'})
-    ax.set_ylim([0, 500])
     ax.legend(loc="upper left")
     fig.tight_layout()
     plt.savefig(exp_dir + "figure_10.png")
-    # plt.show()
+    print("Plot saved to: %s" % exp_dir + "figure_10.png")
 
 
 def plot_figure_11():
@@ -494,12 +531,43 @@ def plot_figure_11():
     colors = plt.cm.viridis(np.linspace(0, 1, 16))
     color_cycler = cycler.cycler('color', colors)
 
-    #TODO Obtain these numbers from the experiment output
-    elim = [222, 322]
-    hilbert_sym = [223, 410]
-    hilbert = [236, 495]
+
+    # elim = [222, 322]
+    # hilbert_sym = [223, 410]
+    # hilbert = [236, 495]
     # d100 = [0, 150, 207, 354]
-    colors = ["k", "b", "g", "r"]
+
+    elim50 = exp_dir + "elimination100_result.json"
+    elim100 = exp_dir + "elimination200_result.json"
+
+    hilbert50 = exp_dir + "hilbert100_result.json"
+    hilbert100 = exp_dir + "hilbert200_result.json"
+
+    hilbertsymmetric50 = exp_dir + "hilbertsymmetric100_result.json"
+    hilbertsymmetric100 = exp_dir + "hilbertsymmetric200_result.json"
+
+
+    elim = []
+    hilbert_sym = []
+    hilbert = []
+
+    with open(elim50) as f:
+        elim.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(elim100) as f:
+        elim.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbert50) as f:
+        hilbert.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbert100) as f:
+        hilbert.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbertsymmetric50) as f:
+        hilbert_sym.append(sum(json.load(f)["Train Time"]) / 1000.0)
+
+    with open(hilbertsymmetric100) as f:
+        hilbert_sym.append(sum(json.load(f)["Train Time"]) / 1000.0)
 
     ind = np.arange(len(elim)) / 2.25  # the x locations for the groups
     width = 0.1  # the width of the bars
@@ -512,15 +580,16 @@ def plot_figure_11():
     ax.tick_params(axis='both', which='minor', labelsize=16)
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Runtime (m)', fontsize=16)
+    ax.set_ylabel('Runtime (s)', fontsize=16)
     ax.set_xticks(ind)
     ax.set_xticklabels(("d=100", "d=200"), fontsize=16, fontdict={'weight': "bold", "family": 'serif'})
     ax.legend(loc="upper left")
-    ax.set_ylim([0, 550])
 
     fig.tight_layout()
 
     plt.savefig(exp_dir + "figure_11.png")
+
+    print("Plot saved to: %s" % exp_dir + "figure_11.png")
 
 
 def plot_figure_12(bounds):
@@ -612,8 +681,6 @@ def plot_figure_12(bounds):
     ax2.plot(new_x, new_y, "b", marker="x", linestyle="--", lw=4, markersize=12)
     ax2.set_xscale("log", basex=2)
     ax2.set_xlabel('Staleness Bound', fontsize=20, fontdict={'weight' : "bold", "family": 'serif'})
-    ax1.set_ylim([.7, .73])
-    ax2.set_ylim([0, 8e5])
     plt.gca().xaxis.set_major_formatter(FuncFormatter(lambda x, y: '{}'.format(int(x))))
     f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
     g = lambda x, pos: "${}$".format(f._formatSciNotation('%1.10e' % x))
@@ -646,70 +713,22 @@ def plot_figure_12(bounds):
 
     print("Plot saved to: %s" % exp_dir + "figure_12.png")
 
+
 def print_figure_13():
-    pass
-    # plt.figure(num=None, figsize=(6, 2), facecolor='w', edgecolor='k')
-    #
-    # params = {'legend.fontsize': 9,
-    #           'legend.handlelength': 4}
-    # plt.rc('font', family='serif')
-    # plt.rcParams['font.size'] = 9
-    # plt.rcParams['axes.labelsize'] = 9
-    # plt.rcParams['axes.labelweight'] = 'bold'
-    # COLOR = 'black'
-    # plt.rcParams['text.color'] = COLOR
-    # plt.rcParams['axes.labelcolor'] = COLOR
-    # plt.rcParams['xtick.color'] = COLOR
-    # plt.rcParams['ytick.color'] = COLOR
-    # plt.rcParams.update(params)
-    #
-    # orderings100_results = read_experiment(orderings100_config.local_experiment_directory, orderings100_config.experiment_name)
-    #
-    # new_res = {}
-    # new_res["Prefetch"] = orderings100_results["training.graph_ordering:Elimination"]
-    #
-    # print(orderings100_results.keys())
-    # new_res["No_prefetch"] = orderings100_results["training.graph_ordering:Elimination_storage.prefetching:False"]
-    #
-    # orderings100_results = new_res
-    #
-    #
-    #
-    # colors = ["r", "b", "g", "c"]
-    #
-    # zorders=[0, 2, 1]
-    #
-    # runtimes = [809, 1500]
-    # # runtimes = [2060, 900, 1300]
-    # start_times = [560, 615]
-    # offsets = []
-    #
-    # for i in range(2):
-    #     offsets.append((start_times[i], start_times[i] + runtimes[i]))
-    #
-    # labels = ["Prefetch", "No Prefetch"]
-    # linestyles = ["-", "--"]
-    #
-    # i = 0
-    # for k, v in orderings100_results.items():
-    #     # y = np.cumsum(v[0].disk_util[offsets[i][0]:offsets[i][1]]) / np.power(2, 30)
-    #     y = smooth(v[0].gpu_compute_util[offsets[i][0]:offsets[i][1]], 25) * 100.0
-    #     cpu_ts = v[0].gpu_trace_timestamp[offsets[i][0]:offsets[i][1]]
-    #     iter_ts = np.asarray([np.datetime64(itr[0]) for itr in v[0].iteration_progress])
-    #
-    #     nearest = [find_nearest(iter_ts, c) for c in cpu_ts]
-    #
-    #     ls = linestyles[i]
-    #
-    #     plt.plot(nearest, y, linestyle=ls, linewidth=2, color=colors[i], zorder=zorders[i], label=labels[i])
-    #     # plt.plot(x[-1], y[-1], markersize=12, marker="o", color = colors[i], zorder=zorders[i])
-    #     i+=1
-    #
-    # plt.ylabel("GPU Utilization (%)")
-    # plt.ylim(0, 100)
-    # plt.xlabel("Iteration")
-    # plt.legend(loc="upper left")
-    # plt.gcf().subplots_adjust(bottom=0.3)
-    # # plt.show()
-    # plt.savefig("../../../../figures/prefetching.pdf")
+    exp_dir = "osdi2021/system_comparisons/fb15k/"
+
+    prefetching_result = exp_dir + "marius/prefetching_result.json"
+    no_prefetching_result = exp_dir + "marius/no_prefetching_result.json"
+
+    with open(prefetching_result) as f:
+        prefetching_res = json.load(f)
+    with open(no_prefetching_result) as f:
+        no_prefetching_res = json.load(f)
+
+    time = sum(prefetching_res["Train Time"]) / 1000.0
+    print("Prefetching: Runtime %s s" % (time))
+
+    time = sum(no_prefetching_res["Train Time"]) / 1000.0
+    print("No Prefetching: Runtime %s s" % (time))
+
 

@@ -370,11 +370,6 @@ def run_orderings_twitter(overwrite=False, collect_tracing_metrics=False, show_o
     elimination_config = exp_dir + "elimination.ini"
     hilbert_config = exp_dir + "hilbert.ini"
     hilbert_symmetric_config = exp_dir + "hilbert_symmetric.ini"
-    memory_config = exp_dir + "memory.ini"
-
-    if not os.path.exists("twitter/"):
-        print("==== Preprocessing Twitter =====")
-        preprocess.twitter("twitter/")
 
     if not os.path.exists("twitter_32/"):
         print("==== Preprocessing Twitter P=32 =====")
@@ -387,7 +382,6 @@ def run_orderings_twitter(overwrite=False, collect_tracing_metrics=False, show_o
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(elimination_config, exp_dir, "elimination100", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_config, exp_dir, "hilbert100", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
-    run_marius(memory_config, exp_dir, "memory100", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     config_args = "--model.embedding_size=200"
     if short:
@@ -450,6 +444,7 @@ def run_prefetching(overwrite=False, collect_tracing_metrics=False, show_output=
     run_marius(prefetching_config, exp_dir, "prefetching", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
     osdi_plot.print_figure_13()
+
 
 def run_big_embeddings(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
     exp_dir = "osdi2021/large_embeddings/"
