@@ -244,14 +244,14 @@ def plot_figure_8():
 
     marius8_df = pd.read_csv(exp_dir + "marius/complex_50_8_util_nvidia_smi.csv")
     marius_mem_df = pd.read_csv(exp_dir + "marius/complex_50_util_nvidia_smi.csv")
-    marius8_dstat_df = pd.read_csv(exp_dir + "marius/complex_50_8_util_dstat.csv")
-    marius_mem_dstat_df = pd.read_csv(exp_dir + "marius/complex_50_util_dstat.csv")
+    # marius8_dstat_df = pd.read_csv(exp_dir + "marius/complex_50_8_util_dstat.csv")
+    # marius_mem_dstat_df = pd.read_csv(exp_dir + "marius/complex_50_util_dstat.csv")
 
     # dglke_df = parse_output.read_nvidia_smi(exp_dir + "dgl-ke/complex_50_util_nvidia_smi.csv")
     # dglke_dstat_df = parse_output.read_dstat(exp_dir + "dgl-ke/complex_50_util_dstat.csv")
 
     pbg_df = pd.read_csv(exp_dir + "pbg/complex_50_8_util_nvidia_smi.csv")
-    pbg_dstat_df = pd.read_csv(exp_dir + "pbg/complex_50_8_util_dstat.csv")
+    # pbg_dstat_df = pd.read_csv(exp_dir + "pbg/complex_50_8_util_dstat.csv")
 
     params = {'legend.fontsize': 12,
               'legend.handlelength': 4}
@@ -271,11 +271,6 @@ def plot_figure_8():
     gpus_dfs.append(marius_mem_df)
     gpus_dfs.append(pbg_df)
     # gpus_dfs.append(dglke_df)
-
-    dstat_dfs = []
-    dstat_dfs.append(marius8_dstat_df)
-    dstat_dfs.append(marius_mem_dstat_df)
-    dstat_dfs.append(pbg_dstat_df)
 
     offsets = []
     # to get proper offsets for each line these need to be tuned
@@ -303,8 +298,7 @@ def plot_figure_8():
     experiment_ids = ["Marius (On Disk, 8 Partitions)", "Marius (In Memory)", "PBG (On Disk, 8 Partitions)"]
     # experiment_ids = ["PBG", "DGL-KE"]
     experiment_handles = []
-    for e in experiment_ids:
-        gpu_res = gpus_dfs[i]
+    for gpu_res in gpus_dfs:
         # cpu_res = dstat_dfs[i]
         gpu_util = smooth(gpu_res["GPU Compute Utilization"].to_numpy(), 30) * 100.0
         # cpu_util = smooth(cpu_res["CPU User Utilization"].to_numpy() + cpu_res["CPU Sys Utilization"].to_numpy(), 25)
@@ -529,7 +523,7 @@ def plot_figure_11():
     plt.savefig(exp_dir + "figure_11.png")
 
 
-def plot_figure_12():
+def plot_figure_12(bounds):
     fig, ax_arr = plt.subplots((2), figsize=(10, 4))
     ax1 = ax_arr[0]
     ax2 = ax_arr[1]
@@ -556,7 +550,7 @@ def plot_figure_12():
     sync_rels_results = [all_sync_result]
     async_rels_results = [all_sync_result]
 
-    all_bounds = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+    all_bounds = [1] + bounds
 
     for bound in all_bounds[1:]:
         with open(exp_dir + "sync_rel_%i_result.json" % bound) as f:
@@ -652,7 +646,7 @@ def plot_figure_12():
 
     print("Plot saved to: %s" % exp_dir + "figure_12.png")
 
-def plot_figure_13():
+def print_figure_13():
     pass
     # plt.figure(num=None, figsize=(6, 2), facecolor='w', edgecolor='k')
     #

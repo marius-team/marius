@@ -293,6 +293,7 @@ def run_utilization(overwrite=False, collect_tracing_metrics=False, show_output=
 
     osdi_plot.plot_figure_8()
 
+
 def run_buffer_simulator(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
     exp_dir = "osdi2021/buffer_simulator/"
 
@@ -322,6 +323,8 @@ def run_orderings_total_io(overwrite=False, collect_tracing_metrics=False, show_
     run_marius(elimination_config, exp_dir, "elimination100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_config, exp_dir, "hilbert100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric100_util", config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
+
+    osdi_plot.plot_figure_9()
 
 
 def run_orderings_freebase86m(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
@@ -358,6 +361,8 @@ def run_orderings_freebase86m(overwrite=False, collect_tracing_metrics=False, sh
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric50", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(memory_config, exp_dir, "memory50", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
+    osdi_plot.plot_figure_10()
+
 
 def run_orderings_twitter(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
     exp_dir = "osdi2021/partition_orderings/twitter/"
@@ -392,7 +397,7 @@ def run_orderings_twitter(overwrite=False, collect_tracing_metrics=False, show_o
     run_marius(hilbert_config, exp_dir, "hilbert200", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(hilbert_symmetric_config, exp_dir, "hilbertsymmetric200", config_args=config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
-    osdi_plot.plot_figure_10()
+    osdi_plot.plot_figure_11()
 
 
 def run_staleness_bound(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
@@ -425,7 +430,7 @@ def run_staleness_bound(overwrite=False, collect_tracing_metrics=False, show_out
         run_marius(all_async_config, exp_dir, "all_async_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
         run_marius(sync_relations_async_nodes, exp_dir, "sync_rel_%i" % bound, config_args, overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
-    osdi_plot.plot_figure_12()
+    osdi_plot.plot_figure_12(bounds)
 
 
 def run_prefetching(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
@@ -444,6 +449,7 @@ def run_prefetching(overwrite=False, collect_tracing_metrics=False, show_output=
     run_marius(no_prefetching_config, exp_dir, "no_prefetching", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
     run_marius(prefetching_config, exp_dir, "prefetching", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
+    osdi_plot.print_figure_13()
 
 def run_big_embeddings(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
     exp_dir = "osdi2021/large_embeddings/"
