@@ -63,7 +63,7 @@ def main():
 
     print("Exported embeddings")
 
-    os.system("marius_eval osdi2021/system_comparisons/freebase86m/pbg/complex_d100_eval.ini --path.train_edges foo")
+    os.system("marius_eval osdi2021/system_comparisons/freebase86m/pbg/complex_d100_eval.ini --path.train_edges=foo")
 
 
 if __name__ == "__main__":
