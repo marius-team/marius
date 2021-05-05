@@ -9,7 +9,7 @@ import matplotlib.ticker as mticker
 
 import parse_output
 from buffer_simulator import plotting as plot_buff
-
+import pandas as pd
 
 def smooth(y, box_pts):
     box = np.ones(box_pts) / box_pts
@@ -337,17 +337,17 @@ def plot_figure_9():
     hilbert = exp_dir + "hilbert100_util_dstat.csv"
     hilbert_sym = exp_dir + "hilbertsymmetric100_util_dstat.csv"
 
-    elimination_dstat = parse_output.read_dstat(elimination)
-    hilbert_dstat = parse_output.read_dstat(hilbert)
-    hilbert_sym_dstat = parse_output.read_dstat(hilbert_sym)
+    elimination_dstat = pd.read_csv(elimination)
+    hilbert_dstat = pd.read_csv(hilbert)
+    hilbert_sym_dstat = pd.read_csv(hilbert_sym)
 
     elimination_total_io = elimination_dstat["Bytes Read"] + elimination_dstat["Bytes Written"]
     hilbert_total_io = hilbert_dstat["Bytes Read"] + hilbert_dstat["Bytes Written"]
     hilbert_sym_total_io = hilbert_sym_dstat["Bytes Read"] + hilbert_sym_dstat["Bytes Written"]
 
-    elimination_total_io = elimination_total_io / np.power(2, 30)
-    hilbert_total_io = hilbert_total_io / np.power(2, 30)
-    hilbert_sym_total_io = hilbert_sym_total_io / np.power(2, 30)
+    elimination_total_io = np.cumsum(elimination_total_io / np.power(2, 30))
+    hilbert_total_io = np.cumsum(hilbert_total_io / np.power(2, 30))
+    hilbert_sym_total_io = np.cumsum(hilbert_sym_total_io / np.power(2, 30))
 
     plt.plot(elimination_total_io, linestyle="--", linewidth=2, color="r", label="Elimination")
     plt.plot(hilbert_total_io, linestyle="-", linewidth=2, color="b", label="Hilbert")
