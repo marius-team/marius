@@ -21,21 +21,37 @@ Experiments are run from the repository root directory with `python3 osdi2021/ru
 By running experiments with this command, results and generated plots will be output in the corresponding directory for the experiment. See the artifact structure section for the locations of the experiment directories.
 
 The list of experiments and their corresponding figures/tables are:
-```
-fb15k                      // Table 2
-livejournal                // Table 3
-twitter                    // Table 4
-freebase86m                // Table 5
-buffer_simulator           // Figure 7
-utilization                // Figure 8 
-orderings_total_io         // Figure 9 
-orderings_freebase86m      // Figure 10 
-orderings_twitter          // Figure 11
-staleness_bound            // Figure 12
-prefetching                // Figure 13
-big_embeddings             // Table 6
-all                        // Will run all of the above
-```
+
+
+| Experiment | Corresponding Figure | Est. Runtime | Est. Runtime with `--short` |
+| --- | ----------- | -------- | ---------- |
+| fb15k | Table 2 | 20 mins | - |
+| livejournal | Table 3 | 2 hours | - |
+| twitter | Table 4 | 10 hours | - |
+| freebase86m | Table 5 | 4 hours | - |
+| buffer_simulator | Figure 7 | Instant | - |
+| utilization | Figure 8 | 2 hours | - |
+| orderings_total_io | Figure 9 | 1 hour | - |
+| orderings_freebase86m | Figure 10 | 1 day | 1 hour |
+| orderings_twitter | Figure 11 | 2 days | 2 hours |
+| staleness_bound | Figure 12 | 2 days | 8 hours |
+| prefetching | Figure 13 | 30 mins | - |
+| big_embeddings | Table 6 | 2 hours | - |
+
+#### Experiment runner flags ####
+
+`--overwrite`: Will overwrite previous experiment results. Can be used in case the experiment results get in an inconsistent state.
+
+`--show_output`: By default output of each program is redirected to a file and stored in the experiment directory. This flag will show the output in stdout AND redirect the output. Useful for checking how far you are in the experiment, but will print out a lot of info. 
+
+`--short`: For the long experiments: orderings_freebase86m, orderings_twitter, and staleness_bound, this will run a shortened version of them. It has no effect for the other experiments.
+
+Using short will have the following effects:
+- orderings_freebase86m configurations will be trained to 1 epoch instead of 10 epochs 
+- orderings_twitter configurations will be trained to 1 epoch instead of 10 epochs
+- staleness_bound configurations will be trained to 3 epochs instead of 10 epochs and only staleness bounds of [1, 4, 16, 64, 256] will be evaluated.
+
+`--collect_tracing_metrics`: Will run dstat and nvidia-smi tracing for the experiment. The following experiments have this enabled by default: utilization, orderings_total_io. The rest have it disable. 
 
 ### Hit an issue? ###
 
@@ -51,21 +67,17 @@ Since submitting the paper, we have made changes to the system to get it ready f
 #### Accuracy differences in Table 5 ####
 In the original submission of the paper we had differences in accuracy between PyTorch Big-Graph and Marius when running on Freebase86m, where the systems reached a peak MRR of .73 and ~.685 respectively. This issue was known by us and also pointed out by the reviewers and we aimed to fix it for the final submission of the paper. 
 
-As a result of the full refactor, the accuracy differences are no longer as large. With Marius now achieving a peak MRR of .717 on the same configuration. There still exists a slight difference in accuracy but we haven't had the opportunity to fully explore this yet, but will do so before the final submission of the paper.
+As a result of the full refactor, the accuracy differences are no longer as large. With Marius now achieving a peak MRR of .728 on the same configuration.
+
+#### Accuracy differences in Table 4 ####
+We also had differences in accuracy between PyTorch Big-Graph and Marius when running on Twitter, where the systems reached a peak MRR of .313 and .383 respectively. 
+
+After the refactor Marius achieves an accuracy of about .310.
 
 #### Updates to this artifact ####
 While the submission of this artifact for evaluation points to a specific commit, we will keep this branch up to date with our latest experiment configuration, scripts and plotting code. Such that for the final version of the paper, all produced results will correspond exactly to the scripts and configuration in the most up to date version of this branch. 
 
-Additionally, if the reviewers of this artifact encounter any issues/bugs, please contact us and we will fix the issue and push an update to the branch. 
-
-#### What's missing? ####
-In this current version of the artifact the following experiments have not been added as they require additional data pre-processing code. These will be added in future versions of the artifact.
-
-Experiments not yet added:
- - DGL-KE Livejournal 
- - DGL-KE Twitter
- - PBG Twitter
- - PBG Freebase86m
+Additionally, if the reviewers of this artifact encounter any issues/bugs, please contact us and we will fix the issue and push an update to the branch.
 
 #### Experiments that require extra effort to reproduce ####
 Some experiments will not run on the single P3.2xLarge instance due to memory requirements and need to be run on a machine with a large amount of memory.
@@ -196,6 +208,7 @@ Please also see instructions below.
 git clone https://github.com/marius-team/marius.git
 cd marius
 git checkout osdi2021
+python3 -m pip install -r requirements.txt
 python3 -m pip install .
 git clone https://github.com/facebookresearch/PyTorch-BigGraph.git
 export PBG_INSTALL_CPP=1
