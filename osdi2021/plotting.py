@@ -298,6 +298,7 @@ def plot_figure_8():
     experiment_ids = ["Marius (On Disk, 8 Partitions)", "Marius (In Memory)", "PBG (On Disk, 8 Partitions)"]
     # experiment_ids = ["PBG", "DGL-KE"]
     experiment_handles = []
+    i = 0
     for gpu_res in gpus_dfs:
         # cpu_res = dstat_dfs[i]
         gpu_util = smooth(gpu_res["GPU Compute Utilization"].to_numpy(), 30) * 100.0
@@ -307,7 +308,7 @@ def plot_figure_8():
 
         offset = offsets[i]
         ax.plot(np.arange(len(gpu_util[offset[0]:offset[1]])), gpu_util[offset[0]:offset[1]], color=color, linewidth=4,
-                linestyle="-", label=e, zorder=orders[i])
+                linestyle="-", label=experiment_ids[i], zorder=orders[i])
         ax.set_ylabel("GPU Util (%)")
         ax.set_xlabel("Time (s)")
 
@@ -315,7 +316,6 @@ def plot_figure_8():
 
     f.set_tight_layout(True)
 
-    experiment_handles.append(Line2D([0], [0], color=color, label=e))
 
     plt.legend()
     plt.ylim(0, 100)
