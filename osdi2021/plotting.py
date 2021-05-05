@@ -242,16 +242,16 @@ def plot_figure_7():
 def plot_figure_8():
     exp_dir = "osdi2021/system_comparisons/freebase86m/"
 
-    marius8_df = parse_output.read_nvidia_smi(exp_dir + "marius/complex_50_8_util_nvidia_smi.csv")
-    marius_mem_df = parse_output.read_nvidia_smi(exp_dir + "marius/complex_50_util_nvidia_smi.csv")
-    marius8_dstat_df = parse_output.read_dstat(exp_dir + "marius/complex_50_8_util_dstat.csv")
-    marius_mem_dstat_df = parse_output.read_dstat(exp_dir + "marius/complex_50_util_dstat.csv")
+    marius8_df = pd.read_csv(exp_dir + "marius/complex_50_8_util_nvidia_smi.csv")
+    marius_mem_df = pd.read_csv(exp_dir + "marius/complex_50_util_nvidia_smi.csv")
+    marius8_dstat_df = pd.read_csv(exp_dir + "marius/complex_50_8_util_dstat.csv")
+    marius_mem_dstat_df = pd.read_csv(exp_dir + "marius/complex_50_util_dstat.csv")
 
     # dglke_df = parse_output.read_nvidia_smi(exp_dir + "dgl-ke/complex_50_util_nvidia_smi.csv")
     # dglke_dstat_df = parse_output.read_dstat(exp_dir + "dgl-ke/complex_50_util_dstat.csv")
 
-    pbg_df = parse_output.read_nvidia_smi(exp_dir + "pbg/complex_50_8_util_nvidia_smi.csv")
-    pbg_dstat_df = parse_output.read_dstat(exp_dir + "pbg/complex_50_8_util_dstat.csv")
+    pbg_df = pd.read_csv(exp_dir + "pbg/complex_50_8_util_nvidia_smi.csv")
+    pbg_dstat_df = pd.read_csv(exp_dir + "pbg/complex_50_8_util_dstat.csv")
 
     params = {'legend.fontsize': 12,
               'legend.handlelength': 4}
@@ -327,6 +327,8 @@ def plot_figure_8():
     plt.ylim(0, 100)
 
     plt.savefig(exp_dir + "figure_8.png")
+
+    print("Plot saved to: %s" % exp_dir + "figure_8.png")
 
 
 def plot_figure_9():

@@ -285,10 +285,13 @@ def run_utilization(overwrite=False, collect_tracing_metrics=False, show_output=
     #
     # run_dglke(dglke_complex_cmd, exp_dir, "complex_50_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
+    exp_dir = "osdi2021/system_comparisons/freebase86m/pbg/"
+
     runner_file = exp_dir + "run_complex.py"
     dot_config = exp_dir + "complex_p8.py"
     run_pbg(runner_file, dot_config, exp_dir, "complex_50_8_util", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
+    osdi_plot.plot_figure_8()
 
 def run_buffer_simulator(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
     exp_dir = "osdi2021/buffer_simulator/"
