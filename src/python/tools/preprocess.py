@@ -513,6 +513,12 @@ def set_args():
     parser.add_argument('--num_partitions', metavar='num_partitions',
                         required=False, type=int, default=1,
                         help='Number of partitions to split the edges into')
+    parser.add_argument('--overwrite', action='store_true',
+                        required=False,
+                        help=('Overwrites the output_directory if this is' +
+                              'set'
+                              'Otherwise, files with same the names will be ' +
+                              'treated as the data for current dataset.'))
     parser.add_argument('--generate_config', '-gc', metavar='generate_config',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', const="GPU",
@@ -575,6 +581,9 @@ def main():
         "ogbn_proteins": ogbn_proteins,
         "ogbn_products": ogbn_products,
     }
+
+    if args.overwrite and Path(args.output_directory).exists():
+        shutil.rmtree(args.output_directory)
 
     if dataset_dict.get(args.dataset) is not None:
         stats = dataset_dict.get(args.dataset)(
