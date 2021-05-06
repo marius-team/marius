@@ -715,10 +715,10 @@ def plot_figure_12(bounds):
 
 
 def print_figure_13():
-    exp_dir = "osdi2021/system_comparisons/fb15k/"
+    exp_dir = "osdi2021/microbenchmarks/prefetching/"
 
-    prefetching_result = exp_dir + "marius/prefetching_result.json"
-    no_prefetching_result = exp_dir + "marius/no_prefetching_result.json"
+    prefetching_result = exp_dir + "prefetching_result.json"
+    no_prefetching_result = exp_dir + "no_prefetching_result.json"
 
     with open(prefetching_result) as f:
         prefetching_res = json.load(f)
