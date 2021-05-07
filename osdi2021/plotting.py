@@ -653,7 +653,7 @@ def plot_figure_12(bounds):
     ax1.axhline(y, color="k", linestyle="--", lw=4)
 
     ax1.set_xscale("log", basex=2)
-    ax1.set_ylim([.3, .75])
+    ax1.set_ylim([.2, .8])
 
     labels = [item.get_text() for item in ax1.get_xticklabels()]
 
@@ -686,6 +686,8 @@ def plot_figure_12(bounds):
 
     y = all_sync_result["TP"][-1]
     ax2.axhline(y, color="k", linestyle="--", lw=4)
+
+    ax2.set_ylim([100000, 1000000])
 
     ax2.set_xscale("log", basex=2)
     ax2.set_xlabel('Staleness Bound', fontsize=20, fontdict={'weight' : "bold", "family": 'serif'})
