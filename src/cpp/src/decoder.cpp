@@ -177,8 +177,6 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
                         + torch::norm(batch->src_relation_emebeddings_, marius_options.training.regularization_norm, 0)
                         + torch::norm(batch->dst_relation_emebeddings_, marius_options.training.regularization_norm, 0)));
             }
-
-            SPDLOG_DEBUG("Loss: {}, Regularization loss: {}", loss.item<float>(), reg_loss.item<float>());
             loss = loss + reg_loss;
         }
 

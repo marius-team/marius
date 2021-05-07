@@ -87,15 +87,16 @@ void EmbeddingsToDeviceWorker::run() {
 
             // transfer data to device
             // chose device with fewest batches in queue:
-            int num_gpus = marius_options.general.gpu_ids.size();
-            int device_id = 0;
-            int min_size = ((PipelineGPU *) pipeline_)->device_loaded_batches_[0]->size();
-            for (int i = 1; i < num_gpus; i++) {
-                if (((PipelineGPU *) pipeline_)->device_loaded_batches_[i]->size() < min_size) {
-                    min_size = ((PipelineGPU *) pipeline_)->device_loaded_batches_[i]->size();
-                    device_id = i;
-                }
-            }
+//            int num_gpus = marius_options.general.gpu_ids.size();
+//            int device_id = 0;
+//            int min_size = ((PipelineGPU *) pipeline_)->device_loaded_batches_[0]->size();
+//            for (int i = 1; i < num_gpus; i++) {
+//                if (((PipelineGPU *) pipeline_)->device_loaded_batches_[i]->size() < min_size) {
+//                    min_size = ((PipelineGPU *) pipeline_)->device_loaded_batches_[i]->size();
+//                    device_id = i;
+//                }
+//            }
+            int device_id = rand() % marius_options.general.gpu_ids.size();
             batch->embeddingsToDevice(device_id);
 
             Queue<Batch *> *push_queue = ((PipelineGPU *) pipeline_)->device_loaded_batches_[device_id];
