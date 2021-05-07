@@ -650,7 +650,7 @@ def plot_figure_12(bounds):
     ax1.plot(new_x, new_y, "b-", marker="x", lw=4, markersize=12)
 
     y = all_sync_result["MRR"][-1]
-    ax1.axhline(y, "k--", marker="x", lw=4, markersize=12)
+    ax1.axhline(y, color="k", linestyle="--", lw=4)
 
     ax1.set_xscale("log", basex=2)
     ax2.ylim([.3, .75])
@@ -685,7 +685,7 @@ def plot_figure_12(bounds):
     ax2.plot(new_x, new_y, "b", marker="x", linestyle="--", lw=4, markersize=12)
 
     y = all_sync_result["TP"][-1]
-    ax2.axhline(y)
+    ax2.axhline(y, color="k", linestyle="--", lw=4)
 
     ax2.set_xscale("log", basex=2)
     ax2.set_xlabel('Staleness Bound', fontsize=20, fontdict={'weight' : "bold", "family": 'serif'})
