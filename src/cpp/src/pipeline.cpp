@@ -666,7 +666,6 @@ void PipelineGPU::addWorkersToPool(int pool_id, int worker_type, int num_workers
 
 
     if (worker_type == GPU_COMPUTE_ID) {
-        num_workers = marius_options.general.gpu_ids.size() * num_workers;
         for (int j = 0; j < marius_options.general.gpu_ids.size(); j++) {
             for (int i = 0; i < num_workers; i++) {
                 paused = new bool(true);
