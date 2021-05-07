@@ -599,8 +599,8 @@ def plot_figure_12(bounds):
     # ax3 =ax_arr[2]
 
     plt.rc('font', family='serif', weight="bold")
-    plt.rcParams['font.size'] = 16
-    plt.rcParams['axes.labelsize'] = 18
+    plt.rcParams['font.size'] = 14
+    plt.rcParams['axes.labelsize'] = 16
     plt.rcParams['axes.labelweight'] = "normal"
     COLOR = 'black'
     plt.rcParams['text.color'] = COLOR
