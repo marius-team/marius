@@ -699,7 +699,7 @@ def plot_figure_12(bounds):
                     Line2D([0], [0], marker="x", color="b", lw=4, markersize=12),
                     Line2D([0], [0], linestyle="--", color="k", lw=4, markersize=12)]
 
-    ax2.legend(custom_lines, ['Sync Relations', 'Async Relations'], loc="lower right")
+    ax2.legend(custom_lines, ['Sync Relations', 'Async Relations', "All Sync"], loc="lower right")
 
     ax1.tick_params(axis="x", labelsize=14)
     ax1.tick_params(axis="y", labelsize=14)
