@@ -619,7 +619,7 @@ def plot_figure_12(bounds):
     sync_rels_results = [all_sync_result]
     async_rels_results = [all_sync_result]
 
-    all_bounds = [1] + bounds
+    all_bounds = [0] + bounds
 
     for bound in all_bounds[1:]:
         with open(exp_dir + "sync_rel_%i_result.json" % bound) as f:
