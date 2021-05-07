@@ -722,11 +722,15 @@ def plot_figure_12(bounds):
     plt.gcf().subplots_adjust(bottom=0.15)
     plt.gcf().subplots_adjust(left=0.15)
 
-    ax1.patch.set_edgecolor('black')
-    ax1.patch.set_linewidth('1')
+    ax1.spines['top'].set_visible(True)
+    ax1.spines['bottom'].set_visible(True)
+    ax1.spines['right'].set_visible(True)
+    ax1.spines['left'].set_visible(True)
 
-    ax2.patch.set_edgecolor('black')
-    ax2.patch.set_linewidth('1')
+    ax2.spines['top'].set_visible(True)
+    ax2.spines['bottom'].set_visible(True)
+    ax2.spines['right'].set_visible(True)
+    ax2.spines['left'].set_visible(True)
 
     plt.savefig(exp_dir + "figure_12.pdf", transparent=True)
 
