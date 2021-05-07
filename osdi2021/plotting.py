@@ -722,9 +722,9 @@ def plot_figure_12(bounds):
     plt.gcf().subplots_adjust(bottom=0.15)
     plt.gcf().subplots_adjust(left=0.15)
 
-    plt.savefig(exp_dir + "figure_12.png")
+    plt.savefig(exp_dir + "figure_12.pdf")
 
-    print("Plot saved to: %s" % exp_dir + "figure_12.png")
+    print("Plot saved to: %s" % exp_dir + "figure_12.pdf")
 
 
 def print_figure_13():
