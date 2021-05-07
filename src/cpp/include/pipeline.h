@@ -9,7 +9,7 @@
 #include <spdlog/spdlog.h>
 #include <decoder.h>
 #include <sys/time.h>
-include <stdlib.h
+#include <stdlib.h>
 #include <batch.h>
 
 #define WAIT_TIME 100000 // 100 micro seconds
