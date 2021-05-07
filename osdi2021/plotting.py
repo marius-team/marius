@@ -652,7 +652,7 @@ def plot_figure_12(bounds):
     y = all_sync_result["MRR"][-1]
     ax1.axhline(y, color="k", linestyle="--", lw=4)
 
-    ax1.set_xscale("log", basex=2)
+    ax1.set_xscale("symlog", basex=2)
     ax1.set_ylim([.2, .8])
 
     labels = [item.get_text() for item in ax1.get_xticklabels()]
@@ -689,7 +689,7 @@ def plot_figure_12(bounds):
 
     ax2.set_ylim([10000, 1000000])
 
-    ax2.set_xscale("log", basex=2)
+    ax2.set_xscale("symlog", basex=2)
     ax2.set_xlabel('Staleness Bound', fontsize=20, fontdict={'weight' : "bold", "family": 'serif'})
     plt.gca().xaxis.set_major_formatter(FuncFormatter(lambda x, y: '{}'.format(int(x))))
     f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
