@@ -134,6 +134,7 @@ void Batch::embeddingsToDevice(int device_id) {
         }
 
     }
+    c10::cuda::CUDAGuard guard = c10::cuda::CUDAGuard(device_id_);
     device_transfer_.record();
     status_ = BatchStatus::TransferredToDevice;
 }
@@ -264,6 +265,7 @@ void Batch::embeddingsToHost() {
             SPDLOG_TRACE("Batch: {} transferred relation embeddings to host", batch_id_);
         }
     }
+    c10::cuda::CUDAGuard guard = c10::cuda::CUDAGuard(device_id_);
     host_transfer_.record();
     host_transfer_.synchronize();
     status_ = BatchStatus::TransferredToHost;

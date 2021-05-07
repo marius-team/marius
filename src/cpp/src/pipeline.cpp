@@ -97,6 +97,7 @@ void EmbeddingsToDeviceWorker::run() {
 //                }
 //            }
             int device_id = rand() % marius_options.general.gpu_ids.size();
+
             batch->embeddingsToDevice(device_id);
 
             Queue<Batch *> *push_queue = ((PipelineGPU *) pipeline_)->device_loaded_batches_[device_id];
