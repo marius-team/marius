@@ -11,6 +11,7 @@ import parse_output
 from buffer_simulator import plotting as plot_buff
 import pandas as pd
 
+
 def smooth(y, box_pts):
     box = np.ones(box_pts) / box_pts
     y_smooth = np.convolve(y, box, mode='same')
@@ -91,7 +92,6 @@ def print_table_2():
     time = distmul_res["Train Time"]
 
     print("PBG DistMult: MRR %s, Hits@1 %s, Hits@10 %s, Runtime %s s" % (MRR, hits1, hits10, time))
-
 
 
 def print_table_3():
@@ -649,7 +649,11 @@ def plot_figure_12(bounds):
     new_x, new_y = zip(*l)
     ax1.plot(new_x, new_y, "b-", marker="x", lw=4, markersize=12)
 
+    y = all_sync_result["MRR"][-1]
+    ax1.axhline(y, "k--", marker="x", lw=4, markersize=12)
+
     ax1.set_xscale("log", basex=2)
+    ax2.ylim([.3, .75])
 
     labels = [item.get_text() for item in ax1.get_xticklabels()]
 
@@ -679,6 +683,10 @@ def plot_figure_12(bounds):
     l = sorted((i, j) for i, j in zip(xs, ys))
     new_x, new_y = zip(*l)
     ax2.plot(new_x, new_y, "b", marker="x", linestyle="--", lw=4, markersize=12)
+
+    y = all_sync_result["TP"][-1]
+    ax2.axhline(y)
+
     ax2.set_xscale("log", basex=2)
     ax2.set_xlabel('Staleness Bound', fontsize=20, fontdict={'weight' : "bold", "family": 'serif'})
     plt.gca().xaxis.set_major_formatter(FuncFormatter(lambda x, y: '{}'.format(int(x))))
@@ -688,7 +696,8 @@ def plot_figure_12(bounds):
     fig.tight_layout()
 
     custom_lines = [Line2D([0], [0], marker="o", color='r', lw=4, markersize=12),
-                    Line2D([0], [0], marker="x", color="b", lw=4, markersize=12)]
+                    Line2D([0], [0], marker="x", color="b", lw=4, markersize=12),
+                    Line2D([0], [0], linestyle="--", color="k", lw=4, markersize=12)]
 
     ax2.legend(custom_lines, ['Sync Relations', 'Async Relations'], loc="lower right")
 
