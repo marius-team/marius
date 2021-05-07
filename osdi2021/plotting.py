@@ -653,7 +653,7 @@ def plot_figure_12(bounds):
     ax1.axhline(y, color="k", linestyle="--", lw=4)
 
     ax1.set_xscale("log", basex=2)
-    ax2.ylim([.3, .75])
+    ax1.set_ylim([.3, .75])
 
     labels = [item.get_text() for item in ax1.get_xticklabels()]
 
