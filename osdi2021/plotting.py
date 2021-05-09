@@ -214,17 +214,16 @@ def print_table_6():
         d100_res = json.load(f)
 
     MRR = d20_res["MRR"][-1]
-    time = d20_res["Train Time"][0]
-
+    time = sum(d20_res["Train Time"]) / (1000.0 * len(d20_res["Train Time"]))
     print("Marius D=20, P=16: MRR %s, Runtime %s s" % (MRR, time))
 
     MRR = d50_res["MRR"][-1]
-    time = d50_res["Train Time"][0]
+    time = sum(d50_res["Train Time"]) / (1000.0 * len(d50_res["Train Time"]))
 
     print("Marius D=50, P=16: MRR %s, Runtime %s s" % (MRR, time))
 
     MRR = d100_res["MRR"][-1]
-    time = d100_res["Train Time"][0]
+    time = sum(d100_res["Train Time"]) / (1000.0 * len(d100_res["Train Time"]))
 
     print("Marius D=100, P=16: MRR %s, Runtime %s s" % (MRR, time))
 
