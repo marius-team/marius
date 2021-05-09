@@ -722,9 +722,21 @@ def plot_figure_12(bounds):
     plt.gcf().subplots_adjust(bottom=0.15)
     plt.gcf().subplots_adjust(left=0.15)
 
-    plt.savefig(exp_dir + "figure_12.pdf", facecolor="white", edgecolor="black")
+    ax1.spines['bottom'].set_color('.1')
+    ax1.spines['top'].set_color('.1')
+    ax1.spines['right'].set_color('.1')
+    ax1.spines['left'].set_color('.1')
 
-    print("Plot saved to: %s" % exp_dir + "figure_12.pdf")
+    ax2.spines['bottom'].set_color('.1')
+    ax2.spines['top'].set_color('.1')
+    ax2.spines['right'].set_color('.1')
+    ax2.spines['left'].set_color('.1')
+
+    ax1.set_facecolor('white')
+    ax2.set_facecolor('white')
+
+    plt.savefig(exp_dir + "figure_12.png")
+    print("Plot saved to: %s" % exp_dir + "figure_12.png")
 
 
 def print_figure_13():
