@@ -31,12 +31,12 @@ The list of experiments and their corresponding figures/tables are:
 | freebase86m | Table 5 | 4 hours | - |
 | buffer_simulator | Figure 7 | Instant | - |
 | utilization | Figure 8 | 2 hours | - |
-| orderings_total_io | Figure 9 | 1 hour | - |
-| orderings_freebase86m | Figure 10 | 1 day | 1 hour |
-| orderings_twitter | Figure 11 | 2 days | 2 hours |
-| staleness_bound | Figure 12 | 2 days | 8 hours |
+| orderings_total_io | Figure 9 | 2 hours | - |
+| orderings_freebase86m | Figure 10 | ~1 day | 2 hours |
+| orderings_twitter | Figure 11 | ~2 days | 4 hours |
+| staleness_bound | Figure 12 | ~2 days | 8 hours |
 | prefetching | Figure 13 | 30 mins | - |
-| big_embeddings | Table 6 | 2 hours | - |
+| big_embeddings | Table 6 | 3 hours | - |
 
 #### Experiment runner flags ####
 
