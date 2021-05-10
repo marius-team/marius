@@ -18,17 +18,21 @@ TEST(TestConfig, TestConfigOnly) {
 
 TEST(TestConfig, TestCommandLineOverride) {
     // Test that command line options override the config file options
-    int num_args = 7;
+    int num_args = 8;
     const char* n_argv[] = {"marius_train", conf_str.c_str(), 
     "--general.random_seed=5", "--model.scale_factor=.003",
     "--evaluation.epochs_per_eval=3", "--evaluation.filtered_evaluation=true",
-    "--path.node_ids=override_path"};
+    "--path.node_ids=override_path", "--general.gpu_ids=0,1,2,3"};
     marius_options = parseConfig(num_args, (char **)n_argv);
     EXPECT_EQ(marius_options.general.random_seed,5);
     EXPECT_FLOAT_EQ(marius_options.model.scale_factor,.003);
     EXPECT_EQ(marius_options.evaluation.epochs_per_eval,3);
     EXPECT_EQ(marius_options.evaluation.filtered_evaluation,true);
     EXPECT_EQ(marius_options.path.node_ids,"override_path");
+    EXPECT_EQ(marius_options.general.gpu_ids[0],0);
+    EXPECT_EQ(marius_options.general.gpu_ids[1],1);
+    EXPECT_EQ(marius_options.general.gpu_ids[2],2);
+    EXPECT_EQ(marius_options.general.gpu_ids[3],3);
 }
 
 TEST(TestConfig, TestInvalidConfig) {
@@ -90,8 +94,8 @@ TEST(TestConfig, TestHelpOnInvalidInput) {
     // test help messages display with bad input
     int num_args = 3;
     testing::internal::CaptureStdout();
-    const char* n_argv1[] = {"marius_train", conf_str.c_str(), "bad_argument"};
-    EXPECT_DEATH(parseConfig(num_args, (char **)n_argv1), "");
+    const char* n_argv[] = {"marius_train", conf_str.c_str(), "bad_argument"};
+    EXPECT_DEATH(parseConfig(num_args, (char **)n_argv), "");
     std::string output = testing::internal::GetCapturedStdout();
     if (output.find("Usage") == std::string::npos)
         FAIL();
