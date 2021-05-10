@@ -32,6 +32,8 @@ using std::shared_ptr;
 using std::list;
 using std::unordered_map;
 
+#define MAX_SHUFFLE_SIZE 4E8
+
 /** Abstract storage class */
 class Storage {
   protected:
@@ -90,6 +92,7 @@ class Storage {
 class PartitionBufferStorage : public Storage {
   protected:
     string filename_;
+
     bool loaded_;
 
     int64_t partition_size_;
@@ -112,6 +115,8 @@ class PartitionBufferStorage : public Storage {
     ~PartitionBufferStorage();
 
     void rangePut(int64_t offset, torch::Tensor values);
+
+    void append(torch::Tensor values);
 
     void load() override;
 
@@ -202,6 +207,8 @@ class FlatFile : public Storage {
     ~FlatFile() {};
 
     void rangePut(int64_t offset, torch::Tensor values);
+
+    void append(torch::Tensor values);
 
     void load() override;
 
