@@ -233,7 +233,7 @@ def plot_figure_7():
     n_start = 8
     c_start = 2
     num = 5
-    total_size = 86E6 * 4 * 2 * 100 * 2 # total embedding size for freebase86m d=100
+    total_size = 86E6 * 4 * 2 * 100  # total embedding size for freebase86m d=100
     plot_buff.plot_varying_num_partitions_io(n_start, c_start, num, total_size, exp_dir + "figure7.png")
     print("Figure written to %s" % exp_dir + "figure7.png")
 
