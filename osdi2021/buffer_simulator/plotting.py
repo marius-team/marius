@@ -158,7 +158,7 @@ def plot_varying_num_partitions_io(n0, c0, num, total_size, output_path=None):
     for k, v in data_dict.items():
         if k == "Lower Bound":
             ls = "--"
-        ax.plot(ns, np.asarray(v) / 2**30, color=cmap(idx), linestyle=ls, label="Ordering: %s" % (k))
+        ax.plot(ns, np.asarray(v) / 10**9, color=cmap(idx), linestyle=ls, label="Ordering: %s" % (k))
         idx += 1
 
     plt.legend()
