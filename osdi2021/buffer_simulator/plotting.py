@@ -145,10 +145,10 @@ def plot_varying_num_partitions_io(n0, c0, num, total_size, output_path=None):
 
         block_size = total_size / n
 
-        data_dict["Hilbert"].append(buffer.hilbert_ordering(n, c, output=False)[1] * block_size)
-        data_dict["Elimination"].append(buffer.greedy_ordering(n, c, output=False)[1] * block_size)
-        data_dict["Hilbert Symmetric"].append(buffer.hilbert_ordering_symmetric(n, c, output=False)[1] * block_size)
-        data_dict["Lower Bound"].append(order.get_lower_bound(n, c) * block_size)
+        data_dict["Hilbert"].append(buffer.hilbert_ordering(n, c, output=False)[1] * block_size * 2)
+        data_dict["Elimination"].append(buffer.greedy_ordering(n, c, output=False)[1] * block_size * 2)
+        data_dict["Hilbert Symmetric"].append(buffer.hilbert_ordering_symmetric(n, c, output=False)[1] * block_size * 2)
+        data_dict["Lower Bound"].append(order.get_lower_bound(n, c) * block_size * 2)
         n = n * 2
         c = c * 2
 
