@@ -7,4 +7,4 @@ TARGET_LINK_LIBRARIES(performance
         gtest gtest_main
         )
 
-add_test(NAME performance COMMAND performance)
+add_test(NAME performance COMMAND performance WORKING_DIRECTORY ${project_WORKING_DIR})

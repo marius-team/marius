@@ -212,8 +212,8 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
             }
 
             OptimizerState emb_state = torch::zeros_like(weights);
-            init_node_embedding_storage->rangePut(offset, weights);
-            init_optimizer_state_storage->rangePut(offset, emb_state);
+            init_node_embedding_storage->append(weights);
+            init_optimizer_state_storage->append(emb_state);
 
             offset += curr_num_nodes;
         }

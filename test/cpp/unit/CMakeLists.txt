@@ -7,4 +7,4 @@ TARGET_LINK_LIBRARIES(unit
         gtest gtest_main
         )
 
-add_test(NAME unit COMMAND unit)
+add_test(NAME unit COMMAND unit WORKING_DIRECTORY ${project_WORKING_DIR})

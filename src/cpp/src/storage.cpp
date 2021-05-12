@@ -27,7 +27,7 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, torch::Tensor da
     dim0_size_ = 0;
     dim1_size_ = data.size(1);
     dtype_ = torch::typeMetaToScalarType(data.dtype());
-    rangePut(0, data);
+    append(data);
     initialized_ = true;
     loaded_ = false;
     capacity_ = capacity;
@@ -53,12 +53,41 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, int64_t capacity
 }
 
 void PartitionBufferStorage::rangePut(int64_t offset, torch::Tensor values) {
+    int fd = open(filename_.c_str(), O_RDWR | IO_FLAGS);
+    if (fd == -1) {
+        SPDLOG_ERROR("Unable to open {}\nError: {}", filename_, errno);
+        exit(-1);
+    }
 
+    int64_t dtype_size = 0;
+
+    if (dtype_ == torch::kFloat64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kFloat32) {
+        dtype_size = 4;
+    } else if (dtype_ == torch::kFloat16) {
+        dtype_size = 2;
+    } else if (dtype_ == torch::kInt64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kInt32) {
+        dtype_size = 4;
+    }
+
+    int64_t ptr_offset = offset * dim1_size_ * dtype_size;
+
+    if (pwrite(fd, values.data_ptr(), values.size(0) * dim1_size_ * dtype_size, ptr_offset) == -1) {
+        SPDLOG_ERROR("Unable to write {}\nError: {}", filename_, errno);
+        exit(-1);
+    }
+
+    close(fd);
+}
+
+void PartitionBufferStorage::append(torch::Tensor values) {
     ios::openmode flags;
 
-    if (offset == 0) {
-        flags = ios::out | ios::binary;
-        dim0_size_ = 0;
+    if (dim0_size_ == 0) {
+        flags = ios::trunc | ios::binary;
     } else {
         flags = ios::binary | ios_base::app;
     }
@@ -180,9 +209,10 @@ FlatFile::FlatFile(string filename, torch::Tensor data) {
     dim0_size_ = 0;
     dim1_size_ = data.size(1);
     dtype_ = torch::typeMetaToScalarType(data.dtype());
-    rangePut(0, data);
-    initialized_ = true;
     loaded_ = false;
+    append(data);
+    initialized_ = true;
+
 }
 
 FlatFile::FlatFile(string filename, torch::ScalarType dtype) {
@@ -194,12 +224,33 @@ FlatFile::FlatFile(string filename, torch::ScalarType dtype) {
 }
 
 void FlatFile::rangePut(int64_t offset, torch::Tensor values) {
+    int64_t dtype_size = 0;
 
+    if (dtype_ == torch::kFloat64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kFloat32) {
+        dtype_size = 4;
+    } else if (dtype_ == torch::kFloat16) {
+        dtype_size = 2;
+    } else if (dtype_ == torch::kInt64) {
+        dtype_size = 8;
+    } else if (dtype_ == torch::kInt32) {
+        dtype_size = 4;
+    }
+
+    int64_t ptr_offset = offset * dim1_size_ * dtype_size;
+
+    if (pwrite(fd_, values.data_ptr(), values.size(0) * dim1_size_ * dtype_size, ptr_offset) == -1) {
+        SPDLOG_ERROR("Unable to write {}\nError: {}", filename_, errno);
+        exit(-1);
+    }
+}
+
+void FlatFile::append(torch::Tensor values) {
     ios::openmode flags;
 
-    if (offset == 0) {
-        flags = ios::out | ios::binary;
-        dim0_size_ = 0;
+    if (dim0_size_ == 0) {
+        flags = ios::trunc | ios::binary;
     } else {
         flags = ios::binary | ios_base::app;
     }
@@ -227,6 +278,7 @@ void FlatFile::rangePut(int64_t offset, torch::Tensor values) {
     outfile.write((char *) values.data_ptr(), values.size(0) * values.size(1) * dtype_size);
     outfile.close();
 }
+
 
 void FlatFile::load() {
     if (!loaded_ && initialized_) {
@@ -311,27 +363,37 @@ torch::Tensor FlatFile::range(int64_t offset, int64_t n) {
 
 void FlatFile::shuffle() {
     bool loaded = loaded_;
-    if (edge_bucket_sizes_.empty()) {
-        unload(true);
-        mem_load();
-        auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
-        auto perm = torch::randperm(dim0_size_, opts);
-        data_.copy_(data_.index_select(0, perm));
-        mem_unload(true);
-    } else {
-        unload(true);
-        mem_load();
-        int64_t start = 0;
-        auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
-        for (auto itr = edge_bucket_sizes_.begin(); itr + 1 != edge_bucket_sizes_.end(); itr++) {
-            torch::Tensor edge_bucket = data_.narrow(0, start, *itr);
-            edge_bucket.copy_(edge_bucket.index_select(0, torch::randperm(edge_bucket.size(0), opts)));
-            start += *itr;
-        }
-        mem_unload(true);
-    }
     if (!loaded) {
         load();
+    }
+    if (edge_bucket_sizes_.empty()) {
+        int64_t offset = 0;
+        int64_t curr_size = 0;
+        while(offset < dim0_size_) {
+            if (dim0_size_ - offset < MAX_SHUFFLE_SIZE) {
+                curr_size = dim0_size_ - offset;
+            } else {
+                curr_size = MAX_SHUFFLE_SIZE;
+            }
+
+            torch::Tensor chunk = range(offset, curr_size);
+            auto opts = torch::TensorOptions().dtype(torch::kInt64).device(torch::kCPU);
+            chunk.copy_(chunk.index_select(0, torch::randperm(chunk.size(0), opts)));
+            rangePut(offset, chunk);
+            offset += curr_size;
+        }
+    } else {
+        int64_t offset = 0;
+        auto opts = torch::TensorOptions().dtype(torch::kInt64).device(torch::kCPU);
+        for (auto itr = edge_bucket_sizes_.begin(); itr + 1 != edge_bucket_sizes_.end(); itr++) {
+            torch::Tensor edge_bucket = range(offset, *itr);
+            edge_bucket.copy_(edge_bucket.index_select(0, torch::randperm(edge_bucket.size(0), opts)));
+            rangePut(offset, edge_bucket);
+            offset += *itr;
+        }
+    }
+    if (!loaded) {
+        unload(true);
     }
 }
 
