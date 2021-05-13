@@ -170,7 +170,7 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
         with open(files[0], 'r') as input_f:
             delim = csv.Sniffer().sniff(input_f.read(10000)).delimiter
             input_f.seek(0)
-        print(f"Detected delimiter: {delim}")
+        print(f"Detected delimiter: ~{delim}~")
 
     if src_idx == -1 or dst_idx == -1:
         raise RuntimeError("Wrong format: source or destination not found.")
@@ -355,29 +355,53 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     return output_stats
 
 
-def main():
-    '''
-        Args: format(s,d,r) output_directory csv_file(s)
-    '''
-    parser = argparse.ArgumentParser(description='General CSV Converter',
-                                     usage="general csv converter")
-    parser.add_argument('format', type=str, nargs=1,
-                        metavar="format: source(s), relation(r)," +
-                        "destination(d)", help="Format of relation")
-    parser.add_argument('output_directory', nargs=1,
-                        metavar='output_directory', type=str,
-                        help='Directory to put graph data')
-    parser.add_argument("files", metavar="dataset file paths", type=str,
-                        nargs='+',
-                        help="path to dateset files([train, valid, test])")
-    parser.add_argument('num_partitions', metavar='num_partitions',
-                        type=int,
-                        help='Number of partitions to split the edges into')
-    args = parser.parse_args()
+def set_args():
+    parser = argparse.ArgumentParser(
+        description='csv converter', prog='csv_converter',
+        formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('files', metavar='files', nargs='+', type=str,
+                        help='Data files')
+    parser.add_argument('format', metavar='format', nargs=1, type=str,
+                        help='Format of data, eg. srd')
+    parser.add_argument('output_dir', metavar='output_dir', nargs=1, type=str,
+                        help='Output directory for preprocessed data')
+    parser.add_argument('--delim', '-d', metavar='delim', type=str,
+                        default="",
+                        help='Specifies the delimiter')
+    parser.add_argument('--num_partitions', '-np', metavar='num_partitions',
+                        type=int, default=1, help='number of partitions')
+    parser.add_argument('--dtype', metavar='dtype', type=np.dtype,
+                        default=np.int32,
+                        help='Indicates the numpy.dtype')
+    parser.add_argument('--not_remap_ids', action='store_false',
+                        help='If set, will not remap ids')
+    parser.add_argument('--dataset_split', '-ds', metavar='dataset_split',
+                        nargs=2, type=float, default=[0, 0],
+                        help='Split dataset into specified fractions')
+    parser.add_argument('--start_col', '-sc', metavar='start_col', type=int,
+                        default=0,
+                        help='Indicates the column index to start from')
+    parser.add_argument('--num_line_skip', '-nls', metavar='num_line_skip',
+                        type=int, default=None,
+                        help='Indicates number of lines to ' +
+                             'skip from the beginning')
 
-    general_parser(np.array(args.files).flatten(), args.format,
-                   args.output_directory,
-                   num_partitions=args.num_partitions)
+    args = parser.parse_args()
+    arg_dict = vars(args)
+    if arg_dict.get("dataset_split") is not None:
+        arg_dict.update({"dataset_split": tuple(arg_dict.get("dataset_split"))})
+    
+    #arg_dict.update({"dtype": np.dtype(arg_dict.get("dtype"))}) # FIXME: argparse not taking np.int32
+    return arg_dict
+
+
+def main():
+    arg_dict = set_args()
+    general_parser(arg_dict.get("files"), arg_dict.get("format"),
+                   arg_dict.get("output_dir"), arg_dict.get("delim"),
+                   arg_dict.get("num_partitions"), arg_dict.get("dtype"),
+                   arg_dict.get("not_remap_ids"), arg_dict.get("dataset_split"),
+                   arg_dict.get("start_col"), arg_dict.get("num_line_skip"))
 
 if __name__ == "__main__":
     main()
