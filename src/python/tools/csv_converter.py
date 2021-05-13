@@ -15,9 +15,9 @@ def split_dataset(input_dataset, validation_fraction, test_fraction,
     assert(train_fraction > 0)
     assert (validation_fraction + test_fraction > 0)
     base_path = "/".join(input_dataset.split("/")[:-1])
-    train_file = base_path + "/train_edges.txt"
-    valid_file = base_path + "/valid_edges.txt"
-    test_file = base_path + "/test_edges.txt"
+    train_file = base_path + "/splitted_train_edges.txt"
+    valid_file = base_path + "/splitted_valid_edges.txt"
+    test_file = base_path + "/splitted_test_edges.txt"
     if Path(train_file).exists():
         Path(train_file).unlink()
     if Path(valid_file).exists():
@@ -146,10 +146,18 @@ def join_files(files, regex, num_line_skip, data_cols, delim):
 def general_parser(files, format, output_dir, delim="", num_partitions=1,
                    dtype=np.int32, remap_ids=True, dataset_split=(0, 0),
                    start_col=0, num_line_skip=None):
+    assert(len(files) != 0), "Number of data files cannot be 0"
+    assert(len(format) == 1), "Format is specified incorrectly"
+    
     rel_idx = format[0].find('r')
     src_idx = format[0].find('s')
     dst_idx = format[0].find('d')
+    assert((len(format[0]) == 3 and rel_idx != -1 and 
+            src_idx != -1 and dst_idx != -1) or
+           (len(format[0]) == 2 and dst_idx != -1 and
+            src_idx != -1)), "Format is specified incorrectly"
 
+    assert(Path(output_dir[0]).exists()), "Output directory not found"
     output_dir = output_dir[0].strip("/")
     output_dir = output_dir + "/"
 
@@ -339,7 +347,7 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
             g.write(bytes(tens))
             f.write("\n".join(str(key) for key in rels_dict.keys()))
 
-    output_stats = np.zeros(3)
+    output_stats = np.zeros(3, dtype=int)
     output_stats[:len(num_edges_f)] = num_edges_f
     output_stats = list(output_stats)
     output_stats.insert(0, num_rels)
