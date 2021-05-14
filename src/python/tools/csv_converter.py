@@ -111,7 +111,7 @@ def check_given_num_line_skip_start_col(input_file, num_line_skip, data_cols,
     with open(input_file, 'r') as f:
         for i in range(num_line_skip):
             line = next(f)
-        
+
         line = next(f)
         splitted_line = line.split(delim)
         if len(splitted_line) - start_col < len(data_cols):
@@ -164,11 +164,12 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     assert(len(format) == 1), "Format is specified incorrectly"
     assert((start_col == 0) or (start_col != 0 and num_line_skip != None)), \
                 "Need to specify num_line_skip if start_col is specified"
+    assert(num_partitions > 0)
 
     rel_idx = format[0].find('r')
     src_idx = format[0].find('s')
     dst_idx = format[0].find('d')
-    assert((len(format[0]) == 3 and rel_idx != -1 and 
+    assert((len(format[0]) == 3 and rel_idx != -1 and
             src_idx != -1 and dst_idx != -1) or
            (len(format[0]) == 2 and dst_idx != -1 and
             src_idx != -1)), "Format is specified incorrectly"

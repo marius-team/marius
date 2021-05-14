@@ -4,6 +4,7 @@ import unittest
 import subprocess
 from pathlib import Path
 import random
+import numpy as np
 from marius.tools.csv_converter import general_parser
 
 TEST_DIR = "./output_dir"
@@ -107,12 +108,12 @@ class TestGeneralParser(unittest.TestCase):
             when dataset_split is not specified
         """
         stats = general_parser(
-                    [str(Path(input_dir) / Path(train_file)), # 1000
-                     str(Path(input_dir) / Path(valid_file)), # 100
-                     str(Path(input_dir) / Path(test_file)), # 100
-                     str(Path(input_dir) / Path(valid_file)), # 100
-                     str(Path(input_dir) / Path(train_file)), # 1000
-                     str(Path(input_dir) / Path(train_file))], # 1000
+                    [str(Path(input_dir) / Path(train_file)),
+                     str(Path(input_dir) / Path(valid_file)),
+                     str(Path(input_dir) / Path(test_file)),
+                     str(Path(input_dir) / Path(valid_file)),
+                     str(Path(input_dir) / Path(train_file)),
+                     str(Path(input_dir) / Path(train_file))],
                      ["srd"], [output_dir])
 
         self.assertTrue(stats[0] == 100)
@@ -290,12 +291,12 @@ class TestGeneralParser(unittest.TestCase):
             accroding to the fraction specified by the dataset_split tuple
         """
         stats = general_parser(
-                    [str(Path(input_dir) / train_file), # 1000
-                     str(Path(input_dir) / Path(valid_file)), # 100
-                     str(Path(input_dir) / Path(test_file)), # 100
-                     str(Path(input_dir) / Path(valid_file)), # 100
-                     str(Path(input_dir) / Path(train_file)), # 1000
-                     str(Path(input_dir) / Path(train_file))], # 1000
+                    [str(Path(input_dir) / train_file),
+                     str(Path(input_dir) / Path(valid_file)),
+                     str(Path(input_dir) / Path(test_file)),
+                     str(Path(input_dir) / Path(valid_file)),
+                     str(Path(input_dir) / Path(train_file)),
+                     str(Path(input_dir) / Path(train_file))],
                      ["srd"], [output_dir], dataset_split = (0.1, 0.1)) 
         
         self.assertTrue(stats[0] == 100)
@@ -315,4 +316,137 @@ class TestGeneralParser(unittest.TestCase):
                     ["srd"], [output_dir], dataset_split = (0.6, 0.7))
 
 
+    def test_remap_ids_false(self):
+        """
+        Check if processed data has sequential ids if remap_ids is set to False
+        """
+        general_parser([str(Path(input_dir) / Path(train_file)),
+                        str(Path(input_dir) / Path(valid_file)),
+                        str(Path(input_dir) / Path(test_file))],
+                       ["srd"], [output_dir], remap_ids=False)
+
+        internal_node_ids = np.fromfile(str(Path(output_dir)) /
+                                        Path("node_mapping.bin"), dtype=int)
+        internal_rel_ids = np.fromfile(str(Path(output_dir)) /
+                                       Path("rel_mapping.bin"), dtype=int)
+        
+        for i in range(len(internal_node_ids) - 1):
+            self.assertEqual((internal_node_ids[i+1] - internal_node_ids[i]), 1)
+        
+        for i in range(len(internal_rel_ids) - 1):
+            self.assertEqual((internal_rel_ids[i+1] - internal_rel_ids[i]), 1)
+        
     
+    def test_remap_ids_true(self):
+        """
+        Check if processed data has non-sequential ids if remap_ids is set 
+            to True
+        """
+        general_parser([str(Path(input_dir) / Path(train_file)),
+                        str(Path(input_dir) / Path(valid_file)),
+                        str(Path(input_dir) / Path(test_file))],
+                       ["srd"], [output_dir], remap_ids=True)
+
+        internal_node_ids = np.fromfile(str(Path(output_dir)) /
+                                        Path("node_mapping.bin"), dtype=int)
+        internal_rel_ids = np.fromfile(str(Path(output_dir)) /
+                                       Path("rel_mapping.bin"), dtype=int)
+        
+        delta_sum = 0
+        for i in range(len(internal_node_ids) - 1):
+            delta_sum = (internal_node_ids[i+1] - internal_node_ids[i])\
+                                                                    + delta_sum
+            self.assertTrue(delta_sum < (len(internal_node_ids) - 1))
+        
+        delta_sum = 0
+        for i in range(len(internal_rel_ids) - 1):
+            delta_sum = (internal_rel_ids[i+1] - internal_rel_ids[i])\
+                                                                + delta_sum
+            self.assertTrue(delta_sum < (len(internal_rel_ids) - 1))
+
+
+    def test_num_partitions(self):
+        """
+        Check if correct number of partitions are made as num_partitions is
+            specified
+        """
+        general_parser([str(Path(input_dir) / Path(train_file)),
+                        str(Path(input_dir) / Path(valid_file)),
+                        str(Path(input_dir) / Path(test_file))],
+                       ["srd"], [output_dir], num_partitions=3)
+        
+        with open(str(Path(output_dir) /
+                      Path("train_edges_partitions.txt")), 'r') as f:
+            lines = f.readlines()
+        
+        self.assertEqual(len(lines), 9)
+    
+
+    def test_num_partitions_invalid(self):
+        """
+        Check if exception is thrown if invalid number of partitions is set
+        """
+        with self.assertRaises(AssertionError):
+            general_parser([str(Path(input_dir) / Path(train_file)),
+                            str(Path(input_dir) / Path(valid_file)),
+                            str(Path(input_dir) / Path(test_file))],
+                           ["srd"], [output_dir], num_partitions=-1)
+        
+        with self.assertRaises(AssertionError):
+            general_parser([str(Path(input_dir) / Path(train_file)),
+                            str(Path(input_dir) / Path(valid_file)),
+                            str(Path(input_dir) / Path(test_file))],
+                           ["srd"], [output_dir], num_partitions=0)
+        
+
+    def test_dtype_int32(self):
+        """
+        Check if processed data is stored in int32 as specified
+        """
+        stats = general_parser([str(Path(input_dir) / Path(train_file)),
+                            str(Path(input_dir) / Path(valid_file)),
+                            str(Path(input_dir) / Path(test_file))],
+                           ["srd"], [output_dir], dtype=np.int32)
+        
+        self.assertEqual((Path(output_dir) /
+                          Path("train_edges.pt")).stat().st_size, stats[2]*3*4)
+        self.assertEqual((Path(output_dir) /
+                          Path("valid_edges.pt")).stat().st_size, stats[3]*3*4)
+        self.assertEqual((Path(output_dir) /
+                          Path("test_edges.pt")).stat().st_size, stats[4]*3*4)
+
+
+    def test_dtype_int64(self):
+        """
+        Check if processed data is stored in int64 as specified
+        """
+        stats = general_parser([str(Path(input_dir) / Path(train_file)),
+                            str(Path(input_dir) / Path(valid_file)),
+                            str(Path(input_dir) / Path(test_file))],
+                           ["srd"], [output_dir], dtype=np.int64)
+        
+        self.assertEqual((Path(output_dir) /
+                          Path("train_edges.pt")).stat().st_size, stats[2]*3*8)
+        self.assertEqual((Path(output_dir) /
+                          Path("valid_edges.pt")).stat().st_size, stats[3]*3*8)
+        self.assertEqual((Path(output_dir) /
+                          Path("test_edges.pt")).stat().st_size, stats[4]*3*8)
+
+    def test_dtype_cmd_opt(self):
+        """
+        Check if dtype opt works from command line arguments
+        """
+        proc = subprocess.run(
+            ["python3", "./src/python/tools/csv_converter.py",
+             str(Path(input_dir) / Path(train_file)),
+             str(Path(input_dir) / Path(valid_file)),
+             str(Path(input_dir) / Path(test_file)),
+             "srd", output_dir, "--dtype=int32"
+            ], capture_output=True)
+
+        self.assertEqual((Path(output_dir) /
+                          Path("train_edges.pt")).stat().st_size, 1000*3*4)
+        self.assertEqual((Path(output_dir) /
+                          Path("valid_edges.pt")).stat().st_size, 100*3*4)
+        self.assertEqual((Path(output_dir) /
+                          Path("test_edges.pt")).stat().st_size, 100*3*4)
