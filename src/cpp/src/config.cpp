@@ -4,245 +4,401 @@
 
 #include <config.h>
 
-namespace po = boost::program_options;
-
 MariusOptions marius_options = MariusOptions();
 TimestampAllocator global_timestamp_allocator = TimestampAllocator();
 
-MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
-    // config_path validity check
+string getConfigPath(int64_t argc, char *argv[], cxxopts::Options cmd_options) {
+    string config_path;
+    try {
+        cmd_options.parse_positional({"config_file"});
+        auto result = cmd_options.parse(argc, argv);
+
+        if (result.count("help")) {
+            std::cout << cmd_options.help() << std::endl;
+            exit(0);
+        }
+
+        if (!result.count("config_file")) {
+            std::cout << cmd_options.help() << std::endl;
+            throw cxxopts::option_required_exception("config_file");
+        }
+
+        config_path = result["config_file"].as<string>();
+
+    } catch (const cxxopts::OptionException& e) {
+        SPDLOG_ERROR("Error parsing options: {}", e.what());
+        std::cout << cmd_options.help() << std::endl;
+        exit(-1);
+    }
+    return config_path;
+}
+
+void assignOptions(AllOptInfo opt_info, string config_path) {
+    INIReader reader(config_path);
+    if (reader.ParseError() != 0) {
+        SPDLOG_ERROR("Can't load {}", config_path);
+        exit(-1);
+    }
+    // Assign values as config or default specifications
+    for (OptInfo<std::string> v : opt_info.s_var_map) {
+        *(v.var_ptr) = reader.Get(v.s_section, v.s_option, v.default_val);
+    }
+    for (OptInfo<int64_t> v : opt_info.i64_var_map) {
+        *(v.var_ptr) = (int64_t)(reader.GetInteger(v.s_section, v.s_option, v.default_val));
+    }
+    for (OptInfo<int> v : opt_info.i_var_map) {
+        *(v.var_ptr) = reader.GetInteger(v.s_section, v.s_option, v.default_val);
+    }
+    for (OptInfo<float> v : opt_info.f_var_map) {
+        *(v.var_ptr) = reader.GetFloat(v.s_section, v.s_option, v.default_val);
+    }
+    for (OptInfo<bool> v : opt_info.b_var_map) {
+        *(v.var_ptr) = reader.GetBoolean(v.s_section, v.s_option, v.default_val);
+    }
+}
+
+void parseCommandLine(int64_t argc, char *argv[], AllOptInfo opt_info, cxxopts::Options cmd_options) {
+    try {
+        cmd_options.parse_positional({"config_file"});
+        auto result = cmd_options.parse(argc, argv);
+
+        if (!result.unmatched().empty()) {
+            try {
+                for (string opt : result.unmatched()) {
+                    if (opt.substr(0, 2) == "--") {
+
+                        int section_end = opt.find(".");
+                        int option_end = opt.find("=");
+
+                        if (section_end == - 1 or option_end == - 1) {
+                            throw std::exception();
+                        }
+
+                        std::string section = opt.substr(2, section_end - 2);
+                        std::string option_name = opt.substr(section_end + 1, option_end - section_end - 1);
+                        std::string value = opt.substr(option_end + 1, opt.size() - option_end - 1);
+
+                        bool valid = false;
+
+                        // Special case for gpu_ids: parse ids
+                        if (section == "general" && option_name == "gpu_ids") {
+                            size_t pos = 0;
+                            std::string token;
+                            std::string gpu_id_str = "";
+                            while ((pos = value.find(",")) != std::string::npos) {
+                                token = value.substr(0,pos);
+                                gpu_id_str += token;
+                                gpu_id_str += " ";
+                                value.erase(0, pos + 1);
+                            }
+                            gpu_id_str += value;
+                            value = gpu_id_str;
+                        }
+                        for (OptInfo<std::string> v : opt_info.s_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = value;
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<int64_t> v : opt_info.i64_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = std::stoll(value);
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<int> v : opt_info.i_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = std::stoi(value);
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<float> v : opt_info.f_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = std::stof(value);
+                                valid = true;
+                            }
+                        }
+                        for (OptInfo<bool> v : opt_info.b_var_map) {
+                            if (section == v.s_section && option_name == v.s_option) {
+                                *(v.var_ptr) = (value == "true");
+                                valid = true;
+                            }
+                        }
+                        if (!valid) {
+                            throw std::exception();
+                        }
+                    } else {
+                        throw std::exception();
+                    }
+                }
+            } catch (std::exception) {
+                throw cxxopts::option_syntax_exception("Unable to parse supplied command line configuration options");
+            }
+        }
+    } catch (const cxxopts::OptionException& e) {
+        SPDLOG_ERROR("Error parsing options: {}", e.what());
+        std::cout << cmd_options.help() << std::endl;
+        exit(-1);
+    }
+}
+
+void validateNumericalOptions(AllOptInfo opt_info) {
+    for (OptInfo<int64_t> v : opt_info.i64_var_map) {
+        if (*(v.var_ptr) < v.range[0] || *(v.var_ptr) > v.range[1]) {
+            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.var_ptr), v.range[0], v.range[1]);
+            exit(-1);
+        }
+    }
+    for (OptInfo<int> v : opt_info.i_var_map) {
+        if (*(v.var_ptr) < v.range[0] || *(v.var_ptr) > v.range[1]) {
+            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.var_ptr), v.range[0], v.range[1]);
+            exit(-1);
+        }
+    }
+    for (OptInfo<float> v : opt_info.f_var_map) {
+        if (*(v.var_ptr) < v.range[0] || *(v.var_ptr) > v.range[1]) {
+            SPDLOG_ERROR("{}.{}: value {} out of range [{}, {}]", v.s_section, v.s_option, *(v.var_ptr), v.range[0], v.range[1]);
+            exit(-1);
+        }
+    }
+}
+
+MariusOptions parseConfig(int64_t argc, char *argv[]) {
+
+    // List for each type of variable
+    std::vector<OptInfo<std::string>> s_var_map;
+    std::vector<OptInfo<int64_t>> i64_var_map;
+    std::vector<OptInfo<int>> i_var_map;
+    std::vector<OptInfo<float>> f_var_map;
+    std::vector<OptInfo<bool>> b_var_map;
+
+    float FLOAT_MAX = std::numeric_limits<float>::max();
+
+    // Map each option to: [default value] [section_name] [option_name] (optional)[valid_range]
+
+    // General options
+    torch::DeviceType device; string s_device; // Device to use for training
+    std::vector<int> gpu_ids; string s_gpu_ids; // Ids of the gpus to use
+    int64_t random_seed; // Random seed to use
+    int64_t num_train; // Number of edges in the graph
+    int64_t num_valid; // Number of edges in the graph
+    int64_t num_test; // Number of edges in the graph
+    int64_t num_nodes; // Number of nodes in the graph
+    int64_t num_relations; // Number of relations in the graph
+    string experiment_name; // Name for the current experiment
+
+    s_var_map.push_back((OptInfo<std::string>){&s_device, "CPU", "general", "device"});
+    s_var_map.push_back((OptInfo<std::string>){&s_gpu_ids, "0", "general", "gpu_ids"});
+    i64_var_map.push_back((OptInfo<int64_t>){&random_seed, time(0), "general", "random_seed", {0, INT64_MAX}});
+    i64_var_map.push_back((OptInfo<int64_t>){&num_train, -1, "general", "num_train", {0, INT64_MAX}});
+    i64_var_map.push_back((OptInfo<int64_t>){&num_valid, 0, "general", "num_valid", {0, INT64_MAX}});
+    i64_var_map.push_back((OptInfo<int64_t>){&num_test, 0, "general", "num_test", {0, INT64_MAX}});
+    i64_var_map.push_back((OptInfo<int64_t>){&num_nodes, -1, "general", "num_nodes", {0, INT64_MAX}});
+    i64_var_map.push_back((OptInfo<int64_t>){&num_relations, -1, "general", "num_relations", {0, INT64_MAX}});
+    s_var_map.push_back((OptInfo<std::string>){&experiment_name, "marius", "general", "experiment_name"});
+
+    // Model options
+    float scale_factor; // Factor to scale the embeddings upon initialization
+    InitializationDistribution initialization_distribution; 
+    string s_initialization_distribution; // Which distribution to use for initializing embeddings
+    int embedding_size; // Dimension of the embedding vectors
+    EncoderModelType encoder_model; string s_encoder; // Encoder model to use
+    DecoderModelType decoder_model; string s_decoder; // Decoder model to use
+
+    f_var_map.push_back((OptInfo<float>){&scale_factor, .001, "model", "scale_factor", {0, FLOAT_MAX}});
+    s_var_map.push_back((OptInfo<std::string>){&s_initialization_distribution, "Normal", "model", "initialization_distribution"});
+    i_var_map.push_back((OptInfo<int>){&embedding_size, 128, "model", "embedding_size", {1, INT32_MAX}});
+    s_var_map.push_back((OptInfo<std::string>){&s_encoder, "None", "model", "encoder"});
+    s_var_map.push_back((OptInfo<std::string>){&s_decoder, "DistMult", "model", "decoder"});
+
+    // Storage options
+    BackendType edges_backend_type; string s_edges_backend; // Storage backend to use
+    bool reinit_edges; // If true, the edges in the data directory will be reinitialized
+    bool remove_preprocessed; // If true, the input edge files will be removed
+    bool shuffle_input_edges; // If true, the input edge files will be shuffled
+    torch::Dtype edges_dtype; string s_edges_dtype; // Type of the embedding vectors
+    BackendType embeddings_backend_type; string s_embeddings_backend; // Storage backend to use
+    bool reinit_embeddings; // If true, the embeddings in the data directory will be reinitialized
+    BackendType relations_backend_type; string s_relations_backend; // Storage backend to use
+    torch::Dtype embeddings_dtype; string s_embeddings_dtype; // Type of the embedding vectors
+    EdgeBucketOrdering edge_bucket_ordering; string s_edge_bucket_ordering; // How to order edge buckets
+    int num_partitions; // Number of partitions for training
+    int buffer_capacity; // Number of partitions to hold in memory
+    bool prefetching; // Whether to prefetch partitions or not
+    bool conserve_memory; // Will try to conserve memory at the cost of extra IO for some configurations
+
+    s_var_map.push_back((OptInfo<std::string>){&s_edges_backend, "HostMemory", "storage", "edges_backend"});
+    b_var_map.push_back((OptInfo<bool>){&reinit_edges, true, "storage", "reinit_edges"});
+    b_var_map.push_back((OptInfo<bool>){&remove_preprocessed, false, "storage", "remove_preprocessed"});
+    b_var_map.push_back((OptInfo<bool>){&shuffle_input_edges, true, "storage", "shuffle_input_edges"});
+    s_var_map.push_back((OptInfo<std::string>){&s_edges_dtype, "int32", "storage", "edges_dtype"});
+    s_var_map.push_back((OptInfo<std::string>){&s_embeddings_backend, "HostMemory", "storage", "embeddings_backend"});
+    b_var_map.push_back((OptInfo<bool>){&reinit_embeddings, true, "storage", "reinit_embeddings"});
+    s_var_map.push_back((OptInfo<std::string>){&s_relations_backend, "HostMemory", "storage", "relations_backend"});
+    s_var_map.push_back((OptInfo<std::string>){&s_embeddings_dtype, "float32", "storage", "embeddings_dtype"});
+    s_var_map.push_back((OptInfo<std::string>){&s_edge_bucket_ordering, "Elimination", "storage", "edge_bucket_ordering"});
+    i_var_map.push_back((OptInfo<int>){&num_partitions, 1, "storage", "num_partitions", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&buffer_capacity, 2, "storage", "buffer_capacity", {2, INT32_MAX}});
+    b_var_map.push_back((OptInfo<bool>){&prefetching, true, "storage", "prefetching"});
+    b_var_map.push_back((OptInfo<bool>){&conserve_memory, false, "storage", "conserve_memory"});
+
+    // Training options
+    int training_batch_size; // Number of positive edges in a batch
+    int training_num_chunks; // Number of chunks to split up positives into
+    int training_negatives; // Number of negatives to sample per chunk
+    float training_degree_fraction; // Fraction of negatives which are sampled by degree
+    NegativeSamplingAccess training_negative_sampling_access;
+    string s_training_negative_sampling_access; // How negative samples are generated
+    float learning_rate; // Learning rate to use
+    float regularization_coef; // Regularization Coefficient
+    int regularization_norm; // Norm of the regularization
+    OptimizerType optimizer_type; string s_optimizer_type; // Optimizer to use
+    LossFunctionType loss_function_type; string s_loss_function_type; // Loss to use
+    float margin; // Margin to use in ranking loss
+    bool average_gradients; // If true gradients will be averaged when accumulated, summed if false
+    bool synchronous; // If true training will be synchronous
+    int num_epochs; // Number of epochs to train
+    int checkpoint_interval; // Will checkpoint model after each interval of epochs
+    int shuffle_interval; // How many epochs until a shuffle of the edges is performed
+
+    i_var_map.push_back((OptInfo<int>){&training_batch_size, 10000, "training", "batch_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&training_num_chunks, 16, "training", "number_of_chunks", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&training_negatives, 512, "training", "negatives", {1, INT32_MAX}});
+    f_var_map.push_back((OptInfo<float>){&training_degree_fraction, .5, "training", "degree_fraction", {0, 1.0}});
+    s_var_map.push_back((OptInfo<std::string>){&s_training_negative_sampling_access, "Uniform", "training", "negative_sampling_access"});
+    f_var_map.push_back((OptInfo<float>){&learning_rate, .1, "training", "learning_rate", {0, FLOAT_MAX}});
+    f_var_map.push_back((OptInfo<float>){&regularization_coef, 2e-6, "training", "regularization_coef", {0, FLOAT_MAX}});
+    i_var_map.push_back((OptInfo<int>){&regularization_norm, 2, "training", "regularization_norm", {0, INT32_MAX}});
+    s_var_map.push_back((OptInfo<std::string>){&s_optimizer_type, "Adagrad", "training", "optimizer"});
+    s_var_map.push_back((OptInfo<std::string>){&s_loss_function_type, "SoftMax", "training", "loss"});
+    f_var_map.push_back((OptInfo<float>){&margin, 0, "training", "margin", {0, FLOAT_MAX}});
+    b_var_map.push_back((OptInfo<bool>){&average_gradients, false, "training", "average_gradients"});
+    b_var_map.push_back((OptInfo<bool>){&synchronous, false, "training", "synchronous"});
+    i_var_map.push_back((OptInfo<int>){&num_epochs, 10, "training", "num_epochs", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&checkpoint_interval, 9999, "training", "checkpoint_interval", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&shuffle_interval, 1, "training", "shuffle_interval", {1, INT32_MAX}});
+
+    // Training pipeline options
+    int max_batches_in_flight; // Vary the amount of batches allowed in the pipeline at once
+    bool update_in_flight; // If true, batches in the pipeline will receive gradient updates
+    int embeddings_host_queue_size; // Size of embeddings host queue
+    int embeddings_device_queue_size; // Size of embeddings device queue
+    int gradients_host_queue_size; // Size of gradients host queue
+    int gradients_device_queue_size; // Size of gradients device queue
+    int num_embedding_loader_threads; // Number of embedding loader threads
+    int num_embedding_transfer_threads; // Number of embedding transfer threads
+    int num_compute_threads; // Number of compute threads
+    int num_gradient_transfer_threads; // Number of gradient transfer threads
+    int num_embedding_update_threads; // Number of embedding updater threads
+
+    i_var_map.push_back((OptInfo<int>){&max_batches_in_flight, 16, "training_pipeline", "max_batches_in_flight", {1, INT32_MAX}});
+    b_var_map.push_back((OptInfo<bool>){&update_in_flight, false, "training_pipeline", "update_in_flight"});
+    i_var_map.push_back((OptInfo<int>){&embeddings_host_queue_size, 4, "training_pipeline", "embeddings_host_queue_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&embeddings_device_queue_size, 4, "training_pipeline", "embeddings_device_queue_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&gradients_host_queue_size, 4, "training_pipeline", "gradients_host_queue_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&gradients_device_queue_size, 4, "training_pipeline", "gradients_device_queue_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&num_embedding_loader_threads, 2, "training_pipeline", "num_embedding_loader_threads", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&num_embedding_transfer_threads, 2, "training_pipeline", "num_embedding_transfer_threads", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&num_compute_threads, 1, "training_pipeline", "num_compute_threads", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&num_gradient_transfer_threads, 2, "training_pipeline", "num_gradient_transfer_threads", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&num_embedding_update_threads, 2, "training_pipeline", "num_embedding_update_threads", {1, INT32_MAX}});
+
+    // Evaluation options
+    int evaluation_batch_size; // Number of positive edges in a batch
+    int evaluation_num_chunks; // Number of chunks to split up positives into
+    int evaluation_negatives; // Number of negatives to sample per chunk
+    float evaluation_degree_fraction; // Fraction of negatives to sample by degree
+    NegativeSamplingAccess eval_negative_sampling_access;
+    string s_eval_negative_sampling_access; // Negative sampling policy to use for evaluation
+    int epochs_per_eval; // Number of epochs before evaluation
+    bool eval_synchronous; // Amount of data to hold out for validation set
+    string s_evaluation_method; // Evaluation method to use
+    bool filtered_eval; // If true false negatives will be filtered
+    int checkpoint_to_eval; // Checkpoint to evaluate
+
+    i_var_map.push_back((OptInfo<int>){&evaluation_batch_size, 1000, "evaluation", "batch_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&evaluation_num_chunks, 1, "evaluation", "number_of_chunks", {0, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&evaluation_negatives, 1000, "evaluation", "negatives", {0, INT32_MAX}});
+    f_var_map.push_back((OptInfo<float>){&evaluation_degree_fraction, .5, "evaluation", "degree_fraction", {0, 1.0}});
+    s_var_map.push_back((OptInfo<std::string>){&s_eval_negative_sampling_access, "Uniform", "evaluation", "negative_sampling_access"});
+    i_var_map.push_back((OptInfo<int>){&epochs_per_eval, 1, "evaluation", "epochs_per_eval", {1, INT32_MAX}});
+    b_var_map.push_back((OptInfo<bool>){&eval_synchronous, false, "evaluation", "synchronous"});
+    s_var_map.push_back((OptInfo<std::string>){&s_evaluation_method, "LinkPrediction", "evaluation", "evaluation_method"});
+    b_var_map.push_back((OptInfo<bool>){&filtered_eval, false, "evaluation", "filtered_evaluation"});
+    i_var_map.push_back((OptInfo<int>){&checkpoint_to_eval, -1, "evaluation", "checkpoint_id", {-1, INT32_MAX}});
+
+    // Evaluation pipeline options
+    int evaluate_max_batches_in_flight; // Vary the amount of batches allowed in the pipeline at once
+    int evaluate_embeddings_host_queue_size; // Size of embeddings host queue
+    int evaluate_embeddings_device_queue_size; // Size of embeddings device queue
+    int evaluate_num_embedding_loader_threads; // Number of embedding loader threads
+    int evaluate_num_embedding_transfer_threads; // Number of embedding transfer threads
+    int num_evaluate_threads; // Number of evaluate threads
+
+    i_var_map.push_back((OptInfo<int>){&evaluate_max_batches_in_flight, 32, "evaluation", "max_batches_in_flight", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&evaluate_embeddings_host_queue_size, 8, "evaluation", "embeddings_host_queue_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&evaluate_embeddings_device_queue_size, 8, "evaluation", "embeddings_device_queue_size", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&evaluate_num_embedding_loader_threads, 4, "evaluation", "num_embedding_loader_threads", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&evaluate_num_embedding_transfer_threads, 4, "evaluation", "num_embedding_transfer_threads", {1, INT32_MAX}});
+    i_var_map.push_back((OptInfo<int>){&num_evaluate_threads, 1, "evaluation", "num_evaluate_threads", {0, INT32_MAX}});
+
+    // Path options
+    string train_edges; // Path to training edges file
+    string train_edges_partitions; // Path to training edge partition file
+    string validation_edges; // Path to validation edges file
+    string validation_edges_partitions; // Path to validation edge partition file
+    string test_edges; // Path to edges used for testing
+    string test_edges_partitions; // Path to testing edge partition file
+    string node_labels; // Path to node labels for Node classification
+    string relation_labels; // Path to relation labels for Relation classification
+    string node_ids; // Path to node ids
+    string relation_ids; // Path to relations ids
+    string custom_ordering; // Path to file where edge bucket ordering is stored
+    string base_directory; // Path to directory where data is stored
+
+    s_var_map.push_back((OptInfo<std::string>){&train_edges, "", "path", "train_edges"});
+    s_var_map.push_back((OptInfo<std::string>){&train_edges_partitions, "", "path", "train_edges_partitions"});
+    s_var_map.push_back((OptInfo<std::string>){&validation_edges, "", "path", "validation_edges"});
+    s_var_map.push_back((OptInfo<std::string>){&validation_edges_partitions, "", "path", "validation_partitions"});
+    s_var_map.push_back((OptInfo<std::string>){&test_edges, "", "path", "test_edges"});
+    s_var_map.push_back((OptInfo<std::string>){&test_edges_partitions, "", "path", "test_edges_partitions"});
+    s_var_map.push_back((OptInfo<std::string>){&node_labels, "", "path", "node_labels"});
+    s_var_map.push_back((OptInfo<std::string>){&relation_labels, "", "path", "relation_labels"});
+    s_var_map.push_back((OptInfo<std::string>){&node_ids, "", "path", "node_ids"});
+    s_var_map.push_back((OptInfo<std::string>){&relation_ids, "", "path", "relations_ids"});
+    s_var_map.push_back((OptInfo<std::string>){&custom_ordering, "", "path", "custom_ordering"});
+    s_var_map.push_back((OptInfo<std::string>){&base_directory, "data/", "path", "base_directory"});
+
+    // Reporting options
+    int logs_per_epoch; // How many times log statements will be output during a single epoch of training or evaluation
+    spdlog::level::level_enum log_level; string s_log_level; // Log level to use
+
+    i_var_map.push_back((OptInfo<int>){&logs_per_epoch, 10, "reporting", "logs_per_epoch", {0, INT32_MAX}});
+    s_var_map.push_back((OptInfo<std::string>){&s_log_level, "info", "reporting", "log_level"});
+
+    AllOptInfo opt_info = {s_var_map, i64_var_map, i_var_map, f_var_map, b_var_map};
+
+    // Get config file
+    cxxopts::Options cmd_options(argv[0], "Train and evaluate graph embeddings");
+    cmd_options.allow_unrecognised_options();
+    cmd_options.positional_help("");
+    cmd_options.custom_help("config_file [OPTIONS...] [<section>.<option>=<value>...]");
+    cmd_options.add_options()
+        ("config_file", "Configuration file", cxxopts::value<std::string>())
+        ("h, help", "Print help and exit.");
+    string config_path = getConfigPath(argc, argv, cmd_options);
     std::filesystem::path config_file_path = config_path;
-    if (false == std::filesystem::exists(config_file_path)){
+    if (!std::filesystem::exists(config_file_path)) {
         SPDLOG_ERROR("Unable to find configuration file: {}", config_path);
         exit(1);
     }
 
-    // General options
-    torch::DeviceType device;
-    string s_device;
-    string s_gpu_ids;
-    std::vector<int> gpu_ids;
-    int64_t rand_seed;
-    int64_t num_train;
-    int64_t num_valid;
-    int64_t num_test;
-    int64_t num_nodes;
-    int64_t num_relations;
-    string experiment_name;
-
-    // Model options
-    float scale_factor;
-    InitializationDistribution initialization_distribution;
-    string s_initialization_distribution;
-    int embedding_size;
-    EncoderModelType encoder_model;
-    string s_encoder_model;
-    DecoderModelType decoder_model;
-    string s_decoder_model;
-
-    // Storage options
-    BackendType edges_backend_type;
-    string s_edges_backend_type;
-    bool reinit_edges;
-    bool remove_preprocessed;
-    bool shuffle_input_edges;
-    torch::Dtype edges_dtype;
-    string s_edges_dtype;
-    BackendType embeddings_backend_type;
-    string s_embeddings_backend_type;
-    bool reinit_embeddings;
-    BackendType relations_backend_type;
-    string s_relations_backend_type;
-    torch::Dtype embeddings_dtype;
-    string s_embeddings_dtype;
-    EdgeBucketOrdering edge_bucket_ordering;
-    string s_edge_bucket_ordering;
-    int num_partitions;
-    int buffer_capacity;
-    bool prefetching;
-    bool conserve_memory;
-
-    // Training options
-    int training_batch_size;
-    int training_num_chunks;
-    int training_negatives;
-    float training_degree_fraction;
-    NegativeSamplingAccess training_negative_sampling_access;
-    string s_training_negative_sampling_access;
-    float learning_rate;
-    float regularization_coef;
-    int regularization_norm;
-    OptimizerType optimizer_type;
-    string s_optimizer_type;
-    LossFunctionType loss_function_type;
-    string s_loss_function_type;
-    float margin;
-    bool average_gradients;
-    bool synchronous;
-    int num_epochs;
-    int checkpoint_interval;
-    int shuffle_interval;
-
-    // Training pipeline options
-    int max_batches_in_flight;
-    bool update_in_flight;
-    int embeddings_host_queue_size;
-    int embeddings_device_queue_size;
-    int gradients_host_queue_size;
-    int gradients_device_queue_size;
-    int num_embedding_loader_threads;
-    int num_embedding_transfer_threads;
-    int num_compute_threads;
-    int num_gradient_transfer_threads;
-    int num_embedding_update_threads;
-
-    // Evaluation options
-    int evaluation_batch_size;
-    int evaluation_num_chunks;
-    int evaluation_negatives;
-    float evaluation_degree_fraction;
-    NegativeSamplingAccess eval_negative_sampling_access;
-    string s_eval_negative_sampling_access;
-    int epochs_per_eval;
-    bool eval_synchronous;
-    string s_evaluation_method;
-    bool filtered_eval;
-    int checkpoint_to_eval;
-
-    // Evaluation pipeline options
-    int evaluate_max_batches_in_flight;
-    int evaluate_embeddings_host_queue_size;
-    int evaluate_embeddings_device_queue_size;
-    int evaluate_num_embedding_loader_threads;
-    int evaluate_num_embedding_transfer_threads;
-    int num_evaluate_threads;
-
-    // Path options
-    string train_edges;
-    string train_edges_partitions;
-    string validation_edges;
-    string validation_edges_partitions;
-    string test_edges;
-    string test_edges_partitions;
-    string node_labels;
-    string relation_labels;
-    string node_ids;
-    string relation_ids;
-    string custom_ordering;
-    string base_directory;
-
-    // Reporting options
-    int logs_per_epoch;
-    spdlog::level::level_enum log_level;
-    string s_log_level;
-
-    std::ifstream config_fstream(config_path.c_str());
-    po::options_description config_options("Configuration");
-    po::variables_map variables_map;
-
-    config_options.add_options()
-        ("general.device", po::value<string>(&s_device)->default_value("CPU"), "Device to use for training")
-        ("general.gpu_ids", po::value<string>(&s_gpu_ids)->default_value("0"), "Ids of the gpus to use")
-        ("general.random_seed", po::value<int64_t>(&rand_seed)->default_value(time(0)), "Random seed to use")
-        ("general.num_train", po::value<int64_t>(&num_train)->default_value(-1), "Number of edges in the graph")
-        ("general.num_valid", po::value<int64_t>(&num_valid)->default_value(0), "Number of edges in the graph")
-        ("general.num_test", po::value<int64_t>(&num_test)->default_value(0), "Number of edges in the graph")
-        ("general.num_nodes", po::value<int64_t>(&num_nodes)->default_value(-1), "Number of nodes in the graph")
-        ("general.num_relations", po::value<int64_t>(&num_relations)->default_value(-1), "Number of relations in the graph")
-        ("general.experiment_name", po::value<string>(&experiment_name)->default_value("marius"), "Name for the current experiment")
-
-        ("model.scale_factor", po::value<float>(&scale_factor)->default_value(.001), "Factor to scale the embeddings upon initialization")
-        ("model.initialization_distribution", po::value<string>(&s_initialization_distribution)->default_value("Normal"), "Which distribution to use for initializing embeddings")
-        ("model.embedding_size", po::value<int>(&embedding_size)->default_value(128), "Dimension of the embedding vectors")
-        ("model.encoder", po::value<string>(&s_encoder_model)->default_value("None"), "Encoder model to use.")
-        ("model.decoder", po::value<string>(&s_decoder_model)->default_value("DistMult"), "Decoder model to use.")
-
-        ("storage.edges_backend", po::value<string>(&s_edges_backend_type)->default_value("HostMemory"), "Storage backend to use")
-        ("storage.reinit_edges", po::value<bool>(&reinit_edges)->default_value(true), "If true, the edges in the data directory will be reinitialized")
-        ("storage.remove_preprocessed", po::value<bool>(&remove_preprocessed)->default_value(false), "If true, the input edge files will be removed.")
-        ("storage.shuffle_input_edges", po::value<bool>(&shuffle_input_edges)->default_value(true), "If true, the input edge files will be shuffled.")
-        ("storage.edges_dtype", po::value<string>(&s_edges_dtype)->default_value("int32"), "Type of the embedding vectors")
-        ("storage.embeddings_backend", po::value<string>(&s_embeddings_backend_type)->default_value("HostMemory"), "Storage backend to use")
-        ("storage.reinit_embeddings", po::value<bool>(&reinit_embeddings)->default_value(true), "If true, the embeddings in the data directory will be reinitialized")
-        ("storage.relations_backend", po::value<string>(&s_relations_backend_type)->default_value("HostMemory"), "Storage backend to use")
-        ("storage.embeddings_dtype", po::value<string>(&s_embeddings_dtype)->default_value("float32"), "Type of the embedding vectors")
-        ("storage.edge_bucket_ordering", po::value<string>(&s_edge_bucket_ordering)->default_value("Elimination"), "How to order edge buckets")
-        ("storage.num_partitions", po::value<int>(&num_partitions)->default_value(1), "Number of partitions for training")
-        ("storage.buffer_capacity", po::value<int>(&buffer_capacity)->default_value(2), "Number of partitions to hold in memory")
-        ("storage.prefetching", po::value<bool>(&prefetching)->default_value(true), "Whether to prefetch partitions or not")
-        ("storage.conserve_memory", po::value<bool>(&conserve_memory)->default_value(false), "Will try to conserve memory at the cost of extra IO for some configurations.")
-
-        ("training.batch_size", po::value<int>(&training_batch_size)->default_value(10000), "Number of positive edges in a batch")
-        ("training.number_of_chunks", po::value<int>(&training_num_chunks)->default_value(16), "Number of chunks to split up positives into")
-        ("training.negatives", po::value<int>(&training_negatives)->default_value(512), "Number of negatives to sample per chunk")
-        ("training.degree_fraction", po::value<float>(&training_degree_fraction)->default_value(.5), "Fraction of negatives which are sampled by degree")
-        ("training.negative_sampling_access", po::value<string>(&s_training_negative_sampling_access)->default_value("Uniform"), "How negative samples are generated")
-        ("training.learning_rate", po::value<float>(&learning_rate)->default_value(.1), "Learning rate to use")
-        ("training.regularization_coef", po::value<float>(&regularization_coef)->default_value(2e-6), "Regularization Coefficient")
-        ("training.regularization_norm", po::value<int>(&regularization_norm)->default_value(2), "Norm of the regularization")
-        ("training.optimizer", po::value<string>(&s_optimizer_type)->default_value("Adagrad"), "Optimizer to use")
-        ("training.loss", po::value<string>(&s_loss_function_type)->default_value("SoftMax"), "Loss to use")
-        ("training.margin", po::value<float>(&margin)->default_value(0), "Margin to use in ranking loss")
-        ("training.average_gradients", po::value<bool>(&average_gradients)->default_value(false), "If true gradients will be averaged when accumulated, summed if false")
-        ("training.synchronous", po::value<bool>(&synchronous)->default_value(false), "If true training will be synchronous")
-        ("training.num_epochs", po::value<int>(&num_epochs)->default_value(10), "Number of epochs to train")
-        ("training.checkpoint_interval", po::value<int>(&checkpoint_interval)->default_value(9999), "Will checkpoint model after each interval of epochs")
-        ("training.shuffle_interval", po::value<int>(&shuffle_interval)->default_value(1), "How many epochs until a shuffle of the edges is performed")
-
-        ("training_pipeline.max_batches_in_flight", po::value<int>(&max_batches_in_flight)->default_value(16), "Vary the amount of batches allowed in the pipeline at once")
-        ("training_pipeline.update_in_flight", po::value<bool>(&update_in_flight)->default_value(false), "If true, batches in the pipeline will receive gradient updates")
-        ("training_pipeline.embeddings_host_queue_size", po::value<int>(&embeddings_host_queue_size)->default_value(4), "Size of embeddings host queue")
-        ("training_pipeline.embeddings_device_queue_size", po::value<int>(&embeddings_device_queue_size)->default_value(4), "Size of embeddings device queue")
-        ("training_pipeline.gradients_host_queue_size", po::value<int>(&gradients_host_queue_size)->default_value(4), "Size of gradients host queue")
-        ("training_pipeline.gradients_device_queue_size", po::value<int>(&gradients_device_queue_size)->default_value(4), "Size of gradients device queue")
-        ("training_pipeline.num_embedding_loader_threads", po::value<int>(&num_embedding_loader_threads)->default_value(2), "Number of embedding loader threads")
-        ("training_pipeline.num_embedding_transfer_threads", po::value<int>(&num_embedding_transfer_threads)->default_value(2), "Number of embedding transfer threads")
-        ("training_pipeline.num_compute_threads", po::value<int>(&num_compute_threads)->default_value(1), "Number of compute threads")
-        ("training_pipeline.num_gradient_transfer_threads", po::value<int>(&num_gradient_transfer_threads)->default_value(2), "Number of gradient transfer threads")
-        ("training_pipeline.num_embedding_update_threads", po::value<int>(&num_embedding_update_threads)->default_value(2), "Number of embedding updater threads")
-
-        ("evaluation.batch_size", po::value<int>(&evaluation_batch_size)->default_value(1000), "Number of positive edges in a batch")
-        ("evaluation.number_of_chunks", po::value<int>(&evaluation_num_chunks)->default_value(1), "Number of chunks to split up positives into")
-        ("evaluation.negatives", po::value<int>(&evaluation_negatives)->default_value(1000), "Number of negatives to sample per chunk")
-        ("evaluation.degree_fraction", po::value<float>(&evaluation_degree_fraction)->default_value(.5), "Fraction of negatives to sample by degree")
-        ("evaluation.negative_sampling_access", po::value<string>(&s_eval_negative_sampling_access)->default_value("Uniform"), "Negative sampling policy to use for evaluation")
-        ("evaluation.epochs_per_eval", po::value<int>(&epochs_per_eval)->default_value(1), "Number of positive edges in a batch")
-        ("evaluation.synchronous", po::value<bool>(&eval_synchronous)->default_value(false), "Amount of data to hold out for validation set")
-        ("evaluation.evaluation_method", po::value<string>(&s_evaluation_method)->default_value("LinkPrediction"), "Evaluation method to use")
-        ("evaluation.filtered_evaluation", po::value<bool>(&filtered_eval)->default_value(false), "If true false negatives will be filtered.")
-        ("evaluation.checkpoint_id", po::value<int>(&checkpoint_to_eval)->default_value(-1), "Checkpoint to evaluate")
-
-        ("evaluation_pipeline.max_batches_in_flight", po::value<int>(&evaluate_max_batches_in_flight)->default_value(32), "Vary the amount of batches allowed in the pipeline at once")
-        ("evaluation_pipeline.embeddings_host_queue_size", po::value<int>(&evaluate_embeddings_host_queue_size)->default_value(8), "Size of embeddings host queue")
-        ("evaluation_pipeline.embeddings_device_queue_size", po::value<int>(&evaluate_embeddings_device_queue_size)->default_value(8), "Size of embeddings device queue")
-        ("evaluation_pipeline.num_embedding_loader_threads", po::value<int>(&evaluate_num_embedding_loader_threads)->default_value(4), "Number of embedding loader threads")
-        ("evaluation_pipeline.num_embedding_transfer_threads", po::value<int>(&evaluate_num_embedding_transfer_threads)->default_value(4), "Number of embedding transfer threads")
-        ("evaluation_pipeline.num_evaluate_threads", po::value<int>(&num_evaluate_threads)->default_value(1), "Number of evaluate threads")
-
-        ("path.train_edges", po::value<string>(&train_edges)->required(), "Path to training edges file")
-        ("path.train_edges_partitions", po::value<string>(&train_edges_partitions), "Path to training edge partition file")
-        ("path.validation_edges", po::value<string>(&validation_edges), "Path to validation edges file")
-        ("path.validation_partitions", po::value<string>(&validation_edges_partitions), "Path to training edge partition file")
-        ("path.test_edges", po::value<string>(&test_edges), "Path to edges used for testing")
-        ("path.test_edges_partitions", po::value<string>(&test_edges_partitions), "Path to training edge partition file")
-        ("path.node_labels", po::value<string>(&node_labels), "Path to node labels for Node classification")
-        ("path.relation_labels", po::value<string>(&relation_labels), "Path to relation labels for Relation classification")
-        ("path.node_ids", po::value<string>(&node_ids), "Path to node ids")
-        ("path.relations_ids", po::value<string>(&relation_ids), "Path to relations ids")
-        ("path.custom_ordering", po::value<string>(&custom_ordering), "Path to file where edge bucket ordering is stored.")
-        ("path.base_directory", po::value<string>(&base_directory)->default_value("data/"), "Path to directory where data is stored")
-
-        ("reporting.logs_per_epoch", po::value<int>(&logs_per_epoch)->default_value(10), "How many times log statements will be output during a single epoch of training or evaluation")
-        ("reporting.log_level", po::value<string>(&s_log_level)->default_value("info"), "Log level to use.");
-
-    try {
-        store(parse_command_line(argc, argv, config_options), variables_map);
-        store(parse_config_file(config_fstream, config_options), variables_map);
-        notify(variables_map);
-    } catch(std::exception& e) {
-        SPDLOG_ERROR(e.what());
-        exit(-1);
-    }
+    // Parse all options from config and command line and validate
+    assignOptions(opt_info, config_path);
+    parseCommandLine(argc, argv, opt_info, cmd_options);
+    if (train_edges == "")
+        SPDLOG_ERROR("Path to training edges required");
+    validateNumericalOptions(opt_info);
 
     if (s_device == "GPU") {
         device = torch::kCUDA;
@@ -267,48 +423,48 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
         exit(-1);
     }
 
-    if (s_encoder_model == "None") {
+    if (s_encoder == "None") {
         encoder_model = EncoderModelType::None;
-    } else if (s_encoder_model == "Custom") {
+    } else if (s_encoder == "Custom") {
         encoder_model = EncoderModelType::None;
     } else {
-        SPDLOG_ERROR("Unrecognized Encoder Model: {}. Options are [None, Custom]", s_encoder_model);
+        SPDLOG_ERROR("Unrecognized Encoder Model: {}. Options are [None, Custom]", s_encoder);
         exit(-1);
     }
 
     RelationOperatorType relation_operator;
     ComparatorType comparator;
-    if (s_decoder_model == "NodeClassification") {
+    if (s_decoder == "NodeClassification") {
         decoder_model = DecoderModelType::NodeClassification;
-    } else if (s_decoder_model == "DistMult") {
+    } else if (s_decoder == "DistMult") {
         decoder_model = DecoderModelType::DistMult;
         comparator = ComparatorType::Dot;
         relation_operator = RelationOperatorType::Hadamard;
-    } else if (s_decoder_model == "TransE") {
+    } else if (s_decoder == "TransE") {
         decoder_model = DecoderModelType::TransE;
         comparator = ComparatorType::Cosine;
         relation_operator = RelationOperatorType::Translation;
-    } else if (s_decoder_model == "ComplEx") {
+    } else if (s_decoder == "ComplEx") {
         decoder_model = DecoderModelType::ComplEx;
         comparator = ComparatorType::Dot;
         relation_operator = RelationOperatorType::ComplexHadamard;
     } else {
-        SPDLOG_ERROR("Unrecognized Evaluation Method: {}. Options are [NodeClassification, DistMult, TransE, ComplEx]", s_decoder_model);
+        SPDLOG_ERROR("Unrecognized Evaluation Method: {}. Options are [NodeClassification, DistMult, TransE, ComplEx]", s_decoder);
         exit(-1);
     }
 
-    if (s_edges_backend_type == "RocksDB") {
+    if (s_edges_backend == "RocksDB") {
         SPDLOG_ERROR("RocksDB backend currently unsupported.");
         exit(-1);
         // edges_backend_type = BackendType::RocksDB;
-    } else if (s_edges_backend_type == "DeviceMemory") {
+    } else if (s_edges_backend == "DeviceMemory") {
         edges_backend_type = BackendType::DeviceMemory;
-    } else if (s_edges_backend_type == "FlatFile") {
+    } else if (s_edges_backend == "FlatFile") {
         edges_backend_type = BackendType::FlatFile;
-    } else if (s_edges_backend_type == "HostMemory") {
+    } else if (s_edges_backend == "HostMemory") {
         edges_backend_type = BackendType::HostMemory;
     } else {
-        SPDLOG_ERROR("Unrecognized Edge Storage Backend: {}. Options are [DeviceMemory, FlatFile, HostMemory]", s_edges_backend_type);
+        SPDLOG_ERROR("Unrecognized Edge Storage Backend: {}. Options are [DeviceMemory, FlatFile, HostMemory]", s_edges_backend);
         exit(-1);
     }
 
@@ -321,42 +477,42 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
         exit(-1);
     }
 
-    if (s_embeddings_backend_type == "RocksDB") {
+    if (s_embeddings_backend == "RocksDB") {
         SPDLOG_ERROR("RocksDB backend currently unsupported.");
         exit(-1);
         // embeddings_backend_type = BackendType::RocksDB;
-    } else if (s_embeddings_backend_type == "HostMemory") {
+    } else if (s_embeddings_backend == "HostMemory") {
         embeddings_backend_type = BackendType::HostMemory;
-    } else if (s_embeddings_backend_type == "DeviceMemory") {
+    } else if (s_embeddings_backend == "DeviceMemory") {
         embeddings_backend_type = BackendType::DeviceMemory;
-    } else if (s_embeddings_backend_type == "FlatFile") {
+    } else if (s_embeddings_backend == "FlatFile") {
         SPDLOG_ERROR("FlatFile backend unsupported for node embeddings.");
         exit(-1);
         // embeddings_backend_type = BackendType::FlatFile;
-    } else if (s_embeddings_backend_type == "PartitionBuffer") {
+    } else if (s_embeddings_backend == "PartitionBuffer") {
         embeddings_backend_type = BackendType::PartitionBuffer;
     } else {
-        SPDLOG_ERROR("Unrecognized Node Embedding Storage Backend: {}. Options are [DeviceMemory, PartitionBuffer, HostMemory]", s_embeddings_backend_type);
+        SPDLOG_ERROR("Unrecognized Node Embedding Storage Backend: {}. Options are [DeviceMemory, PartitionBuffer, HostMemory]", s_embeddings_backend);
         exit(-1);
     }
 
-    if (s_relations_backend_type == "RocksDB") {
+    if (s_relations_backend == "RocksDB") {
         SPDLOG_ERROR("RocksDB backend currently unsupported.");
         exit(-1);
         // embeddings_backend_type = BackendType::RocksDB;
-    } else if (s_relations_backend_type == "HostMemory") {
+    } else if (s_relations_backend == "HostMemory") {
         relations_backend_type = BackendType::HostMemory;
-    } else if (s_relations_backend_type == "DeviceMemory") {
+    } else if (s_relations_backend == "DeviceMemory") {
         relations_backend_type = BackendType::DeviceMemory;
-    } else if (s_relations_backend_type == "FlatFile") {
+    } else if (s_relations_backend == "FlatFile") {
         SPDLOG_ERROR("FlatFile backend unsupported for relation embeddings.");
         exit(-1);
         // embeddings_backend_type = BackendType::FlatFile;
-    } else if (s_relations_backend_type == "PartitionBuffer") {
+    } else if (s_relations_backend == "PartitionBuffer") {
         SPDLOG_ERROR("PartitionBuffer backend unsupported for relation embeddings.");
         exit(-1);
     } else {
-        SPDLOG_ERROR("Unrecognized Relation Embedding Storage Backend: {}. Options are [DeviceMemory, HostMemory]", s_relations_backend_type);
+        SPDLOG_ERROR("Unrecognized Relation Embedding Storage Backend: {}. Options are [DeviceMemory, HostMemory]", s_relations_backend);
         exit(-1);
     }
 
@@ -405,7 +561,7 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
     if (s_optimizer_type == "SGD") {
         SPDLOG_ERROR("SGD Currently Unsupported");
         exit(-1);
-//        optimizer_type = OptimizerType::SGD;
+        // optimizer_type = OptimizerType::SGD;
     } else if (s_optimizer_type == "Adagrad") {
         optimizer_type = OptimizerType::Adagrad;
     } else {
@@ -447,7 +603,7 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
     GeneralOptions general_options = {
         device,
         gpu_ids,
-        rand_seed,
+        random_seed,
         num_train,
         num_valid,
         num_test,
@@ -570,150 +726,7 @@ MariusOptions parseConfig(string config_path, int64_t argc, char *argv[]) {
         reporting_options
     };
 
-    if (validateNumericalOptions(options) == false) {
-        exit(-1);
-    }
-
     return options;
-}
-
-bool validateNumericalOptions(MariusOptions options) {
-
-    struct IntValueRange {
-        string name;
-        int64_t value;
-        int64_t range[2];
-    };
-
-    struct FloatValueRange {
-        string name;
-        float value;
-        float range[2];
-    };
-
-    std::vector<IntValueRange> intRanges;
-    std::vector<FloatValueRange> floatRanges;
-
-    float float_max = std::numeric_limits<float>::max();
-
-    // GENERAL OPTIONS
-    IntValueRange rand_seed = {"general.random_seed", options.general.random_seed, {0, INT64_MAX}};
-    intRanges.push_back(rand_seed);
-    IntValueRange num_train = {"general.num_train", options.general.num_train, {0, INT64_MAX}};
-    intRanges.push_back(num_train);
-    IntValueRange num_valid = {"general.num_valid", options.general.num_valid, {0, INT64_MAX}};
-    intRanges.push_back(num_valid);
-    IntValueRange num_test = {"general.num_test", options.general.num_test, {0, INT64_MAX}};
-    intRanges.push_back(num_test);
-    IntValueRange num_nodes = {"general.num_nodes", options.general.num_nodes, {0, INT64_MAX}};
-    intRanges.push_back(num_nodes);
-    IntValueRange num_relations = {"general.num_relations", options.general.num_relations, {0, INT64_MAX}};
-    intRanges.push_back(num_relations);
-
-    // MODEL OPTIONS
-    FloatValueRange scale_factor = {"model.scale_factor", options.model.scale_factor, {0, float_max}};
-    floatRanges.push_back(scale_factor);
-    IntValueRange embedding_size = {"model.embedding_size", options.model.embedding_size, {1, INT32_MAX}};
-    intRanges.push_back(embedding_size);
-
-    // STORAGE OPTIONS
-    IntValueRange num_partitions = {"storage.num_partitions", options.storage.num_partitions, {1, INT32_MAX}};
-    intRanges.push_back(num_partitions);
-    IntValueRange buffer_capacity = {"storage.buffer_capacity", options.storage.buffer_capacity, {2, INT32_MAX}};
-    intRanges.push_back(buffer_capacity);
-
-    // TRAINING OPTIONS
-    IntValueRange training_batch_size = {"training.batch_size", options.training.batch_size, {1, INT32_MAX}};
-    intRanges.push_back(training_batch_size);
-    IntValueRange training_num_chunks = {"training.number_of_chunks", options.training.number_of_chunks, {1, options.training.batch_size}};
-    intRanges.push_back(training_num_chunks);
-    IntValueRange training_negatives = {"training.negatives", options.training.negatives, {1, INT32_MAX}};
-    intRanges.push_back(training_negatives);
-    FloatValueRange training_degree_fraction = {"training.degree_fraction", options.training.degree_fraction, {0.0, 1.0}};
-    floatRanges.push_back(training_degree_fraction);
-    FloatValueRange learning_rate = {"training.learning_rate", options.training.learning_rate, {0, float_max}};
-    floatRanges.push_back(learning_rate);
-    FloatValueRange regularization_coef = {"training.regularization_coef", options.training.regularization_coef, {0, float_max}};
-    floatRanges.push_back(regularization_coef);
-    IntValueRange regularization_norm = {"training.regularization_norm", options.training.regularization_norm, {0, INT32_MAX}};
-    intRanges.push_back(regularization_norm);
-    FloatValueRange margin = {"training.margin", options.training.margin, {0, float_max}};
-    floatRanges.push_back(margin);
-    IntValueRange num_epochs = {"training.num_epochs", options.training.num_epochs, {0, INT32_MAX}};
-    intRanges.push_back(num_epochs);
-    IntValueRange checkpoint_interval = {"training.checkpoint_interval", options.training.num_epochs, {1, INT32_MAX}};
-    intRanges.push_back(checkpoint_interval);
-    IntValueRange shuffle_interval = {"training.shuffle_interval", options.training.shuffle_interval, {1, INT32_MAX}};
-    intRanges.push_back(shuffle_interval);
-
-    // TRAINING PIPELINE OPTIONS
-    IntValueRange max_batches_in_flight = {"training_pipeline.max_batches_in_flight", options.training_pipeline.max_batches_in_flight, {1, INT32_MAX}};
-    intRanges.push_back(max_batches_in_flight);
-    IntValueRange embeddings_host_queue_size = {"training_pipeline.embeddings_host_queue_size", options.training_pipeline.embeddings_host_queue_size, {1, INT32_MAX}};
-    intRanges.push_back(embeddings_host_queue_size);
-    IntValueRange embeddings_device_queue_size = {"training_pipeline.embeddings_device_queue_size", options.training_pipeline.embeddings_device_queue_size, {1, INT32_MAX}};
-    intRanges.push_back(embeddings_device_queue_size);
-    IntValueRange gradients_host_queue_size = {"training_pipeline.gradients_host_queue_size", options.training_pipeline.gradients_host_queue_size, {1, INT32_MAX}};
-    intRanges.push_back(gradients_host_queue_size);
-    IntValueRange gradients_device_queue_size = {"training_pipeline.gradients_device_queue_size", options.training_pipeline.gradients_device_queue_size, {1, INT32_MAX}};
-    intRanges.push_back(gradients_device_queue_size);
-    IntValueRange num_embedding_loader_threads = {"training_pipeline.num_embedding_loader_threads", options.training_pipeline.num_embedding_loader_threads, {1, INT32_MAX}};
-    intRanges.push_back(num_embedding_loader_threads);
-    IntValueRange num_embedding_transfer_threads = {"training_pipeline.num_embedding_transfer_threads", options.training_pipeline.num_embedding_transfer_threads, {1, INT32_MAX}};
-    intRanges.push_back(num_embedding_transfer_threads);
-    IntValueRange num_compute_threads = {"training_pipeline.num_compute_threads", options.training_pipeline.num_compute_threads, {1, INT32_MAX}};
-    intRanges.push_back(num_compute_threads);
-    IntValueRange num_gradient_transfer_threads = {"training_pipeline.num_gradient_transfer_threads", options.training_pipeline.num_gradient_transfer_threads, {1, INT32_MAX}};
-    intRanges.push_back(num_gradient_transfer_threads);
-    IntValueRange num_embedding_update_threads = {"training_pipeline.num_embedding_update_threads", options.training_pipeline.num_embedding_update_threads, {1, INT32_MAX}};
-    intRanges.push_back(num_embedding_update_threads);
-
-    // EVALUATION OPTIONS
-    IntValueRange evaluation_batch_size = {"evaluation.batch_size", options.evaluation.batch_size, {1, INT32_MAX}};
-    intRanges.push_back(evaluation_batch_size);
-    IntValueRange evaluation_num_chunks = {"evaluation.number_of_chunks", options.evaluation.number_of_chunks, {0, INT64_MAX}};
-    intRanges.push_back(evaluation_num_chunks);
-    IntValueRange evaluation_negatives = {"evaluation.negatives", options.evaluation.negatives, {0, INT64_MAX}};
-    intRanges.push_back(evaluation_negatives);
-    FloatValueRange evaluation_degree_fraction = {"evaluation.degree_fraction", options.evaluation.degree_fraction, {0.0, 1.0}};
-    floatRanges.push_back(evaluation_degree_fraction);
-    IntValueRange epochs_per_eval = {"evaluation.epochs_per_eval", options.evaluation.epochs_per_eval, {1, INT32_MAX}};
-    intRanges.push_back(epochs_per_eval);
-    IntValueRange checkpoint_to_eval = {"evaluation.checkpoint_to_eval", options.evaluation.checkpoint_to_eval, {-1, INT32_MAX}};
-    intRanges.push_back(checkpoint_to_eval);
-
-    // EVALUATION PIPELINE OPTIONS
-    IntValueRange evaluate_max_batches_in_flight = {"evaluation_pipeline.max_batches_in_flight", options.evaluation_pipeline.max_batches_in_flight, {1, INT32_MAX}};
-    intRanges.push_back(evaluate_max_batches_in_flight);
-    IntValueRange evaluate_embeddings_host_queue_size = {"evaluation_pipeline.embeddings_host_queue_size", options.evaluation_pipeline.embeddings_host_queue_size, {1, INT32_MAX}};
-    intRanges.push_back(evaluate_embeddings_host_queue_size);
-    IntValueRange evaluate_embeddings_device_queue_size = {"evaluation_pipeline.embeddings_device_queue_size", options.evaluation_pipeline.embeddings_device_queue_size, {1, INT32_MAX}};
-    intRanges.push_back(evaluate_embeddings_device_queue_size);
-    IntValueRange evaluate_num_embedding_loader_threads = {"evaluation_pipeline.num_embedding_loader_threads", options.evaluation_pipeline.num_embedding_loader_threads, {1, INT32_MAX}};
-    intRanges.push_back(evaluate_num_embedding_loader_threads);
-    IntValueRange evaluate_num_embedding_transfer_threads = {"evaluation_pipeline.num_embedding_transfer_threads", options.evaluation_pipeline.num_embedding_transfer_threads, {1, INT32_MAX}};
-    intRanges.push_back(evaluate_num_embedding_transfer_threads);
-    IntValueRange num_evaluate_threads = {"evaluation_pipeline.num_evaluate_threads", options.evaluation_pipeline.num_evaluate_threads, {0, INT32_MAX}};
-    intRanges.push_back(num_evaluate_threads);
-
-    // REPORTING OPTIONS
-    IntValueRange logs_per_epoch = {"reporting.logs_per_epoch", options.reporting.logs_per_epoch, {0, INT32_MAX}};
-    intRanges.push_back(logs_per_epoch);
-
-    for (IntValueRange v : intRanges) {
-        if (v.value < v.range[0] || v.value > v.range[1]) {
-            SPDLOG_ERROR("Parameter {}: value {} out of range [{}, {}]", v.name, v.value, v.range[0], v.range[1]);
-            return false;
-        }
-    }
-    for (FloatValueRange v : floatRanges) {
-        if (v.value < v.range[0] || v.value > v.range[1]) {
-            SPDLOG_ERROR("Parameter {}: value {} out of range [{}, {}]", v.name, v.value, v.range[0], v.range[1]);
-            return false;
-        }
-    }
-
-    return true;
 }
 
 void logConfig() {
