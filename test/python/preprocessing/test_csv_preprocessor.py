@@ -343,13 +343,13 @@ class TestGeneralParser(unittest.TestCase):
         for i in range(len(internal_node_ids) - 1):
             delta_sum = (internal_node_ids[i+1] - internal_node_ids[i])\
                                                                     + delta_sum
-            self.assertTrue(delta_sum < (len(internal_node_ids) - 1))
+            self.assertNotEqual(delta_sum, (len(internal_node_ids) - 1))
 
         delta_sum = 0
         for i in range(len(internal_rel_ids) - 1):
             delta_sum = (internal_rel_ids[i+1] - internal_rel_ids[i])\
                                                                 + delta_sum
-            self.assertTrue(delta_sum < (len(internal_rel_ids) - 1))
+            self.assertNotEqual(delta_sum, (len(internal_rel_ids) - 1))
 
     def test_num_partitions(self):
         """
