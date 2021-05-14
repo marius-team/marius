@@ -3,9 +3,9 @@ import shutil
 import unittest
 import subprocess
 from pathlib import Path
-import random
 import numpy as np
 from marius.tools.csv_converter import general_parser
+from test.python.helpers import dataset_generator
 
 TEST_DIR = "./output_dir"
 test_data_dir = "./test/test_data/"
@@ -14,6 +14,9 @@ train_file = "train_edges.txt"
 valid_file = "valid_edges.txt"
 test_file = "test_edges.txt"
 output_dir = TEST_DIR
+train_path = str(Path(input_dir) / Path(train_file))
+valid_path = str(Path(input_dir) / Path(valid_file))
+test_path = str(Path(input_dir) / Path(test_file))
 
 
 class TestGeneralParser(unittest.TestCase):
@@ -44,44 +47,6 @@ class TestGeneralParser(unittest.TestCase):
 
         if Path(input_dir).exists():
             shutil.rmtree(Path(input_dir))
-
-    def dataset_generator(self, train_len=1000, valid_len=100, test_len=100,
-                          delim="\t", start_col=0, num_line_skip=0):
-        with open(str(Path(input_dir) / Path(train_file)), "w") as f:
-            for i in range(num_line_skip):
-                f.write("This is a line needs to be skipped.\n")
-            for i in range(train_len):
-                src = random.randint(1, 100)
-                dst = random.randint(1, 100)
-                rel = random.randint(101, 110)
-                for j in range(start_col):
-                    f.write("col_" + str(j) + delim)
-                f.write(str(src) + delim + str(rel) + delim + str(dst) + "\n")
-        f.close()
-
-        with open(str(Path(input_dir) / Path(valid_file)), "w") as f:
-            for i in range(num_line_skip):
-                f.write("This is a line needs to be skipped.\n")
-            for i in range(valid_len):
-                src = random.randint(1, 100)
-                dst = random.randint(1, 100)
-                rel = random.randint(101, 110)
-                for j in range(start_col):
-                    f.write("col_" + str(j) + delim)
-                f.write(str(src) + delim + str(rel) + delim + str(dst) + "\n")
-        f.close()
-
-        with open(str(Path(input_dir) / Path(test_file)), "w") as f:
-            for i in range(num_line_skip):
-                f.write("This is a line needs to be skipped.\n")
-            for i in range(test_len):
-                src = random.randint(1, 100)
-                dst = random.randint(1, 100)
-                rel = random.randint(101, 110)
-                for j in range(start_col):
-                    f.write("col_" + str(j) + delim)
-                f.write(str(src) + delim + str(rel) + delim + str(dst) + "\n")
-        f.close()
 
     def test_basic(self):
         """
@@ -191,7 +156,9 @@ class TestGeneralParser(unittest.TestCase):
             capability of detecting delimiter is limited. This test ensures
             future changes will not have worse performance
         """
-        self.dataset_generator(delim='\t', num_line_skip=2, start_col=2)
+
+        dataset_generator(train_path, valid_path, test_path, delim='\t',
+                          num_line_skip=2, start_col=2)
 
         proc = subprocess.run(
             ["python3", "./src/python/tools/csv_converter.py",
@@ -212,7 +179,8 @@ class TestGeneralParser(unittest.TestCase):
         Check if csv_converter can process data files correctly with 
             num_line_skip specified
         """
-        self.dataset_generator(delim='\t', num_line_skip=5)
+        dataset_generator(train_path, valid_path, test_path, delim='\t',
+                          num_line_skip=5)
         proc = subprocess.run(
             ["python3", "./src/python/tools/csv_converter.py",
              str(Path(input_dir) / Path(train_file)),
@@ -231,7 +199,8 @@ class TestGeneralParser(unittest.TestCase):
         Check if exception is thrown when num_line_skip is not
             specified correctly
         """
-        self.dataset_generator(delim='\t', num_line_skip=5)
+        dataset_generator(train_path, valid_path, test_path, delim='\t',
+                          num_line_skip=5)
         with self.assertRaises(AssertionError):
             general_parser([str(Path(input_dir) / Path(train_file)),
                             str(Path(input_dir) / Path(valid_file)),
@@ -246,7 +215,8 @@ class TestGeneralParser(unittest.TestCase):
             specified if start_col is specified. If future improvment is made,
             this test can be removed
         """
-        self.dataset_generator(delim='\t', start_col=2)
+        dataset_generator(train_path, valid_path, test_path, delim='\t',
+                          start_col=2)
         with self.assertRaises(AssertionError):
             general_parser([str(Path(input_dir) / Path(train_file)),
                             str(Path(input_dir) / Path(valid_file)),
