@@ -319,7 +319,7 @@ PartitionBuffer::PartitionBuffer(int capacity, int num_partitions, int64_t parti
     misses_ = 0;
     prefetch_hits_ = 0;
 
-    free_list_ = new boost::lockfree::queue<int64_t>(capacity_);
+    free_list_ = std::queue<int>();
     partition_table_ = std::vector<Partition *>();
 
     prefetching_ = marius_options.storage.prefetching;
@@ -344,7 +344,7 @@ PartitionBuffer::PartitionBuffer(int capacity, int num_partitions, int64_t parti
     }
 
     for (int64_t i = 0; i < capacity_; i++) {
-        free_list_->push(i);
+        free_list_.push(i);
     }
 
     filename_ = filename;
@@ -358,7 +358,6 @@ PartitionBuffer::~PartitionBuffer() {
 
     unload(true);
 
-    delete free_list_;
     delete partitioned_file_;
     for (int64_t i = 0; i < num_partitions_; i++) {
         delete partition_table_[i];
@@ -525,20 +524,22 @@ void PartitionBuffer::evict(Partition *partition) {
     }
     assert(partition->buffer_idx_ >= 0);
     assert(partition->buffer_idx_ < capacity_);
-    free_list_->push(partition->buffer_idx_);
+    free_list_.push(partition->buffer_idx_);
 }
 
 void PartitionBuffer::admit(Partition *partition) {
     // assumes that the buffer has been locked but not the partition
     int64_t buffer_idx;
     SPDLOG_TRACE("Admitting {}", partition->partition_id_);
-    while (!free_list_->pop(buffer_idx)) {
+    if (free_list_.empty()) {
         Partition *partition_to_evict = partition_table_[*evict_ids_itr_++];
         SPDLOG_TRACE("Evicting {}", partition_to_evict->partition_id_);
         evict(partition_to_evict);
         size_--;
         SPDLOG_TRACE("Evicted {}", partition_to_evict->partition_id_);
     }
+    buffer_idx = free_list_.front();
+    free_list_.pop();
 
     void *buff_addr = (char *) buff_mem_ + (buffer_idx * partition_size_ * embedding_size_ * dtype_size_);
 
@@ -573,7 +574,7 @@ void PartitionBuffer::sync() {
         if (curr_partition->present_) {
             partitioned_file_->writePartition(curr_partition, true);
             curr_partition->present_ = false;
-            free_list_->push(curr_partition->buffer_idx_);
+            free_list_.push(curr_partition->buffer_idx_);
             curr_partition->buffer_idx_ = -1;
         }
     }
