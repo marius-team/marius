@@ -106,8 +106,8 @@ def get_header_length(input_file, entry_regex):
     return num_line_skip
 
 
-def check_given_num_line_skip_start_col(input_file, num_line_skip, data_cols, 
-        delim, start_col):
+def check_given_num_line_skip_start_col(input_file, num_line_skip, data_cols,
+                                        delim, start_col):
     with open(input_file, 'r') as f:
         for i in range(num_line_skip):
             line = next(f)
@@ -116,7 +116,7 @@ def check_given_num_line_skip_start_col(input_file, num_line_skip, data_cols,
         splitted_line = line.split(delim)
         if len(splitted_line) - start_col < len(data_cols):
             return False
-    
+
     return True
 
 
@@ -162,8 +162,9 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                    start_col=0, num_line_skip=None):
     assert(len(files) != 0), "Number of data files cannot be 0"
     assert(len(format) == 1), "Format is specified incorrectly"
-    assert((start_col == 0) or (start_col != 0 and num_line_skip != None)), \
-                "Need to specify num_line_skip if start_col is specified"
+    assert((start_col == 0) or
+           (start_col != 0 and num_line_skip is not None)),\
+        "Need to specify num_line_skip if start_col is specified"
     assert(num_partitions > 0)
 
     rel_idx = format[0].find('r')
@@ -410,8 +411,6 @@ def set_args():
     arg_dict = vars(args)
     if arg_dict.get("dataset_split") is not None:
         arg_dict.update({"dataset_split": tuple(arg_dict.get("dataset_split"))})
-    
-    #arg_dict.update({"dtype": np.dtype(arg_dict.get("dtype"))}) # FIXME: argparse not taking np.int32
     return arg_dict
 
 
@@ -422,6 +421,7 @@ def main():
                    arg_dict.get("num_partitions"), arg_dict.get("dtype"),
                    arg_dict.get("not_remap_ids"), arg_dict.get("dataset_split"),
                    arg_dict.get("start_col"), arg_dict.get("num_line_skip"))
+
 
 if __name__ == "__main__":
     main()
