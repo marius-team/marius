@@ -309,17 +309,23 @@ class TestGeneralParser(unittest.TestCase):
         internal_rel_ids = np.fromfile(str(Path(output_dir)) /
                                        Path("rel_mapping.bin"), dtype=int)
 
-        delta_sum = 0
+        delta_list = []
         for i in range(len(internal_node_ids) - 1):
-            delta_sum = (internal_node_ids[i+1] - internal_node_ids[i])\
-                                                                    + delta_sum
-            self.assertNotEqual(delta_sum, (len(internal_node_ids) - 1))
+            delta_list.append(internal_node_ids[i+1] - internal_node_ids[i])
+        delta_list_1 = [i - 1 for i in delta_list]
+        delta_list_2 = [i + 1 for i in delta_list]
+        self.assertNotEqual(sum(delta_list_1), 0)
+        self.assertNotEqual(sum(delta_list_2), 0)
+        self.assertNotEqual(sum(delta_list), 0)
 
-        delta_sum = 0
+        delta_list = []
         for i in range(len(internal_rel_ids) - 1):
-            delta_sum = (internal_rel_ids[i+1] - internal_rel_ids[i])\
-                                                                + delta_sum
-            self.assertNotEqual(delta_sum, (len(internal_rel_ids) - 1))
+            delta_list.append(internal_rel_ids[i+1] - internal_rel_ids[i])
+        delta_list_1 = [i - 1 for i in delta_list]
+        delta_list_2 = [i + 1 for i in delta_list]
+        self.assertNotEqual(sum(delta_list_1), 0)
+        self.assertNotEqual(sum(delta_list_2), 0)
+        self.assertNotEqual(sum(delta_list), 0)
 
     def test_num_partitions(self):
         """
