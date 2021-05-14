@@ -106,6 +106,20 @@ def get_header_length(input_file, entry_regex):
     return num_line_skip
 
 
+def check_given_num_line_skip_start_col(input_file, num_line_skip, data_cols, 
+        delim, start_col):
+    with open(input_file, 'r') as f:
+        for i in range(num_line_skip):
+            line = next(f)
+        
+        line = next(f)
+        splitted_line = line.split(delim)
+        if len(splitted_line) - start_col < len(data_cols):
+            return False
+    
+    return True
+
+
 def partition_edges(edges, num_partitions, num_nodes):
     partition_size = int(np.ceil(num_nodes / num_partitions))
     src_partitions = edges[:, 0] // partition_size
@@ -148,7 +162,9 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                    start_col=0, num_line_skip=None):
     assert(len(files) != 0), "Number of data files cannot be 0"
     assert(len(format) == 1), "Format is specified incorrectly"
-    
+    assert((start_col == 0) or (start_col != 0 and num_line_skip != None)), \
+                "Need to specify num_line_skip if start_col is specified"
+
     rel_idx = format[0].find('r')
     src_idx = format[0].find('s')
     dst_idx = format[0].find('d')
@@ -171,6 +187,9 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
             delim = csv.Sniffer().sniff(input_f.read(10000)).delimiter
             input_f.seek(0)
         print(f"Detected delimiter: ~{delim}~")
+    if num_line_skip is not None:
+        assert(check_given_num_line_skip_start_col(files[0], num_line_skip,
+               data_cols, delim, start_col)), "Incorrect num_line_skip given"
 
     if src_idx == -1 or dst_idx == -1:
         raise RuntimeError("Wrong format: source or destination not found.")
