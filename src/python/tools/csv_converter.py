@@ -15,9 +15,9 @@ def split_dataset(input_dataset, validation_fraction, test_fraction,
     assert(train_fraction > 0)
     assert (validation_fraction + test_fraction > 0)
     base_path = "/".join(input_dataset.split("/")[:-1])
-    train_file = base_path + "/train_edges.txt"
-    valid_file = base_path + "/valid_edges.txt"
-    test_file = base_path + "/test_edges.txt"
+    train_file = base_path + "/splitted_train_edges.txt"
+    valid_file = base_path + "/splitted_valid_edges.txt"
+    test_file = base_path + "/splitted_test_edges.txt"
     if Path(train_file).exists():
         Path(train_file).unlink()
     if Path(valid_file).exists():
@@ -106,6 +106,20 @@ def get_header_length(input_file, entry_regex):
     return num_line_skip
 
 
+def check_given_num_line_skip_start_col(input_file, num_line_skip, data_cols,
+                                        delim, start_col):
+    with open(input_file, 'r') as f:
+        for i in range(num_line_skip):
+            line = next(f)
+
+        line = next(f)
+        splitted_line = line.split(delim)
+        if len(splitted_line) - start_col < len(data_cols):
+            return False
+
+    return True
+
+
 def partition_edges(edges, num_partitions, num_nodes):
     partition_size = int(np.ceil(num_nodes / num_partitions))
     src_partitions = edges[:, 0] // partition_size
@@ -146,10 +160,22 @@ def join_files(files, regex, num_line_skip, data_cols, delim):
 def general_parser(files, format, output_dir, delim="", num_partitions=1,
                    dtype=np.int32, remap_ids=True, dataset_split=(0, 0),
                    start_col=0, num_line_skip=None):
+    assert(len(files) != 0), "Number of data files cannot be 0"
+    assert(len(format) == 1), "Format is specified incorrectly"
+    assert((start_col == 0) or
+           (start_col != 0 and num_line_skip is not None)),\
+        "Need to specify num_line_skip if start_col is specified"
+    assert(num_partitions > 0)
+
     rel_idx = format[0].find('r')
     src_idx = format[0].find('s')
     dst_idx = format[0].find('d')
+    assert((len(format[0]) == 3 and rel_idx != -1 and
+            src_idx != -1 and dst_idx != -1) or
+           (len(format[0]) == 2 and dst_idx != -1 and
+            src_idx != -1)), "Format is specified incorrectly"
 
+    assert(Path(output_dir[0]).exists()), "Output directory not found"
     output_dir = output_dir[0].strip("/")
     output_dir = output_dir + "/"
 
@@ -162,7 +188,10 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
         with open(files[0], 'r') as input_f:
             delim = csv.Sniffer().sniff(input_f.read(10000)).delimiter
             input_f.seek(0)
-        print(f"Detected delimiter: {delim}")
+        print(f"Detected delimiter: ~{delim}~")
+    if num_line_skip is not None:
+        assert(check_given_num_line_skip_start_col(files[0], num_line_skip,
+               data_cols, delim, start_col)), "Incorrect num_line_skip given"
 
     if src_idx == -1 or dst_idx == -1:
         raise RuntimeError("Wrong format: source or destination not found.")
@@ -339,7 +368,7 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
             g.write(bytes(tens))
             f.write("\n".join(str(key) for key in rels_dict.keys()))
 
-    output_stats = np.zeros(3)
+    output_stats = np.zeros(3, dtype=int)
     output_stats[:len(num_edges_f)] = num_edges_f
     output_stats = list(output_stats)
     output_stats.insert(0, num_rels)
@@ -347,29 +376,52 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     return output_stats
 
 
-def main():
-    '''
-        Args: format(s,d,r) output_directory csv_file(s)
-    '''
-    parser = argparse.ArgumentParser(description='General CSV Converter',
-                                     usage="general csv converter")
-    parser.add_argument('format', type=str, nargs=1,
-                        metavar="format: source(s), relation(r)," +
-                        "destination(d)", help="Format of relation")
-    parser.add_argument('output_directory', nargs=1,
-                        metavar='output_directory', type=str,
-                        help='Directory to put graph data')
-    parser.add_argument("files", metavar="dataset file paths", type=str,
-                        nargs='+',
-                        help="path to dateset files([train, valid, test])")
-    parser.add_argument('num_partitions', metavar='num_partitions',
-                        type=int,
-                        help='Number of partitions to split the edges into')
-    args = parser.parse_args()
+def set_args():
+    parser = argparse.ArgumentParser(
+        description='csv converter', prog='csv_converter',
+        formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('files', metavar='files', nargs='+', type=str,
+                        help='Data files')
+    parser.add_argument('format', metavar='format', nargs=1, type=str,
+                        help='Format of data, eg. srd')
+    parser.add_argument('output_dir', metavar='output_dir', nargs=1, type=str,
+                        help='Output directory for preprocessed data')
+    parser.add_argument('--delim', '-d', metavar='delim', type=str,
+                        default="",
+                        help='Specifies the delimiter')
+    parser.add_argument('--num_partitions', '-np', metavar='num_partitions',
+                        type=int, default=1, help='number of partitions')
+    parser.add_argument('--dtype', metavar='dtype', type=np.dtype,
+                        default=np.int32,
+                        help='Indicates the numpy.dtype')
+    parser.add_argument('--not_remap_ids', action='store_false',
+                        help='If set, will not remap ids')
+    parser.add_argument('--dataset_split', '-ds', metavar='dataset_split',
+                        nargs=2, type=float, default=[0, 0],
+                        help='Split dataset into specified fractions')
+    parser.add_argument('--start_col', '-sc', metavar='start_col', type=int,
+                        default=0,
+                        help='Indicates the column index to start from')
+    parser.add_argument('--num_line_skip', '-nls', metavar='num_line_skip',
+                        type=int, default=None,
+                        help='Indicates number of lines to ' +
+                             'skip from the beginning')
 
-    general_parser(np.array(args.files).flatten(), args.format,
-                   args.output_directory,
-                   num_partitions=args.num_partitions)
+    args = parser.parse_args()
+    arg_dict = vars(args)
+    if arg_dict.get("dataset_split") is not None:
+        arg_dict.update({"dataset_split": tuple(arg_dict.get("dataset_split"))})
+    return arg_dict
+
+
+def main():
+    arg_dict = set_args()
+    general_parser(arg_dict.get("files"), arg_dict.get("format"),
+                   arg_dict.get("output_dir"), arg_dict.get("delim"),
+                   arg_dict.get("num_partitions"), arg_dict.get("dtype"),
+                   arg_dict.get("not_remap_ids"), arg_dict.get("dataset_split"),
+                   arg_dict.get("start_col"), arg_dict.get("num_line_skip"))
+
 
 if __name__ == "__main__":
     main()
