@@ -18,6 +18,8 @@ To reproduce the experiments we have provided python scripts to run each experim
 
 Experiments are run from the repository root directory with `python3 osdi2021/run_experiment.py --experiment <experiment_name>`
 
+**Experiments cannot be run in parallel on the same machine and must be run one at a time. This is because Marius utilizes the same paths to store intermediate program data accross experiments.** 
+
 By running experiments with this command, results and generated plots will be output to the terminal and in the corresponding directory for the experiment. See the artifact structure section for the locations of the experiment directories. For example, the above command will output results to `osdi2021/system_comparisons/fb15k`.
 
 The list of experiments and their corresponding figures/tables are:
