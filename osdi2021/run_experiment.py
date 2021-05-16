@@ -537,18 +537,19 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
 
     config_keys = list(grid_config.keys())
 
-    for g_config in itertools.product(grid_config.values()):
+    print(grid_config.values())
+    for g_config in itertools.product(*grid_config.values()):
         command_line_str = ""
         for i, v in enumerate(g_config):
             command_line_str += "%s=%s " % (config_keys[i], v)
         command_line_str = command_line_str.strip()
         name = command_line_str.replace(" ", "_")
         print(command_line_str)
-        # run_marius(config, exp_dir, command_line_str.replace(" ", "_"), command_line_str)
-        # with open(exp_dir + name + "_result.json", 'w') as result_file:
-        #     result = json.load(result_file)
-        #     MRR = result["MRR"][-1]
-        #     print(command_line_str + ": " + MRR)
+        run_marius(config, exp_dir, command_line_str.replace(" ", "_"), command_line_str)
+        with open(exp_dir + name + "_result.json", 'w') as result_file:
+            result = json.load(result_file)
+            MRR = result["MRR"][-1]
+            print(command_line_str + ": " + MRR)
 
 
 
