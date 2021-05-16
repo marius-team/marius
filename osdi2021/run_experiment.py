@@ -531,9 +531,9 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
     exp_dir = "osdi2021/grid_search/fb15k/"
     config = exp_dir + "config.ini"
 
-    grid_config = {"model.scale_factor", [.0001, .001, .01, .1, 1],
-                   "training.regularization_coef", [.000001, .00001, .0001, .001, .01, .1, 1],
-                   "training.regularization_norm", [1, 2, 3, 4, 5]}
+    grid_config = {"model.scale_factor": [.0001, .001, .01, .1, 1],
+                   "training.regularization_coef": [.000001, .00001, .0001, .001, .01, .1, 1],
+                   "training.regularization_norm": [1, 2, 3, 4, 5]}
 
     config_keys = grid_config.keys()
 
