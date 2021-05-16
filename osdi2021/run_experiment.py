@@ -549,7 +549,7 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
         with open(exp_dir + name + "_result.json") as result_file:
             result = json.load(result_file)
             MRR = result["MRR"][-1]
-            print(command_line_str + ": " + MRR)
+            print(command_line_str + ": %s" % MRR)
 
 
 
