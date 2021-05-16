@@ -542,12 +542,11 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
         command_line_str = ""
         for i, v in enumerate(g_config):
             command_line_str += "--%s=%s " % (config_keys[i], v)
-        command_line_str = command_line_str.strip()
+        command_line_str = command_line_str.replace(" ", "_").replace("-", "").replace("=", "").replace(".", "")
         name = command_line_str.replace(" ", "_")
         print(command_line_str)
-        run_marius(config, exp_dir, command_line_str.replace(" ", "_").replace("-", "").replace("=", "").replace(".", ""), command_line_str)
+        run_marius(config, exp_dir, name, command_line_str)
         with open(exp_dir + name + "_result.json") as result_file:
-            result_file.seek(0)
             result = json.load(result_file)
             MRR = result["MRR"][-1]
             print(command_line_str + ": " + MRR)
