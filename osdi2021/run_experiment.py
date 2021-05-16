@@ -535,7 +535,7 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
                    "training.regularization_coef": [.000001, .00001, .0001, .001, .01, .1, 1],
                    "training.regularization_norm": [1, 2, 3, 4, 5]}
 
-    config_keys = grid_config.keys()
+    config_keys = list(grid_config.keys())
 
     for g_config in itertools.product(grid_config.values()):
         command_line_str = ""
