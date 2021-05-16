@@ -505,7 +505,7 @@ def run_all(overwrite=False, collect_tracing_metrics=False, show_output=False, s
             print("#### %s Failed ####\n" %k)
 
 
-def run_multi_gpu(overwrite=False, collect_tracing_metrics=False, show_output=False):
+def run_multi_gpu(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
 
     exp_dir = "osdi2021/system_comparisons/freebase86m/marius/"
     complex_config = exp_dir + "d50_multi_gpu.ini"
@@ -527,7 +527,7 @@ def run_multi_gpu(overwrite=False, collect_tracing_metrics=False, show_output=Fa
     #
     # run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
-def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_output=False):
+def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
     exp_dir = "osdi2021/grid_search/fb15k/"
     config = exp_dir + "config.ini"
 
