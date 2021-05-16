@@ -545,7 +545,7 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
         command_line_str = command_line_str.strip()
         name = command_line_str.replace(" ", "_")
         print(command_line_str)
-        run_marius(config, exp_dir, command_line_str.replace(" ", "_"), command_line_str)
+        run_marius(config, exp_dir, command_line_str.replace(" ", "_").replace("-", "").replace("=", "\="), command_line_str)
         with open(exp_dir + name + "_result.json", 'w') as result_file:
             result = json.load(result_file)
             MRR = result["MRR"][-1]
