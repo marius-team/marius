@@ -541,7 +541,7 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
     for g_config in itertools.product(*grid_config.values()):
         command_line_str = ""
         for i, v in enumerate(g_config):
-            command_line_str += "%s=%s " % (config_keys[i], v)
+            command_line_str += "--%s=%s " % (config_keys[i], v)
         command_line_str = command_line_str.strip()
         name = command_line_str.replace(" ", "_")
         print(command_line_str)
