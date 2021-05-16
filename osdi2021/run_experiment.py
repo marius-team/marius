@@ -9,7 +9,7 @@ import plotting as osdi_plot
 import shutil
 import marius.tools.preprocess as preprocess
 from dglke_preprocessing import preprocess_live_journal
-from utils import perform_grid_search
+import itertools
 
 def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_tracing_metrics=False, show_output=False):
     e.cleanup_experiments()
@@ -535,7 +535,21 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
                    "training.regularization_coef", [.000001, .00001, .0001, .001, .01, .1, 1],
                    "training.regularization_norm", [1, 2, 3, 4, 5]}
 
-    perform_grid_search(config, exp_dir, grid_config)
+    config_keys = grid_config.keys()
+
+    for g_config in itertools.product(grid_config.values()):
+        command_line_str = ""
+        for i, v in enumerate(g_config):
+            command_line_str += "%s=%s " % (config_keys[i], v)
+        command_line_str = command_line_str.strip()
+        name = command_line_str.replace(" ", "_")
+        print(command_line_str)
+        run_marius(config, exp_dir, command_line_str.replace(" ", "_"), command_line_str)
+        with open(exp_dir + name + "_result.json", 'w') as result_file:
+            result = json.load(result_file)
+            MRR = result["MRR"][-1]
+            print(command_line_str + ": " + MRR)
+
 
 
 if __name__ == "__main__":
