@@ -9,7 +9,7 @@ import plotting as osdi_plot
 import shutil
 import marius.tools.preprocess as preprocess
 from dglke_preprocessing import preprocess_live_journal
-
+from utils import perform_grid_search
 
 def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_tracing_metrics=False, show_output=False):
     e.cleanup_experiments()
@@ -527,6 +527,16 @@ def run_multi_gpu(overwrite=False, collect_tracing_metrics=False, show_output=Fa
     #
     # run_dglke(dglke_complex_cmd, exp_dir, "complex_8gpu", overwrite=overwrite, collect_tracing_metrics=collect_tracing_metrics, show_output=show_output)
 
+def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_output=False):
+    exp_dir = "osdi2021/grid_search/fb15k/"
+    config = exp_dir + "config.ini"
+
+    grid_config = {"model.scale_factor", [.0001, .001, .01, .1, 1],
+                   "training.regularization_coef", [.000001, .00001, .0001, .001, .01, .1, 1],
+                   "training.regularization_norm", [1, 2, 3, 4, 5]}
+
+    perform_grid_search(config, exp_dir, grid_config)
+
 
 if __name__ == "__main__":
     experiment_dict = {
@@ -543,6 +553,7 @@ if __name__ == "__main__":
         "prefetching": run_prefetching,
         "big_embeddings": run_big_embeddings,
         "multi_gpu": run_multi_gpu,
+        "fb15k_grid_search": fb15k_grid_search,
         "all": run_all
     }
     parser = argparse.ArgumentParser(description='Reproduce experiments ')

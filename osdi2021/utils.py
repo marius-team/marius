@@ -21,7 +21,9 @@ from torchbiggraph.graph_storages import (
 )
 from torchbiggraph.model import MultiRelationEmbedder, make_model
 import math
-
+import itertools
+from run_experiment import run_marius
+import json
 
 
 def preprocess_twitter_dglke():
@@ -38,6 +40,36 @@ def preprocess_livejournal_dglke():
 
 def copy_and_evaluate_pybg():
     pass
+
+
+def perform_grid_search(base_config, exp_dir, grid_config):
+    """
+    :param grid_config:
+
+        grid_config = {
+                        "section1.key1" = [value1, ..., valueN],
+                        "section2.key2" = [value1, ..., valueN],
+                        "section3.key3" = [value1, ..., valueN],
+                        }
+
+
+
+    """
+
+    config_keys = grid_config.keys()
+
+    for config in itertools.product(grid_config.values()):
+        command_line_str = ""
+        for i, v in enumerate(config):
+            command_line_str += "%s=%s " % (config_keys[i], v)
+        command_line_str = command_line_str.strip()
+        name = command_line_str.replace(" ", "_")
+        print(command_line_str)
+        run_marius(base_config, exp_dir, command_line_str.replace(" ", "_"), command_line_str)
+        with open(exp_dir + name + "_result.json", 'w') as result_file:
+            result = json.load(result_file)
+            MRR = result["MRR"][-1]
+            print(command_line_str + ": " + MRR)
 
 
 def write(outf: TextIO, key: Iterable[str], value: Iterable[float]) -> None:
