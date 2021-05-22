@@ -11,6 +11,7 @@ import marius.tools.preprocess as preprocess
 from dglke_preprocessing import preprocess_live_journal
 import itertools
 
+
 def run_marius(config, exp_dir, name, config_args="", overwrite=False, collect_tracing_metrics=False, show_output=False):
     e.cleanup_experiments()
     if not os.path.exists(exp_dir + name + "_result.json") or overwrite:
@@ -451,6 +452,9 @@ def run_big_embeddings(overwrite=False, collect_tracing_metrics=False, show_outp
     cpu_memory = exp_dir + "cpu_memory.ini"
     gpu_memory = exp_dir + "gpu_memory.ini"
     disk = exp_dir + "disk.ini"
+    d400 = exp_dir + "d400.ini"
+    d800 = exp_dir + "d800.ini"
+
     if not os.path.exists("freebase86m/"):
         print("==== Preprocessing Freebase86m P=1 =====")
         preprocess.freebase86m("freebase86m/")
@@ -467,15 +471,13 @@ def run_big_embeddings(overwrite=False, collect_tracing_metrics=False, show_outp
 
     osdi_plot.print_table_6()
 
-    # config_args = "--storage.buffer_capacity=4 --model.embedding_size=400"
-    # run_marius(disk, exp_dir, "d400", config_args)
-    #
-    # if not os.path.exists("freebase86m_64/"):
-    #     print("==== Preprocessing Freebase86m P=64 =====")
-    #     preprocess.freebase86m("freebase86m_64/", num_partitions=64)
+    run_marius(d400, exp_dir, "d400")
 
-    # config_args = "--storage.buffer_capacity=4 --model.embedding_size=800"
-    # run_marius(disk, exp_dir, "d800", config_args)
+    if not os.path.exists("freebase86m_64/"):
+        print("==== Preprocessing Freebase86m P=64 =====")
+        preprocess.freebase86m("freebase86m_64/", num_partitions=64)
+
+    run_marius(d800, exp_dir, "d800")
 
 
 def run_all(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
@@ -549,7 +551,6 @@ def fb15k_grid_search(overwrite=False, collect_tracing_metrics=False, show_outpu
             result = json.load(result_file)
             MRR = result["MRR"][-1]
             print("MRR: %s" % MRR)
-
 
 
 if __name__ == "__main__":
