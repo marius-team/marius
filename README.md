@@ -31,7 +31,7 @@ The list of experiments and their corresponding figures/tables are:
 | livejournal | Table 3 | 2 hours | - |
 | twitter | Table 4 | 10 hours | - |
 | freebase86m | Table 5 | 12 hours | - |
-| buffer_simulator | Figure 7 | Instant | - |
+| buffer_simulator | Figure 7 | ~ 1 minute | - |
 | utilization | Figure 8 | 2 hours | - |
 | orderings_total_io | Figure 9 | 2 hours | - |
 | orderings_freebase86m | Figure 10 | ~1 day | 2 hours |
