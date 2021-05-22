@@ -189,6 +189,7 @@ For the artifact reviewers, we will set up an AWS P3.2xLarge instance with the s
 * GCC >= 9
 * cmake >= 3.12
 * make >= 3.8
+* dstat 
 
 Please also see instructions below.
 
