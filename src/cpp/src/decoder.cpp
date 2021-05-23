@@ -222,30 +222,30 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
 }
 
 DistMult::DistMult() {
-    if (marius_options.training.loss_function_type == LossFunctionType::SoftMax) {
+    if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
         loss_function_ = new SoftMax();
-    } else if (marius_options.training.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.training.margin);
+    } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
+        loss_function_ = new RankingLoss(marius_options.loss.margin);
     }
     comparator_ = new DotCompare();
     relation_operator_ = new HadamardOperator();
 }
 
 TransE::TransE() {
-    if (marius_options.training.loss_function_type == LossFunctionType::SoftMax) {
+    if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
         loss_function_ = new SoftMax();
-    } else if (marius_options.training.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.training.margin);
+    } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
+        loss_function_ = new RankingLoss(marius_options.loss.margin);
     }
     comparator_ = new CosineCompare();
     relation_operator_ = new TranslationOperator();
 }
 
 ComplEx::ComplEx() {
-    if (marius_options.training.loss_function_type == LossFunctionType::SoftMax) {
+    if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
         loss_function_ = new SoftMax();
-    } else if (marius_options.training.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.training.margin);
+    } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
+        loss_function_ = new RankingLoss(marius_options.loss.margin);
     }
     comparator_ = new DotCompare();
     relation_operator_ = new ComplexHadamardOperator();
