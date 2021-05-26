@@ -21,7 +21,7 @@ def get_torchbiggraph_config():
         comparator="dot",
         # Training
         num_epochs=1,
-        batch_size=10000,
+        batch_size=50000,
         num_uniform_negs=500,
         num_batch_negs=500,
         loss_fn="softmax",

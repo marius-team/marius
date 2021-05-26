@@ -471,13 +471,13 @@ def run_big_embeddings(overwrite=False, collect_tracing_metrics=False, show_outp
 
     osdi_plot.print_table_6()
 
-    run_marius(d400, exp_dir, "d400")
-
-    if not os.path.exists("freebase86m_64/"):
-        print("==== Preprocessing Freebase86m P=64 =====")
-        preprocess.freebase86m("freebase86m_64/", num_partitions=64)
-
-    run_marius(d800, exp_dir, "d800")
+    # run_marius(d400, exp_dir, "d400")
+    #
+    # if not os.path.exists("freebase86m_64/"):
+    #     print("==== Preprocessing Freebase86m P=64 =====")
+    #     preprocess.freebase86m("freebase86m_64/", num_partitions=64)
+    #
+    # run_marius(d800, exp_dir, "d800")
 
 
 def run_all(overwrite=False, collect_tracing_metrics=False, show_output=False, short=False):
