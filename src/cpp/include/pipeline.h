@@ -191,7 +191,7 @@ class Pipeline {
 
     thread initThreadOfType(int worker_type, bool *paused, ThreadStatus *status, int device_id);
 
-    virtual void addWorkersToPool(int worker_type, int num_workers) = 0;
+    virtual void addWorkersToPool(int pool_id, int worker_type, int num_workers) = 0;
 
     bool isDone();
 
@@ -232,7 +232,7 @@ class PipelineCPU : public Pipeline {
 
     ~PipelineCPU();
 
-    void addWorkersToPool(int worker_type, int num_workers) override;
+    void addWorkersToPool(int pool_id, int worker_type, int num_workers) override;
 
     void initialize() override;
 
@@ -265,7 +265,7 @@ class PipelineGPU : public Pipeline {
 
     ~PipelineGPU();
 
-    void addWorkersToPool(int worker_type, int num_workers) override;
+    void addWorkersToPool(int pool_id, int worker_type, int num_workers) override;
 
     void initialize() override;
 
