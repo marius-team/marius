@@ -124,7 +124,7 @@ class PartitionBatch : public Batch {
 
     PartitionBatch(bool train);                             /**< Constructor */
 
-    ~PartitionBatch() {};                                   /** Destructor */
+    ~PartitionBatch() {};                                   /**< Destructor */
 
     void accumulateUniqueIndices() override;                /**< Populates the uniques tensors */
 
