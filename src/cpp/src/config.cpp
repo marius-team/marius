@@ -277,8 +277,10 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
     // LossOptions
     LossFunctionType loss_function_type; string s_loss_function_type; // Loss to use
     float margin; // Margin to use in ranking loss
+    ReductionType reduction_type; string s_reduction_type; // reduction method to use
     s_var_map.push_back((OptInfo<std::string>){&s_loss_function_type, "SoftMax", "loss", "loss"});
     f_var_map.push_back((OptInfo<float>){&margin, 0, "loss", "margin", {0, FLOAT_MAX}});
+    s_var_map.push_back((OptInfo<std::string>){&s_reduction_type, "Mean", "loss", "reduction"});
 
     // Training pipeline options
     int max_batches_in_flight; // Vary the amount of batches allowed in the pipeline at once
@@ -571,8 +573,6 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
         exit(-1);
     }
 
-    std::cout << s_loss_function_type;
-    std::cout << s_optimizer_type;
     if (s_loss_function_type == "Ranking") {
         loss_function_type = LossFunctionType::RankingLoss;
     } else if (s_loss_function_type == "SoftMax") {
@@ -590,6 +590,15 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
         exit(-1);
     }
     
+    if (s_reduction_type == "Sum") {
+        reduction_type = ReductionType::Sum;
+    } else if (s_reduction_type == "Mean") {
+        reduction_type = ReductionType::Mean;
+    } else {
+        SPDLOG_ERROR("Unrecognized reduction type {}. Options are [Sum, Mean].", s_reduction_type);
+        exit(-1);
+    }
+
     if (s_eval_negative_sampling_access == "UniformCrossPartition") {
         eval_negative_sampling_access = NegativeSamplingAccess::UniformCrossPartition;
     } else if (s_eval_negative_sampling_access == "Uniform" ){
@@ -670,7 +679,8 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
 
     LossOptions loss_options = {
         loss_function_type,
-        margin
+        margin,
+        reduction_type
     };
 
     TrainingPipelineOptions training_pipeline_options = {

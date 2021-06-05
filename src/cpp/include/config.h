@@ -134,6 +134,7 @@ struct TrainingOptions {
 struct LossOptions {
     LossFunctionType loss_function_type;
     float margin;
+    ReductionType reduction_type;
 };
 
 struct TrainingPipelineOptions {

@@ -65,7 +65,8 @@ void init_config(py::module &m) {
     // LossOptions class
     py::class_<LossOptions>(m, "LossOptions")
         .def_readwrite("loss_function_type", &LossOptions::loss_function_type)
-        .def_readwrite("margin", &LossOptions::margin);
+        .def_readwrite("margin", &LossOptions::margin)
+        .def_readwrite("reduction_type", &LossOptions::reduction_type);
 
     // TrainingPipelineOptions class
     py::class_<TrainingPipelineOptions>(m, "TrainingPipelineOptions")

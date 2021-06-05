@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
 #include <loss.h>
+#include <datatypes.h>
 
 namespace py = pybind11;
 
@@ -16,15 +17,15 @@ void init_loss(py::module &m) {
   py::class_<LossFunction, PyLossFunction>(m, "LossFunction")
     .def("__call__", &LossFunction::operator(), py::arg("pos_scores"), py::arg("neg_scores"));
   py::class_<SoftMax, LossFunction>(m, "SoftMax")
-    .def(py::init<>());
+    .def(py::init<ReductionType>(), py::arg("reduction_type"));
   py::class_<RankingLoss, LossFunction>(m, "RankingLoss")
-    .def(py::init<float>(), py::arg("margin"));
+    .def(py::init<float, ReductionType>(), py::arg("margin"), py::arg("reduction_type"));
   py::class_<BCEAfterSigmoidLoss, LossFunction>(m, "BCEAfterSigmoidLoss")
-    .def(py::init<>());
+    .def(py::init<ReductionType>(), py::arg("reduction_type"));
   py::class_<BCEWithLogitsLoss, LossFunction>(m, "BCEWithLogitsLoss")
-    .def(py::init<>());
+    .def(py::init<ReductionType>(), py::arg("reduction_type"));
   py::class_<MSELoss, LossFunction>(m, "MSELoss")
-    .def(py::init<>());
+    .def(py::init<ReductionType>(), py::arg("reduction_type"));
   py::class_<SoftPlusLoss, LossFunction>(m, "SoftPlusLoss")
-    .def(py::init<>());
+    .def(py::init<ReductionType>(), py::arg("reduction_type"));
 }

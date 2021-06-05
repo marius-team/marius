@@ -165,6 +165,11 @@ enum class LossFunctionType {
     SoftPlusLoss        // Softplus loss
 };
 
+enum class ReductionType {
+    Mean,
+    Sum
+};
+
 enum class RelationOperatorType {
     Translation,
     ComplexHadamard,

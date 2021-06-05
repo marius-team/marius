@@ -205,17 +205,17 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
 
 DistMult::DistMult() {
     if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax();
+        loss_function_ = new SoftMax(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.loss.margin);
+        loss_function_ = new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
-        loss_function_ = new BCEAfterSigmoidLoss();
+        loss_function_ = new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
-        loss_function_ = new BCEWithLogitsLoss();
+        loss_function_ = new BCEWithLogitsLoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::MSELoss) {
-        loss_function_ = new MSELoss();
+        loss_function_ = new MSELoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::SoftPlusLoss) {
-        loss_function_ = new SoftPlusLoss();
+        loss_function_ = new SoftPlusLoss(marius_options.loss.reduction_type);
     }
     comparator_ = new DotCompare();
     relation_operator_ = new HadamardOperator();
@@ -223,17 +223,17 @@ DistMult::DistMult() {
 
 TransE::TransE() {
     if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax();
+        loss_function_ = new SoftMax(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.loss.margin);
+        loss_function_ = new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
-        loss_function_ = new BCEAfterSigmoidLoss();
+        loss_function_ = new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
-        loss_function_ = new BCEWithLogitsLoss();
+        loss_function_ = new BCEWithLogitsLoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::MSELoss) {
-        loss_function_ = new MSELoss();
+        loss_function_ = new MSELoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::SoftPlusLoss) {
-        loss_function_ = new SoftPlusLoss();
+        loss_function_ = new SoftPlusLoss(marius_options.loss.reduction_type);
     }
     comparator_ = new CosineCompare();
     relation_operator_ = new TranslationOperator();
@@ -241,17 +241,17 @@ TransE::TransE() {
 
 ComplEx::ComplEx() {
     if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax();
+        loss_function_ = new SoftMax(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.loss.margin);
+        loss_function_ = new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
-        loss_function_ = new BCEAfterSigmoidLoss();
+        loss_function_ = new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
-        loss_function_ = new BCEWithLogitsLoss();
+        loss_function_ = new BCEWithLogitsLoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::MSELoss) {
-        loss_function_ = new MSELoss();
+        loss_function_ = new MSELoss(marius_options.loss.reduction_type);
     } else if (marius_options.loss.loss_function_type == LossFunctionType::SoftPlusLoss) {
-        loss_function_ = new SoftPlusLoss();
+        loss_function_ = new SoftPlusLoss(marius_options.loss.reduction_type);
     }
     comparator_ = new DotCompare();
     relation_operator_ = new ComplexHadamardOperator();
