@@ -8,7 +8,6 @@
 #include <torch/torch.h>
 #include <spdlog/spdlog.h>
 #include <datatypes.h>
-
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
