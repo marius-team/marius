@@ -4,7 +4,7 @@
 
 #ifndef MARIUS_UTIL_H
 #define MARIUS_UTIL_H
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+
 #include <torch/torch.h>
 #include <spdlog/spdlog.h>
 #include <datatypes.h>
