@@ -2,18 +2,11 @@
 // Created by Jason Mohoney on 5/26/20.
 //
 
-
 #ifndef MARIUS_BUFFER_H
 #define MARIUS_BUFFER_H
-#include <datatypes.h>
-#include <future>
-#include <functional>
-#include <spdlog/spdlog.h>
-#include <batch.h>
-#include <boost/lockfree/queue.hpp>
-#include <shared_mutex>
-#include <util.h>
-#include <fcntl.h>
+
+#include "batch.h"
+#include "datatypes.h"
 
 class Partition {
 public:
@@ -90,6 +83,8 @@ class LookaheadBlock {
 
     LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_file);
 
+    ~LookaheadBlock();
+
     void start(Partition *first_partition);
 
     void stop();
@@ -114,6 +109,8 @@ class AsyncWriteBlock {
     std::atomic<bool> done_;
 
     AsyncWriteBlock(int64_t total_size, PartitionedFile *partitioned_file);
+
+    ~AsyncWriteBlock();
 
     void start();
 
@@ -142,7 +139,7 @@ class PartitionBuffer {
     bool loaded_;
     torch::Tensor buffer_tensor_view_;
     std::vector<Partition *> partition_table_;
-    boost::lockfree::queue<int64_t> *free_list_;
+    std::queue<int> free_list_;
 
     bool prefetching_;
     LookaheadBlock *lookahead_block_;

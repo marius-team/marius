@@ -5,9 +5,8 @@
 #ifndef MARIUS_BATCH_H
 #define MARIUS_BATCH_H
 
-#include <datatypes.h>
-#include <config.h>
-#include <util.h>
+#include "datatypes.h"
+#include "util.h"
 
 using std::vector;
 
@@ -90,6 +89,8 @@ class Batch {
 
     Batch(bool train);                                      /**< Constructor */
 
+    ~Batch() {};                                            /**< Destructor */
+
     void localSample();                                     /**< Construct additional negative samples and neighborhood information from the batch */
 
     virtual void accumulateUniqueIndices();                 /**< Populates the unique_<>_indices tensors */
@@ -122,6 +123,8 @@ class PartitionBatch : public Batch {
     std::vector<int> buffer_state_;                         /**< State of the buffer when this batch was read, used to check for evicited negatives */
 
     PartitionBatch(bool train);                             /**< Constructor */
+
+    ~PartitionBatch() {};                                   /** Destructor */
 
     void accumulateUniqueIndices() override;                /**< Populates the uniques tensors */
 

@@ -1,8 +1,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <marius.h>
-#include <io.h>
-#include <util.h>
+
+#include "config.h"
+#include "dataset.h"
+#include "io.h"
 
 namespace py = pybind11;
 
@@ -16,17 +17,18 @@ tuple<DataSet *, DataSet*> initializeDatasets(MariusOptions config) {
 
     tuple<Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *> storage_ptrs = initializeTrain();
 
-    Storage *train_edges = get<0>(storage_ptrs);
-    Storage *eval_edges = get<1>(storage_ptrs);
-    Storage *test_edges = get<2>(storage_ptrs);
+    Storage *train_edges;
+    train_edges = std::get<0>(storage_ptrs);
+    Storage *eval_edges = std::get<1>(storage_ptrs);
+    Storage *test_edges = std::get<2>(storage_ptrs);
 
-    Storage *embeddings = get<3>(storage_ptrs);
-    Storage *emb_state = get<4>(storage_ptrs);
+    Storage *embeddings = std::get<3>(storage_ptrs);
+    Storage *emb_state = std::get<4>(storage_ptrs);
 
-    Storage *lhs_rel = get<5>(storage_ptrs);
-    Storage *lhs_rel_state = get<6>(storage_ptrs);
-    Storage *rhs_rel = get<7>(storage_ptrs);
-    Storage *rhs_rel_state = get<8>(storage_ptrs);
+    Storage *lhs_rel = std::get<5>(storage_ptrs);
+    Storage *lhs_rel_state = std::get<6>(storage_ptrs);
+    Storage *rhs_rel = std::get<7>(storage_ptrs);
+    Storage *rhs_rel_state = std::get<8>(storage_ptrs);
 
     bool will_train = !(marius_options.path.train_edges.empty());
     bool will_evaluate = !(marius_options.path.validation_edges.empty() && marius_options.path.test_edges.empty());

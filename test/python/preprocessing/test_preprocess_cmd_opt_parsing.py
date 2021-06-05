@@ -33,6 +33,11 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         ]
 
     @classmethod
+    def setUp(self):
+        if not Path("./output_dir").exists():
+            Path("./output_dir").mkdir()
+
+    @classmethod
     def tearDown(self):
         if Path("./output_dir").exists():
             shutil.rmtree(Path("./output_dir"))

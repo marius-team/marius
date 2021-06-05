@@ -5,32 +5,23 @@
 
 #ifndef MARIUS_STORAGE_H
 #define MARIUS_STORAGE_H
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
-#include <batch.h>
-#include <buffer.h>
-#include <config.h>
-#include <datatypes.h>
-#include <decoder.h>
-#include <fcntl.h>
-#include <filesystem>
+
 #include <fstream>
-#include <iostream>
-#include <map>
-#include <math.h>
 #include <string>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <tuple>
-#include <unistd.h>
-#include <util.h>
 #include <vector>
+
+#include "batch.h"
+#include "buffer.h"
+#include "datatypes.h"
 
 using std::vector;
 using std::string;
 using std::shared_ptr;
 using std::list;
 using std::unordered_map;
+
+#define MAX_SHUFFLE_SIZE 4E8
 
 /** Abstract storage class */
 class Storage {
@@ -42,6 +33,8 @@ class Storage {
     vector<int64_t> edge_bucket_sizes_;
 
   public:
+    virtual ~Storage() {};
+
     virtual torch::Tensor indexRead(Indices indices) = 0;
 
     virtual void indexAdd(Indices indices, torch::Tensor values) = 0;
@@ -88,6 +81,7 @@ class Storage {
 class PartitionBufferStorage : public Storage {
   protected:
     string filename_;
+
     bool loaded_;
 
     int64_t partition_size_;
@@ -111,6 +105,8 @@ class PartitionBufferStorage : public Storage {
 
     void rangePut(int64_t offset, torch::Tensor values);
 
+    void append(torch::Tensor values);
+
     void load() override;
 
     void unload(bool write) override;
@@ -125,10 +121,7 @@ class PartitionBufferStorage : public Storage {
 
     void indexPut(Indices indices, torch::Tensor values) override;
 
-    void shuffle() override {
-        SPDLOG_ERROR("Shuffle not supported for PartitionBufferStorage");
-        exit(-1);
-    };
+    void shuffle() override;
 
     torch::Tensor indexRead(int partition_id, Indices indices, int64_t access_id);
 
@@ -197,7 +190,11 @@ class FlatFile : public Storage {
 
     FlatFile(string filename, torch::ScalarType dtype);
 
+    ~FlatFile() {};
+
     void rangePut(int64_t offset, torch::Tensor values);
+
+    void append(torch::Tensor values);
 
     void load() override;
 
@@ -286,6 +283,8 @@ class InMemory : public Storage {
     InMemory(string filename, torch::Tensor data, torch::DeviceType device);
 
     InMemory(string filename, torch::ScalarType dtype);
+
+    ~InMemory() {};
 
     void load() override;
 

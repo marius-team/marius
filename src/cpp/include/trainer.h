@@ -4,13 +4,8 @@
 #ifndef MARIUS_TRAINER_H
 #define MARIUS_TRAINER_H
 
-#include <dataset.h>
-#include <io.h>
-#include <spdlog/spdlog.h>
-#include <iostream>
-#include <config.h>
+#include "dataset.h"
 #include "pipeline.h"
-#include <sys/time.h>
 
 class Trainer {
   public:

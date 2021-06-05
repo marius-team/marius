@@ -2,30 +2,19 @@
 // Created by jasonmohoney on 10/4/19.
 //
 
-
-
 #ifndef MARIUS_DATASET_H
 #define MARIUS_DATASET_H
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
-#include <string>
+
 #include <map>
-#include <vector>
+#include <string>
 #include <tuple>
-#include "datatypes.h"
-#include "decoder.h"
-#include <iostream>
-#include <fstream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <spdlog/spdlog.h>
-#include <sys/mman.h>
+#include <vector>
+
+#include "batch.h"
 #include "config.h"
+#include "datatypes.h"
+#include "logger.h"
 #include "storage.h"
-#include <fstream>
-#include <batch.h>
-#include <ordering.h>
-#include <model.h>
 
 using std::map;
 using std::vector;
@@ -90,6 +79,11 @@ class DataSet {
      * Evaluation set constructor for separate evaluation without training
      */
     DataSet(Storage *test_edges, Storage *embeddings, Storage *src_relations, Storage *dst_relations);
+
+    /**
+     * Destructor
+     */
+     ~DataSet();
 
     /**
      * Returns the next uninitialized batch from the batch_iterator_ in a thread safe manner
@@ -279,11 +273,7 @@ class DataSet {
         current_edge_ = curr_pos;
     }
 
-    void syncEmbeddings() {
-        if (!train_ && marius_options.storage.embeddings == BackendType::PartitionBuffer) {
-            ((InMemory *) node_embeddings_)->force_load();
-        }
-    }
+    void syncEmbeddings();
 
     torch::Tensor accumulateRanks();
 

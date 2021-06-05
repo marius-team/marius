@@ -5,13 +5,7 @@
 #ifndef MARIUS_UTIL_H
 #define MARIUS_UTIL_H
 
-#include <torch/torch.h>
-#include <spdlog/spdlog.h>
-#include <datatypes.h>
-
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
+#include "datatypes.h"
 
 class Timer {
   public:
@@ -25,6 +19,11 @@ class Timer {
         start_event_ = new CudaEvent(0);
         end_event_ = new CudaEvent(0);
         gpu_ = gpu;
+    }
+
+    ~Timer() {
+        delete start_event_;
+        delete end_event_;
     }
 
     void start() {

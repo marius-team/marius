@@ -1,20 +1,34 @@
 //
 // Created by Jason Mohoney on 2/18/20.
 //
+
 #ifndef MARIUS_CONFIG_H
 #define MARIUS_CONFIG_H
 
 #include <string>
-#include <exception>
-#include <datatypes.h>
-#include <boost/program_options.hpp>
-#include <spdlog/spdlog.h>
-#include <iostream>
-#include <filesystem>
+
+#include "datatypes.h"
+#include "logger.h"
 
 using std::string;
 using std::mutex;
 
+template <typename T>
+struct OptInfo {
+    T *var_ptr;
+    T default_val;
+    std::string s_section;
+    std::string s_option;
+    T range[2];
+};
+
+struct AllOptInfo {
+    std::vector<OptInfo<std::string>> s_var_map;
+    std::vector<OptInfo<int64_t>> i64_var_map;
+    std::vector<OptInfo<int>> i_var_map;
+    std::vector<OptInfo<float>> f_var_map;
+    std::vector<OptInfo<bool>> b_var_map;
+};
 
 class TimestampAllocator {
   private:
@@ -181,14 +195,10 @@ struct MariusOptions {
     ReportingOptions reporting{};
 };
 
-MariusOptions parseConfig(string path, int64_t argc, char *argv[]);
+MariusOptions parseConfig(int64_t argc, char *argv[]);
 
 extern MariusOptions marius_options;
-
-bool validateNumericalOptions(MariusOptions options);
 
 void logConfig();
 
 #endif //MARIUS_CONFIG_H
-
-

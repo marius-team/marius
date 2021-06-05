@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <trainer.h>
+
+#include "trainer.h"
 
 namespace py = pybind11;
 

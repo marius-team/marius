@@ -102,7 +102,7 @@ def update_data_path(dir, config_dict):
                         "/train_edges.pt")})
     config_dict.update({"path.train_edges_partitions": str(dir.strip("/") +
                         "/train_edges_partitions.txt")})
-    config_dict.update({"path.valid_edges": str(dir.strip("/") +
+    config_dict.update({"path.validation_edges": str(dir.strip("/") +
                         "/valid_edges.pt")})
     config_dict.update({"path.test_edges": str(dir.strip("/") +
                         "/test_edges.pt")})
@@ -112,7 +112,7 @@ def update_data_path(dir, config_dict):
                         "/rel_mapping.txt")})
     config_dict.update({"path.node_ids": str(dir.strip("/") +
                         "/node_mapping.bin")})
-    config_dict.update({"path.relation_ids": str(dir.strip("/") +
+    config_dict.update({"path.relations_ids": str(dir.strip("/") +
                         "/rel_mapping.bin")})
 
     return config_dict
@@ -170,6 +170,8 @@ def parse_args(args):
     arg_dict.update({"general.device": arg_dict.get("device")})
     if arg_dict.get("device") == "multi-GPU":
         arg_dict.update({"device": "multi_GPU"})
+        arg_dict.update({"general.device": "GPU"})
+        arg_dict.update({"general.gpu_ids": "0 1"})
     else:
         arg_dict.update({"device": arg_dict.get("device")})
 

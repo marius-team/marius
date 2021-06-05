@@ -1,7 +1,20 @@
 //
 // Created by Jason Mohoney on 6/3/20.
 //
-#include <buffer.h>
+
+#include "buffer.h"
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <util.h>
+
+#include <functional>
+#include <future>
+#include <shared_mutex>
+
+#include "config.h"
+#include "logger.h"
+
 
 Partition::Partition(int partition_id, int64_t partition_size, int embedding_size, torch::Dtype dtype, int64_t idx_offset, int64_t file_offset) {
 
@@ -132,7 +145,7 @@ LookaheadBlock::LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_
     total_size_ = total_size;
     partitioned_file_ = partitioned_file;
     partition_ = nullptr;
-    lock_ = new mutex();
+    lock_ = new std::mutex();
 
     if(posix_memalign(&mem_, 4096, total_size_)) {
         SPDLOG_ERROR("Unable to allocate lookahead memory\nError: {}", errno);
@@ -143,6 +156,11 @@ LookaheadBlock::LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_
     done_ = false;
     present_ = false;
     thread_ = nullptr;
+}
+
+LookaheadBlock::~LookaheadBlock() {
+    delete lock_;
+    free(mem_);
 }
 
 void LookaheadBlock::run() {
@@ -208,7 +226,7 @@ AsyncWriteBlock::AsyncWriteBlock(int64_t total_size, PartitionedFile *partitione
     total_size_ = total_size;
     partitioned_file_ = partitioned_file;
 
-    lock_ = new mutex();
+    lock_ = new std::mutex();
 
     if(posix_memalign(&mem_, 4096, total_size_)) {
         SPDLOG_ERROR("Unable to allocate async evict memory\nError: {}", errno);
@@ -220,6 +238,12 @@ AsyncWriteBlock::AsyncWriteBlock(int64_t total_size, PartitionedFile *partitione
     present_ = false;
     thread_ = nullptr;
 }
+
+AsyncWriteBlock::~AsyncWriteBlock() {
+    delete lock_;
+    free(mem_);
+}
+
 
 void AsyncWriteBlock::run() {
     while(!done_) {
@@ -308,7 +332,7 @@ PartitionBuffer::PartitionBuffer(int capacity, int num_partitions, int64_t parti
     misses_ = 0;
     prefetch_hits_ = 0;
 
-    free_list_ = new boost::lockfree::queue<int64_t>(capacity_);
+    free_list_ = std::queue<int>();
     partition_table_ = std::vector<Partition *>();
 
     prefetching_ = marius_options.storage.prefetching;
@@ -333,7 +357,7 @@ PartitionBuffer::PartitionBuffer(int capacity, int num_partitions, int64_t parti
     }
 
     for (int64_t i = 0; i < capacity_; i++) {
-        free_list_->push(i);
+        free_list_.push(i);
     }
 
     filename_ = filename;
@@ -347,7 +371,6 @@ PartitionBuffer::~PartitionBuffer() {
 
     unload(true);
 
-    delete free_list_;
     delete partitioned_file_;
     for (int64_t i = 0; i < num_partitions_; i++) {
         delete partition_table_[i];
@@ -514,20 +537,22 @@ void PartitionBuffer::evict(Partition *partition) {
     }
     assert(partition->buffer_idx_ >= 0);
     assert(partition->buffer_idx_ < capacity_);
-    free_list_->push(partition->buffer_idx_);
+    free_list_.push(partition->buffer_idx_);
 }
 
 void PartitionBuffer::admit(Partition *partition) {
     // assumes that the buffer has been locked but not the partition
     int64_t buffer_idx;
     SPDLOG_TRACE("Admitting {}", partition->partition_id_);
-    while (!free_list_->pop(buffer_idx)) {
+    if (free_list_.empty()) {
         Partition *partition_to_evict = partition_table_[*evict_ids_itr_++];
         SPDLOG_TRACE("Evicting {}", partition_to_evict->partition_id_);
         evict(partition_to_evict);
         size_--;
         SPDLOG_TRACE("Evicted {}", partition_to_evict->partition_id_);
     }
+    buffer_idx = free_list_.front();
+    free_list_.pop();
 
     void *buff_addr = (char *) buff_mem_ + (buffer_idx * partition_size_ * embedding_size_ * dtype_size_);
 
@@ -562,7 +587,7 @@ void PartitionBuffer::sync() {
         if (curr_partition->present_) {
             partitioned_file_->writePartition(curr_partition, true);
             curr_partition->present_ = false;
-            free_list_->push(curr_partition->buffer_idx_);
+            free_list_.push(curr_partition->buffer_idx_);
             curr_partition->buffer_idx_ = -1;
         }
     }

@@ -4,12 +4,12 @@
 #ifndef MARIUS_PIPELINE_H
 #define MARIUS_PIPELINE_H
 
-#include <datatypes.h>
-#include <dataset.h>
-#include <spdlog/spdlog.h>
-#include <decoder.h>
-#include <sys/time.h>
-#include <batch.h>
+#include <time.h>
+
+#include "batch.h"
+#include "dataset.h"
+#include "datatypes.h"
+#include "model.h"
 
 #define WAIT_TIME 100000 // 100 micro seconds
 #define NANOSECOND 1
@@ -186,9 +186,12 @@ class Pipeline {
     bool train_;
 
   public:
+
+    ~Pipeline();
+
     thread initThreadOfType(int worker_type, bool *paused, ThreadStatus *status, int device_id);
 
-    virtual void addWorkersToPool(int worker_type, int num_workers) = 0;
+    virtual void addWorkersToPool(int pool_id, int worker_type, int num_workers) = 0;
 
     bool isDone();
 
@@ -227,7 +230,9 @@ class PipelineCPU : public Pipeline {
 
     PipelineCPU(DataSet *data_set, Model *model, bool train, struct timespec report_time);
 
-    void addWorkersToPool(int worker_type, int num_workers) override;
+    ~PipelineCPU();
+
+    void addWorkersToPool(int pool_id, int worker_type, int num_workers) override;
 
     void initialize() override;
 
@@ -258,7 +263,9 @@ class PipelineGPU : public Pipeline {
 
     PipelineGPU(DataSet *data_set, Model *model, bool train, struct timespec report_time);
 
-    void addWorkersToPool(int worker_type, int num_workers) override;
+    ~PipelineGPU();
+
+    void addWorkersToPool(int pool_id, int worker_type, int num_workers) override;
 
     void initialize() override;
 

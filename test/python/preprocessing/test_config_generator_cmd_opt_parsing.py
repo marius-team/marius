@@ -31,6 +31,12 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         ["./output_dir"]
     ]
 
+    @classmethod
+    def setUp(self):
+        if not Path("./output_dir").exists():
+            Path("./output_dir").mkdir()
+
+    @classmethod
     def tearDown(self):
         if Path("./output_dir").exists():
             shutil.rmtree(Path("./output_dir"))
@@ -87,7 +93,7 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[4])
         config_dict = parse_args(args)
-        self.assertTrue(config_dict.get("general.device") == "multi-GPU")
+        self.assertTrue(config_dict.get("general.device") == "GPU")
 
     def test_stats_parsing(self):
         """
@@ -96,7 +102,6 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[5])
         config_dict = parse_args(args)
-        print(config_dict.get("num_nodes"))
         self.assertTrue(str(config_dict.get("num_nodes")) == "14")
         self.assertTrue(str(config_dict.get("num_relations")) == "2")
         self.assertTrue(str(config_dict.get("num_train")) == "14")
@@ -141,7 +146,6 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[10])
         config_dict = parse_args(args)
-        print(config_dict.get("training.number_of_chunks"))
         self.assertTrue(config_dict.get("training.number_of_chunks") == "32")
         self.assertTrue(config_dict.get("dataset") == "live_journal")
         self.assertTrue(config_dict.get("model.embedding_size") == "128")
