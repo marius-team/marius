@@ -2,7 +2,8 @@
 // Created by Jason Mohoney on 7/9/20.
 //
 
-#include <batch.h>
+#include "batch.h"
+#include "config.h"
 
 using std::get;
 

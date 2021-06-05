@@ -5,9 +5,8 @@
 #ifndef MARIUS_BATCH_H
 #define MARIUS_BATCH_H
 
-#include <datatypes.h>
-#include <config.h>
-#include <util.h>
+#include "datatypes.h"
+#include "util.h"
 
 using std::vector;
 

@@ -1,9 +1,8 @@
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace py = pybind11;
 
-//void init_batch(py::module &);
+void init_batch(py::module &);
 void init_config(py::module &);
 void init_dataset(py::module &);
 void init_datatypes(py::module &);

@@ -2,17 +2,11 @@
 // Created by Jason Mohoney on 5/26/20.
 //
 
-
 #ifndef MARIUS_BUFFER_H
 #define MARIUS_BUFFER_H
-#include <datatypes.h>
-#include <future>
-#include <functional>
-#include <spdlog/spdlog.h>
-#include <batch.h>
-#include <shared_mutex>
-#include <util.h>
-#include <fcntl.h>
+
+#include "batch.h"
+#include "datatypes.h"
 
 class Partition {
 public:

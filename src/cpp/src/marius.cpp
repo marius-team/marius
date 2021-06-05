@@ -1,5 +1,15 @@
 
-#include <marius.h>
+#include "marius.h"
+
+#include "config.h"
+#include "evaluator.h"
+#include "io.h"
+#include "logger.h"
+#include "model.h"
+#include "trainer.h"
+#include "util.h"
+
+using std::get;
 
 void marius(int argc, char *argv[]) {
     marius_options = parseConfig(argc, argv);

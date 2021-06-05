@@ -1,14 +1,16 @@
 //
 // Created by jasonmohoney on 10/19/19.
 //
+
 #ifndef MARIUS_DATATYPES_H
 #define MARIUS_DATATYPES_H
 
-#include <string>
 #include <map>
+#include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
-#include <tuple>
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <torch/torch.h>

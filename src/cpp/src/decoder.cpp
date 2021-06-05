@@ -2,7 +2,9 @@
 // Created by Jason Mohoney on 2019-11-20.
 //
 
-#include <decoder.h>
+#include "decoder.h"
+
+#include "config.h"
 
 using std::tuple;
 using std::make_tuple;

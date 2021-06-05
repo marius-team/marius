@@ -2,7 +2,14 @@
 // Created by Jason Mohoney on 2/18/20.
 //
 
-#include <config.h>
+#include "config.h"
+
+#include <exception>
+#include <filesystem>
+#include <sstream>
+
+#include <cxxopts.hpp>
+#include <INIReader.h>
 
 MariusOptions marius_options = MariusOptions();
 TimestampAllocator global_timestamp_allocator = TimestampAllocator();
