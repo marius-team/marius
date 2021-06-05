@@ -240,7 +240,7 @@ void GradientsToHostWorker::run() {
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
 
-            // transfer data to device
+            // transfer data to host
             // chose device with most batches in queue:
             int num_gpus = marius_options.general.gpu_ids.size();
             int device_id = 0;
