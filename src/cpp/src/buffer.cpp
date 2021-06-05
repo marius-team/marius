@@ -1,7 +1,20 @@
 //
 // Created by Jason Mohoney on 6/3/20.
 //
-#include <buffer.h>
+
+#include "buffer.h"
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <util.h>
+
+#include <functional>
+#include <future>
+#include <shared_mutex>
+
+#include "config.h"
+#include "logger.h"
+
 
 Partition::Partition(int partition_id, int64_t partition_size, int embedding_size, torch::Dtype dtype, int64_t idx_offset, int64_t file_offset) {
 
@@ -132,7 +145,7 @@ LookaheadBlock::LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_
     total_size_ = total_size;
     partitioned_file_ = partitioned_file;
     partition_ = nullptr;
-    lock_ = new mutex();
+    lock_ = new std::mutex();
 
     if(posix_memalign(&mem_, 4096, total_size_)) {
         SPDLOG_ERROR("Unable to allocate lookahead memory\nError: {}", errno);
@@ -213,7 +226,7 @@ AsyncWriteBlock::AsyncWriteBlock(int64_t total_size, PartitionedFile *partitione
     total_size_ = total_size;
     partitioned_file_ = partitioned_file;
 
-    lock_ = new mutex();
+    lock_ = new std::mutex();
 
     if(posix_memalign(&mem_, 4096, total_size_)) {
         SPDLOG_ERROR("Unable to allocate async evict memory\nError: {}", errno);

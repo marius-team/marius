@@ -1,20 +1,14 @@
 //
 // Created by Jason Mohoney on 2/18/20.
 //
+
 #ifndef MARIUS_CONFIG_H
 #define MARIUS_CONFIG_H
 
 #include <string>
-#include <exception>
-#include <datatypes.h>
-#include <spdlog/spdlog.h>
-#include <iostream>
-#include <filesystem>
-#include <INIReader.h>
-#include <cxxopts.hpp>
-#include <variant>
-#include <sstream>
-#include <iostream>
+
+#include "datatypes.h"
+#include "logger.h"
 
 using std::string;
 using std::mutex;

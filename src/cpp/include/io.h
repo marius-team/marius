@@ -1,25 +1,25 @@
 //
 // Created by jasonmohoney on 10/4/19.
 //
+
 #ifndef MARIUS_IO_H
 #define MARIUS_IO_H
 
-#include <dataset.h>
-#include <datatypes.h>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <spdlog/spdlog.h>
-#include <storage.h>
-#include <string>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <torch/script.h>
-#include <util.h>
+#include <sys/stat.h>
 
-using std::vector;
+#include <iostream>
+#include <fstream>
+#include <memory>
+#include <string>
+
+#include "datatypes.h"
+#include "storage.h"
+
 using std::string;
 using std::tuple;
+using std::vector;
 
 void createDir(const string &path);
 

@@ -5,8 +5,8 @@
 #ifndef MARIUS_EMBEDDING_H
 #define MARIUS_EMBEDDING_H
 
-#include <datatypes.h>
-#include <batch.h>
+#include "batch.h"
+#include "datatypes.h"
 
 using std::tuple;
 

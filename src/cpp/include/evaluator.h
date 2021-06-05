@@ -1,15 +1,14 @@
 //
 // Created by Jason Mohoney on 2/28/20.
 //
+
 #ifndef MARIUS_EVALUATOR_H
 #define MARIUS_EVALUATOR_H
 
-#include <dataset.h>
-#include <io.h>
-#include <spdlog/spdlog.h>
 #include <iostream>
-#include <config.h>
-#include <pipeline.h>
+
+#include "dataset.h"
+#include "pipeline.h"
 
 class Evaluator {
   public:

@@ -2,7 +2,17 @@
 // Created by Jason Mohoney on 4/21/20.
 //
 
-#include <storage.h>
+#include "storage.h"
+
+#include <fcntl.h>
+#include <unistd.h>
+
+#include <filesystem>
+#include <iostream>
+
+#include "config.h"
+#include "logger.h"
+#include "util.h"
 
 using std::ios;
 using std::ios_base;
@@ -174,6 +184,12 @@ void PartitionBufferStorage::indexPut(Indices indices, torch::Tensor values) {
     SPDLOG_ERROR("Unsupported operation for PartitionBufferStorage");
     exit(-1);
 }
+
+void PartitionBufferStorage::shuffle() {
+    SPDLOG_ERROR("Shuffle not supported for PartitionBufferStorage");
+    exit(-1);
+};
+
 
 torch::Tensor PartitionBufferStorage::indexRead(int partition_id, Indices indices, int64_t access_id) {
     return buffer_->indexRead(partition_id, indices, access_id);

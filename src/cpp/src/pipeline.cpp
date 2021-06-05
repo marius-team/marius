@@ -2,7 +2,9 @@
 // Created by Jason Mohoney on 2/29/20.
 //
 
-#include <pipeline.h>
+#include "pipeline.h"
+
+#include "logger.h"
 
 using std::get;
 using std::make_pair;

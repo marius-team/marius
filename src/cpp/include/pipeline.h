@@ -4,12 +4,12 @@
 #ifndef MARIUS_PIPELINE_H
 #define MARIUS_PIPELINE_H
 
-#include <datatypes.h>
-#include <dataset.h>
-#include <spdlog/spdlog.h>
-#include <decoder.h>
-#include <sys/time.h>
-#include <batch.h>
+#include <time.h>
+
+#include "batch.h"
+#include "dataset.h"
+#include "datatypes.h"
+#include "model.h"
 
 #define WAIT_TIME 100000 // 100 micro seconds
 #define NANOSECOND 1
