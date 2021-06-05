@@ -14,6 +14,8 @@ Welcome to Marius's documentation!
     configuration
     io_format
     training
+    models
+    loss_functions
     evaluation
     storage_backends
 
