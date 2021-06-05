@@ -158,7 +158,11 @@ enum class ComparatorType {
 
 enum class LossFunctionType {
     SoftMax,            // Dot Product Comparator
-    RankingLoss          // Cosine Product Comparator
+    RankingLoss,          // Cosine Product Comparator
+    BCEAfterSigmoidLoss,  // Binary cross entropy after explicit Sigmoid
+    BCEWithLogitsLoss,    // Combination of Sigmoid and BCELoss
+    MSELoss,             // Mean square error loss
+    SoftPlusLoss        // Softplus loss
 };
 
 enum class RelationOperatorType {

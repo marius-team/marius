@@ -7,6 +7,7 @@
 
 #include <datatypes.h>
 #include <batch.h>
+#include <loss.h>
 
 using std::tuple;
 
@@ -61,30 +62,6 @@ class DotCompare : public Comparator {
     tuple<torch::Tensor, torch::Tensor> operator()(const Embeddings &src, const Embeddings &dst, const Embeddings &negs) override;
 };
 
-// Loss Functions Functions
-class LossFunction {
-  public:
-    virtual ~LossFunction() {};
-    virtual torch::Tensor operator()(const torch::Tensor &pos_scores, const torch::Tensor &neg_scores) = 0;
-};
-
-class SoftMax : public LossFunction {
-  public:
-    SoftMax() {};
-
-    torch::Tensor operator()(const torch::Tensor &pos_scores, const torch::Tensor &neg_scores) override;
-};
-
-class RankingLoss : public LossFunction {
-  private:
-    float margin_;
-  public:
-    RankingLoss(float margin) {
-        margin_ = margin;
-    };
-
-    torch::Tensor operator()(const torch::Tensor &pos_scores, const torch::Tensor &neg_scores) override;
-};
 
 // Decoder Models
 class Decoder {

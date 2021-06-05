@@ -21,13 +21,6 @@ class PyRelationOperator : RelationOperator {
 //       PYBIND11_OVERRIDE_NAME(tuple<torch::Tensor, torch::Tensor>, Comparator, "__call__", operator(), src, dst, negs); }
 // };
 
-class PyLossFunction : LossFunction {
-  public:
-    using LossFunction::LossFunction;
-    torch::Tensor operator()(const torch::Tensor &pos_scores, const torch::Tensor &neg_scores) override { 
-      PYBIND11_OVERRIDE_NAME(torch::Tensor, LossFunction, "__call__", operator(), pos_scores, neg_scores); }
-};
-
 class PyDecoder : Decoder {
   public:
     using Decoder::Decoder;
@@ -50,13 +43,6 @@ void init_decoder(py::module &m) {
   //   .def(py::init<>());
   // py::class_<DotCompare, Comparator>(m, "DotCompare")
   //   .def(py::init<>());
-
-  py::class_<LossFunction, PyLossFunction>(m, "LossFunction")
-    .def("__call__", &LossFunction::operator(), py::arg("pos_scores"), py::arg("neg_scores"));
-  py::class_<SoftMax, LossFunction>(m, "SoftMax")
-    .def(py::init<>());
-  py::class_<RankingLoss, LossFunction>(m, "RankingLoss")
-    .def(py::init<float>(), py::arg("margin"));
 
   py::class_<Decoder, PyDecoder>(m, "Decoder")
     .def(py::init<>())

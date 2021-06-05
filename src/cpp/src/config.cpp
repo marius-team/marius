@@ -571,12 +571,22 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
         exit(-1);
     }
 
+    std::cout << s_loss_function_type;
+    std::cout << s_optimizer_type;
     if (s_loss_function_type == "Ranking") {
         loss_function_type = LossFunctionType::RankingLoss;
     } else if (s_loss_function_type == "SoftMax") {
         loss_function_type = LossFunctionType::SoftMax;
+    } else if (s_loss_function_type == "BCEAfterSigmoid") {
+        loss_function_type = LossFunctionType::BCEAfterSigmoidLoss;
+    } else if (s_loss_function_type == "BCEWithLogits") {
+        loss_function_type = LossFunctionType::BCEWithLogitsLoss;
+    } else if (s_loss_function_type == "MSE") {
+        loss_function_type = LossFunctionType::MSELoss;
+    } else if (s_loss_function_type == "SoftPlus") {
+        loss_function_type = LossFunctionType::SoftPlusLoss;
     } else {
-        SPDLOG_ERROR("Unrecognized loss function {}. Options are [Ranking, SoftMax].", s_loss_function_type);
+        SPDLOG_ERROR("Unrecognized loss function {}. Options are [Ranking, SoftMax, BCEAfterSigmoid, BCEWithLogits, MSE, SoftPlus].", s_loss_function_type);
         exit(-1);
     }
     
