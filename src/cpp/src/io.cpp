@@ -2,7 +2,12 @@
 // Created by jasonmohoney on 10/4/19.
 //
 
-#include <io.h>
+#include "io.h"
+
+#include <filesystem>
+
+#include "config.h"
+#include "logger.h"
 
 using std::get;
 using std::ofstream;

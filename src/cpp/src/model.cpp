@@ -2,7 +2,9 @@
 // Created by Jason Mohoney on 2/12/21.
 //
 
-#include <model.h>
+#include "model.h"
+
+#include "logger.h"
 
 Model::Model(Encoder *encoder, Decoder* decoder) {
     encoder_ = encoder;

@@ -5,7 +5,7 @@ find_package(Sphinx REQUIRED)
 # Find all the public headers
 file(GLOB_RECURSE PROJECT_HEADERS ${project_INCLUDE_DIR}/*.h)
 
-set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/include)
+set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/src/cpp/include)
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
 set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)

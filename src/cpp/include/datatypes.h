@@ -1,14 +1,16 @@
 //
 // Created by jasonmohoney on 10/19/19.
 //
+
 #ifndef MARIUS_DATATYPES_H
 #define MARIUS_DATATYPES_H
 
-#include <string>
 #include <map>
+#include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
-#include <tuple>
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <torch/torch.h>
@@ -63,52 +65,47 @@ typedef DummyCuda CudaEvent;
 
 /** Typedefs */
 
-// Tensor of edges with node and relation indices. Shape (n, 3)
-// First column -> src_idx
-// Second column -> rel_idx
-// Third column -> dst_idx
+/**
+ * Tensor of edges with node and relation indices. Shape (n, 3)
+ * First column -> src_idx
+ * Second column -> rel_idx
+ * Third column -> dst_idx
+ */
 typedef torch::Tensor EdgeList;
 
-// Tensor of embedding vectors. Shape: (n, FEATURE_SIZE)
+/** Tensor of embedding vectors. Shape: (n, FEATURE_SIZE) */
 typedef torch::Tensor Embeddings;
 
-// Single embedding vector. Shape (FEATURE_SIZE)
+/** Single embedding vector. Shape (FEATURE_SIZE) */
 typedef torch::Tensor Embedding;
 
-// Tensor of relation vectors. Shape: (n, FEATURE_SIZE)
+/** Tensor of relation vectors. Shape: (n, FEATURE_SIZE) */
 typedef torch::Tensor Relations;
 
-// Single relation vector. Shape (FEATURE_SIZE)
+/** Single relation vector. Shape (FEATURE_SIZE) */
 typedef torch::Tensor Relation;
 
-// 1D Tensor of indices. Shape (n)
+/** 1D Tensor of indices. Shape (n) */
 typedef torch::Tensor Indices;
 
-// Tensor of gradients. Shape: (n, FEATURE_SIZE)
+/** Tensor of gradients. Shape: (n, FEATURE_SIZE) */
 typedef torch::Tensor Gradients;
 
-// Tensor containing optimizer state for a selection of parameters. Shape: (n, FEATURE_SIZE)
+/** Tensor containing optimizer state for a selection of parameters. Shape: (n, FEATURE_SIZE) */
 typedef torch::Tensor OptimizerState;
-
-// Sparse Tensor
-typedef torch::Tensor SparseAdjacencyMatrix;
-
-// Sparse Tensor for multiple relations (n x n x r)
-typedef torch::Tensor SparseAdjacencyMatrixMR;
 
 typedef std::chrono::time_point<std::chrono::steady_clock> Timestamp;
 
 
-/** Enums */
 enum class InitializationDistribution {
-    Uniform,               // Initialize with torch::uniform with min: -scale_factor and max: scale_factor
-    Normal                 // Initialize with torch::randn with mean 0 and variance scale_factor^2
+    Uniform,               /**< Initialize with torch::uniform with min: -scale_factor and max: scale_factor */
+    Normal                 /**< Initialize with torch::randn with mean 0 and variance scale_factor^2 */
 };
 
 enum class NegativeSamplingAccess {
-    Uniform,               // Uniformly random sampling
-    UniformCrossPartition, // Used with partitioning, samples come from across partitions in the buffer
-    All
+    Uniform,               /**< Uniformly random sampling */
+    UniformCrossPartition, /**< Used with partitioning, samples come from across partitions in the buffer */
+    All                    /**< Sample all nodes for negatives, used for evaluation */
 };
 
 enum class EdgeBucketOrdering {
@@ -144,16 +141,16 @@ enum class BackendType {
     DeviceMemory
 };
 
-// Optimizer options
+/** Optimizer options */
 enum class OptimizerType {
-    SGD,            // Standard SGD optimizer
-    Adagrad         // Standard Adagrad optimizer with state managed on disk
+    SGD,            /**< Standard SGD optimizer */
+    Adagrad         /**< Standard Adagrad optimizer with state managed on disk */
 };
 
-// Comparison operator options
+/** Comparison operator options */
 enum class ComparatorType {
-    Dot,            // Dot Product Comparator
-    Cosine          // Cosine Product Comparator
+    Dot,            /**< Dot Product Comparator */
+    Cosine          /**< Cosine Product Comparator */
 };
 
 enum class LossFunctionType {

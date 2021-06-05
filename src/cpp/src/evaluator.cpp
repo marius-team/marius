@@ -2,7 +2,10 @@
 // Created by Jason Mohoney on 2/28/20.
 //
 
-#include <evaluator.h>
+#include "evaluator.h"
+
+#include "config.h"
+#include "logger.h"
 
 PipelineEvaluator::PipelineEvaluator(DataSet *data_set, Model *model) {
     data_set_ = data_set;

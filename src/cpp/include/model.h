@@ -5,8 +5,8 @@
 #ifndef MARIUS_INCLUDE_MODEL_H_
 #define MARIUS_INCLUDE_MODEL_H_
 
-#include <encoder.h>
-#include <decoder.h>
+#include "decoder.h"
+#include "encoder.h"
 
 class Model {
   public:

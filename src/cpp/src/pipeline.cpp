@@ -2,7 +2,9 @@
 // Created by Jason Mohoney on 2/29/20.
 //
 
-#include <pipeline.h>
+#include "pipeline.h"
+
+#include "logger.h"
 
 using std::get;
 using std::make_pair;
@@ -237,7 +239,20 @@ void AccumulateGradientsWorker::run() {
 void GradientsToHostWorker::run() {
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
-            Queue<Batch *> *pop_queue = ((PipelineGPU *) pipeline_)->device_update_batches_[device_id_];
+
+            // transfer data to host
+            // chose device with most batches in queue:
+            int num_gpus = marius_options.general.gpu_ids.size();
+            int device_id = 0;
+            int max_size = ((PipelineGPU *) pipeline_)->device_update_batches_[0]->size();
+            for (int i = 1; i < num_gpus; i++) {
+                if (((PipelineGPU *) pipeline_)->device_update_batches_[i]->size() > max_size) {
+                    max_size = ((PipelineGPU *) pipeline_)->device_update_batches_[i]->size();
+                    device_id = i;
+                }
+            }
+
+            Queue<Batch *> *pop_queue = ((PipelineGPU *) pipeline_)->device_update_batches_[device_id];
             *status_ = ThreadStatus::WaitPop;
             auto tup = pop_queue->blocking_pop();
             bool popped = get<0>(tup);
@@ -435,30 +450,30 @@ void Pipeline::waitComplete() {
     }
 }
 
-void PipelineCPU::addWorkersToPool(int worker_type, int num_workers) {
+void PipelineCPU::addWorkersToPool(int pool_id, int worker_type, int num_workers) {
     bool *paused;
     ThreadStatus *status;
 
     for (int i = 0; i < num_workers; i++) {
         paused = new bool(true);
         status = new ThreadStatus(ThreadStatus::Paused);
-        pool_paused_[i]->emplace_back(paused);
-        pool_status_[i]->emplace_back(status);
-        pool_[i]->emplace_back(initThreadOfType(worker_type, paused, status, i));
+        pool_paused_[pool_id]->emplace_back(paused);
+        pool_status_[pool_id]->emplace_back(status);
+        pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, i));
     }
 }
 
 void PipelineCPU::initialize() {
     if (train_) {
-        addWorkersToPool(EMBEDDINGS_LOADER_ID, marius_options.training_pipeline.num_embedding_loader_threads);
-        addWorkersToPool(CPU_BATCH_PREP_ID, marius_options.training_pipeline.num_compute_threads);
-        addWorkersToPool(CPU_COMPUTE_ID, marius_options.training_pipeline.num_compute_threads);
-        addWorkersToPool(CPU_ACCUMULATE_ID, marius_options.training_pipeline.num_compute_threads);
-        addWorkersToPool(UPDATE_EMBEDDINGS_ID, marius_options.training_pipeline.num_embedding_update_threads);
+        addWorkersToPool(0, EMBEDDINGS_LOADER_ID, marius_options.training_pipeline.num_embedding_loader_threads);
+        addWorkersToPool(1, CPU_BATCH_PREP_ID, marius_options.training_pipeline.num_compute_threads);
+        addWorkersToPool(2, CPU_COMPUTE_ID, marius_options.training_pipeline.num_compute_threads);
+        addWorkersToPool(3, CPU_ACCUMULATE_ID, marius_options.training_pipeline.num_compute_threads);
+        addWorkersToPool(4, UPDATE_EMBEDDINGS_ID, marius_options.training_pipeline.num_embedding_update_threads);
     } else {
-        addWorkersToPool(EMBEDDINGS_LOADER_ID, marius_options.evaluation_pipeline.num_embedding_loader_threads);
-        addWorkersToPool(CPU_BATCH_PREP_ID, marius_options.evaluation_pipeline.num_evaluate_threads);
-        addWorkersToPool(CPU_COMPUTE_ID, marius_options.evaluation_pipeline.num_evaluate_threads);
+        addWorkersToPool(0, EMBEDDINGS_LOADER_ID, marius_options.evaluation_pipeline.num_embedding_loader_threads);
+        addWorkersToPool(1, CPU_BATCH_PREP_ID, marius_options.evaluation_pipeline.num_evaluate_threads);
+        addWorkersToPool(2, CPU_COMPUTE_ID, marius_options.evaluation_pipeline.num_evaluate_threads);
     }
     auto monitor_func = [](PipelineMonitor w) { w.run(); };
     monitor_ = thread(monitor_func, PipelineMonitor(this, report_time_));
@@ -646,30 +661,45 @@ PipelineGPU::~PipelineGPU() {
     }
 }
 
-void PipelineGPU::addWorkersToPool(int worker_type, int num_workers) {
+void PipelineGPU::addWorkersToPool(int pool_id, int worker_type, int num_workers) {
     bool *paused;
     ThreadStatus *status;
 
-    for (int i = 0; i < num_workers; i++) {
-        paused = new bool(true);
-        status = new ThreadStatus(ThreadStatus::Paused);
-        pool_paused_[i]->emplace_back(paused);
-        pool_status_[i]->emplace_back(status);
-        pool_[i]->emplace_back(initThreadOfType(worker_type, paused, status, i));
+
+    if (worker_type == GPU_COMPUTE_ID) {
+        num_workers = marius_options.general.gpu_ids.size() * num_workers;
+        for (int j = 0; j < marius_options.general.gpu_ids.size(); j++) {
+            for (int i = 0; i < num_workers; i++) {
+                paused = new bool(true);
+                status = new ThreadStatus(ThreadStatus::Paused);
+                pool_paused_[pool_id]->emplace_back(paused);
+                pool_status_[pool_id]->emplace_back(status);
+                pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, j));
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < num_workers; i++) {
+            paused = new bool(true);
+            status = new ThreadStatus(ThreadStatus::Paused);
+            pool_paused_[pool_id]->emplace_back(paused);
+            pool_status_[pool_id]->emplace_back(status);
+            pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, i));
+        }
     }
 }
 
 void PipelineGPU::initialize() {
     if (train_) {
-        addWorkersToPool(EMBEDDINGS_LOADER_ID, marius_options.training_pipeline.num_embedding_loader_threads);
-        addWorkersToPool(EMBEDDINGS_TRANSFER_ID, marius_options.training_pipeline.num_embedding_transfer_threads);
-        addWorkersToPool(GPU_COMPUTE_ID, marius_options.training_pipeline.num_compute_threads);
-        addWorkersToPool(UPDATE_TRANSFER_ID, marius_options.training_pipeline.num_compute_threads);
-        addWorkersToPool(UPDATE_EMBEDDINGS_ID, marius_options.training_pipeline.num_embedding_update_threads);
+        addWorkersToPool(0, EMBEDDINGS_LOADER_ID, marius_options.training_pipeline.num_embedding_loader_threads);
+        addWorkersToPool(1, EMBEDDINGS_TRANSFER_ID, marius_options.training_pipeline.num_embedding_transfer_threads);
+        addWorkersToPool(2, GPU_COMPUTE_ID, marius_options.training_pipeline.num_compute_threads);
+        addWorkersToPool(3, UPDATE_TRANSFER_ID, marius_options.training_pipeline.num_gradient_transfer_threads);
+        addWorkersToPool(4, UPDATE_EMBEDDINGS_ID, marius_options.training_pipeline.num_embedding_update_threads);
     } else {
-        addWorkersToPool(EMBEDDINGS_LOADER_ID, marius_options.evaluation_pipeline.num_embedding_loader_threads);
-        addWorkersToPool(EMBEDDINGS_TRANSFER_ID, marius_options.evaluation_pipeline.num_embedding_transfer_threads);
-        addWorkersToPool(GPU_COMPUTE_ID, marius_options.evaluation_pipeline.num_evaluate_threads);
+        addWorkersToPool(0, EMBEDDINGS_LOADER_ID, marius_options.evaluation_pipeline.num_embedding_loader_threads);
+        addWorkersToPool(1, EMBEDDINGS_TRANSFER_ID, marius_options.evaluation_pipeline.num_embedding_transfer_threads);
+        addWorkersToPool(2, GPU_COMPUTE_ID, marius_options.evaluation_pipeline.num_evaluate_threads);
     }
 
     auto monitor_func = [](PipelineMonitor w) { w.run(); };

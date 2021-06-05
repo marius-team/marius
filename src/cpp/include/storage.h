@@ -5,26 +5,15 @@
 
 #ifndef MARIUS_STORAGE_H
 #define MARIUS_STORAGE_H
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
-#include <batch.h>
-#include <buffer.h>
-#include <config.h>
-#include <datatypes.h>
-#include <decoder.h>
-#include <fcntl.h>
-#include <filesystem>
+
 #include <fstream>
-#include <iostream>
-#include <map>
-#include <math.h>
 #include <string>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <tuple>
-#include <unistd.h>
-#include <util.h>
 #include <vector>
+
+#include "batch.h"
+#include "buffer.h"
+#include "datatypes.h"
 
 using std::vector;
 using std::string;
@@ -132,10 +121,7 @@ class PartitionBufferStorage : public Storage {
 
     void indexPut(Indices indices, torch::Tensor values) override;
 
-    void shuffle() override {
-        SPDLOG_ERROR("Shuffle not supported for PartitionBufferStorage");
-        exit(-1);
-    };
+    void shuffle() override;
 
     torch::Tensor indexRead(int partition_id, Indices indices, int64_t access_id);
 

@@ -2,7 +2,9 @@
 // Created by Jason Mohoney on 2/28/20.
 //
 
-#include <trainer.h>
+#include "trainer.h"
+
+#include "logger.h"
 
 using std::cout;
 using std::tie;

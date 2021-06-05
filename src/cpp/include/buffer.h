@@ -2,39 +2,33 @@
 // Created by Jason Mohoney on 5/26/20.
 //
 
-
 #ifndef MARIUS_BUFFER_H
 #define MARIUS_BUFFER_H
-#include <datatypes.h>
-#include <future>
-#include <functional>
-#include <spdlog/spdlog.h>
-#include <batch.h>
-#include <shared_mutex>
-#include <util.h>
-#include <fcntl.h>
+
+#include "batch.h"
+#include "datatypes.h"
 
 class Partition {
 public:
-    std::mutex *lock_;                                              /** Mutex lock to prevent race conditions */
-    std::condition_variable *cv_;                                   /** Condition variable for signaling */
-    void *data_ptr_;                                                /** Pointer to partition in memory */
-    int partition_id_;                                              /** ID of the partition */
+    std::mutex *lock_;                                              /**< Mutex lock to prevent race conditions */
+    std::condition_variable *cv_;                                   /**< Condition variable for signaling */
+    void *data_ptr_;                                                /**< Pointer to partition in memory */
+    int partition_id_;                                              /**< ID of the partition */
 
-    bool present_;                                                  /** If true this partition is present in the buffer */
-    int usage_;                                                     /** Counter which indicates the number of batches which are currently accessing this partition */
+    bool present_;                                                  /**< If true this partition is present in the buffer */
+    int usage_;                                                     /**< Counter which indicates the number of batches which are currently accessing this partition */
 
-    int64_t partition_size_;                                        /** Number of embeddings in each partition, the last partition may have fewer embeddings than this */
-    int embedding_size_;                                            /** Number of elements in each embedding */
-    torch::Dtype dtype_;                                            /** Datatype of the embeddings */
-    int dtype_size_;                                                /** Size in bytes of the datatype */
-    int64_t total_size_;                                            /** Total size in bytes of the partition */
+    int64_t partition_size_;                                        /**< Number of embeddings in each partition, the last partition may have fewer embeddings than this */
+    int embedding_size_;                                            /**< Number of elements in each embedding */
+    torch::Dtype dtype_;                                            /**< Datatype of the embeddings */
+    int dtype_size_;                                                /**< Size in bytes of the datatype */
+    int64_t total_size_;                                            /**< Total size in bytes of the partition */
 
-    int64_t idx_offset_;                                            /** Embedding ID offset of the partition */
-    int64_t file_offset_;                                           /** Offset in bytes of the partition in the embedding file */
-    int buffer_idx_;                                                /** Buffer entry ID of the partition in the buffer */
+    int64_t idx_offset_;                                            /**< Embedding ID offset of the partition */
+    int64_t file_offset_;                                           /**< Offset in bytes of the partition in the embedding file */
+    int buffer_idx_;                                                /**< Buffer entry ID of the partition in the buffer */
 
-    torch::Tensor tensor_;                                          /** Tensor view of the partition */
+    torch::Tensor tensor_;                                          /**< Tensor view of the partition */
 
     bool evicting_;
 
@@ -52,14 +46,14 @@ public:
 
 class PartitionedFile {
   public:
-    int num_partitions_;                                            /** Number of partitions in the file */
-    int64_t partition_size_;                                        /** Number of embeddings in each partition, the last partition may have fewer embeddings than this */
-    int embedding_size_;                                            /** Number of elements in each embedding */
-    int64_t total_embeddings_;                                      /** Total number of embeddings */
-    torch::Dtype dtype_;                                            /** Datatype of the embeddings */
-    int dtype_size_;                                                /** Size in bytes of embedding element dtype */
-    string filename_;                                               /** Name of the backing file */
-    int fd_;                                                        /** File descriptor for the backing file */
+    int num_partitions_;                                            /**< Number of partitions in the file */
+    int64_t partition_size_;                                        /**< Number of embeddings in each partition, the last partition may have fewer embeddings than this */
+    int embedding_size_;                                            /**< Number of elements in each embedding */
+    int64_t total_embeddings_;                                      /**< Total number of embeddings */
+    torch::Dtype dtype_;                                            /**< Datatype of the embeddings */
+    int dtype_size_;                                                /**< Size in bytes of embedding element dtype */
+    string filename_;                                               /**< Name of the backing file */
+    int fd_;                                                        /**< File descriptor for the backing file */
 
     /** Constructor */
     PartitionedFile(string filename, int num_partitions, int64_t partition_size, int embedding_size, int64_t total_embeddings, torch::Dtype dtype);
@@ -129,11 +123,11 @@ class PartitionBuffer {
   private:
     std::atomic<int64_t> size_;
     int capacity_;
-    int num_partitions_;                                            /** Number of partitions in the file */
-    int64_t partition_size_;                                        /** Number of embeddings in each partition, the last partition may have fewer embeddings than this */
-    int embedding_size_;                                            /** Number of elements in each embedding */
+    int num_partitions_;                                            /**< Number of partitions in the file */
+    int64_t partition_size_;                                        /**< Number of embeddings in each partition, the last partition may have fewer embeddings than this */
+    int embedding_size_;                                            /**< Number of elements in each embedding */
     int64_t total_embeddings_;
-    torch::Dtype dtype_;                                            /** Datatype of the embeddings */
+    torch::Dtype dtype_;                                            /**< Datatype of the embeddings */
     int dtype_size_;
 
     // counters

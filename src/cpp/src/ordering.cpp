@@ -1,7 +1,12 @@
 //
 // Created by Jason Mohoney on 7/17/20.
 //
-#include <ordering.h>
+
+#include "ordering.h"
+
+#include "config.h"
+#include "datatypes.h"
+#include "logger.h"
 
 using std::pair;
 

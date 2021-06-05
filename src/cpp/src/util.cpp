@@ -2,7 +2,13 @@
 // Created by Jason Mohoney on 7/30/20.
 //
 
-#include <util.h>
+#include "util.h"
+
+#include <unistd.h>
+
+#include <iostream>
+
+#include "logger.h"
 
 void assert_no_nans(torch::Tensor values) {
     return;

@@ -1,7 +1,10 @@
 //
 // Created by Jason Mohoney on 2/7/20.
 //
-#include <dataset.h>
+
+#include "dataset.h"
+
+#include "ordering.h"
 
 using std::get;
 using std::make_pair;
@@ -809,6 +812,12 @@ void DataSet::unloadStorage() {
         SPDLOG_DEBUG("Unloaded Evaluation Set");
     }
     storage_loaded_ = false;
+}
+
+void DataSet::syncEmbeddings() {
+    if (!train_ && marius_options.storage.embeddings == BackendType::PartitionBuffer) {
+        ((InMemory *) node_embeddings_)->force_load();
+    }
 }
 
 torch::Tensor DataSet::accumulateRanks() {

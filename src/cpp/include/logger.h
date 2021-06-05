@@ -5,10 +5,12 @@
 #ifndef MARIUS_LOGGER_H
 #define MARIUS_LOGGER_H
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+
 #include <string>
+
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "spdlog/sinks/basic_file_sink.h"
 
 using std::string;
 using std::shared_ptr;

@@ -4,7 +4,8 @@
 
 #ifndef MARIUS_INCLUDE_ENCODER_H_
 #define MARIUS_INCLUDE_ENCODER_H_
-#include <batch.h>
+
+#include "batch.h"
 
 // Encoder Models
 class Encoder {
