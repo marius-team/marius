@@ -204,22 +204,13 @@ RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/wh
 ## Citing Marius ##
 Arxiv Version:
 ```
-@article{DBLP:journals/corr/abs-2101-08358,
-  author    = {Jason Mohoney and
-               Roger Waleffe and
-               Yiheng Xu and
-               Theodoros Rekatsinas and
-               Shivaram Venkataraman},
-  title     = {Learning Massive Graph Embeddings on a Single Machine},
-  journal   = {CoRR},
-  volume    = {abs/2101.08358},
-  year      = {2021},
-  url       = {https://arxiv.org/abs/2101.08358},
-  archivePrefix = {arXiv},
-  eprint    = {2101.08358},
-  timestamp = {Sat, 30 Jan 2021 18:02:51 +0100},
-  biburl    = {https://dblp.org/rec/journals/corr/abs-2101-08358.bib},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
+@misc{mohoney2021marius,
+      title={Marius: Learning Massive Graph Embeddings on a Single Machine}, 
+      author={Jason Mohoney and Roger Waleffe and Yiheng Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
+      year={2021},
+      eprint={2101.08358},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
 }
 ```
 OSDI Version (not yet available):
