@@ -4,6 +4,8 @@
 
 #include "io.h"
 
+#include <filesystem>
+
 #include "config.h"
 #include "logger.h"
 
