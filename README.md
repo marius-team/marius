@@ -5,9 +5,9 @@ Marius is a system under active development for training embeddings for large-sc
 Training on large scale graphs requires a large amount of data movement to get embedding parameters from storage to the computational device. 
 Marius is designed to mitigate/reduce data movement overheads using:
 - Pipelined training and IO
-- Partition caching and locality-aware data orderings
+- Partition caching and buffer-aware data orderings
 
-Details on how Marius works can be found in the documentation, or in our [OSDI 21' Paper](https://arxiv.org/abs/2101.08358).
+Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.org/abs/2101.08358), where experiment scripts and configurations can be found in the `osdi2021` branch.
 
 ## Requirements ##
 (Other versions may work, but are untested)
@@ -202,12 +202,24 @@ RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/wh
 ```
 
 ## Citing Marius ##
+Arxiv Version:
 ```
-@inproceedings {MariusOSDI2021,
-    author = {Jason Mohoney and Roger Waleffe and Yiheng Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
-    title = {Marius: Learning Massive Graph Embeddings on a Single Machine},
-    booktitle = {15th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 21)},
-    year = {2021},
-    publisher = {{USENIX} Association},
+@article{DBLP:journals/corr/abs-2101-08358,
+  author    = {Jason Mohoney and
+               Roger Waleffe and
+               Yiheng Xu and
+               Theodoros Rekatsinas and
+               Shivaram Venkataraman},
+  title     = {Learning Massive Graph Embeddings on a Single Machine},
+  journal   = {CoRR},
+  volume    = {abs/2101.08358},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2101.08358},
+  archivePrefix = {arXiv},
+  eprint    = {2101.08358},
+  timestamp = {Sat, 30 Jan 2021 18:02:51 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2101-08358.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 ```
+OSDI Version (not yet available):
