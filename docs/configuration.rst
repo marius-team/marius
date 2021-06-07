@@ -155,13 +155,13 @@ shuffle_interval             int     No        1                                
 
 The loss section allows for setting loss function options.
 
-===========================  ======  ========  ==========  ===========================================  ===================
-   Name                      Type    Required  Default     Valid Values                                 Description
----------------------------  ------  --------  ----------  -------------------------------------------  -------------------
-loss                         string  No        SoftMax      [SoftMax, Ranking]                          Sets the loss function. The Ranking loss can be tuned with the margin parameter.
-margin                       float   No        0                                                        Sets the margin for the Ranking loss function
-reduction                    string  No        Mean         [Mean, Sum]                                 Sets the reduction to apply to the loss
-===========================  ======  ========  ==========  ===========================================  ===================
+===========================  ======  ========  ==========  ==================================================================  ===================
+   Name                      Type    Required  Default     Valid Values                                                        Description
+---------------------------  ------  --------  ----------  ------------------------------------------------------------------  -------------------
+loss :ref:`_loss_functions`  string  No        SoftMax      [SoftMax, Ranking, BCEAfterSigmoid, BCEWithLogits, MSE, SoftPlus]  Sets the loss function. The Ranking loss can be tuned with the margin parameter.
+margin                       float   No        0                                                                               Sets the margin for the Ranking loss function
+reduction                    string  No        Mean         [Mean, Sum]                                                        Sets the reduction to apply to the loss
+===========================  ======  ========  ==========  ==================================================================  ===================
 
 
 [training_pipeline]
