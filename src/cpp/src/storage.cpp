@@ -5,6 +5,7 @@
 #include "storage.h"
 
 #include <fcntl.h>
+#include <omp.h>
 #include <unistd.h>
 
 #include <filesystem>
@@ -180,6 +181,21 @@ torch::Tensor PartitionBufferStorage::range(int64_t offset, int64_t n) {
     exit(-1);
 }
 
+std::tuple<torch::Tensor, torch::Tensor> PartitionBufferStorage::gatherNeighbors(torch::Tensor node_ids, bool src) {
+    SPDLOG_ERROR("Unsupported operation for PartitionBufferStorage");
+    exit(-1);
+}
+
+void PartitionBufferStorage::initializeInMemorySubGraph(std::vector<int> buffer_state) {
+    SPDLOG_ERROR("Unsupported operation for PartitionBufferStorage");
+    exit(-1);
+}
+
+void PartitionBufferStorage::updateInMemorySubGraph(int admit_partition_id, int evict_partition_id) {
+    SPDLOG_ERROR("Unsupported operation for PartitionBufferStorage");
+    exit(-1);
+}
+
 void PartitionBufferStorage::indexPut(Indices indices, torch::Tensor values) {
     SPDLOG_ERROR("Unsupported operation for PartitionBufferStorage");
     exit(-1);
@@ -218,6 +234,8 @@ FlatFile::FlatFile(string filename, int64_t dim0_size, int64_t dim1_size, torch:
     dtype_ = dtype;
     initialized_ = true;
     loaded_ = false;
+
+    in_memory_subgraph_enabled_ = false;
 }
 
 FlatFile::FlatFile(string filename, torch::Tensor data) {
@@ -229,6 +247,7 @@ FlatFile::FlatFile(string filename, torch::Tensor data) {
     append(data);
     initialized_ = true;
 
+    in_memory_subgraph_enabled_ = false;
 }
 
 FlatFile::FlatFile(string filename, torch::ScalarType dtype) {
@@ -237,6 +256,8 @@ FlatFile::FlatFile(string filename, torch::ScalarType dtype) {
     initialized_ = false;
     loaded_ = false;
     dtype_ = dtype;
+
+    in_memory_subgraph_enabled_ = false;
 }
 
 void FlatFile::rangePut(int64_t offset, torch::Tensor values) {
@@ -328,6 +349,189 @@ torch::Tensor FlatFile::indexRead(Indices indices) {
 void FlatFile::indexAdd(Indices indices, torch::Tensor values) {
     SPDLOG_ERROR("Unsupported operation for FlatFile, only sequential access is supported");
     exit(-1);
+}
+
+void FlatFile::initializeInMemorySubGraph(std::vector<int> buffer_state) {
+
+    in_memory_subgraph_enabled_ = true;
+    std::vector<torch::Tensor> in_memory_edge_buckets;
+    std::vector<int> in_memory_edge_bucket_ids;
+    std::vector<int> in_memory_edge_bucket_starts;
+    std::vector<int> in_memory_edge_bucket_sizes;
+
+    torch::Tensor new_in_memory_partition_ids = torch::from_blob(buffer_state.data(), {(int) buffer_state.size()}, torch::kInt32);
+
+    torch::Tensor edge_bucket_sizes = torch::from_blob(edge_bucket_sizes_.data(), {(int) edge_bucket_sizes_.size()}, torch::kInt64);
+    edge_bucket_sizes = edge_bucket_sizes.to(torch::kInt32);
+    torch::Tensor edge_bucket_ends_disk = edge_bucket_sizes.cumsum(0);
+    torch::Tensor edge_bucket_starts_disk = edge_bucket_ends_disk - edge_bucket_sizes;
+
+    int curr_in_memory_start = 0;
+    // new partition as src
+    for (int i = 0; i < new_in_memory_partition_ids.size(0); i++) {
+        {
+            int edge_bucket_id = (new_in_memory_partition_ids[i].item<int>() * marius_options.storage.num_partitions) + new_in_memory_partition_ids[i].item<int>();
+            int edge_bucket_start = edge_bucket_starts_disk[edge_bucket_id].item<int>();
+            int edge_bucket_size = edge_bucket_sizes[edge_bucket_id].item<int>();
+
+            torch::Tensor edge_bucket = range(edge_bucket_start, edge_bucket_size);
+            in_memory_edge_buckets.emplace_back(edge_bucket);
+            in_memory_edge_bucket_ids.emplace_back(edge_bucket_id);
+            in_memory_edge_bucket_starts.emplace_back(curr_in_memory_start);
+            in_memory_edge_bucket_sizes.emplace_back(edge_bucket_size);
+            curr_in_memory_start += edge_bucket_size;
+        }
+        for (int j = 0; j < new_in_memory_partition_ids.size(0); j++) {
+            if (i != j) {
+                int edge_bucket_id = (new_in_memory_partition_ids[i].item<int>() * marius_options.storage.num_partitions) + new_in_memory_partition_ids[j].item<int>();
+                int edge_bucket_start = edge_bucket_starts_disk[edge_bucket_id].item<int>();
+                int edge_bucket_size = edge_bucket_sizes[edge_bucket_id].item<int>();
+
+                torch::Tensor edge_bucket = range(edge_bucket_start, edge_bucket_size);
+                in_memory_edge_buckets.emplace_back(edge_bucket);
+                in_memory_edge_bucket_ids.emplace_back(edge_bucket_id);
+                in_memory_edge_bucket_starts.emplace_back(curr_in_memory_start);
+                in_memory_edge_bucket_sizes.emplace_back(edge_bucket_size);
+                curr_in_memory_start += edge_bucket_size;
+            }
+        }
+    }
+    in_memory_subgraph_ = torch::cat(in_memory_edge_buckets);
+
+    // sort by source
+    src_sorted_list_ = in_memory_subgraph_.index_select(0, torch::argsort(in_memory_subgraph_.select(1, 0)));
+
+    // sort by dest
+    dst_sorted_list_ = in_memory_subgraph_.index_select(0, torch::argsort(in_memory_subgraph_.select(1, 2)));
+
+    // update state
+    in_memory_partition_ids_ = new_in_memory_partition_ids.clone();
+    in_memory_edge_bucket_ids_ = torch::from_blob(in_memory_edge_bucket_ids.data(), {(int) in_memory_edge_bucket_ids.size()}, torch::kInt32).clone();
+    in_memory_edge_bucket_starts_ = torch::from_blob(in_memory_edge_bucket_starts.data(), {(int) in_memory_edge_bucket_starts.size()}, torch::kInt32).clone();
+    in_memory_edge_bucket_sizes_ = torch::from_blob(in_memory_edge_bucket_sizes.data(), {(int) in_memory_edge_bucket_sizes.size()}, torch::kInt32).clone();
+}
+
+
+std::tuple<torch::Tensor, torch::Tensor> FlatFile::gatherNeighbors(torch::Tensor node_ids, bool src) {
+    std::vector<torch::Tensor> neighbors = std::vector<torch::Tensor>(node_ids.size(0));
+
+    torch::Tensor search_values = torch::ones_like(node_ids);
+    search_values = node_ids + search_values;
+    search_values = torch::stack({node_ids, search_values}).transpose(0, 1);
+
+    torch::Tensor ranges;
+
+    if (src) {
+        ranges = torch::searchsorted(src_sorted_list_.select(1, 0), search_values);
+    } else {
+        ranges = torch::searchsorted(dst_sorted_list_.select(1, 2), search_values);
+    }
+
+    torch::Tensor num_neighbors = ranges.select(1, 1) - ranges.select(1, 0);
+    torch::Tensor offsets = num_neighbors.cumsum(0) - num_neighbors;
+    int total_neighbors = torch::sum(num_neighbors).item<int64_t>();
+    torch::Tensor neighbor_ids = torch::empty({total_neighbors}, torch::kInt64);
+
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (int i = 0; i < node_ids.size(0); i++) {
+            neighbor_ids.narrow(0, offsets[i], num_neighbors[i].item<int64_t>()).copy_(torch::arange(ranges.select(0, i)[0].item<int64_t>(), ranges.select(0, i)[1].item<int64_t>()));
+        }
+    }
+
+    return std::forward_as_tuple(src_sorted_list_.index_select(0, neighbor_ids), offsets);
+}
+
+void FlatFile::updateInMemorySubGraph(int admit_partition_id, int evict_partition_id) {
+    if (in_memory_subgraph_enabled_) {
+        std::vector<torch::Tensor> in_memory_edge_buckets;
+        std::vector<int> in_memory_edge_bucket_ids;
+        std::vector<int> in_memory_edge_bucket_starts;
+        std::vector<int> in_memory_edge_bucket_sizes;
+
+        // get edge buckets that will be kept in memory
+        torch::Tensor src_partitions = torch::floor(in_memory_edge_bucket_ids_ / marius_options.storage.num_partitions);
+        torch::Tensor dst_partitions = in_memory_edge_bucket_ids_ % marius_options.storage.num_partitions;
+        torch::Tensor keep_mask = (src_partitions != evict_partition_id) & (dst_partitions != evict_partition_id);
+
+        torch::Tensor kept_edge_buckets_ids = in_memory_edge_bucket_ids_.masked_select(keep_mask);
+        torch::Tensor kept_edge_buckets_starts = in_memory_edge_bucket_starts_.masked_select(keep_mask);
+        torch::Tensor kept_edge_buckets_sizes = in_memory_edge_bucket_sizes_.masked_select(keep_mask);
+
+        // copy existing edge buckets
+        in_memory_edge_buckets.reserve(kept_edge_buckets_starts.size(0));
+        for (int i = 0; i < kept_edge_buckets_starts.size(0); i++) {
+            in_memory_edge_buckets.emplace_back(in_memory_subgraph_.narrow(0, kept_edge_buckets_starts[i].item<int>(), kept_edge_buckets_sizes[i].item<int>()));
+            in_memory_edge_bucket_ids.emplace_back(kept_edge_buckets_ids.item<int>());
+            in_memory_edge_bucket_starts.emplace_back(kept_edge_buckets_starts[i].item<int>());
+            in_memory_edge_bucket_sizes.emplace_back(kept_edge_buckets_sizes[i].item<int>());
+        }
+
+        torch::Tensor new_in_memory_partition_ids = torch::cat({in_memory_partition_ids_.masked_select(in_memory_partition_ids_ != admit_partition_id), torch::full({1}, admit_partition_id)});
+
+        torch::Tensor edge_bucket_sizes = torch::from_blob(edge_bucket_sizes_.data(), {(int) edge_bucket_sizes_.size()});
+        torch::Tensor edge_bucket_ends_disk = edge_bucket_sizes.cumsum(0);
+        torch::Tensor edge_bucket_starts_disk = edge_bucket_ends_disk - edge_bucket_sizes;
+
+
+        int curr_in_memory_start = kept_edge_buckets_starts[-1].item<int>();
+        // new partition as src
+        for (int i = 0; i < new_in_memory_partition_ids.size(0) - 1; i++) {
+            int edge_bucket_id = (admit_partition_id * marius_options.storage.num_partitions) + new_in_memory_partition_ids[i].item<int>();
+            int edge_bucket_start = edge_bucket_starts_disk[edge_bucket_id].item<int>();
+            int edge_bucket_size = edge_bucket_sizes[edge_bucket_id].item<int>();
+
+            torch::Tensor edge_bucket = range(edge_bucket_start, edge_bucket_size);
+            in_memory_edge_buckets.emplace_back(edge_bucket);
+            in_memory_edge_bucket_ids.emplace_back(edge_bucket_id);
+            in_memory_edge_bucket_starts.emplace_back(curr_in_memory_start);
+            in_memory_edge_bucket_sizes.emplace_back(edge_bucket_size);
+            curr_in_memory_start += edge_bucket_size;
+        }
+
+        // new partition as dst
+        for (int i = 0; i < new_in_memory_partition_ids.size(0) - 1; i++) {
+            int edge_bucket_id = (new_in_memory_partition_ids[i].item<int>() * marius_options.storage.num_partitions) + admit_partition_id;
+            int edge_bucket_start = edge_bucket_starts_disk[edge_bucket_id].item<int>();
+            int edge_bucket_size = edge_bucket_sizes[edge_bucket_id].item<int>();
+
+            torch::Tensor edge_bucket = range(edge_bucket_start, edge_bucket_size);
+            in_memory_edge_buckets.emplace_back(edge_bucket);
+            in_memory_edge_bucket_ids.emplace_back(edge_bucket_id);
+            in_memory_edge_bucket_starts.emplace_back(curr_in_memory_start);
+            in_memory_edge_bucket_sizes.emplace_back(edge_bucket_size);
+            curr_in_memory_start += edge_bucket_size;
+        }
+
+        // add self edge bucket
+        {
+            int edge_bucket_id = (admit_partition_id * marius_options.storage.num_partitions) + admit_partition_id;
+            int edge_bucket_start = edge_bucket_starts_disk[edge_bucket_id].item<int>();
+            int edge_bucket_size = edge_bucket_sizes[edge_bucket_id].item<int>();
+
+            torch::Tensor edge_bucket = range(edge_bucket_start, edge_bucket_size);
+            in_memory_edge_buckets.emplace_back(edge_bucket);
+            in_memory_edge_bucket_ids.emplace_back(edge_bucket_id);
+            in_memory_edge_bucket_starts.emplace_back(curr_in_memory_start);
+            in_memory_edge_bucket_sizes.emplace_back(edge_bucket_size);
+            curr_in_memory_start += edge_bucket_size;
+        }
+
+        in_memory_subgraph_ = torch::cat(in_memory_edge_buckets);
+
+        // sort by source
+        src_sorted_list_ = in_memory_subgraph_.index_select(0, torch::argsort(in_memory_subgraph_.select(1, 0)));
+
+        // sort by dest
+        dst_sorted_list_ = in_memory_subgraph_.index_select(0, torch::argsort(in_memory_subgraph_.select(1, 2)));
+
+        // update state
+        in_memory_partition_ids_ = new_in_memory_partition_ids.clone();
+        in_memory_edge_bucket_ids_ = torch::from_blob(in_memory_edge_bucket_ids.data(), {(int) in_memory_edge_bucket_ids.size()}).clone();
+        in_memory_edge_bucket_starts_ = torch::from_blob(in_memory_edge_bucket_starts.data(), {(int) in_memory_edge_bucket_starts.size()}).clone();
+        in_memory_edge_bucket_sizes_ = torch::from_blob(in_memory_edge_bucket_sizes.data(), {(int) in_memory_edge_bucket_sizes.size()}).clone();
+    }
 }
 
 void FlatFile::indexPut(Indices indices, torch::Tensor values) {
@@ -561,6 +765,48 @@ InMemory::InMemory(string filename, torch::ScalarType dtype) {
     device_ = torch::kCPU;
     loaded_ = false;
 }
+
+void InMemory::initializeInMemorySubGraph(std::vector<int> buffer_state) {
+    // sort by source
+    src_sorted_list_ = data_.index_select(0, torch::argsort(data_.select(1, 0)));
+
+    // sort by dest
+    dst_sorted_list_ = data_.index_select(0, torch::argsort(data_.select(1, 2)));
+}
+
+std::tuple<torch::Tensor, torch::Tensor> InMemory::gatherNeighbors(torch::Tensor node_ids, bool src) {
+    std::vector<torch::Tensor> neighbors = std::vector<torch::Tensor>(node_ids.size(0));
+
+    torch::Tensor search_values = torch::ones_like(node_ids);
+    search_values = node_ids + search_values;
+    search_values = torch::stack({node_ids, search_values}).transpose(0, 1);
+
+    torch::Tensor ranges;
+
+    if (src) {
+        ranges = torch::searchsorted(src_sorted_list_.select(1, 0), search_values);
+    } else {
+        ranges = torch::searchsorted(dst_sorted_list_.select(1, 2), search_values);
+    }
+
+    torch::Tensor num_neighbors = ranges.select(1, 1) - ranges.select(1, 0);
+    torch::Tensor offsets = num_neighbors.cumsum(0) - num_neighbors;
+    int total_neighbors = torch::sum(num_neighbors).item<int>();
+    torch::Tensor neighbor_ids = torch::empty({total_neighbors});
+
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (int i = 0; i < node_ids.size(0); i++) {
+            neighbor_ids.narrow(0, offsets[i], num_neighbors[i].item<int>()).copy_(torch::arange(ranges.select(0, 0).item<int>(), ranges.select(0, 1).item<int>()));
+        }
+    }
+
+
+    return std::forward_as_tuple(src_sorted_list_.gather(0, neighbor_ids), offsets);
+}
+
+void InMemory::updateInMemorySubGraph(int admit_partition_id, int evict_partition_id) {}
 
 void InMemory::load() {
     if (!loaded_) {

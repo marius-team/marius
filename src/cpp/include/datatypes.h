@@ -164,4 +164,5 @@ enum class RelationOperatorType {
     Hadamard,
     NoOp
 };
+
 #endif //MARIUS_DATATYPES_H

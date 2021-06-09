@@ -6,7 +6,7 @@ project(marius VERSION 0.1 LANGUAGES CXX)
 
 include(FindPackageHandleStandardArgs)
 
-add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
+#add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0)
@@ -36,7 +36,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 if(${USE_CUDA})
     add_definitions(-DMARIUS_CUDA=${USE_CUDA})
 endif()
-
 
 # Find torch location
 execute_process(
@@ -83,6 +82,15 @@ include_directories(${project_INCLUDE_DIR})
 include_directories(${TORCH_INCLUDE_DIRS})
 include_directories(${project_THIRD_PARTY_DIR}/inih)
 add_library(${PROJECT_NAME} SHARED ${project_SOURCES} ${project_HEADERS})
+
+#find_package(OpenMP)
+#if (OPENMP_FOUND)
+#    message("HI")
+#    message(${OpenMP_CXX_FLAGS})
+#    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+#endif()
 
 find_package(Torch REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${TORCH_LIBRARIES})
