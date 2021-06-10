@@ -423,7 +423,6 @@ std::tuple<torch::Tensor, torch::Tensor> FlatFile::gatherNeighbors(torch::Tensor
 
     torch::Tensor ranges;
 
-
     if (src) {
         ranges = torch::searchsorted(src_sorted_list_.select(1, 0), search_values);
     } else {
@@ -433,20 +432,40 @@ std::tuple<torch::Tensor, torch::Tensor> FlatFile::gatherNeighbors(torch::Tensor
     torch::Tensor num_neighbors = ranges.select(1, 1) - ranges.select(1, 0);
     torch::Tensor offsets = num_neighbors.cumsum(0) - num_neighbors;
     int total_neighbors = torch::sum(num_neighbors).item<int64_t>();
-    torch::Tensor neighbor_ids = torch::empty({total_neighbors}, torch::kInt64);
+
+    int64_t *neighbor_id_mem = (int64_t *) malloc(total_neighbors * sizeof(int64_t));
+    auto starts = ranges.select(1, 0);
+    auto ends = ranges.select(1, 1);
+
+    auto starts_accessor = starts.accessor<int64_t, 1>();
+    auto ends_accessor = ends.accessor<int64_t, 1>();
+    auto offsets_accessor = offsets.accessor<int64_t, 1>();
+    auto num_neighbors_accessor = num_neighbors.accessor<int64_t, 1>();
+
 
     #pragma omp parallel
     {
-//        int np = omp_get_num_threads();
-
-//        std::cout << np << '\n';
         #pragma omp for
         for (int i = 0; i < node_ids.size(0); i++) {
-            neighbor_ids.narrow(0, offsets[i], num_neighbors[i].item<int64_t>()).copy_(torch::arange(ranges.select(0, i)[0].item<int64_t>(), ranges.select(0, i)[1].item<int64_t>()));
+            int64_t offset = offsets_accessor[i];
+
+            int count = 0;
+            for (int64_t j = starts_accessor[i]; j < ends_accessor[i]; j++) {
+                *(neighbor_id_mem + offset + count) = j;
+                count++;
+            }
         }
     }
 
-    auto ret = std::forward_as_tuple(src_sorted_list_.index_select(0, neighbor_ids), offsets);
+    torch::Tensor neighbor_ids = torch::from_blob(neighbor_id_mem,  {total_neighbors}, torch::kInt64);
+
+    std::tuple<torch::Tensor, torch::Tensor> ret;
+
+    if (src) {
+        ret = std::forward_as_tuple(src_sorted_list_.index_select(0, neighbor_ids), offsets);
+    } else {
+        ret = std::forward_as_tuple(dst_sorted_list_.index_select(0, neighbor_ids), offsets);
+    }
 
     return ret;
 }

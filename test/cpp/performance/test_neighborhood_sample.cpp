@@ -50,6 +50,11 @@ TEST(TestNeighborhoodSample, TestRuntimeFB15k) {
         timer.stop();
 
         std::cout << "n = " << i * 1000 << ", t = " << timer.getDuration() << "ms\n";
+
+//        std::cout << "num in: " << out_ids.size(0) << '\n';
+//
+//        auto unique_nodes = std::get<0>(torch::_unique(torch::cat({in_ids.select(1, 0), in_ids.select(1, 2), out_ids.select(1, 0), out_ids.select(1, 2)})));
+//        std::cout << "total unique nodes: " << unique_nodes.size(0) << '\n';
     }
 
 
