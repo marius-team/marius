@@ -6,6 +6,7 @@
 
 #include <fcntl.h>
 #include <omp.h>
+//#include "/usr/local/opt/libomp/include/omp.h"
 #include <unistd.h>
 
 #include <filesystem>
@@ -413,6 +414,7 @@ void FlatFile::initializeInMemorySubGraph(std::vector<int> buffer_state) {
 
 
 std::tuple<torch::Tensor, torch::Tensor> FlatFile::gatherNeighbors(torch::Tensor node_ids, bool src) {
+
     std::vector<torch::Tensor> neighbors = std::vector<torch::Tensor>(node_ids.size(0));
 
     torch::Tensor search_values = torch::ones_like(node_ids);
@@ -420,6 +422,7 @@ std::tuple<torch::Tensor, torch::Tensor> FlatFile::gatherNeighbors(torch::Tensor
     search_values = torch::stack({node_ids, search_values}).transpose(0, 1);
 
     torch::Tensor ranges;
+
 
     if (src) {
         ranges = torch::searchsorted(src_sorted_list_.select(1, 0), search_values);
@@ -434,13 +437,18 @@ std::tuple<torch::Tensor, torch::Tensor> FlatFile::gatherNeighbors(torch::Tensor
 
     #pragma omp parallel
     {
+//        int np = omp_get_num_threads();
+
+//        std::cout << np << '\n';
         #pragma omp for
         for (int i = 0; i < node_ids.size(0); i++) {
             neighbor_ids.narrow(0, offsets[i], num_neighbors[i].item<int64_t>()).copy_(torch::arange(ranges.select(0, i)[0].item<int64_t>(), ranges.select(0, i)[1].item<int64_t>()));
         }
     }
 
-    return std::forward_as_tuple(src_sorted_list_.index_select(0, neighbor_ids), offsets);
+    auto ret = std::forward_as_tuple(src_sorted_list_.index_select(0, neighbor_ids), offsets);
+
+    return ret;
 }
 
 void FlatFile::updateInMemorySubGraph(int admit_partition_id, int evict_partition_id) {
