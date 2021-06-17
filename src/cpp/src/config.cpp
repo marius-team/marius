@@ -593,7 +593,7 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
     } else if (s_loss_function_type == "SoftPlus") {
         loss_function_type = LossFunctionType::SoftPlusLoss;
     } else {
-        SPDLOG_ERROR("Unrecognized loss function {}. Options are [Ranking, SoftMax, BCEAfterSigmoid, BCEWithLogits, MSE, SoftPlus].", s_loss_function_type);
+        SPDLOG_ERROR("Unrecognized loss function {}. Options are [SoftMax, Ranking, BCEAfterSigmoid, BCEWithLogits, MSE, SoftPlus].", s_loss_function_type);
         exit(-1);
     }
     
