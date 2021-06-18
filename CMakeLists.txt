@@ -92,13 +92,11 @@ if (APPLE)
     set(OpenMP_omp_LIBRARY "/usr/local/opt/libomp/lib/libomp.dylib" CACHE INTERNAL "OpenMP lib name for Xcode toolchain.")
 endif()
 
+if(${USE_OMP})
+    find_package(OpenMP REQUIRED)
 
-# OpenMP (optional)
-option(WITH_OPENMP "Build with parallelization using OpenMP" TRUE)
-if(WITH_OPENMP)
-    find_package(OpenMP)
-endif()
-if(OpenMP_FOUND)
+    add_definitions(-DMARIUS_OMP=1)
+
     string(APPEND CMAKE_C_FLAGS " ${OpenMP_C_FLAGS}")
     string(APPEND CMAKE_CXX_FLAGS " ${OpenMP_CXX_FLAGS}")
     if(${CMAKE_VERSION} VERSION_LESS "3.7")
@@ -123,13 +121,9 @@ if(OpenMP_FOUND)
             message(WARNING "Delay loading flag for OpenMP DLL is invalid.")
         endif()
     endif()
-else()
-    message(STATUS "Not found OpenMP")
 endif()
 
-if(OpenMP_FOUND)
-    add_definitions(-DMARIUS_OMP=1)
-endif()
+
 
 find_package(Torch REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${TORCH_LIBRARIES})
