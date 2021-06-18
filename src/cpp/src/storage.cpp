@@ -5,12 +5,14 @@
 #include "storage.h"
 
 #include <fcntl.h>
-#include <omp.h>
-//#include "/usr/local/opt/libomp/include/omp.h"
 #include <unistd.h>
 
 #include <filesystem>
 #include <iostream>
+
+#ifdef MARIUS_OMP
+#include <omp.h>
+#endif
 
 #include "config.h"
 #include "logger.h"
