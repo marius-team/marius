@@ -108,4 +108,7 @@ class NodeClassificationDecoder : public Decoder {
 
 class RelationClassificationDecoder : public Decoder {};
 
+
+LossFunction *getLossFunction(LossFunctionType loss_function_type);
+
 #endif //MARIUS_EMBEDDING_H

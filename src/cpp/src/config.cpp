@@ -287,7 +287,7 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
     ReductionType reduction_type; string s_reduction_type; // reduction method to use
     s_var_map.push_back((OptInfo<std::string>){&s_loss_function_type, "SoftMax", "loss", "loss"});
     f_var_map.push_back((OptInfo<float>){&margin, 0, "loss", "margin", {0, FLOAT_MAX}});
-    s_var_map.push_back((OptInfo<std::string>){&s_reduction_type, "Mean", "loss", "reduction"});
+    s_var_map.push_back((OptInfo<std::string>){&s_reduction_type, "Sum", "loss", "reduction"});
 
     // Training pipeline options
     int max_batches_in_flight; // Vary the amount of batches allowed in the pipeline at once

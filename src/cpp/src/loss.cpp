@@ -1,5 +1,4 @@
-#include <loss.h>
-#include <iostream>
+#include "loss.h"
 
 torch::Tensor SoftMax::operator()(torch::Tensor pos_scores, torch::Tensor neg_scores) {
     auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(pos_scores.device());

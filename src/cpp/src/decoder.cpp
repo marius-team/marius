@@ -2,9 +2,9 @@
 // Created by Jason Mohoney on 2019-11-20.
 //
 
-#include "decoder.h"
-
 #include "config.h"
+#include "decoder.h"
+#include "loss.h"
 
 using std::tuple;
 using std::make_tuple;
@@ -206,56 +206,37 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
 }
 
 DistMult::DistMult() {
-    if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
-        loss_function_ = new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
-        loss_function_ = new BCEWithLogitsLoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::MSELoss) {
-        loss_function_ = new MSELoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::SoftPlusLoss) {
-        loss_function_ = new SoftPlusLoss(marius_options.loss.reduction_type);
-    }
+    loss_function_ = getLossFunction(marius_options.loss.loss_function_type);
     comparator_ = new DotCompare();
     relation_operator_ = new HadamardOperator();
 }
 
 TransE::TransE() {
-    if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
-        loss_function_ = new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
-        loss_function_ = new BCEWithLogitsLoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::MSELoss) {
-        loss_function_ = new MSELoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::SoftPlusLoss) {
-        loss_function_ = new SoftPlusLoss(marius_options.loss.reduction_type);
-    }
+    loss_function_ = getLossFunction(marius_options.loss.loss_function_type);
     comparator_ = new CosineCompare();
     relation_operator_ = new TranslationOperator();
 }
 
 ComplEx::ComplEx() {
-    if (marius_options.loss.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
-        loss_function_ = new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
-        loss_function_ = new BCEWithLogitsLoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::MSELoss) {
-        loss_function_ = new MSELoss(marius_options.loss.reduction_type);
-    } else if (marius_options.loss.loss_function_type == LossFunctionType::SoftPlusLoss) {
-        loss_function_ = new SoftPlusLoss(marius_options.loss.reduction_type);
-    }
+    loss_function_ = getLossFunction(marius_options.loss.loss_function_type);
     comparator_ = new DotCompare();
     relation_operator_ = new ComplexHadamardOperator();
 }
 
+LossFunction *getLossFunction(LossFunctionType loss_function_type){
+    if (loss_function_type == LossFunctionType::SoftMax) {
+        return new SoftMax(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::RankingLoss) {
+        return new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
+        return new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
+        return new BCEWithLogitsLoss(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::MSELoss) {
+        return new MSELoss(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::SoftPlusLoss) {
+        return new SoftPlusLoss(marius_options.loss.reduction_type);
+    } else {
+       return NULL;
+    }
+}

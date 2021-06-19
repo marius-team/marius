@@ -1,8 +1,7 @@
 #ifndef MARIUS_LOSS_H
 #define MARIUS_LOSS_H
 
-#include <torch/torch.h>
-#include <datatypes.h>
+#include "datatypes.h"
 
 // Loss Functions Functions
 class LossFunction {
