@@ -5,15 +5,26 @@ import re
 
 
 def add_section(sec_name, sec_dict, sec_list):
-    sec = sec_name.split(",")[0]
+    sec = sec_name.split(",")[0].strip()
     if len(sec_name.split(",")) == 2:
-        prev_sec = sec_name.split(",")[1]
+        prev_sec = sec_name.split(",")[1].strip()
     else:
         prev_sec = sec_list[-1]
 
     if sec_dict.get(sec) is None:
         sec_dict.update({sec:[]})
-    sec_list.insert(sec_list.index(prev_sec) + 1, sec)
+        try:
+            sec_list.insert(sec_list.index(prev_sec) + 1, sec)
+        except ValueError:
+            raise ValueError("Section " + prev_sec + " not existing.")
+    else:
+        try:
+            if (sec_list.index(prev_sec) + 1 != sec_list.index(sec)
+                                                        and prev_sec != sec):
+                sec_list.remove(sec)
+                sec_list.insert(sec_list.index(prev_sec) + 1, sec)
+        except ValueError:
+            raise ValueError("Section " + prev_sec + " not existing.")
 
     return sec_dict, sec_list
 
