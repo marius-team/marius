@@ -4,45 +4,61 @@ import numpy as np
 import re
 
 
-def add_section(sec_name, sec_dict):
-    if sec_dict.get(sec_name) is None:
-        sec_dict.update({sec_name:[]})
+def add_section(sec_name, sec_dict, sec_list):
+    sec = sec_name.split(",")[0]
+    if len(sec_name.split(",")) == 2:
+        prev_sec = sec_name.split(",")[1]
+    else:
+        prev_sec = sec_list[-1]
 
-    return sec_dict
+    if sec_dict.get(sec) is None:
+        sec_dict.update({sec:[]})
+    sec_list.insert(sec_list.index(prev_sec) + 1, sec)
+
+    return sec_dict, sec_list
 
 
-def add_opt(opt, sec_dict):
+def add_opt(opt, sec_dict, sec_list):
     sec = opt.split(".")[0]
     val = opt.split(".")[1]
 
     if sec_dict.get(sec) is None:
-        sec_dict.update({sec:[val]})
+        sec_dict, sec_list = add_section(sec, sec_dict, sec_list)
+        sec_dict.get(sec).append(val)
     else:
         sec_dict.get(sec).append(val)
 
-    return sec_dict
+    return sec_dict, sec_list
 
 
-def remove_opt(opt, sec_dict):
+def remove_opt(opt, sec_dict, sec_list):
     sec = opt.split(".")[0]
     val = opt.split(".")[1]
     
     if sec_dict.get(sec) is None:
-        raise RuntimeError("Section " + " sec not existing.")
+        raise RuntimeError("Section " + sec + " not existing.")
     else:
         temp_list = sec_dict.get(sec)
         for i in range(len(temp_list)):
             if len(re.findall(val + r"[=].+", temp_list[i])) != 0:
                 sec_dict.get(sec).remove(temp_list[i])
+                if len(sec_dict.get(sec)) == 0:
+                    sec_dict, sec_list = remove_section(sec, 
+                                                        sec_dict, sec_list)
                 break
 
-    return sec_dict
+    return sec_dict, sec_list
 
 
-def remove_section(sec_name, sec_dict):
-    sec_dict.pop(sec_name, None)
+def remove_section(sec_name, sec_dict, sec_list):
+    try:
+        sec_dict.pop(sec_name)
+    except KeyError: 
+        raise KeyError("Section " + sec_name + "not existing.")
 
-    return sec_dict
+    sec_list.remove(sec_name)
+
+    return sec_dict, sec_list
 
 
 def read_operations_from_file(filename):
@@ -74,9 +90,9 @@ def is_valid_op(op):
     return True
 
 
-def output_sec_dict(sec_dict, orig_config):
+def output_sec_dict(sec_dict, sec_list, orig_config):
     f = open(orig_config, "w")
-    for sec in sec_dict.keys():
+    for sec in sec_list:
         f.write("[" + sec + "]" + "\n")
         for opt in sec_dict.get(sec):
             f.write(opt + "\n")
@@ -97,7 +113,7 @@ def set_args():
                         help='Operations to be conducted:\n' +
                              'remove section: rs <section>\n' +
                              'remove option: ro <section>.<option>\n' +
-                             'add section: as <section>\n' +
+                             'add section: as <section>,<pervious_section>\n' +
                              'add option: ao <section>.<option>' +
                              '=<default_value>')
     mode.add_argument('--file', '-f', metavar='file', type=str,
@@ -126,13 +142,15 @@ def parse_actions(orig_config, op_list):
     f = open(orig_config, "r")
     lines = f.readlines()
     sec_dict = {}
+    sec_list = []
     curr_sec = None
 
     for line in lines:
         if (len(re.findall("[[].+[]]", line)) != 0):
             curr_sec = line[1:-2]
+            sec_list.append(curr_sec)
             continue
-    
+
         if line == '\n':
             continue
 
@@ -144,29 +162,26 @@ def parse_actions(orig_config, op_list):
 
     for op in op_list:
         if op[0] == "rs":
-            sec_dict = remove_section(op[1], sec_dict)
+            sec_dict, sec_list = remove_section(op[1], sec_dict, sec_list)
         elif op[0] == "ro":
-            sec_dict = remove_opt(op[1], sec_dict)
+            sec_dict, sec_list = remove_opt(op[1], sec_dict, sec_list)
         elif op[0] == "as":
-            sec_dict = add_section(op[1], sec_dict)
+            sec_dict, sec_list = add_section(op[1], sec_dict, sec_list)
         elif op[0] == "ao":
-            sec_dict = add_opt(op[1], sec_dict)
+            sec_dict, sec_list = add_opt(op[1], sec_dict, sec_list)
         else:
             raise RuntimeError("Invalid opt: " + " ".join(op))
 
-    return sec_dict
+    return sec_dict, sec_list
+
 
 def main():
     parser = set_args()
-    #parser.parse_args('./dcpl -o rs a ro b ao c'.split())
     args = parser.parse_args()
     arg_dict, op_list = parse_args(args)
-    sec_dict = parse_actions(args.orig_config, op_list)
-    output_sec_dict(sec_dict, args.orig_config)
-
+    sec_dict, sec_list = parse_actions(args.orig_config, op_list)
+    output_sec_dict(sec_dict, sec_list, args.orig_config)
 
 
 if __name__ == "__main__":
     main()
-
-#"-o", "ao", "loss.loss=SoftMax", "ro", "training.loss", 
