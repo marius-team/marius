@@ -41,12 +41,6 @@ class Storage {
 
     virtual torch::Tensor range(int64_t offset, int64_t n) = 0;
 
-    virtual std::tuple<torch::Tensor, torch::Tensor> gatherNeighbors(torch::Tensor node_ids, bool src) = 0;
-
-    virtual void initializeInMemorySubGraph(std::vector<int> buffer_state) = 0;
-
-    virtual void updateInMemorySubGraph(int admit_partition_id, int evict_partition_id) = 0;
-
     virtual void indexPut(Indices indices, torch::Tensor values) = 0;
 
     virtual void load() = 0;
@@ -195,22 +189,6 @@ class FlatFile : public Storage {
 
     bool loaded_;
 
-    // GNN Code
-    bool in_memory_subgraph_enabled_;
-
-    torch::Tensor in_memory_partition_ids_;
-
-    torch::Tensor in_memory_edge_bucket_ids_;
-
-    torch::Tensor in_memory_edge_bucket_starts_;
-
-    torch::Tensor in_memory_edge_bucket_sizes_;
-
-    EdgeList in_memory_subgraph_;
-
-    torch::Tensor src_sorted_list_;
-
-    torch::Tensor dst_sorted_list_;
 
   public:
     FlatFile(string filename, int64_t dim0_size, int64_t dim1_size, torch::ScalarType dtype);

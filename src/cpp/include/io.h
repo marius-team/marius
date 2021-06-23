@@ -35,7 +35,7 @@ tuple<Storage *, Storage *, Storage *, Storage *> initializeRelationEmbeddings(b
 
 tuple<Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *> initializeTrain();
 
-tuple<Storage *, Storage *, Storage *, Storage *> initializeEval();
+tuple<Storage *, Storage *, Storage *, Storage *> initializeEval(DataSetType data_set_type);
 
 void freeTrainStorage(Storage *train_edges,
                       Storage *eval_edges,

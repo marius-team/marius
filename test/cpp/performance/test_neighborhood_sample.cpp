@@ -50,15 +50,62 @@ TEST(TestNeighborhoodSample, TestRuntimeFB15k) {
         timer.stop();
 
         std::cout << "n = " << i * 1000 << ", t = " << timer.getDuration() << "ms\n";
+    }
+}
 
-//        std::cout << "num in: " << out_ids.size(0) << '\n';
-//
-//        auto unique_nodes = std::get<0>(torch::_unique(torch::cat({in_ids.select(1, 0), in_ids.select(1, 2), out_ids.select(1, 0), out_ids.select(1, 2)})));
-//        std::cout << "total unique nodes: " << unique_nodes.size(0) << '\n';
+TEST(TestNeighborhoodSample, TestSwappingFB15k) {
+    if (!std::getenv("RUN_PERFORMANCE")) {
+        GTEST_SKIP();
     }
 
+    string filename = "output_dir/train_edges.pt";
+    string edges_partitions = "output_dir/train_edges_partitions.txt";
+    int dim0_size = 483142;
+    int dim1_size = 3;
+    torch::ScalarType dtype = torch::kInt32;
+
+    std::vector<int> init_buffer = {0, 1};
+
+    // set the required options
+    MariusOptions options;
+    StorageOptions storage_options;
+    storage_options.num_partitions = 16;
+    storage_options.buffer_capacity = 2;
+    options.storage = storage_options;
+    marius_options = options;
+
+    FlatFile *fb15k_edges = new FlatFile(filename, dim0_size, dim1_size, dtype);
+    fb15k_edges->readPartitionSizes(edges_partitions);
+    fb15k_edges->load();
+    fb15k_edges->initializeInMemorySubGraph(init_buffer);
 
 
-//    auto unique_nodes = std::get<0>(torch::_unique(torch::cat({in_ids.select(1, 0), in_ids.select(1, 2), out_ids.select(1, 0), out_ids.select(1, 2)})));
-//    std::cout << unique_nodes.size(0) << '\n';
+    Timer timer = Timer(false);
+    timer.start();
+    fb15k_edges->updateInMemorySubGraph(15, 1);
+    timer.stop();
+    std::cout << "Swap in memory: "  << timer.getDuration() << "ms\n";
+
+    auto tmp_ret = fb15k_edges->gatherNeighbors(torch::randint(0, 800, 5), true);
+    auto tmp_ids = std::get<0>(tmp_ret);
+    auto tmp_offsets = std::get<1>(tmp_ret);
+
+    std::cout << tmp_ids << '\n';
+
+    for (int i = 1; i <= 10; i++) {
+        torch::Tensor test_id = torch::randint(0, 1000, i * 1000);
+
+        timer.start();
+        auto ret = fb15k_edges->gatherNeighbors(test_id, true);
+        auto out_ids = std::get<0>(ret);
+        auto out_offsets = std::get<1>(ret);
+
+        ret = fb15k_edges->gatherNeighbors(test_id, false);
+        auto in_ids = std::get<0>(ret);
+        auto in_offsets = std::get<1>(ret);
+
+        timer.stop();
+
+        std::cout << "n = " << i * 1000 << ", t = " << timer.getDuration() << "ms\n";
+    }
 }

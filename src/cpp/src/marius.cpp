@@ -118,7 +118,7 @@ void marius(int argc, char *argv[]) {
         freeTrainStorage(train_edges, eval_edges, test_edges, embeddings, emb_state, src_rel, src_rel_state, dst_rel, dst_rel_state);
 
     } else {
-        tuple<Storage *, Storage *, Storage *, Storage *> storage_ptrs = initializeEval();
+        tuple<Storage *, Storage *, Storage *, Storage *> storage_ptrs = initializeEval(DataSetType::Test);
         Storage *test_edges = get<0>(storage_ptrs);
         Storage *embeddings = get<1>(storage_ptrs);
         Storage *src_rel = get<2>(storage_ptrs);

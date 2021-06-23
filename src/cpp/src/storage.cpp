@@ -492,14 +492,14 @@ void FlatFile::updateInMemorySubGraph(int admit_partition_id, int evict_partitio
         in_memory_edge_buckets.reserve(kept_edge_buckets_starts.size(0));
         for (int i = 0; i < kept_edge_buckets_starts.size(0); i++) {
             in_memory_edge_buckets.emplace_back(in_memory_subgraph_.narrow(0, kept_edge_buckets_starts[i].item<int>(), kept_edge_buckets_sizes[i].item<int>()));
-            in_memory_edge_bucket_ids.emplace_back(kept_edge_buckets_ids.item<int>());
+            in_memory_edge_bucket_ids.emplace_back(kept_edge_buckets_ids[i].item<int>());
             in_memory_edge_bucket_starts.emplace_back(kept_edge_buckets_starts[i].item<int>());
             in_memory_edge_bucket_sizes.emplace_back(kept_edge_buckets_sizes[i].item<int>());
         }
 
-        torch::Tensor new_in_memory_partition_ids = torch::cat({in_memory_partition_ids_.masked_select(in_memory_partition_ids_ != admit_partition_id), torch::full({1}, admit_partition_id)});
+        torch::Tensor new_in_memory_partition_ids = torch::cat({in_memory_partition_ids_.masked_select(in_memory_partition_ids_ != evict_partition_id), torch::full({1}, admit_partition_id)});
 
-        torch::Tensor edge_bucket_sizes = torch::from_blob(edge_bucket_sizes_.data(), {(int) edge_bucket_sizes_.size()});
+        torch::Tensor edge_bucket_sizes = torch::from_blob(edge_bucket_sizes_.data(), {(int) edge_bucket_sizes_.size()}, torch::kInt64);
         torch::Tensor edge_bucket_ends_disk = edge_bucket_sizes.cumsum(0);
         torch::Tensor edge_bucket_starts_disk = edge_bucket_ends_disk - edge_bucket_sizes;
 
@@ -831,8 +831,15 @@ std::tuple<torch::Tensor, torch::Tensor> InMemory::gatherNeighbors(torch::Tensor
         }
     }
 
+    std::tuple<torch::Tensor, torch::Tensor> ret;
 
-    return std::forward_as_tuple(src_sorted_list_.gather(0, neighbor_ids), offsets);
+    if (src) {
+        ret = std::forward_as_tuple(src_sorted_list_.index_select(0, neighbor_ids), offsets);
+    } else {
+        ret = std::forward_as_tuple(dst_sorted_list_.index_select(0, neighbor_ids), offsets);
+    }
+
+    return ret;
 }
 
 void InMemory::updateInMemorySubGraph(int admit_partition_id, int evict_partition_id) {}

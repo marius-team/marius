@@ -382,7 +382,7 @@ tuple<Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage 
     return std::tuple_cat(edge_storages, node_embedding_storages, relation_embedding_storages);
 }
 
-tuple<Storage *, Storage *, Storage *, Storage *> initializeEval() {
+tuple<Storage *, Storage *, Storage *, Storage *> initializeEval(DataSetType data_set_type) {
     string data_directory = marius_options.path.experiment_directory;
 
     torch::manual_seed(marius_options.general.random_seed);
@@ -400,7 +400,16 @@ tuple<Storage *, Storage *, Storage *, Storage *> initializeEval() {
     tuple<Storage *, Storage *> node_embedding_storages = initializeNodeEmbeddings(train);
     tuple<Storage *, Storage *, Storage *, Storage *> relation_embedding_storages = initializeRelationEmbeddings(train);
 
-    return std::forward_as_tuple(std::get<2>(edge_storages), std::get<0>(node_embedding_storages), std::get<0>(relation_embedding_storages), std::get<2>(relation_embedding_storages));
+    Storage *edges;
+    if (data_set_type == DataSetType::Train) {
+        edges = std::get<0>(edge_storages);
+    } else if (data_set_type == DataSetType::Validation) {
+        edges = std::get<1>(edge_storages);
+    } else {
+        edges = std::get<2>(edge_storages);
+    }
+
+    return std::forward_as_tuple(edges, std::get<0>(node_embedding_storages), std::get<0>(relation_embedding_storages), std::get<2>(relation_embedding_storages));
 }
 
 void freeTrainStorage(Storage *train_edges,

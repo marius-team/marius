@@ -119,6 +119,13 @@ enum class EdgeBucketOrdering {
     Custom
 };
 
+/** Specifies how the neighors of a node are sampled */
+enum class NeighborSamplingMethod {
+    All,
+    Dropout,
+    Uniform
+};
+
 // Currently unsupported
 enum class EncoderModelType {
     None,
@@ -145,6 +152,13 @@ enum class BackendType {
 enum class OptimizerType {
     SGD,            /**< Standard SGD optimizer */
     Adagrad         /**< Standard Adagrad optimizer with state managed on disk */
+};
+
+/** Denotes the type of a given dataset */
+enum class DataSetType {
+    Train,          /**< Training Set */
+    Validation,     /**< Validation Set */
+    Test            /**< Testing Set  */
 };
 
 /** Comparison operator options */
