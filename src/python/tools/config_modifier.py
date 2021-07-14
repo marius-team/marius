@@ -37,7 +37,10 @@ def add_opt(opt, sec_dict, sec_list):
         sec_dict, sec_list = add_section(sec, sec_dict, sec_list)
         sec_dict.get(sec).append(val)
     else:
-        sec_dict.get(sec).append(val)
+        if is_in_sec(sec_dict.get(sec), val):
+            raise RuntimeError("Option " + opt + " already exists.")
+        else:
+            sec_dict.get(sec).append(val)
 
     return sec_dict, sec_list
 
@@ -82,6 +85,14 @@ def read_operations_from_file(filename):
     return op_list
 
 
+def is_in_sec(sec_list, val):
+    for v in sec_list:
+        if val.split("=")[0] == v.split("=")[0]:
+            return True
+
+    return False
+
+
 def is_valid_op(op):
     if (op[0] == 'rs'):
         return True
@@ -117,8 +128,10 @@ def set_args():
         prog='config_modifier',
         formatter_class=argparse.RawTextHelpFormatter)
     mode = parser.add_mutually_exclusive_group()
-    parser.add_argument('orig_config', metavar='orig_config',
-                        type=str, help='Original configuration file location')
+    parser.add_argument('orig_config', metavar='orig_config', nargs='+',
+                        type=str,
+                        help='Original configuration files location, ' +
+                             'operations will apply to all files.')
     mode.add_argument('--operations', '-o', action='extend', nargs='+',
                         type=str,
                         help='Operations to be conducted:\n' +
@@ -134,8 +147,9 @@ def set_args():
 
 
 def parse_args(args):
-    if not Path(args.orig_config).is_file():
-        raise RuntimeError(str(args.orig_config) + "not found!")
+    for orig_file in args.orig_config:
+        if not Path(orig_file).is_file():
+            raise RuntimeError(str(args.orig_config) + "not found!")
     arg_dict = vars(args)
     if args.file is None:
         op_list = np.array(arg_dict.get("operations"))
@@ -190,8 +204,9 @@ def main():
     parser = set_args()
     args = parser.parse_args()
     arg_dict, op_list = parse_args(args)
-    sec_dict, sec_list = parse_actions(args.orig_config, op_list)
-    output_sec_dict(sec_dict, sec_list, args.orig_config)
+    for orig_config_file in args.orig_config:
+        sec_dict, sec_list = parse_actions(orig_config_file, op_list)
+        output_sec_dict(sec_dict, sec_list, orig_config_file)
 
 
 if __name__ == "__main__":
