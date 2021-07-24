@@ -515,14 +515,14 @@ def set_args():
                         help='Number of partitions to split the edges into')
     parser.add_argument('--overwrite', action='store_true',
                         required=False,
-                        help=('Overwrites the output_directory if this is' +
-                              'set'
+                        help=('Overwrites the output_directory if this is ' +
+                              'set. '
                               'Otherwise, files with same the names will be ' +
                               'treated as the data for current dataset.'))
     parser.add_argument('--generate_config', '-gc', metavar='generate_config',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', const="GPU",
-                        help=('Generates a single-GPU/multi-CPU/multi-GPU ' +
+                        help=('Generates a single-GPU ' +
                               'training configuration file by default. ' +
                               '\nValid options (default to GPU): ' +
                               '[GPU, CPU, multi-GPU]'))
