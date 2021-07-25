@@ -1,4 +1,4 @@
-.. _preprocessing
+.. _preprocessing:
 
 *************
 Preprocessing
@@ -28,7 +28,7 @@ and specifying certain configuration for Marius.
 ^^^^^^^^^
 The ``<dataset>`` is a **requried** option for ``marius_preprocess``. 
 It is the alias for the datasets will be preprocessed. These alias can be found in 
-the :ref:`datasets`.
+the :ref:`datasets` table.
 
 <output_directory>
 ^^^^^^^^^^^^^^^^^^
@@ -67,7 +67,8 @@ may be treated as the already-preprocessed data files for the current dataset if
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The ``--generate_config <device>, -gc <device>`` is an **optional** option for ``marius_preprocess``.
 If this option is set, ``marius_preprocess`` will generate a Marius configuration
-file in the ``<output_directory>``.
+file in the ``<output_directory>`` with all configuration parameters set to the recommended defaults if not 
+explicitly defined.
 The generated Marius configuration is for single-GPU setting by default if ``<device>`` is not set.
 If other device, such as ``CPU`` or ``multi-GPU``, is required, users can just append the option after
 ``--generate_config``, e.g. ``--generate_config CPU``.
@@ -162,16 +163,20 @@ In addition to generating a Marius trainable version over WordNet18, this comman
 asks ``marius_preprocess`` to generate a Marius configuration file for CPU over WordNet18.
 In this Marius configuration file, the hyper-parameter ``model.decoder=TransE`` is set.
 
-Apart from some progress information, the command line output
+Apart from some progress information, the terminal output
 of ``marius_preprocess`` also gives some statistics of the 
 database being preprocessed. ``Number of instance per file:[141442, 5000, 5000]``
 gives the number of edges in the training, validation and testing sets respectively.
 ``Number of nodes: 40943`` shows the total number of nodes in the dataset. 
 ``Number of edges: 151442`` reveals the total number of edges in the dataset.
 ``Number of relations: 18`` is the total number of relations appear in the dataset.
-These dataset statistics not only give the users an overview to the structure of 
+These dataset statistics not only gives the users an overview to the structure of 
 the dataset but also make it easy for users to set dataset information in 
 Marius configuration file.
+
+The terminal output also shows ``Detected delimiter: ~  ~`` and ``Delimiter: ~  ~``.
+These 2 lines reminds the users what delimiter between entities in the same line has been used in the preprocessing.
+In this case ``\t`` is used in the raw data files to seperate 2 entities in the same line.
 
 ::
 
