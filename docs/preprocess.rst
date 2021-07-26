@@ -11,7 +11,7 @@ datasets included with out of the box.
 Users can obtain the trainable versions of these datasets by calling ``marius_preprocess`` directly from command line.
 
 
-Use ``marius_preprocess`` For Datasets Supported By Marius
+Use ``marius_preprocess`` for Datasets Supported By Marius
 ----------------------------------------------------------
 
 Users can download and convert 21 popular datasets to trainable versions 
@@ -41,19 +41,36 @@ output files from ``marius_preprocess`` shown in the following table.
 ==================  ============
 File                Description
 ------------------  ------------
-train_edges.pt      Contains edges for training set; Should be set for ``path.train_edges`` in Marius configuration file
-valid_edges.pt      Contains edges for validation set; Should be set for ``path.train_edges`` in Marius configuration file
-test_edges.pt       Contains edges for test set; Should be set for ``path.train_edges`` in Marius configuration file
-node_mapping.txt    Contains all node IDs from raw dataset corresponds to encoded node IDs in `node_mapping.txt`
-node_mapping.bin    Contains all encoded node IDs corresponds to node IDs in  `node_mapping.txt`
-rel_mapping.txt     Contains all relation IDs from raw dataset corresponds to encoded relation IDs in `rel_mapping.txt`
-rel_mapping.bin     Contains all encoded relation IDs corresponds to node IDs in `rel_mapping.bin`
+train_edges.pt      Contains edges for training set;
+
+                    Should be set for ``path.train_edges`` in Marius configuration file
+valid_edges.pt      Contains edges for validation set; 
+
+                    Should be set for ``path.train_edges`` in Marius configuration file
+test_edges.pt       Contains edges for test set; 
+
+                    Should be set for ``path.train_edges`` in Marius configuration file
+node_mapping.txt    Contains 2 columns; 
+                    The first column is all the original node IDs from raw data, the second column is all the remapped node IDs
+rel_mapping.txt     Contains 2 columns; 
+
+                    The first column is all the original relation IDs from raw data, the second column is all the remapped relation IDs
 ==================  ============
+
+Each edge in ``train_edges.pt``, ``valid_edges.pt``, and ``test_edges.pt`` is stored
+in the format of ``source relation destination`` on 1 row.
+The 2 Node IDs and relation IDs are stored as 3 4-byte integers (or 8-byte integers
+if the storage data type is set to int64). 
+The source, relation and destinatio of edge ``i`` can be retrieved from 
+``train_edges.pt``, ``valid_edges.pt``, and ``test_edges.pt``
+files by reading 3 4-byte integers (or 8-byte integers if using int64 data type for storage)
+at the offset in the file ``i * 3 * 4`` (or ``i * 3 * 8`` when using int64).
+
 
 \-\-num_partitions
 ^^^^^^^^^^^^^^^^^^
 The ``--num_partitions <num_partitions>`` is an optional option for ``marius_preprocess``.
-If this option is specified, the dataset will be splitted into ``<num_partitions>`` partitions.
+If this option is specified, the nodes of the input graph will be partitioned into ``<num_partitions>``.
 
 \-\-overwrite
 ^^^^^^^^^^^^^
@@ -89,7 +106,7 @@ in the Marius configuration file generated for WordNet18 (``wn18_gpu.ini``).
 
 ::
 
-    marius_perprocess wn18 ./output_dir --generate_config --model.embedding_sze=256 --training.num_epochs=100
+    marius_preprocess wn18 ./output_dir --generate_config --model.embedding_sze=256 --training.num_epochs=100
 
 \-\-help, \-h
 ^^^^^^^^^^^^^
@@ -124,31 +141,31 @@ Datasets
 --------
 The following table contains the information of the 21 datasets Marius comes included out of the box.
 
-==================  ==========  ===========  ==========
-Dataset Name        Entities    Relations    Triples  
-------------------  ----------  -----------  ----------
-live_journal        4847571     1            68993773
-fb15k               14951       1345         592213
-fb15k_237           114541      237          310116
-wn18                40943       18           151442
-wn18rr              40943       11           93003
-codex_s             2034        42           36543
-codex_m             17050       51           206205
-codex_l             77951       69           612437
-drkg                97238       107          5874261
-hetionet            45160       25           2250198
-freebase86m         86054151    14824        338586276
-kinships            24          12           112
-ogbl_ppa            576289      1            30326273
-ogbl_ddi            4267        1            1334889
-ogbl_collab         235868      1            1285465
-ogbl_biokg          45085       51           5088434
-ogbn_arxiv          169341      1            1166243
-ogbn_proteins       132534      1            39561254
-ogbn_products       2400608     1            61859140
-openbiolink_hq      184635      28           4563405
-openbiolink_lq      486942      32           27320889
-==================  ==========  ===========  ==========
+==================  ==========  ======================  ==========
+Dataset Name        Entities    Relations (edge-types)  Edges  
+------------------  ----------  ----------------------  ----------
+live_journal        4847571     1                       68993773
+fb15k               14951       1345                    592213
+fb15k_237           114541      237                     310116
+wn18                40943       18                      151442
+wn18rr              40943       11                      93003
+codex_s             2034        42                      36543
+codex_m             17050       51                      206205
+codex_l             77951       69                      612437
+drkg                97238       107                     5874261
+hetionet            45160       25                      2250198
+freebase86m         86054151    14824                   338586276
+kinships            24          12                      112
+ogbl_ppa            576289      1                       30326273
+ogbl_ddi            4267        1                       1334889
+ogbl_collab         235868      1                       1285465
+ogbl_biokg          45085       51                      5088434
+ogbn_arxiv          169341      1                       1166243
+ogbn_proteins       132534      1                       39561254
+ogbn_products       2400608     1                       61859140
+openbiolink_hq      184635      28                      4563405
+openbiolink_lq      486942      32                      27320889
+==================  ==========  ======================  ==========
 
 Example of Using ``marius_preprocess`` Over WordNet18
 ------------------------------------------------------

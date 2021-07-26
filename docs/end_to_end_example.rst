@@ -4,16 +4,16 @@
 End to End Example
 ******************
 
-Users can :ref:`preprocess<preprocessing>` the datasets, deploy Marius, and postprocess the training outcomes 
+Users can :ref:`preprocess<preprocessing>` the datasets, deploy Marius, 
+and postprocess the trained embeddings/model
 in a configuration-based programming pattern through the command line. The following 
 is a comprehensive example showing how users can use the system to perform the tasks (assuming 
 users have Marius installed properly):
 
 * :ref:`preprocess datasets<Preprocess_datasets>`
 * :ref:`deploy Marius<Deploy_marius>`
-* :ref:`postprocess training results<Postprocess_training_results>`
+* :ref:`postprocess trained embeddings/model<Postprocess_trained_embeddingsmodel>`
 * perform inference tasks
-
 
 
 .. _Preprocess_datasets:
@@ -21,7 +21,7 @@ users have Marius installed properly):
 Preprocess Datasets
 -------------------
 Marius provides the users with ``marius_preprocess`` as a handy tool for preprocessing
-datasets supported by Marius and custome datasets. Detailed usage of ``marius_preprocess`` 
+datasets supported by Marius and custom datasets. Detailed usage of ``marius_preprocess`` 
 can be found :ref:`here<preprocessing>`. 
 
 The following example shows how to preprocess dataset WordNet18
@@ -108,18 +108,21 @@ In this example, we use the Marius configuration file generated in :ref:`previou
     [info] [07/25/21 07:26:30.507] Evaluation complete: 277ms
 
 ``marius_train`` gives informative terminal outputs including training progress, 
-system performance, and training results evalution. 
+system performance, and training results evaluation. 
 
 After the start of the training, ``marius_train`` outputs the training progress information,
-indlucding number of edges processed, number of epochs have been processed. When an epoch is 
+including number of edges processed, number of epochs have been processed. When an epoch is 
 completed, system performance information such as ``Epoch Runtime (Before shuffle/sync)``,
 ``Edges per Second (Before shuffle/sync)``, ``Epoch Runtime (Including shuffle/sync)``, and
 ``Edges per Second (Including shuffle/sync)``.
 
-Training results evalution information is also printed by ``marius_train`` to the terminal automatically.
-The metrics for evalution include ``Auc``, ``Avg Ranks``, ``MRR``, ``Hits@1``, 
+Training results evaluation information is also printed by ``marius_train`` to the terminal automatically.
+The metrics for evaluation include ``Auc``, ``Avg Ranks``, ``MRR``, ``Hits@1``, 
 ``Hits@5``, ``Hits@10``, ``Hits@20``, ``Hits@50``, ``Hits@100``.
 
-.. _Postprocess_training_results:
-Postprocess Training Results
-----------------------------
+.. _Postprocess_trained_embeddingsmodel:
+Postprocess trained embeddings/model
+------------------------------------
+
+After the execution of ``marius_train``, we can use ``marius_postprocess`` to retrieve
+the trained embedding vectors and model just from the command line.
