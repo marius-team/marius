@@ -1,60 +1,52 @@
 from pathlib import Path
-
 import numpy as np
+import json
 
 
-def idx_converter(raw_id_file, in_id_file, embedding_file):
-    raw_ids = []
-    with open(raw_id_file) as f:
-        for line in f.readlines():
-            raw_ids.append(line.strip())
+def idx_converter(dict_file, embedding_file):
+    mapping = np.loadtxt(dict_file, dtype=str, delimiter="\t")
+    mapping_dict = dict(mapping)
 
-    in_ids = np.fromfile(in_id_file, dtype=int)
-    raw_in_dict = dict(zip(raw_ids, in_ids))
-
-    num = len(raw_ids)
+    num = len(mapping_dict)
     embeddings = np.fromfile(embedding_file, np.float32).reshape((num, -1))
 
-    raw_emb_dict = []
-    for rid in raw_ids:
-        iid = raw_in_dict.get(rid)
+    raw_emb_dict = dict()
+    for rid in mapping_dict.keys():
+        iid = int(mapping_dict.get(rid))
         emb = embeddings[iid]
-        raw_emb_dict.append(np.append(rid, emb))
+        raw_emb_dict.update({rid: emb})
 
     return raw_emb_dict
 
 
-def convert_to_tsv(output_dir=None):
+def get_emb_dicts(output_dir=None):
+    trained_base_dir = Path("./data/")
     temp = output_dir if output_dir != None else None
     output_dir = "./output_dir" if output_dir == None else output_dir
 
-    nodes_raw_id_file = Path(output_dir) / Path("node_mapping.txt")
-    nodes_in_id_file = Path(output_dir) / Path("node_mapping.bin")
-    nodes_embedding_file = Path("./training_data/marius/embeddings/embeddings.bin")
-    node_embs = np.array(idx_converter(nodes_raw_id_file, nodes_in_id_file, nodes_embedding_file))
+    node_save_file = trained_base_dir / Path("node_embedding_dict.json")
+    lhs_rel_save_file = trained_base_dir / Path("lhs_rel_embedding_dict.json")
+    rhs_rel_save_file = trained_base_dir / Path("rhs_rel_embedding_dict.json")
+    save_files = [node_save_file, lhs_rel_save_file, rhs_rel_save_file]
 
-    rels_raw_id_file = Path(output_dir) / Path("rel_mapping.txt")
-    rels_in_id_file = Path(output_dir) / Path("rel_mapping.bin")
-    lhs_rels_embedding_file = Path("./training_data/marius/relations/lhs_relations.bin")
-    lhs_rel_embs = np.array(idx_converter(rels_raw_id_file, rels_in_id_file, lhs_rels_embedding_file))
+    nodes_dict_file = Path(output_dir) / Path("node_mapping.txt")
+    nodes_embedding_file = trained_base_dir / Path("marius/embeddings/embeddings.bin")
+    node_embs = idx_converter(nodes_dict_file, nodes_embedding_file)
 
-    rhs_rels_embedding_file = Path("./training_data/marius/relations/rhs_relations.bin")
-    rhs_rel_embs = np.array(idx_converter(rels_raw_id_file, rels_in_id_file, rhs_rels_embedding_file))
+    rels_dict_file = Path(output_dir) / Path("rel_mapping.txt")
+    lhs_rels_embedding_file = trained_base_dir / Path("marius/relations/src_relations.bin")
+    lhs_rel_embs = idx_converter(rels_dict_file, lhs_rels_embedding_file)
 
-    if temp != None:
-        np.savetxt((Path("./training_data/node_embedding.tsv")), node_embs, fmt="%f", delimiter='\t', newline='\n')
-        np.savetxt((Path("./training_data/edge_lhs_embedding.tsv")), lhs_rel_embs, fmt="%f", delimiter='\t',
-                   newline='\n')
-        np.savetxt((Path("./training_data/edge_rhs_embedding.tsv")), rhs_rel_embs, fmt="%f", delimiter='\t',
-                   newline='\n')
+    rhs_rels_embedding_file = trained_base_dir / Path("marius/relations/dst_relations.bin")
+    rhs_rel_embs = idx_converter(rels_dict_file, rhs_rels_embedding_file)
 
-        return node_embs, lhs_rel_embs, rhs_rel_embs
-    else:
-        return node_embs, lhs_rel_embs, rhs_rel_embs
+    emb_dicts = [node_embs, lhs_rel_embs, rhs_rel_embs]
+
+    return emb_dicts
 
 
 def main():
-    n_emb, lhs_emb, rhs_emb = convert_to_tsv()
+    emb_dicts = convert_to_tsv("./output_dir")
 
 
 if __name__ == '__main__':

@@ -354,19 +354,13 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                     i += chunksize
 
     node_mapping = output_dir + "node_mapping.txt"
-    node_mapping_tens = output_dir + "node_mapping.bin"
-    with open(node_mapping, "w") as f, open(node_mapping_tens, "wb") as g:
-        tens = np.array(list(nodes_dict.values()))
-        g.write(bytes(tens))
-        f.write("\n".join(str(key) for key in nodes_dict.keys()))
+    node_dict_items = np.array(list(nodes_dict.items()))
+    np.savetxt(node_mapping, node_dict_items, fmt='%s', delimiter='\t')
 
     if rel_idx != -1:
         rel_mapping = output_dir + "rel_mapping.txt"
-        rel_mapping_tens = output_dir + "rel_mapping.bin"
-        with open(rel_mapping, "w") as f, open(rel_mapping_tens, "wb") as g:
-            tens = np.array(list(rels_dict.values()))
-            g.write(bytes(tens))
-            f.write("\n".join(str(key) for key in rels_dict.keys()))
+        rels_dict_items = np.array(list(rels_dict.items()))
+        np.savetxt(rel_mapping, rels_dict_items, fmt='%s', delimiter='\t')
 
     output_stats = np.zeros(3, dtype=int)
     output_stats[:len(num_edges_f)] = num_edges_f
