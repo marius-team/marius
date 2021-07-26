@@ -20,13 +20,13 @@ The ``<dataset>`` is the alias for dataset and can be found in the :ref:`dataset
 The ``output_directory`` is the directory where all trainable data will be stored.
 ``marius_preprocess`` will create this directory if the directory does not exist.
 It is also the value should be set for ``path.base_directory`` in Marius configuration file.
-In addition to these 2 requried command line arguments, ``marius_preprocess`` also offers users 
+In addition to these 2 required command line arguments, ``marius_preprocess`` also offers users 
 other options including ``--help``, ``--num_partitions``, ``--overwrite``, ``--generate_config``
 and specifying certain configuration for Marius.
 
 <dataset>
 ^^^^^^^^^
-The ``<dataset>`` is a **requried** option for ``marius_preprocess``. 
+The ``<dataset>`` is a **required** option for ``marius_preprocess``. 
 It is the alias for the datasets will be preprocessed. These alias can be found in 
 the :ref:`datasets` table.
 
@@ -61,7 +61,7 @@ Each edge in ``train_edges.pt``, ``valid_edges.pt``, and ``test_edges.pt`` is st
 in the format of ``source relation destination`` on 1 row.
 The 2 Node IDs and relation IDs are stored as 3 4-byte integers (or 8-byte integers
 if the storage data type is set to int64). 
-The source, relation and destinatio of edge ``i`` can be retrieved from 
+The source, relation and destination of edge ``i`` can be retrieved from 
 ``train_edges.pt``, ``valid_edges.pt``, and ``test_edges.pt``
 files by reading 3 4-byte integers (or 8-byte integers if using int64 data type for storage)
 at the offset in the file ``i * 3 * 4`` (or ``i * 3 * 8`` when using int64).
@@ -94,7 +94,7 @@ configuration file generated for WordNet18 (``wn18_cpu.ini``).
 
 ::
 
-    marius_perprocess wn18 ./output_dir --generate_config CPU
+    marius_preprocess wn18 ./output_dir --generate_config CPU
 
 \-\-<section>.<key>=<value>
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -172,7 +172,7 @@ Example of Using ``marius_preprocess`` Over WordNet18
 
 The following example uses ``marius_preprocess`` for downloading and 
 converting the dataset WordNet18 to Marius trainable version from command line.
-``wn18`` is the alias for WordNet18 in ``marius_perprocess``. The aliaes for
+``wn18`` is the alias for WordNet18 in ``marius_preprocess``. The alias for
 all the datasets supported by Marius can be found in the :ref:`datasets` table below.
 ``./output_dir`` is the directory where all the converted data will be stored.
 
@@ -193,7 +193,7 @@ Marius configuration file.
 
 The terminal output also shows ``Detected delimiter: ~  ~`` and ``Delimiter: ~  ~``.
 These 2 lines reminds the users what delimiter between entities in the same line has been used in the preprocessing.
-In this case ``\t`` is used in the raw data files to seperate 2 entities in the same line.
+In this case ``\t`` is used in the raw data files to separate 2 entities in the same line.
 
 ::
 
