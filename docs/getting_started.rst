@@ -7,39 +7,20 @@ Getting Started
 .. _getting_started_introduction:
 Introduction
 ============
-Marius is a toolbox that allows users to train and evaluate graph embedding models 
+Marius is a system that allows users to train graph embedding models 
 over large-scale data on a single machine without the need to write code. 
-It is build on top of PyTorch.
+Marius uses PyTorch as the underlying tensor engine.
 
 To train a graph embedding model, a Marius Configuration file and the data are the only 
 things you need to provide. Simple commands can be used to preprocess the dataset,
-deploy Marius, postprocess the trained models and embeddings, and make link prediction.
+deploy Marius, postprocess the trained models and embeddings, and perform link prediction.
 
-Users can also use Marius as a Python API. It can work seamlessly with existing popular
+Users can also use Marius via a Python API. It can work seamlessly with existing popular
 machine learning libraries such as PyTorch.
 
-Practitioners can use Marius to conveniently train and evaluate graph embedding models, 
-while researchers can use Marius for experiment settings that is compatible with
-data in various formats and comparable in terms of same data processing and evaluation process.
-
-Marius offers a set of model architectures options that users can combine to form 
-the suitable model based on their needs. All these choices of model architectures
-can be performed by turning the Marius configuration file.
-
-The core design principles for Marius are:
-
-* **No code paradigm for graph embedding pipelines**
-  
-    The user of configuration based programming allows users to run Marius without 
-    ever having to write a line of code. Only commands in terminal is required to deploy
-    a graph embedding pipeline including the dataset for training, the data storage,
-    the execution hardware, model, hyperparameters etc.
-
-* **Seamless integration with popular machine learning libraries**
-  
-    Marius' API can be used seamlessly with other popular machine learning libraries,
-    such as PyTorch, to define the training pipeline of a graph embedding model.
-
+Marius offers a set of model architectures that users can combine to choose 
+a suitable model that fits their needs. Different model architectures
+can be chosen via the Marius configuration file.
 
 
 .. _getting_started_installation
@@ -111,33 +92,26 @@ Full script (without torch install)
     cmake ../ -DUSE_CUDA=1
     make -j
 
-
-
 Main Functionality
-================
-Marius offers the users three main functionalities:
+==================
+Marius offers four functionalities:
 
-* preprocess datasets
 * train graph embedding models
 * evaluate the trained embeddings/models
 * perform link prediction based on trained embeddings/models
 
-For out-of-the-box deployment Marius adopts a configuration-based programming paradigm. 
+For out-of-the-box deployment, Marius adopts a configuration-based programming paradigm. 
 Users are only required to provide a configuration file and dataset as input.
-There are currently over 90 configurable parameters divided into 9 main sections,
+There are currently over ninety configurable parameters divided into nine main sections,
 including model, storage, training, pipelining and evaluation, that can define the 
 training pipeline and model architectures. 
 
-For basic functionality, all you need to do is to specify the statistics of the dataset,
-such as number of edges, number of nodes, number of edge types, location of the data and the device for training (CPU/GPU). 
-Marius can put together and train a graph embedding model for you. 
+For basic functionality, all you need to do is specifying the statistics of the dataset,
+such as number of edges, number of nodes, number of edge types, 
+location of the data and the device for training (CPU/GPU). 
+Marius can train a graph embedding model for you. 
 For users who want more advanced functionality of the system, there are additional
 configuration parameters available for them to tune based on their needs.
-
-Currently, the available graph formats are:   (**is this section necessary?**)
-
-* graphs with multiple edge types
-* graphs with only one edge type
 
 
 Training a graph
@@ -156,7 +130,12 @@ __kobenhavn_NN_1    _instance_hypernym  __national_capital_NN_1
 
 Training embeddings on such a graph requires three steps:
 
-#. Define a configuration file ``config_gpu.ini``.
+#. Preprocess the dataset ``marius_preprocess <dataset> output_dir/``
+
+    The first argument of ``marius_preprocess`` defines the dataset we want to preprocess.
+    The second argument tells ``marius_preprocess`` where to put the preprocessed dataset.
+
+#. Define a configuration file ``config.ini``.
 
     ::
 
@@ -178,8 +157,8 @@ Training embeddings on such a graph requires three steps:
 
     In this case, we choose to use GPU as the training device.
     The ``[path]`` section contains all the locations of preprocessed data.
-    If you want to specify the model for train to be ``TransE`` and increase the 
-    train epochs to a certain number, you can simply add the following lines to the
+    If you want to specify the model for training to be ``TransE`` and increase the 
+    training epochs to a certain number, you can simply add the following lines to the
     configuration file:
 
     ::
@@ -192,19 +171,28 @@ Training embeddings on such a graph requires three steps:
 
     See :ref:`User Guide<User_Guide>` for full details on the configuration options.
 
-#. Proprocess the dataset ``marius_preprocess <dataset> output_dir/``
+    Marius also offers ``marius_config_generator`` to generate a configuration file
+    for the users given the basic information of dataset statistics and where the data is stored.
+    All other configuration parameters will be set to the default value.
+    Users are given the options to specify the values of certain parameters.
+    The following command shows how to use ``marius_config_generator`` to generate 
+    a Marius configuration file for the same dataset mention above.
+    The generated config file is save to the same directory for storing data.
+    The value of ``embedding_size`` is changed to 512.
 
-    The first argument of ``marius_preprocess`` defines the dataset we want to preprocess.
-    The second argument tells ``marius_preprocess`` where to put the preprocessed dataset.
+    ::
+
+        marius_config_generator -s 40943 18 141442 5000 5000 --model.embedding_size=512
+
+    See ::ref:`User Guide<User_Guide>` for full details on usage of ``marius_config_generator``.
 
 #. Run the training executable with the Marius configuration file. 
 
     ::
 
-        marius_train config_gpu.ini
+        marius_train config.ini
 
-    Refer to :ref:`Examples<Examples>` to find out how to perform link prediction task on
-    the 2 supported formats of graphs.
+    Refer to :ref:`Examples<Examples>` to find out how to perform link prediction task.
 
 
 Evaluation
@@ -212,21 +200,45 @@ Evaluation
 
 Marius prints out training progress and evaluation information to the terminal during the training.
 After training, Marius also creates a ``data/`` directory to store all the trained embeddings,
-models, and evaluation statistics. You can utilize these statistics for evaluation.
+models, and evaluation statistics. ``marius_eval`` can be used for evaluation the trained embeddings
+and models.
+
+Run the following command to perform evaluation. The ``config.ini`` is the same Marius configuration
+file used for ``marius_train``.
+
+::
+
+    marius_eval config.ini
 
 
 Prediction
 ^^^^^^^^^^
 
-Marius provides ``marius_postprocess`` for user to perform link prediction task
-on trained embeddings and models. Given the source and type of relation, the 
-following command would give the most matched few destinations:
+After the training task is completed, ``marius_postprocess`` and ``marius_predict``
+can help retrieve the trained embeddings and perform link prediction tasks.
+
+Marius provides ``marius_postprocess`` for users to retrieve the trained embeddings in the 
+required format.
+The following command retrieves the trained embeddings and store them in CSV format in
+the directory ``embeddings/``. Other data formats, such as parquet, TSV, PyTorch tensor 
+are also supported by ``marius_postprocess``.
+Users just need to replace ``csv`` with name of the format they want in the following command.
+
+::
+
+    marius_postprocess embeddings/ csv
+
+Link prediction on trained embeddings is a supported task by ``marius_predict``. 
+Given a source node and type of relation, the 
+following command returns the top-ten destinations nodes. 
+More or less predicted destinations can be returned by changing the number ``10`` in 
+the command.
 
 ::
     
-    marius_postprocess __saxony_NN_1 _member_meronym 
+    marius_predict __saxony_NN_1 _member_meronym 10
 
-Checkout the :ref:`User Guide<User_Guide>` for more detailed usage of ``marius_postprocess``.
+Checkout the :ref:`User Guide<User_Guide>` for more detailed usage of ``marius_postprocess`` and ``marius_predict``.
 
 
 
@@ -267,7 +279,7 @@ Marius also provides a programmatic API that could allow users to deploy trainin
 Extensibility
 =============
 
-Marius can be imported as a Python library. While Marius already comes equipped 
+While Marius already comes equipped 
 with a number of commonly used models and functions, advanced users can implement 
 their own custom models in Python and use them for the training process. These
 models can then be used in the training process by setting the associated model decoder
