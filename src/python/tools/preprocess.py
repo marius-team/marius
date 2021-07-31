@@ -506,10 +506,12 @@ def set_args():
                 formatter_class=argparse.RawTextHelpFormatter,
                 epilog=(('Specify certain config (optional): ' +
                         '[--<section>.<key>=<value>]')))
-    parser.add_argument('dataset', metavar='dataset',
-                        type=str, help='Dataset to preprocess')
     parser.add_argument('output_directory', metavar='output_directory',
                         type=str, help='Directory to put graph data')
+    parser.add_argument('--files', metavar='files', nargs='+', type=str,
+                        help='Data files')
+    parser.add_argument('--dataset', metavar='dataset',
+                        type=str, help='Dataset to preprocess')
     parser.add_argument('--num_partitions', metavar='num_partitions',
                         required=False, type=int, default=1,
                         help='Number of partitions to split the edges into')
@@ -526,6 +528,28 @@ def set_args():
                               'training configuration file by default. ' +
                               '\nValid options (default to GPU): ' +
                               '[GPU, CPU, multi-GPU]'))
+    parser.add_argument('--format', metavar='format', nargs=1, type=str,
+                        default=['srd'],
+                        help='Format of data, eg. srd')
+    parser.add_argument('--delim', '-d', metavar='delim', type=str,
+                        default="",
+                        help='Specifies the delimiter')
+    parser.add_argument('--dtype', metavar='dtype', type=np.dtype,
+                        default=np.int32,
+                        help='Indicates the numpy.dtype')
+    parser.add_argument('--not_remap_ids', action='store_false',
+                        help='If set, will not remap ids')
+    parser.add_argument('--dataset_split', '-ds', metavar='dataset_split',
+                        nargs=2, type=float, default=(-1, -1),
+                        help='Split dataset into specified fractions' +
+                             ' when only 1 or more than 3 data files are present')
+    parser.add_argument('--start_col', '-sc', metavar='start_col', type=int,
+                        default=0,
+                        help='Indicates the column index to start from')
+    parser.add_argument('--num_line_skip', '-nls', metavar='num_line_skip',
+                        type=int, default=None,
+                        help='Indicates number of lines to ' +
+                             'skip from the beginning')
 
     config_dict, valid_dict = read_template(DEFAULT_CONFIG_FILE)
 
@@ -545,8 +569,12 @@ def parse_args(config_dict, args):
     arg_dict = vars(args)
     config_dict = update_param(config_dict, arg_dict)
     set_up_files(args.output_directory)
-
-    config_dict.update({"dataset": arg_dict.get("dataset")})
+    
+    if arg_dict.get("dataset") is None:
+        config_dict.update({"dataset": "custom"})
+    else:
+        config_dict.update({"dataset": arg_dict.get("dataset")})
+    
     return config_dict, arg_dict
 
 
@@ -554,8 +582,6 @@ def main():
     parser, config_dict = set_args()
     args = parser.parse_args()
     config_dict, arg_dict = parse_args(config_dict, args)
-
-    print(args.dataset)
 
     dataset_dict = {
         "twitter": twitter,
@@ -586,10 +612,19 @@ def main():
         shutil.rmtree(args.output_directory)
 
     if dataset_dict.get(args.dataset) is not None:
+        print(args.dataset)
         stats = dataset_dict.get(args.dataset)(
                                     args.output_directory, args.num_partitions)
     else:
-        raise RuntimeError("Unrecognized dataset.")
+        print("Preprocess custom dataset")
+        stats = general_parser(args.files, args.format,
+                               args.output_directory, args.delim,
+                               args.num_partitions,
+                               args.dtype, args.not_remap_ids,
+                               args.dataset_split,
+                               args.start_col,
+                               args.num_line_skip)
+
 
     if args.generate_config is not None:
         dir = args.output_directory
