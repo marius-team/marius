@@ -502,16 +502,17 @@ def update_param(config_dict, arg_dict):
 
 def set_args():
     parser = argparse.ArgumentParser(
-                description='Preprocess Datasets', prog='preprocessor',
+                description='Preprocess Datasets', prog='preprocess',
                 formatter_class=argparse.RawTextHelpFormatter,
                 epilog=(('Specify certain config (optional): ' +
                         '[--<section>.<key>=<value>]')))
+    mode = parser.add_mutually_exclusive_group()
     parser.add_argument('output_directory', metavar='output_directory',
                         type=str, help='Directory to put graph data')
-    parser.add_argument('--files', metavar='files', nargs='+', type=str,
-                        help='Data files')
-    parser.add_argument('--dataset', metavar='dataset',
-                        type=str, help='Dataset to preprocess')
+    mode.add_argument('--files', metavar='files', nargs='+', type=str,
+                        help='Files containing custom dataset')
+    mode.add_argument('--dataset', metavar='dataset',
+                        type=str, help='Supported dataset to preprocess')
     parser.add_argument('--num_partitions', metavar='num_partitions',
                         required=False, type=int, default=1,
                         help='Number of partitions to split the edges into')
@@ -541,8 +542,7 @@ def set_args():
                         help='If set, will not remap ids')
     parser.add_argument('--dataset_split', '-ds', metavar='dataset_split',
                         nargs=2, type=float, default=(-1, -1),
-                        help='Split dataset into specified fractions' +
-                             ' when only 1 or more than 3 data files are present')
+                        help='Split dataset into specified fractions')
     parser.add_argument('--start_col', '-sc', metavar='start_col', type=int,
                         default=0,
                         help='Indicates the column index to start from')
