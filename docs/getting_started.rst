@@ -130,10 +130,10 @@ __kobenhavn_NN_1    _instance_hypernym  __national_capital_NN_1
 
 Training embeddings on such a graph requires three steps:
 
-#. Preprocess the dataset ``marius_preprocess <dataset> output_dir/``
+#. Preprocess the dataset ``marius_preprocess output_dir/ --files custom_dataset.csv``
 
-    The first argument of ``marius_preprocess`` defines the dataset we want to preprocess.
-    The second argument tells ``marius_preprocess`` where to put the preprocessed dataset.
+    ``output_dir`` defines the directory to save all the preprocessed data. 
+    The option ``--files`` can be used to pass the files containing the custom dataset.
 
 #. Define a configuration file ``config.ini``.
 
@@ -172,17 +172,18 @@ Training embeddings on such a graph requires three steps:
     See :ref:`User Guide<User_Guide>` for full details on the configuration options.
 
     Marius also offers ``marius_config_generator`` to generate a configuration file
-    for the users given the basic information of dataset statistics and where the data is stored.
+    for the users given the basic information of dataset statistics and where to store
+    the created configuration file.
     All other configuration parameters will be set to the default value.
     Users are given the options to specify the values of certain parameters.
     The following command shows how to use ``marius_config_generator`` to generate 
     a Marius configuration file for the same dataset mention above.
-    The generated config file is save to the same directory for storing data.
+    The generated config file is saved to the same directory for storing data.
     The value of ``embedding_size`` is changed to 512.
 
     ::
 
-        marius_config_generator -s 40943 18 141442 5000 5000 --model.embedding_size=512
+        marius_config_generator ./output_dir -s 40943 18 141442 5000 5000 --model.embedding_size=512
 
     See ::ref:`User Guide<User_Guide>` for full details on usage of ``marius_config_generator``.
 
@@ -219,25 +220,30 @@ can help retrieve the trained embeddings and perform link prediction tasks.
 
 Marius provides ``marius_postprocess`` for users to retrieve the trained embeddings in the 
 required format.
-The following command retrieves the trained embeddings and store them in CSV format in
-the directory ``embeddings/``. Other data formats, such as parquet, TSV, PyTorch tensor 
+The following command retrieves the trained embeddings stored in ``./data/``
+and store them in CSV format in
+the directory ``embeddings/``. The directory ``./training_data/`` is the directory
+containing the preprocessed data used for training.
+Other data formats, such as TSV, PyTorch tensor 
 are also supported by ``marius_postprocess``.
-Users just need to replace ``csv`` with name of the format they want in the following command.
+Users just need to replace ``CSV`` with name of the format they want in the following command.
 
 ::
 
-    marius_postprocess embeddings/ csv
+    marius_postprocess ./data/ ./training_data/ --output_directory ./embeddings/ --format CSV
 
 Link prediction on trained embeddings is a supported task by ``marius_predict``. 
 Given a source node and type of relation, the 
 following command returns the top-ten destinations nodes. 
-More or less predicted destinations can be returned by changing the number ``10`` in 
+Number of predicted destinations can be controlled by changing the number ``10`` in 
 the command.
 
 ::
     
-    marius_predict __saxony_NN_1 _member_meronym 10
+    marius_predict ./data/ ./training_data/ 10 --src __saxony_NN_1  --rel _member_meronym --rel_type lhs 
 
+The left-hand-side relation type is used since the link prediction performed in 
+this case starts from source node to destination node.
 Checkout the :ref:`User Guide<User_Guide>` for more detailed usage of ``marius_postprocess`` and ``marius_predict``.
 
 

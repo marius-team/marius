@@ -18,10 +18,6 @@ Showcases
 
 This is a showcase demonstrates how to deploy Marius on a dataset with only one edge type.
 The ``num_relations`` is set to one since there is only one edge type in this relation.
-The size of this dataset is relatively large. It is reasonable to use the ``TBD`` for the 
-storage of edge and embeddings for nodes and relations: ``edges_backend=TBD 
-embeddings_backend=TBD relations_backend=TBD``.
-
 
 ==========  ======================  ==========
 Entities    Relations (edge-types)  Edges  
@@ -50,11 +46,6 @@ Marius configurations:
     num_relations=1
     num_valid=3449689
     num_test=3449689
-
-    [storage]
-    edges_backend=DeviceMemory
-    embeddings_backend=DeviceMemory
-    relations_backend=DeviceMemory
 
     [path]
     base_directory=data/
