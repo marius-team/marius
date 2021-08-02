@@ -282,10 +282,15 @@ class TestGeneralParser(unittest.TestCase):
                         str(Path(input_dir) / Path(test_file))],
                        ["srd"], [output_dir], remap_ids=False)
 
-        internal_node_ids = np.fromfile(str(Path(output_dir)) /
-                                        Path("node_mapping.bin"), dtype=int)
-        internal_rel_ids = np.fromfile(str(Path(output_dir)) /
-                                       Path("rel_mapping.bin"), dtype=int)
+        # internal_node_ids = np.fromfile(str(Path(output_dir)) /
+        #                                 Path("node_mapping.bin"), dtype=int)
+        # internal_rel_ids = np.fromfile(str(Path(output_dir)) /
+        #                                Path("rel_mapping.bin"), dtype=int)
+        internal_node_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("node_mapping.txt"))[:,1]
+        internal_rel_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("rel_mapping.txt"))[:,1]
+
 
         for i in range(len(internal_node_ids) - 1):
             self.assertEqual((internal_node_ids[i+1] -
@@ -304,10 +309,14 @@ class TestGeneralParser(unittest.TestCase):
                         str(Path(input_dir) / Path(test_file))],
                        ["srd"], [output_dir], remap_ids=True)
 
-        internal_node_ids = np.fromfile(str(Path(output_dir)) /
-                                        Path("node_mapping.bin"), dtype=int)
-        internal_rel_ids = np.fromfile(str(Path(output_dir)) /
-                                       Path("rel_mapping.bin"), dtype=int)
+        # internal_node_ids = np.fromfile(str(Path(output_dir)) /
+        #                                 Path("node_mapping.bin"), dtype=int)
+        # internal_rel_ids = np.fromfile(str(Path(output_dir)) /
+        #                                Path("rel_mapping.bin"), dtype=int)
+        internal_node_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("node_mapping.txt"))[:,1]
+        internal_rel_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("rel_mapping.txt"))[:,1]
 
         num_same_id = 0
         for i in range(len(internal_node_ids)):
