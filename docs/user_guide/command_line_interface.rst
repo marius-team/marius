@@ -6,9 +6,6 @@ Command Line Interface
 
 Here we go into detail on the arguments and usage of the command line interface to Marius.
 
-Commands
-^^^^^^^^^^^^^^^^^
-
 - marius_preprocess: convert datasets into the Marius input format
 - marius_train: train embeddings for input dataset
 - marius_eval: perform evaluation on the link prediction task

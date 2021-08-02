@@ -4,19 +4,31 @@
 Postprocessing
 ***************
 
-Here we cover how to export the trained embeddings for use.
+Here we cover how to export the trained embeddings for use. See :ref:`user_guide_marius_postprocess` for details on ``marius_postprocess``
 
 Supported formats for exporting embeddings:
 -------------------------------------------
 
-Numpy array
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 PyTorch tensor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-CSV/TSV file
+::
+
+    marius_postprocess ./data/ ./training_data/ --output_directory ./embeddings/ --format Tensor
+
+CSV file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+    marius_postprocess ./data/ ./training_data/ --output_directory ./embeddings/ --format CSV
+
+TSV file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+    marius_postprocess ./data/ ./training_data/ --output_directory ./embeddings/ --format TSV
 
 Accessing embeddings by original IDs
 -------------------------------------------

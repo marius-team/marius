@@ -1,5 +1,9 @@
 .. _installation:
 
+***************
+Installation
+***************
+
 Dependencies
 ^^^^^^^^^^^^
 
@@ -15,11 +19,7 @@ Dependencies
 * cmake >= 3.12
 * make >= 3.8
 
-Installing dependencies
-"""""""""""""""""""""""
-This can be skipped if the above are already installed.
-
-PyTorch, CUDA & CuDNN:
+Installing torch according to their documentation should cover the above dependencies: https://pytorch.org/get-started/locally/
 
 
 Installation from source with Pip
@@ -71,3 +71,38 @@ Script
     cd build
     cmake ../ -DUSE_CUDA=1
     make -j
+
+Marius in Docker
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Marius can be deployed within a docker container for convenient dependency management. Here is a sample ubuntu dockerfile which contains the necessary dependencies preinstalled for GPU training.
+
+::
+
+    FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+    RUN apt update
+
+    RUN apt install -y g++ \
+             make \
+             wget \
+             unzip \
+             vim \
+             git \
+             python3-pip
+
+    # install gcc-9
+    RUN apt install -y software-properties-common
+    RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    RUN apt update
+    RUN apt install -y gcc-9 g++-9
+    RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
+    RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+
+    # install cmake 3.20
+    RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.sh
+    RUN mkdir /opt/cmake
+    RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
+    RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+
+    # install pytorch
+    RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html

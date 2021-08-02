@@ -7,18 +7,7 @@ User Guide Intro
 User Guide
 ==========
 
-This is the Marius user guide. It helps users figure out how to deploy Marius,
-what configuration parameters are available for graph embedding model architectures.
-Below are the links to each section of the guide.
-
-Basic workflow
-=====================
-
-1. Preprocess input dataset using ``marius_preprocess`` See :ref:`preprocessing`.
-2. Create a configuration file which denotes the dataset, model, trainingm and evaluation process. See. :ref:`configuration`.
-3. Train and evaluate with ``marius_train`` and ``marius_eval``. See :ref:`training` :ref:`evaluation`.
-4. Convert trained embeddings to output format with ``marius_postprocess`` See :ref:`postprocessing`.
-5. Perform downstream task with embeddings. E.g edge/link prediction with ``marius_predict``. See :ref:`prediction`
+This guide helps users figure out how to train models with Marius.
 
 Dataset Preprocessing
 =====================

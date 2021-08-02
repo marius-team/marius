@@ -4,17 +4,55 @@
 Training
 ****************
 
+Here we cover how to configure Marius for training.
+
 Training process
 -----------------
+
+Marius trains embeddings by:
+
+1. Sampling a batch of edges from the graph
+2. Producing negative samples by corrupting the edges in the batch.
+3. Optimizing a link-prediction based loss on the batch of edges and negative samples.
 
 Configuring training parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Negative Sampling
-^^^^^^^^^^^^^^^^^
+The following are the defaults for the main parameters of interest during training. See :ref:`configuration` for more details on these parameters.
 
-Two-sided relation embeddings
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+    [model]
+    scale_factor=.001
+    initialization_distribution=Normal
+    embedding_size=128
+    decoder=DistMult
+
+    [training]
+    batch_size=10000
+    negatives=512
+    degree_fraction=.5
+    learning_rate=.1
+    regularization_coef=2e-6
+    regularization_norm=2
+    loss=SoftMax
+    num_epochs=10
+
+This set of parameters should yield reasonable quality embeddings for most datasets. But can be tuned to improve training times and model accuracy.
+
+Improving accuracy:
+
+- Increase embedding size
+- Increase negatives
+
+Improving training time:
+
+- Reduce embedding size
+- Increase batch size
+- Reduce negatives
+
+Models typically converge in 10-100 epochs on small datasets (< 1 million edges) and for large datasets (>100 million), only 1-10 epochs may be needed for convergence.
+
 
 Multi-GPU training
 ------------------
