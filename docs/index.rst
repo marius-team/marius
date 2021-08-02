@@ -22,6 +22,28 @@ Welcome to Marius's documentation!
 .. toctree::
     :glob:
     :maxdepth: 1
+    :caption: Examples
+
+    examples/*
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+    :caption: User Guide
+
+    user_guide/*
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+    :caption: Developer Guide
+
+    developer_guide/*
+
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
     :caption: API
 
     api/*

@@ -1,109 +1,80 @@
-.. _User_guide_intro:
-
-****************
-User Guide Intro
-****************
-
-User Guide
-==========
-
-This is the Marius user guide. It helps users figure out how to deploy Marius,
-what configuration parameters are available for graph embedding model architectures.
-Below are the links to each section of the guide.
-
+.. _command_line_interface:
 
 **********************
 Command Line Interface
 **********************
 
+Here we go into detail on the arguments and usage of the command line interface to Marius.
+
 Commands
-========
+^^^^^^^^^^^^^^^^^
 
-Marius provides several command line interface entry points:
+- marius_preprocess: convert datasets into the Marius input format
+- marius_train: train embeddings for input dataset
+- marius_eval: perform evaluation on the link prediction task
+- marius_postprocess: convert trained embeddings to desired output format
+- marius_predict: perform interactive link prediction over trained embeddings
 
-* :ref:`marius_preprocess<user_guide_marius_preprocess>`: preprocess a dataset
-* :ref:`marius_config_generator<_user_guide_marius_config_generator>`: generates configuration file
-* :ref:`marius_train<user_guide_marius_train>`: trains a graph embedding model
-* :ref:`marius_eval<user_guide_marius_eval>`: evaluate the trained graph embeddings and model
-* :ref:`marius_postprocess<user_guide_marius_postprocess>`: retrieves trained graph embeddings
-* :ref:`marius_predict<user_guide_marius_predict>`: performs link prediction over trained embeddings and model
-
-The details of using these commands are described below.
 
 .. _user_guide_marius_preprocess:
 
 marius_preprocess
 ^^^^^^^^^^^^^^^^^
 
+See :ref:`preprocess` for additional context and usage.
+
 This command allows the users to preprocess a dataset to the Marius-trainable format.
 This command can be called with:
 
 ::
 
-    marius_preprocess <output_directory> [OPTIONS]
+ marius_preprocess <output_directory> [OPTIONS]
 
 The available options:
 
 ::
 
-    usage: preprocess [-h] [--files files [files ...]] [--dataset dataset] [--num_partitions num_partitions] [--overwrite]
-    [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
-    [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
-    output_directory
+ usage: preprocess [-h] [--files files [files ...]] [--dataset dataset] [--num_partitions num_partitions] [--overwrite]
+ [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
+ [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
+ output_directory
 
-    Preprocess Datasets
+ Preprocess Datasets
 
-    positional arguments:
-    output_directory      Directory to put graph data
+ positional arguments:
+ output_directory      Directory to put graph data
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    --files files [files ...]
-        Files containing custom dataset
-    --dataset dataset     Supported dataset to preprocess
-    --num_partitions num_partitions
-        Number of partitions to split the edges into
-    --overwrite           Overwrites the output_directory if this issetOtherwise, files with same the names will be treated as the data for current dataset.
-    --generate_config [generate_config], -gc [generate_config]
-        Generates a single-GPU/multi-CPU/multi-GPU training configuration file by default.
-        Valid options (default to GPU): [GPU, CPU, multi-GPU]
-    --format format       Format of data, eg. srd
-    --delim delim, -d delim
-        Specifies the delimiter
-    --dtype dtype         Indicates the numpy.dtype
-    --not_remap_ids       If set, will not remap ids
-    --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
-        Split dataset into specified fractions
-    --start_col start_col, -sc start_col
-        Indicates the column index to start from
-    --num_line_skip num_line_skip, -nls num_line_skip
-        Indicates number of lines to skip from the beginning
+ optional arguments:
+ -h, --help            show this help message and exit
+ --files files [files ...]
+     Files containing custom dataset
+ --dataset dataset     Supported dataset to preprocess
+ --num_partitions num_partitions
+     Number of partitions to split the edges into
+ --overwrite           Overwrites the output_directory if this issetOtherwise, files with same the names will be treated as the data for current dataset.
+ --generate_config [generate_config], -gc [generate_config]
+     Generates a single-GPU/multi-CPU/multi-GPU training configuration file by default.
+     Valid options (default to GPU): [GPU, CPU, multi-GPU]
+ --format format       Format of data, eg. srd
+ --delim delim, -d delim
+     Specifies the delimiter
+ --dtype dtype         Indicates the numpy.dtype
+ --not_remap_ids       If set, will not remap ids
+ --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
+     Split dataset into specified fractions
+ --start_col start_col, -sc start_col
+     Indicates the column index to start from
+ --num_line_skip num_line_skip, -nls num_line_skip
+     Indicates number of lines to skip from the beginning
 
-    Specify certain config (optional): [--<section>.<key>=<value>]
-
-``marius_preprocess`` is able to prerpocess both the custom dataset provided by users 
-and the 21 supported dataset Marius comes included out of the box.
-
-It now supports 
-custom datasets in the format of CSV, TSV, TXT. Each edge of the graph must be stored on 
-one line with delimiter between the node and relation. The following example presents two 
-lines of valid edges using "," as delimiter. If there is only one relation in the graph,
-the relation column can be removed.
-
-::
-
-    s1,r1,s2
-    s3,r2,s1
-
-Only ``<output_directory>`` and a supported dataset name or custom dataset 
-files are required for preprocessing supported datasets.
+ Specify certain config (optional): [--<section>.<key>=<value>]
 
 output_directory
 ++++++++++++++++
 ``<output_directory>`` is a **required** argument for ``marius_preprocess``. 
 It is the directory where all the files created by ``marius_preprocess`` wil be stored.
 ``marius_preprocess`` will create this file if it does not exist.
-``maiurs_preprocess`` outputs the following files to ``<output_directory>``.
+``marius_preprocess`` outputs the following files to ``<output_directory>``.
 For the preprocessing of supported datasets, ``<output_directory>`` also includes
 the downloaded raw dataset.
 
@@ -115,7 +86,7 @@ train_edges.pt      Contains edges for training set;
                     Should be set for ``path.train_edges`` in Marius configuration file
 valid_edges.pt      Contains edges for validation set; 
 
-                    Should be set for ``path.train_edges`` in Marius configuration file
+                    Should be set for ``path.valid)edges`` in Marius configuration file
 test_edges.pt       Contains edges for test set; 
 
                     Should be set for ``path.train_edges`` in Marius configuration file
@@ -148,7 +119,7 @@ For example, the following command preprocesses the custom dataset composed of `
 
 ::
 
-    marius_preprocess output_dir --files custom_train.csv custom_valid.csv custom_test.csv
+ marius_preprocess output_dir --files custom_train.csv custom_valid.csv custom_test.csv
 
 \-\-dataset
 +++++++++++
@@ -188,7 +159,7 @@ configuration file generated for dataset WordNet18 (``wn18_cpu.ini``).
 
 ::
 
-    marius_preprocess ./output_dir --dataset wn18 --generate_config CPU
+ marius_preprocess ./output_dir --dataset wn18 --generate_config CPU
 
 \-\-<section>.<key>=<value>
 +++++++++++++++++++++++++++
@@ -200,7 +171,7 @@ in the Marius configuration file generated for custom dataset composed of ``cust
 
 ::
 
-    marius_preprocess ./output_dir --files custom_dataset.csv --generate_config --model.embedding_sze=256 --training.num_epochs=100
+ marius_preprocess ./output_dir --files custom_dataset.csv --generate_config --model.embedding_sze=256 --training.num_epochs=100
 
 \-\-format <format>
 +++++++++++++++++++
@@ -214,7 +185,7 @@ storing edges in the sequence of source node, relation and destination node.
 
 ::
 
-    marius_preprocess ./output_dir --files custom_dataset.csv --format src
+ marius_preprocess ./output_dir --files custom_dataset.csv --format src
 
 \-\-delim delim, -d delim
 +++++++++++++++++++++++++
@@ -256,7 +227,7 @@ validation, and test sets with a corresponding proportion of 0.99, 0.05, and 0.0
 
 ::
 
-    marius_preprocess ./output_dir --files custom_dataset.csv --dataset_split 0.05 0.05
+ marius_preprocess ./output_dir --files custom_dataset.csv --dataset_split 0.05 0.05
 
 \-\-start_col <start_col>
 +++++++++++++++++++++++++
@@ -271,7 +242,6 @@ The default value for ``<start_col>`` is zero.
 ``--num_line_skip <num_line_skip>, \-nls <num_line_skip>`` is an **optional** argument for ``marius_preprocess``.
 It is the number of lines of headers to skip when reading the custom dataset files.
 If this value is not set. ``marius_preprocess`` uses Python Sniffer to determine the number of header row.
-
 
 .. _user_guide_marius_config_generator:
 
@@ -290,7 +260,7 @@ The available options:
 
 ::
 
-    usage: config_generator [-h] [--data_directory data_directory] [--dataset dataset | --stats num_nodes num_relations num_train num_valid num_test]
+    usage: config_generator [-h] [--data_directory data_directory] [--dataset dataset | --stats num_nodes num_edge_types num_train num_valid num_test]
     [--device [generate_config]]
     output_directory
 
@@ -306,9 +276,9 @@ The available options:
     Directory of the preprocessed data
     --dataset dataset, -d dataset
     Dataset to preprocess
-    --stats num_nodes num_relations num_train num_valid num_test, -s num_nodes num_relations num_train num_valid num_test
+    --stats num_nodes num_edge_types num_train num_valid num_test, -s num_nodes num_edge_types num_train num_valid num_test
     Dataset statistics
-    Enter in order of num_nodes, num_relations, num_train num_valid, num_test
+    Enter in order of num_nodes, num_edge_types, num_train num_valid, num_test
     --device [generate_config], -dev [generate_config]
     Generates configs for a single-GPU/multi-CPU/multi-GPU training configuration file by default.
     Valid options (default to GPU): [GPU, CPU, multi-GPU]
@@ -319,24 +289,24 @@ The available options:
 ++++++++++++++++++
 ``<output_directory>`` is a **required** argument. It specifies the output directory of the created configuration file.
 
-\-\-<data_directory>, \-<dataset>
-++++++++++++++++++++
+\-\-data_directory <data_directory>
+++++++++++++++++++++++++++++++++++++++++
 ``--<data_directory>`` is an **optional** argument. It specifies the directory where ``marius_preprocess`` stores
 preprocessed data.
 
-\-\-<dataset>, \-<dataset>
+\-\-dataset <dataset>
 ++++++++++++++++++++++++++
-``--<dataset>, -<dataset>`` is an **optional** argument. It specifies the name of the supported dataset. It should not be 
+``--<dataset>`` is an **optional** argument. It specifies the name of the supported dataset. It should not be
 used when ``--stats`` is in use.
 
-\-\-stats <num_nodes> <num_relations> <num_train> <num_valid> <num_test>, \-s <num_nodes> <num_relations> <num_train> <num_valid> <num_test>
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-``--stats num_nodes num_relations num_train num_valid num_test, -s num_nodes num_relations num_train num_valid num_test``
-is an **optional** argument. It specifies the stats of the dataset to be trained over. It should not be used at the same 
+\-\-stats <num_nodes> <num_edge_types> <num_train> <num_valid> <num_test>, \-s <num_nodes> <num_edge_types> <num_train> <num_valid> <num_test>
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+``--stats num_nodes num_edge_types num_train num_valid num_test, -s num_nodes num_edge_types num_train num_valid num_test``
+is an **optional** argument. It specifies the stats of the dataset to be trained over. It should not be used at the same
 time with option ``--<dataset>``.
 
 \-\-device <device>, \-dev <device>
-+++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++
 ``--device, -dev`` is an **optional** argument. The default value of it is GPU. It takes only three values: GPU, CPU, multi-GPU.
 It specifies the device option.
 
@@ -371,8 +341,8 @@ options for model architectures and training pipeline.
 
 The configuration options can also be modified by passing ``--<section>.<key>=<value>``
 to the end of the ``marius_train`` command.
-Any parameter passed in the command line will override the value specified 
-in the configuration file. The details about ``<section>.<key>`` can be 
+Any parameter passed in the command line will override the value specified
+in the configuration file. The details about ``<section>.<key>`` can be
 found in :ref:`Configuration<user_guide_configuration>`. The following is an example
 of overriding the decoder model to ``TransE`` and using ``config.ini`` as the configuration
 file:
@@ -382,8 +352,8 @@ file:
     marius_train config.ini --model.decoder=TransE
 
 During the execution of this ``marius_train``, information about training progress
-and model performance is printed to terminal. The output of the first epoch would be 
-similar to the following. 
+and model performance is printed to terminal. The output of the first epoch would be
+similar to the following.
 
 ::
 
@@ -416,10 +386,10 @@ similar to the following.
     [info] [03/18/21 01:33:19.271] Num Eval Batches: 50
     [info] [03/18/21 01:33:19.271] Auc: 0.973, Avg Ranks: 24.477, MRR: 0.491, Hits@1: 0.357, Hits@5: 0.651, Hits@10: 0.733, Hits@20: 0.806, Hits@50: 0.895, Hits@100: 0.943
 
-After the training is finished, Marius will generate a directory ``data/`` for storing all the trained model
+After the training is finished, Marius will generate a directory according to the ``path.data_directory`` option for storing all the trained model
 and a directory ``logs/`` for all the log information during the training.
 
-The following is the description of each file in ``data/``.
+The following is the description of each file in ``path.data_directory``.
 
 =========================================  ================
 File                                       Description
@@ -455,7 +425,7 @@ logs/marius_warn.log            contains the warning messages produced by the sy
 marius_eval
 ^^^^^^^^^^^
 
-This command lets users perform evaluation on the trained embeddings and model.
+This command lets users perform link-prediction evaluation on the trained embeddings and model.
 It can be called with:
 
 ::
@@ -472,8 +442,7 @@ The available arguments:
 
     -h, --help  Print help and exit.
 
-``marius_eval`` performs evaluations to the trained embeddings and model without training them again.
-The ``<config_file>`` is the same config_file used for ``marius_train``. The output of ``marius_eval``
+The ``<config_file>`` can be the same configuration file used for ``marius_train``, or a separate configuration file defined for different evaluation scenarios. The output of ``marius_eval``
 will be similar to the following.
 
 ::
@@ -522,24 +491,24 @@ The available options:
     --format format, -f format
                             Data format to store retrieved embeddings
 
-The ``<trained_embedding_directory>`` is the directory created 
+The ``<trained_embedding_directory>`` is the directory created
 by ``marius_train`` containing all trained embeddings.
 The ``<dataset_directory>`` is the directory created by ``marius_preprocess`` to store preprocessed data.
 
 \-\-output_directory
 ++++++++++++++++++++
 
-The ``--<output directory>`` is an **optional** argument. It is
+The ``--<output_directory>`` is an **optional** argument. It is
 the directory where the retrieved graph embeddings will be stored.
 
 \-\-format
 ++++++++++
 
 The ``--<format>`` is an **optional** argument. It specifies the storing format of the retrieved graph embeddings.
-Currently, the supported formats include CSV, TSV and PyTroch Tensor. 
+Currently, the supported formats include CSV, TSV and PyTorch Tensor.
 
 The index of the embeddings in the output file follows the remmaped IDs of the node or entity.
-The mapping information between the original IDs and remapped IDs is in ``node_mapping.txt`` and 
+The mapping information between the original IDs and remapped IDs is in ``node_mapping.txt`` and
 ``rel_mapping.txt`` created by ``marius_preprocess``. See :ref:`marius_preprocess<user_guide_marius_preprocess>`
 for detailed description.
 
@@ -548,7 +517,6 @@ The following command shows how to use ``marius_postprocess`` for retrieving tra
 ::
 
     marius_postprocess ./data/ ./dataset_directory --output_directory output_dir -f CSV
-    output_dir CSV
 
 In this case, ``./data/`` is the directory created by ``marius_train`` containing all the
 trained embeddings. ``./dataset_directory`` is the directory created by ``marius_preprocess``
@@ -587,7 +555,7 @@ The available options are:
     -h, --help            show this help message and exit
     --src src, -s src     Source node, the original ID of a certain node
     --dst dst, -d dst     Destination node, the original ID of a certain node
-    --rel rel, -r rel     Relation, the original ID of a certain relation
+    --rel rel, -r rel     relation (edge-type), the original ID of a certain relation
     --rel_type rel_type, -rt rel_type
                             The direction of a certain relation
 
@@ -620,170 +588,3 @@ in the following example.
 
     marius_predict ./data/ ./dataset_directory 5 -s source_node_id -r relation_id --rel_type lhs
 
-
-
-
-
-
-Data Preprocessing
-==================
-
-
-
-.. _user_guide_configuration:
-
-
-Configuration
-=============
-
-**Can use the configuration doc we have for now: https://github.com/marius-team/marius/blob/main/docs/configuration.rst**
-
-Hyper-parameter optimization
-============================
-
-Marius provides 90 configurable parameters divided into 
-nine main section, including model, storage, training, pipelining and evaluation.
-These parameters can be tuned to achieve the best system efficiency and training performance
-for dataset with certain properties.
-
-Memory Hierarchy Usage
-^^^^^^^^^^^^^^^^^^^^^^
-Marius achieves great training efficiency via its novel in-memory replacement method.
-Marius configuration parameters allows users to use the entire memory hierarchy efficiently by 
-tuning the hardware used by Marius, the batch size used during training, the number of 
-partitions of the input graph, as well as the asynchrony of Marius training pipeline.
-
-Marius denotes the memory hierarchy according to the follow table.
-
-===============  ===========
-Parameter value  Description
----------------  -----------
-DeviceMemory     GPU memory
-HostMemory       CPU memory
-PartitionBuffer  Disk???
-FlatFile         Disk
-===============  ===========
-
-The overheads of storing and training each dataset is calculated as follows:
-For training d-dimensional graph embeddings with n nodes, r edge-types and e edges:
-
-* Overhead of storing node embedding parameters + optimizer state: N = 2 * n * d * 4 bytes
-* Overhead of edge-type embedding parameters + optimizer state: R = 2 * r * d * 4 bytes
-* Overhead of storing edges: E = e * 3 * 4 bytes (with int32 node ids)
-
-The sum of these overheads is the total overhead of training: N + R + E
-
-Large graph example
-+++++++++++++++++++
-
-For a graph with n = 100 million,  e = 1 billion, r = 10000, and d = 100 we have:
-
-* N = 2 * 100 million * 100 * 4 bytes = 80GB
-* R = 2 * 10000 * 100 * 4 bytes = 8 MB
-* E = 1 billion * 3 * 4 bytes = 12 GB
-
-The AWS p3.2xlarge instance instance has 64 GB of CPU memory and 16 GB of GPU memory.
-Assume we have our hardware setting as mentioned above.
-
-Edge-type embeddings
-""""""""""""""""""""
-
-As we can see the overhead of the edge type embeddings is only eight MB, quite small.
-Most publicly available datasets have few edge-types and we have not observed a dataset 
-with more than fifteen thousand edge-types. Therefore, the relations_backend should almost always 
-be set to ``DeviceMemory`` (gpu memory), unless the graph has millions of edge types.
-
-Node embeddings
-"""""""""""""""
-
-The overhead of the node embedding parameters in our example exceeds the CPU memory 
-capacity. Therefore we will have to partition the embedding parameters and use the 
-partition buffer (using ``PartitionBuffer`` backend) swap partitions in and out of CPU memory. 
-We can define the capacity of the buffer and the number of partitions in the following manner:
-
-* The capacity of the buffer should be set to the maximum value such that it does not 
-  exceed CPU memory capacity. 
-  So in our example, if we partition the node embedding parameters into 10 partitions, 
-  each partition has the size 80 GB / 10 = 10 GB. 
-  Since our CPU memory capacity is 64 GB, we can fit 6 total partitions in CPU memory. 
-  Therefore we should set the buffer capacity to 6, and the buffer uses 60GB of CPU memory.
-* For best accuracy, the fewer partitions used generally results in better quality embeddings.
-  Using a few partitions (8-16) is recommend for small datasets. 
-  For large datasets, 16+ partitions may be needed.
-
-Note that if we used a smaller embedding size such as d = 50. 
-N would become 40GB. It would fit in CPU memory. 
-In that case we would use the ``HostMemory`` storage backend for node embeddings. 
-If we used an even smaller embedding size such that d = 10, 
-then the overhead is only 10 GB. 
-Therefore we could store them using the ``DeviceMemory`` backend, since GPU memory capacity is generally larger than 16GB.
-
-
-Edges
-"""""
-
-In this example, storing our edges requires 12 GB. 
-While in isolation, this will fit just fine in CPU memory. 
-But when combined with the overhead of storing the partition buffer (60 GB), 
-it will exceed CPU memory capacity. 
-As edges are accessed by the system using sequential IO, 
-they can safely be stored on disk assuming at least 100 MBps of disk throughput. 
-This can be done by setting the edges_backend to ``FlatFile``.
-
-Small graph example
-+++++++++++++++++++
-
-For smaller graphs the overheads much smaller, take one with
-n = 1 million,  e = 100 million , r = 1000, and d = 100 we have:
-
-* N = 2 * 1 million * 100 * 4 bytes = 800MB
-* R = 2 * 1000 * 100 * 4 bytes = .8 MB
-* E = 100 million * 3 * 4 bytes = 1.2 GB
-
-We can see that the total overhead is only about 2GB.
-This will fit just fine in GPU memory. 
-Therefore all can be stored with the ``DeviceMemory`` backend.
-
-Notes for storing and training of large graphs:
-
-* If any of the edges, node embeddings or edge-types embeddings are stored off GPU, 
-  then asynchronous training should be used for fastest training times. 
-  The default training pipeline configuration parameters should be sufficient for most graphs and deployments.
-* To best hide IO wait times and improve training times when using the partition buffer, 
-  prefetching should be enabled. 
-  When prefetching is enabled the overhead of the buffer will increase to 
-  partition_size * (buffer_capacity + 2), 
-  as we use two partition sized regions of memory for async writes and prefetching.
-
-
-
-Datasets
-========
-
-The following table contains the information of the 21 datasets Marius comes included out of the box.
-
-==================  ==========  ======================  ==========
-Dataset Name        Entities    Relations (edge-types)  Edges  
-------------------  ----------  ----------------------  ----------
-live_journal        4847571     1                       68993773
-fb15k               14951       1345                    592213
-fb15k_237           114541      237                     310116
-wn18                40943       18                      151442
-wn18rr              40943       11                      93003
-codex_s             2034        42                      36543
-codex_m             17050       51                      206205
-codex_l             77951       69                      612437
-drkg                97238       107                     5874261
-hetionet            45160       25                      2250198
-freebase86m         86054151    14824                   338586276
-kinships            24          12                      112
-ogbl_ppa            576289      1                       30326273
-ogbl_ddi            4267        1                       1334889
-ogbl_collab         235868      1                       1285465
-ogbl_biokg          45085       51                      5088434
-ogbn_arxiv          169341      1                       1166243
-ogbn_proteins       132534      1                       39561254
-ogbn_products       2400608     1                       61859140
-openbiolink_hq      184635      28                      4563405
-openbiolink_lq      486942      32                      27320889
-==================  ==========  ======================  ==========

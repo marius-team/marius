@@ -5,6 +5,7 @@ Getting Started
 ***************
 
 .. _getting_started_introduction:
+
 Introduction
 ============
 Marius is a system that allows users to train graph embedding models 
