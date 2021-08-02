@@ -5,11 +5,14 @@ import argparse
 
 
 def get_embs(mapping_file, embs_file):
-    mapping = np.loadtxt(mapping_file, dtype=str, delimiter='\t')
-    mapping_dict = dict(mapping)
+    try:
+        mapping = np.loadtxt(mapping_file, dtype=str, delimiter='\t')
+        mapping_dict = dict(mapping)
 
-    num = len(mapping_dict)
-    embs = np.fromfile(embs_file, np.float32).reshape((num, -1))
+        num = len(mapping_dict)
+        embs = np.fromfile(embs_file, np.float32).reshape((num, -1))
+    except FileNotFoundError:
+        raise FileNotFoundError("Incorrect file passed in.")
 
     return embs
 
@@ -28,7 +31,7 @@ def output_embeddings(data_dir, dataset_dir, output_dir, fmt):
     if fmt == "CSV":
         np.savetxt(Path(output_dir) / Path("node_embeddings.csv"), node_embs, delimiter=',')
         np.savetxt(Path(output_dir) / Path("src_relations_embeddings.csv"), lhs_embs, delimiter=',')
-        np.savetxt(Path(output_dir) / Path("dst_relations.csv"), rhs_embs, delimiter=',')
+        np.savetxt(Path(output_dir) / Path("dst_relations_embeddings.csv"), rhs_embs, delimiter=',')
     elif fmt == "TSV":
         np.savetxt(Path(output_dir) / Path("node_embeddings.tsv"), node_embs, delimiter='\t')
         np.savetxt(Path(output_dir) / Path("src_relations_embeddings.tsv"), lhs_embs, delimiter='\t')
@@ -39,8 +42,8 @@ def output_embeddings(data_dir, dataset_dir, output_dir, fmt):
         np.savetxt(Path(output_dir) / Path("dst_relations_embeddings.txt"), rhs_embs, delimiter='\t')
     else:
         torch.save(torch.tensor(node_embs), Path(output_dir) / Path('node_embeddings.pt'))
-        torch.save(torch.tensor(lhs_embs), Path(output_dir) / Path('node_embeddings.pt'))
-        torch.save(torch.tensor(rhs_embs), Path(output_dir) / Path('node_embeddings.pt'))
+        torch.save(torch.tensor(lhs_embs), Path(output_dir) / Path('src_relations_embeddings.pt'))
+        torch.save(torch.tensor(rhs_embs), Path(output_dir) / Path('dst_relations_embeddings.pt'))
 
     return node_embs, lhs_embs, rhs_embs
 

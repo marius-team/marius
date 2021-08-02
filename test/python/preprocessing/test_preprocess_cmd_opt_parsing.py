@@ -162,3 +162,16 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         subprocess.run(self.cmd_args[12])
         self.assertTrue(Path("./output_dir/wn18_gpu.ini").exists())
+
+    def test_custom_dataset(self):
+        """
+        Check if custom dataset is processed correctly
+        """
+        subprocess.run(["python3", "./src/python/tools/preprocess.py",
+                        "./output_dir",
+                        "--files",
+                        "./test/test_data/train_edges.txt",
+                        "./test/test_data/valid_edges.txt",
+                        "./test/test_data/test_edges.txt",
+                        "-gc", "CPU"])
+        self.assertTrue(Path("./output_dir/custom_cpu.ini").exists())
