@@ -137,9 +137,9 @@ The source, relation and destination of edge ``i`` can be retrieved from
 files by reading 3 4-byte integers (or 8-byte integers if using int64 data type for storage)
 at the offset in the file ``i * 3 * 4`` (or ``i * 3 * 8`` when using int64).
 
-\-\-files
-+++++++++
-``--files`` is an **optional** argument for ``marius_preprocess``.
+\-\-files <files ...>
++++++++++++++++++++++
+``--files <files ...>`` is an **optional** argument for ``marius_preprocess``.
 It should be a list of files containing custom dataset. It should not be used
 at the same time when ``--dataset`` is used.
 
@@ -150,16 +150,16 @@ For example, the following command preprocesses the custom dataset composed of `
 
     marius_preprocess output_dir --files custom_train.csv custom_valid.csv custom_test.csv
 
-\-\-dataset
-+++++++++++
-``--dataset`` is an **optional** argument for ``marius_preprocess``. 
+\-\-dataset <dataset>
++++++++++++++++++++++
+``--dataset <dataset>`` is an **optional** argument for ``marius_preprocess``. 
 It can be one of the names of a Marius supported dataset. 
 It should not be used at the same time when ``--files`` is used.
 To see which datasets are supported by Marius, check out
 :ref:`dataset` table.
 
-\-\-num_partitions
-++++++++++++++++++
+\-\-num_partitions <num_partitions>
++++++++++++++++++++++++++++++++++++
 ``--num_partitions <num_partitions>`` is an optional argument for ``marius_preprocess``.
 If this option is specified, the nodes of the input graph will be partitioned into ``<num_partitions>``.
 The default value for ``<num_partitions>`` is one.
@@ -216,9 +216,9 @@ storing edges in the sequence of source node, relation and destination node.
 
     marius_preprocess ./output_dir --files custom_dataset.csv --format src
 
-\-\-delim delim, -d delim
-+++++++++++++++++++++++++
-``--delim=<delim>`` is an **optional** argument for ``marius_preprocess``.
+\-\-delim <delim>, \-d <delim>
++++++++++++++++++++++++++++++
+``--delim <delim>, -d <delim>`` is an **optional** argument for ``marius_preprocess``.
 ``<delim>`` defines the delimiter between nodes and relations in the dataset files.
 If ``<delim>`` is not set, ``marius_preprocess`` will use Python Sniffer to detect a delimiter.
 The delimiter is printed to the terminal so users can verify it.
@@ -319,25 +319,25 @@ The available options:
 ++++++++++++++++++
 ``<output_directory>`` is a **required** argument. It specifies the output directory of the created configuration file.
 
-\-\-<data_directory>, \-<dataset>
-++++++++++++++++++++
-``--<data_directory>`` is an **optional** argument. It specifies the directory where ``marius_preprocess`` stores
+\-\-data_directory <data_directory>
++++++++++++++++++++++++++++++++++++
+``--data_directory <data_directory>`` is an **optional** argument. It specifies the directory where ``marius_preprocess`` stores
 preprocessed data.
 
-\-\-<dataset>, \-<dataset>
-++++++++++++++++++++++++++
-``--<dataset>, -<dataset>`` is an **optional** argument. It specifies the name of the supported dataset. It should not be 
+\-\-dataset <dataset>, \-d <dataset>
+++++++++++++++++++++++++++++++++++++
+``--dataset <dataset>, -d <dataset>`` is an **optional** argument. It specifies the name of the supported dataset. It should not be 
 used when ``--stats`` is in use.
 
 \-\-stats <num_nodes> <num_relations> <num_train> <num_valid> <num_test>, \-s <num_nodes> <num_relations> <num_train> <num_valid> <num_test>
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-``--stats num_nodes num_relations num_train num_valid num_test, -s num_nodes num_relations num_train num_valid num_test``
+``--stats <num_nodes> <num_relations> <num_train> <num_valid> <num_test>, -s <num_nodes> <num_relations> <num_train> <num_valid> <num_test>``
 is an **optional** argument. It specifies the stats of the dataset to be trained over. It should not be used at the same 
-time with option ``--<dataset>``.
+time with option ``--dataset``.
 
 \-\-device <device>, \-dev <device>
 +++++++++++++++++
-``--device, -dev`` is an **optional** argument. The default value of it is GPU. It takes only three values: GPU, CPU, multi-GPU.
+``--device <device>, -dev <device>`` is an **optional** argument. The default value of it is GPU. It takes only three values: GPU, CPU, multi-GPU.
 It specifies the device option.
 
 
@@ -526,16 +526,16 @@ The ``<trained_embedding_directory>`` is the directory created
 by ``marius_train`` containing all trained embeddings.
 The ``<dataset_directory>`` is the directory created by ``marius_preprocess`` to store preprocessed data.
 
-\-\-output_directory
-++++++++++++++++++++
+\-\-output_directory <output_directory>, \-o <output_directory>
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The ``--<output directory>`` is an **optional** argument. It is
+The ``--output_directory <output_directory>, -o <output_directory>`` is an **optional** argument. It is
 the directory where the retrieved graph embeddings will be stored.
 
-\-\-format
-++++++++++
+\-\-format <format>, \-f <format>
++++++++++++++++++++++++++++++++++
 
-The ``--<format>`` is an **optional** argument. It specifies the storing format of the retrieved graph embeddings.
+The ``--format <format>, -f <format>`` is an **optional** argument. It specifies the storing format of the retrieved graph embeddings.
 Currently, the supported formats include CSV, TSV and PyTroch Tensor. 
 
 The index of the embeddings in the output file follows the remmaped IDs of the node or entity.
@@ -562,6 +562,9 @@ marius_predict
 ^^^^^^^^^^^^^^
 
 This command lets users to perform link predictions using trained graph embeddings.
+Users can either make one inference on command line, or pass in all inferences they
+need in a file and perform multiple link prediction in one run.
+
 It can be called with:
 
 ::
@@ -573,7 +576,7 @@ The available options are:
 
 ::
 
-    usage: predict [-h] [--src src] [--dst dst] [--rel rel] [--rel_type rel_type] trained_embeddings_directory dataset_directory k
+    usage: predict [-h] [--src src] [--dst dst] [--rel rel] [--decoder decoder] [--file_input file_input] trained_embeddings_directory dataset_directory k
 
     Perform link prediction
 
@@ -588,28 +591,54 @@ The available options are:
     --src src, -s src     Source node, the original ID of a certain node
     --dst dst, -d dst     Destination node, the original ID of a certain node
     --rel rel, -r rel     Relation, the original ID of a certain relation
-    --rel_type rel_type, -rt rel_type
-                            The direction of a certain relation
+    --decoder decoder, -dc decoder
+                            Specifies the decoder used for training
+    --file_input file_input, -f file_input
+                            File containing all required information for batch inference
 
 The ``<trained_embeddings_directory>`` is the directory ``data/`` created by ``marius_train``.
 The ``<dataset_directory>`` is the directory containing the ``node_mapping.txt`` and ``rel_mapping.txt`` files.
 The ``<k>`` controls the number of predicted node to output.
 
-\-\-src
-+++++++
-``--<src>`` is an **optional** argument. It is the original node ID of source node.
+\-\-src <src>, \-s <src>
+++++++++++++++++++++++++
+``--src <src>, -s <src>`` is an **optional** argument. It is the original node ID of source node.
 
-\-\-rel
-+++++++
-``--<rel>`` is an **optional** argument. It is the original relation ID of the relation.
+\-\-rel <rel>, \-r <rel>
+++++++++++++++++++++++++
+``--rel <rel>, -r <rel>`` is an **optional** argument. It is the original relation ID of the relation.
 
-\-\-dst
-+++++++
-``--<dst>`` is an **optional** argument. It is the original node ID of destination node.
+\-\-dst <dst>, \-d <dst>
+++++++++++++++++++++++++
+``--dst <rel>, -d <rel>`` is an **optional** argument. It is the original node ID of destination node.
 
-\-\-rel_type
-``--<rel_type>`` is an **optional** argument. It only takes two values: ``lhs``, ``rhs``.
-For prediction given source node and relation type, use relation type of ``lhs``, otherwise, use ``rhs``.
+\-\-decoder <decoder>, \-dc <decoder>
++++++++++++++++++++++++++++++++++++++
+``--decoder <decoder>, -dc <decoder>`` is an **optional** argument. It specifies the decoder used
+for training. Input values must be chosen from ``DisMult``, ``TransE``, ``ComplEx``. 
+The default value is ``DisMult``.
+
+\-\-file_input <file_input>, \-f <file_input>
++++++++++++++++++++++++++++++++++++++++++++++
+``--file_input <file_input>, -f <file_input>`` is an **optional** argument. User can put all
+inferences they want to perform in this file and make all inferences in one run. 
+
+Each inference in the file should take one row. On each row, there should be two commas as 
+the delimiters between nodes and relation. Node IDs and relation IDs in the original 
+dataset file should be used. Replace the target of the inference use an empty string.
+If the dataset has multiple relation types,
+each inference needs to contain a node id and a relation type. If the dataset only has one
+relation type, each inference only needs a node id.
+
+The following example is valid as contents of the inference file:
+
+::
+
+    00789448,_verb_group,
+    ,_hyponym,10682169
+    ,_member_of_domain_region,05688486
+    02233096,_member_meronym,
+    01459242,_part_of,
 
 
 Given the source node, relation and other necessary arguments,
@@ -618,8 +647,7 @@ in the following example.
 
 ::
 
-    marius_predict ./data/ ./dataset_directory 5 -s source_node_id -r relation_id --rel_type lhs
-
+    marius_predict ./data/ ./dataset_directory 5 -s source_node_id -r relation_id 
 
 
 
