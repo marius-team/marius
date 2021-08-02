@@ -158,7 +158,7 @@ def join_files(files, regex, num_line_skip, data_cols, delim):
 
 
 def general_parser(files, format, output_dir, delim="", num_partitions=1,
-                   dtype=np.int32, remap_ids=True, dataset_split=(0, 0),
+                   dtype=np.int32, remap_ids=True, dataset_split=(-1, -1),
                    start_col=0, num_line_skip=None):
     assert(len(files) != 0), "Number of data files cannot be 0"
     assert(len(format) == 1), "Format is specified incorrectly"
@@ -208,12 +208,23 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
     num_file_read = 0
 
     if (len(files) > 3):
-        print("Reconstructing data")
+        print("Merging data")
         files, num_line_skip, data_cols = join_files(
                                             files, regex, num_line_skip,
                                             data_cols, delim)
 
-    if (len(files) == 1 and dataset_split != (0, 0)):
+    if (len(files) == 1 and dataset_split != (0, 0) and dataset_split != (-1, -1)):
+        print("Splitting data")
+        files, num_line_skip, data_cols = split_dataset(
+                                            files[0], dataset_split[0],
+                                            dataset_split[1], regex,
+                                            num_line_skip, data_cols, delim)
+
+    if (len(files) > 1 and dataset_split != (-1, -1)):
+        print("Merging data")
+        files, num_line_skip, data_cols = join_files(
+                                            files, regex, num_line_skip,
+                                            data_cols, delim)
         print("Splitting data")
         files, num_line_skip, data_cols = split_dataset(
                                             files[0], dataset_split[0],
@@ -354,19 +365,13 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                     i += chunksize
 
     node_mapping = output_dir + "node_mapping.txt"
-    node_mapping_tens = output_dir + "node_mapping.bin"
-    with open(node_mapping, "w") as f, open(node_mapping_tens, "wb") as g:
-        tens = np.array(list(nodes_dict.values()))
-        g.write(bytes(tens))
-        f.write("\n".join(str(key) for key in nodes_dict.keys()))
+    node_dict_items = np.array(list(nodes_dict.items()))
+    np.savetxt(node_mapping, node_dict_items, fmt='%s', delimiter='\t')
 
     if rel_idx != -1:
         rel_mapping = output_dir + "rel_mapping.txt"
-        rel_mapping_tens = output_dir + "rel_mapping.bin"
-        with open(rel_mapping, "w") as f, open(rel_mapping_tens, "wb") as g:
-            tens = np.array(list(rels_dict.values()))
-            g.write(bytes(tens))
-            f.write("\n".join(str(key) for key in rels_dict.keys()))
+        rels_dict_items = np.array(list(rels_dict.items()))
+        np.savetxt(rel_mapping, rels_dict_items, fmt='%s', delimiter='\t')
 
     output_stats = np.zeros(3, dtype=int)
     output_stats[:len(num_edges_f)] = num_edges_f
@@ -397,7 +402,7 @@ def set_args():
     parser.add_argument('--not_remap_ids', action='store_false',
                         help='If set, will not remap ids')
     parser.add_argument('--dataset_split', '-ds', metavar='dataset_split',
-                        nargs=2, type=float, default=[0, 0],
+                        nargs=2, type=float, default=[-1, -1],
                         help='Split dataset into specified fractions')
     parser.add_argument('--start_col', '-sc', metavar='start_col', type=int,
                         default=0,
