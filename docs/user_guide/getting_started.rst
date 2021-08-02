@@ -233,7 +233,7 @@ Users just need to replace ``CSV`` with name of the format they want in the foll
 
     marius_postprocess ./data/ ./training_data/ --output_directory ./embeddings/ --format CSV
 
-Link prediction on trained embeddings is a supported task by ``marius_predict``. 
+Link prediction on trained embeddings is supported by ``marius_predict``. 
 Given a source node and type of relation, the 
 following command returns the top-ten destinations nodes. 
 Number of predicted destinations can be controlled by changing the number ``10`` in 
@@ -241,10 +241,11 @@ the command.
 
 ::
     
-    marius_predict ./data/ ./training_data/ 10 --src __saxony_NN_1  --rel _member_meronym --rel_type lhs 
+    marius_predict ./data/ ./training_data/ 10 --src __saxony_NN_1  --rel _member_meronym
 
 The left-hand-side relation type is used since the link prediction performed in 
 this case starts from source node to destination node.
+User can also do batch inference by using a file as inference input.
 Checkout the :ref:`User Guide<User_Guide>` for more detailed usage of ``marius_postprocess`` and ``marius_predict``.
 
 
