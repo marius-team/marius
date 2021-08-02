@@ -120,7 +120,7 @@ def print_nodes(nodes, k):
 
 
 def read_batch(input_file):
-    infer_list = np.loadtxt("./temp.txt", dtype=str, delimiter=",")
+    infer_list = np.loadtxt(Path(input_file), dtype=str, delimiter=",")
     return infer_list
 
 def set_args():
