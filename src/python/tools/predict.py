@@ -29,7 +29,7 @@ def dismult_infer(node_emb, rel_emb, all_embs):
 
 def complex_infer(node_emb, rel_emb, all_embs):
     node_emb = torch.tensor(node_emb)
-    rel_emb = torch.tensor(node_emb)
+    rel_emb = torch.tensor(rel_emb)
     all_embs = torch.tensor(all_embs)
 
     if rel_emb is not None:
@@ -55,7 +55,7 @@ def complex_infer(node_emb, rel_emb, all_embs):
 
 def transe_infer(node_emb, rel_emb, all_embs):
     node_emb = torch.tensor(node_emb)
-    rel_emb = torch.tensor(node_emb)
+    rel_emb = torch.tensor(rel_emb)
     all_embs = torch.tensor(all_embs)
 
     if rel_emb is not None:
