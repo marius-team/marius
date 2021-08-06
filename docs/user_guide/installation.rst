@@ -12,7 +12,7 @@ Dependencies
 * Ubuntu 18.04 or macOS 10.15
 * CUDA 10.1 or 10.2 (If using GPU training)
 * CuDNN 7 (If using GPU training)
-* 1.7 >= pytorch
+* pytorch >= 1.7
 * python >=3.6
 * pip >= 21
 * GCC >= 9 (On Linux) or Clang 12.0 (On MacOS)
