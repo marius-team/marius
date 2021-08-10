@@ -179,4 +179,17 @@ Arxiv Version:
       primaryClass={cs.LG}
 }
 ```
-OSDI Version (not yet available):
+OSDI Version:
+```
+@inproceedings {273733,
+                author = {Jason Mohoney and Roger Waleffe and Henry Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
+                title = {Marius: Learning Massive Graph Embeddings on a Single Machine},
+                booktitle = {15th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 21)},
+                year = {2021},
+                isbn = {978-1-939133-22-9},
+                pages = {533--549},
+                url = {https://www.usenix.org/conference/osdi21/presentation/mohoney},
+                publisher = {{USENIX} Association},
+                month = jul,
+}
+```
