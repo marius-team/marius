@@ -1,60 +1,96 @@
 from pathlib import Path
-
 import numpy as np
+import torch
+import argparse
 
 
-def idx_converter(raw_id_file, in_id_file, embedding_file):
-    raw_ids = []
-    with open(raw_id_file) as f:
-        for line in f.readlines():
-            raw_ids.append(line.strip())
+def get_embs(mapping_file, embs_file):
+    try:
+        mapping = np.loadtxt(mapping_file, dtype=str, delimiter='\t')
+        mapping_dict = dict(mapping)
 
-    in_ids = np.fromfile(in_id_file, dtype=int)
-    raw_in_dict = dict(zip(raw_ids, in_ids))
+        num = len(mapping_dict)
+        embs = np.fromfile(embs_file, np.float32).reshape((num, -1))
+    except FileNotFoundError:
+        raise FileNotFoundError("Incorrect file passed in.")
 
-    num = len(raw_ids)
-    embeddings = np.fromfile(embedding_file, np.float32).reshape((num, -1))
-
-    raw_emb_dict = []
-    for rid in raw_ids:
-        iid = raw_in_dict.get(rid)
-        emb = embeddings[iid]
-        raw_emb_dict.append(np.append(rid, emb))
-
-    return raw_emb_dict
+    return embs
 
 
-def convert_to_tsv(output_dir=None):
-    temp = output_dir if output_dir != None else None
-    output_dir = "./output_dir" if output_dir == None else output_dir
+def output_embeddings(data_dir, dataset_dir, output_dir, fmt):
+    node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
+    rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
+    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
 
-    nodes_raw_id_file = Path(output_dir) / Path("node_mapping.txt")
-    nodes_in_id_file = Path(output_dir) / Path("node_mapping.bin")
-    nodes_embedding_file = Path("./training_data/marius/embeddings/embeddings.bin")
-    node_embs = np.array(idx_converter(nodes_raw_id_file, nodes_in_id_file, nodes_embedding_file))
+    node_embs = get_embs(node_mapping_file, node_embs_file)
+    lhs_embs = get_embs(rel_mapping_file, lhs_embs_file)
+    rhs_embs = get_embs(rel_mapping_file, rhs_embs_file)
 
-    rels_raw_id_file = Path(output_dir) / Path("rel_mapping.txt")
-    rels_in_id_file = Path(output_dir) / Path("rel_mapping.bin")
-    lhs_rels_embedding_file = Path("./training_data/marius/relations/lhs_relations.bin")
-    lhs_rel_embs = np.array(idx_converter(rels_raw_id_file, rels_in_id_file, lhs_rels_embedding_file))
-
-    rhs_rels_embedding_file = Path("./training_data/marius/relations/rhs_relations.bin")
-    rhs_rel_embs = np.array(idx_converter(rels_raw_id_file, rels_in_id_file, rhs_rels_embedding_file))
-
-    if temp != None:
-        np.savetxt((Path("./training_data/node_embedding.tsv")), node_embs, fmt="%f", delimiter='\t', newline='\n')
-        np.savetxt((Path("./training_data/edge_lhs_embedding.tsv")), lhs_rel_embs, fmt="%f", delimiter='\t',
-                   newline='\n')
-        np.savetxt((Path("./training_data/edge_rhs_embedding.tsv")), rhs_rel_embs, fmt="%f", delimiter='\t',
-                   newline='\n')
-
-        return node_embs, lhs_rel_embs, rhs_rel_embs
+    if fmt == "CSV":
+        np.savetxt(Path(output_dir) / Path("node_embeddings.csv"), node_embs, delimiter=',')
+        np.savetxt(Path(output_dir) / Path("src_relations_embeddings.csv"), lhs_embs, delimiter=',')
+        np.savetxt(Path(output_dir) / Path("dst_relations_embeddings.csv"), rhs_embs, delimiter=',')
+    elif fmt == "TSV":
+        np.savetxt(Path(output_dir) / Path("node_embeddings.tsv"), node_embs, delimiter='\t')
+        np.savetxt(Path(output_dir) / Path("src_relations_embeddings.tsv"), lhs_embs, delimiter='\t')
+        np.savetxt(Path(output_dir) / Path("dst_relations_embeddings.tsv"), rhs_embs, delimiter='\t')
+    elif fmt == "TXT":
+        np.savetxt(Path(output_dir) / Path("node_embeddings.txt"), node_embs, delimiter='\t')
+        np.savetxt(Path(output_dir) / Path("src_relations_embeddings.txt"), lhs_embs, delimiter='\t')
+        np.savetxt(Path(output_dir) / Path("dst_relations_embeddings.txt"), rhs_embs, delimiter='\t')
     else:
-        return node_embs, lhs_rel_embs, rhs_rel_embs
+        torch.save(torch.tensor(node_embs), Path(output_dir) / Path('node_embeddings.pt'))
+        torch.save(torch.tensor(lhs_embs), Path(output_dir) / Path('src_relations_embeddings.pt'))
+        torch.save(torch.tensor(rhs_embs), Path(output_dir) / Path('dst_relations_embeddings.pt'))
+
+    return node_embs, lhs_embs, rhs_embs
+
+
+def set_args():
+    parser = argparse.ArgumentParser(
+        description='Retrieve trained embeddings',
+        prog='postprocess'
+    )
+    parser.add_argument('trained_embeddings_directory',
+                        metavar='trained_embeddings_directory',
+                        type=str,
+                        help='Directory containing trained embeddings')
+    parser.add_argument('dataset_directory',
+                        metavar='dataset_directory',
+                        type=str,
+                        help='Directory containing the dataset for training')
+    parser.add_argument('--output_directory', '-o',
+                        metavar='output_directory',
+                        type=str,
+                        help='Directory to put retrieved embeddings. ' + 
+                             'If is not set, will output retrieved embeddings' +
+                             ' to dataset directory.')
+    parser.add_argument('--format', '-f',
+                        metavar='format',
+                        choices=["CSV", "TSV", "TXT", "Tensor"],
+                        default="CSV",
+                        help="Data format to store retrieved embeddings")
+
+    return parser
 
 
 def main():
-    n_emb, lhs_emb, rhs_emb = convert_to_tsv()
+    parser = set_args()
+    args = parser.parse_args()
+    data_dir = args.trained_embeddings_directory
+    dataset_dir = args.dataset_directory
+    output_dir = args.output_directory
+    fmt = args.format
+
+    if output_dir is None:
+        output_dir = dataset_dir
+    else:
+        if not Path(output_dir).exists():
+            Path(output_dir).mkdir()
+
+    output_embeddings(data_dir, dataset_dir, output_dir, fmt)
 
 
 if __name__ == '__main__':

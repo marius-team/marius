@@ -14,7 +14,7 @@ Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.o
 * Ubuntu 18.04 or MacOS 10.15 
 * CUDA 10.1 or 10.2 (If using GPU training)
 * CuDNN 7 (If using GPU training)
-* 1.7 >= pytorch 
+* pytorch >= 1.7
 * python >= 3.6
 * pip >= 21
 * GCC >= 9 (On Linux) or Clang 12.0 (On MacOS)
@@ -24,20 +24,11 @@ Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.o
 
 ## Installation from source with Pip ##
 
-1. Install latest version of PyTorch for your CUDA version:
-
-    Linux:
-    - CUDA 10.1: `python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html`
-    - CUDA 10.2: `python3 -m pip install torch==1.7.1`
-    - CPU Only: `python3 -m pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html`
-
-    MacOS:
-    - CPU Only: `python3 -m pip install torch==1.7.1`
+1. Install latest version of PyTorch for your CUDA version: https://pytorch.org/get-started/locally/
 
 2. Clone the repository `git clone https://github.com/marius-team/marius.git`
 
 3. Build and install Marius `cd marius; python3 -m pip install .`
-
 
 #### Full script (without torch install) ####
 
@@ -45,30 +36,6 @@ Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.o
 git clone https://github.com/marius-team/marius.git
 cd marius
 python3 -m pip install .
-```
-
-## Installation from source with CMake ##
-
-1. Clone the repository `git clone https://github.com/marius-team/marius.git`
-
-2. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
-
-3. Create build directory `mkdir build; cd build`
-
-4. Run cmake in the build directory `cmake ../` (CPU-only build) or `cmake ../ -DUSE_CUDA=1` (GPU build)
-
-5. Make the marius executable. `make marius_train -j`
-
-#### Full script (without torch install) ####
-
-```
-git clone https://github.com/marius-team/marius.git
-cd marius
-python3 -m pip install -r requirements.txt
-mkdir build
-cd build
-cmake ../ -DUSE_CUDA=1
-make -j
 ```
 
 ## Training a graph ##
@@ -79,12 +46,11 @@ Training embeddings on a graph requires three steps.
 
    See `docs/configuration.rst` for full details on the configuration options.
 
-2. Preprocess the dataset `marius_preprocess fb15k output_dir/`
+2. Preprocess the dataset `marius_preprocess output_dir/ --dataset fb15k`
 
-   The first argument of marius/tools/preprocess.py defines the dataset we wish to download and preprocess, in this case fb15k. 
-   The second argument tells the preprocessor where to put the preprocessed dataset.
+   This command will download the freebase15k dataset and preprocess it for training, storing files in `output_dir/`. If a different output directory is used, the configuration file's path options will need to be updated accordingly.
 
-3. Run the training executable with the config file. `marius_train examples/training/configs/fb15k_gpu.ini`
+3. Run the training executable with the config file `marius_train examples/training/configs/fb15k_gpu.ini`. 
 
 The output of the first epoch should be similar to the following.
 ```[info] [03/18/21 01:33:16.173] Start preprocessing

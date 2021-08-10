@@ -282,10 +282,15 @@ class TestGeneralParser(unittest.TestCase):
                         str(Path(input_dir) / Path(test_file))],
                        ["srd"], [output_dir], remap_ids=False)
 
-        internal_node_ids = np.fromfile(str(Path(output_dir)) /
-                                        Path("node_mapping.bin"), dtype=int)
-        internal_rel_ids = np.fromfile(str(Path(output_dir)) /
-                                       Path("rel_mapping.bin"), dtype=int)
+        # internal_node_ids = np.fromfile(str(Path(output_dir)) /
+        #                                 Path("node_mapping.bin"), dtype=int)
+        # internal_rel_ids = np.fromfile(str(Path(output_dir)) /
+        #                                Path("rel_mapping.bin"), dtype=int)
+        internal_node_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("node_mapping.txt"))[:,1]
+        internal_rel_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("rel_mapping.txt"))[:,1]
+
 
         for i in range(len(internal_node_ids) - 1):
             self.assertEqual((internal_node_ids[i+1] -
@@ -304,28 +309,26 @@ class TestGeneralParser(unittest.TestCase):
                         str(Path(input_dir) / Path(test_file))],
                        ["srd"], [output_dir], remap_ids=True)
 
-        internal_node_ids = np.fromfile(str(Path(output_dir)) /
-                                        Path("node_mapping.bin"), dtype=int)
-        internal_rel_ids = np.fromfile(str(Path(output_dir)) /
-                                       Path("rel_mapping.bin"), dtype=int)
+        # internal_node_ids = np.fromfile(str(Path(output_dir)) /
+        #                                 Path("node_mapping.bin"), dtype=int)
+        # internal_rel_ids = np.fromfile(str(Path(output_dir)) /
+        #                                Path("rel_mapping.bin"), dtype=int)
+        internal_node_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("node_mapping.txt"))[:,1]
+        internal_rel_ids = np.loadtxt(str(Path(output_dir)) /
+                                       Path("rel_mapping.txt"))[:,1]
 
-        delta_list = []
-        for i in range(len(internal_node_ids) - 1):
-            delta_list.append(internal_node_ids[i+1] - internal_node_ids[i])
-        delta_list_1 = [i - 1 for i in delta_list]
-        delta_list_2 = [i + 1 for i in delta_list]
-        self.assertNotEqual(sum(delta_list_1), 0)
-        self.assertNotEqual(sum(delta_list_2), 0)
-        self.assertNotEqual(sum(delta_list), 0)
+        num_same_id = 0
+        for i in range(len(internal_node_ids)):
+            if i == internal_node_ids[i]:
+                num_same_id = num_same_id + 1
+        self.assertNotEqual(num_same_id, len(internal_node_ids))
 
-        delta_list = []
-        for i in range(len(internal_rel_ids) - 1):
-            delta_list.append(internal_rel_ids[i+1] - internal_rel_ids[i])
-        delta_list_1 = [i - 1 for i in delta_list]
-        delta_list_2 = [i + 1 for i in delta_list]
-        self.assertNotEqual(sum(delta_list_1), 0)
-        self.assertNotEqual(sum(delta_list_2), 0)
-        self.assertNotEqual(sum(delta_list), 0)
+        num_same_id = 0
+        for i in range(len(internal_rel_ids)):
+            if i == internal_rel_ids[i]:
+                num_same_id = num_same_id + 1
+        self.assertNotEqual(num_same_id, len(internal_rel_ids))
 
     def test_num_partitions(self):
         """
