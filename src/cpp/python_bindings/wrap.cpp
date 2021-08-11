@@ -12,6 +12,7 @@ void init_evaluator(py::module &);
 void init_model(py::module &);
 void init_marius(py::module &);
 void init_io(py::module &);
+void init_loss(py::module &);
 void init_trainer(py::module &);
 
 PYBIND11_MODULE(_pymarius, m) {
@@ -28,5 +29,6 @@ PYBIND11_MODULE(_pymarius, m) {
 	init_model(m);
 	init_marius(m);
 	init_io(m);
+	init_loss(m);
 	init_trainer(m);
 }

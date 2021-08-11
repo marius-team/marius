@@ -57,13 +57,17 @@ void init_config(py::module &m) {
         .def_readwrite("regularization_coef", &TrainingOptions::regularization_coef)
         .def_readwrite("regularization_norm", &TrainingOptions::regularization_norm)
         .def_readwrite("optimizer_type", &TrainingOptions::optimizer_type)
-        .def_readwrite("loss_function_type", &TrainingOptions::loss_function_type)
-        .def_readwrite("margin", &TrainingOptions::margin)
         .def_readwrite("average_gradients", &TrainingOptions::average_gradients)
         .def_readwrite("synchronous", &TrainingOptions::synchronous)
         .def_readwrite("num_epochs", &TrainingOptions::num_epochs)
         .def_readwrite("checkpoint_interval", &TrainingOptions::checkpoint_interval)
         .def_readwrite("shuffle_interval", &TrainingOptions::shuffle_interval);
+
+    // LossOptions class
+    py::class_<LossOptions>(m, "LossOptions")
+        .def_readwrite("loss_function_type", &LossOptions::loss_function_type)
+        .def_readwrite("margin", &LossOptions::margin)
+        .def_readwrite("reduction_type", &LossOptions::reduction_type);
 
     // TrainingPipelineOptions class
     py::class_<TrainingPipelineOptions>(m, "TrainingPipelineOptions")
