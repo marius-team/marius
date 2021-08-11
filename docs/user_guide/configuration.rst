@@ -1,4 +1,4 @@
-.. _configuration
+.. _configuration:
 
 *************
 Configuration
@@ -142,14 +142,29 @@ learning_rate                float   No        .1                               
 regularization_coef          float   No        2e-6                                                     Coefficient to scale the regularization loss.
 regularization_norm          int     No        2                                                        Norm of the regularization.
 optimizer                    string  No        Adagrad      [Adagrad]                                   Currently Adagrad is the only supported optimizer.
-loss                         string  No        SoftMax      [SoftMax, Ranking]                          Sets the loss function. The Ranking loss can be tuned with the margin parameter.
-margin                       float   No        0                                                        Sets the margin for the Ranking loss function
 average_gradients            bool    No        false                                                    If true, the gradients will be averaged when accumulating gradients for a batch. If false, the gradients will be summed.
 synchronous                  bool    No        false                                                    If true, the training will be performed synchronously without use of the training pipeline. If false, the training pipeline will be used. If embedding data is stored in HostMemory or the PartitionBuffer, synchronous training will be slow due to data movement wait times.
 num_epochs                   int     No        10                                                       The number of epochs to train to.
 checkpoint_interval          int     No        9999                                                     Determines how many epochs should complete before checkpointing the embedding parameters. By default this is set to 9999, a large number which is used to effectively disable checkpointing. Checkpoints are stored in ``<base_directory>/<experiment_name>/embeddings/embeddings_<epoch_id>.bin`` and ``<base_directory>/<experiment_name>/relations/embeddings_<epoch_id>.bin``
 shuffle_interval             int     No        1                                                        Determines how many epochs should complete before the edges are shuffled. If set to 1, the edges will be shuffled after every epoch.
 ===========================  ======  ========  ==========  ===========================================  ===================
+
+
+.. _loss_option:
+
+[loss]
+^^^^^^
+
+The loss section allows for setting loss function options. 
+
+===========================  ======  ========  ==========  ============================================================================================================================================================================================================  ===================
+   Name                      Type    Required  Default     Valid Values                                                                                                                                                                                                  Description
+---------------------------  ------  --------  ----------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  -------------------
+loss                         string  No        SoftMax      [:ref:`SoftMax<loss_functions>`, :ref:`Ranking<loss_functions>`, :ref:`BCEAfterSigmoid<loss_functions>`, :ref:`BCEWithLogits<loss_functions>`, :ref:`MSE<loss_functions>`, :ref:`SoftPlus<loss_functions>`]  Sets the loss function. The Ranking loss can be tuned with the margin parameter.
+margin                       float   No        0                                                                                                                                                                                                                         Sets the margin for the Ranking loss function
+reduction                    string  No        Mean         [Mean, Sum]                                                                                                                                                                                                  Sets the reduction to apply to the loss
+===========================  ======  ========  ==========  ============================================================================================================================================================================================================  ===================                                                      
+
 
 
 [training_pipeline]

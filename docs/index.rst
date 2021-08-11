@@ -5,23 +5,38 @@ Welcome to Marius's documentation!
 
 .. toctree::
     :maxdepth: 1
-    :caption: Contents
+    :caption: User Guide
 
-    introduction
-    quickstart
-    build
-    system_overview
-    configuration
-    io_format
-    training
-    models
-    loss_functions
-    evaluation
-    storage_backends
+    user_guide/installation
+    user_guide/getting_started
+    user_guide/user_guide_intro
+    user_guide/command_line_interface
+    user_guide/preprocess
+    user_guide/configuration
+    user_guide/training
+    user_guide/evaluation
+    user_guide/postprocess
+    user_guide/prediction
 
 .. toctree::
     :glob:
     :maxdepth: 1
-    :caption: API
+    :caption: Developer Guide
 
-    api/*
+    developer_guide/*
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+    :caption: Examples
+
+    examples/*
+
+.. toctree::
+    :glob:
+    :hidden:
+    :maxdepth: 1
+    :caption: CPP API
+
+    cpp_api/*
+

@@ -57,5 +57,8 @@ Datatypes
 .. doxygenenum:: LossFunctionType
     :project: Marius
 
+.. doxygenenum:: ReductionType
+    :project: Marius
+
 .. doxygenenum:: RelationOperatorType
     :project: Marius

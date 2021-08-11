@@ -12,24 +12,24 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
     Tests for functions parsing command line arguments
     """
     cmd_args = [
-            ["wn18", "./output_dir", "--generate_config",
+            ["./output_dir", "--dataset", "wn18", "--generate_config",
              "--num_partitions", "5"],
-            ["wn18", "./output_dir", "-gc", "GPU"],
-            ["wn18", "./output_dir", "-gc", "CPU",
+            ["./output_dir", "--dataset", "wn18", "-gc", "GPU"],
+            ["./output_dir", "--dataset", "wn18", "-gc", "CPU",
              "--model.embedding_size=400", "--training.batch_size=51200",
              "--training.num_epochs=23"],
-            ["wn18", "./output_dir", "-gc", "GPU",
+            ["./output_dir", "--dataset", "wn18", "-gc", "GPU",
              "--general.embedding_size=400"],
-            ["wn18", "./output_dir", "--general.embedding_size=200"],
-            ["wn18", "./output_dir"],
-            ["wn18"],
-            ["wn18", "./output_dir", "CPU"],
-            ["wn18", "./output_dir", "--gc", "--model.decoder"],
+            ["./output_dir", "--dataset", "wn18", "--general.embedding_size=200"],
+            ["--dataset", "wn18", "./output_dir"],
+            ["--dataset", "wn18"],
+            ["./output_dir", "--dataset", "wn18", "CPU"],
+            ["./output_dir", "--dataset", "wn18", "--gc", "--model.decoder"],
             [],
-            ["wn18", "./output_dir", "multi_cpu"],
-            ["wn18", "./output_dir", "--gc",
+            ["./output_dir", "--dataset", "wn18", "multi_cpu"],
+            ["./output_dir", "--dataset", "wn18", "--gc",
              "--storage.edge_bucket_ordering=EliminationCus"],
-            ["marius_preprocess", "wn18", "./output_dir", "-gc"]
+            ["marius_preprocess", "./output_dir", "--dataset", "wn18", "-gc"]
         ]
 
     @classmethod
@@ -162,3 +162,16 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         subprocess.run(self.cmd_args[12])
         self.assertTrue(Path("./output_dir/wn18_gpu.ini").exists())
+
+    def test_custom_dataset(self):
+        """
+        Check if custom dataset is processed correctly
+        """
+        subprocess.run(["python3", "./src/python/tools/preprocess.py",
+                        "./output_dir",
+                        "--files",
+                        "./test/test_data/train_edges.txt",
+                        "./test/test_data/valid_edges.txt",
+                        "./test/test_data/test_edges.txt",
+                        "-gc", "CPU"])
+        self.assertTrue(Path("./output_dir/custom_cpu.ini").exists())

@@ -118,13 +118,17 @@ struct TrainingOptions {
     float regularization_coef;
     int regularization_norm;
     OptimizerType optimizer_type;
-    LossFunctionType loss_function_type;
-    float margin;
     bool average_gradients;
     bool synchronous;
     int num_epochs;
     int checkpoint_interval;
     int shuffle_interval;
+};
+
+struct LossOptions {
+    LossFunctionType loss_function_type;
+    float margin;
+    ReductionType reduction_type;
 };
 
 struct TrainingPipelineOptions {
@@ -188,6 +192,7 @@ struct MariusOptions {
     ModelOptions model{};
     StorageOptions storage{};
     TrainingOptions training{};
+    LossOptions loss{};
     TrainingPipelineOptions training_pipeline{};
     EvaluationOptions evaluation{};
     EvaluationPipelineOptions evaluation_pipeline{};

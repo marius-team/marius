@@ -11,7 +11,10 @@ DATASET_STATS = os.path.join(HERE, "dataset_stats", "dataset_stats.tsv")
 
 def output_config(config_dict, output_dir):
     device = config_dict.get("device")
-    ds_name = config_dict.get("dataset")
+    if config_dict.get("dataset") is None:
+        ds_name = "custom"
+    else:
+        ds_name = config_dict.get("dataset")
 
     file = Path(output_dir) / Path(str(ds_name) + "_" +
                                    device.lower() + ".ini")
@@ -22,7 +25,8 @@ def output_config(config_dict, output_dir):
     with open(file, "w+") as f:
         f.write("[general]\n")
         f.write("device=" + config_dict.get("general.device") + "\n")
-        f.write("gpu_ids=" + config_dict.get("general.gpu_ids") + "\n")
+        if config_dict.get("general.gpu_ids") is not None:
+            f.write("gpu_ids=" + config_dict.get("general.gpu_ids") + "\n")
         if config_dict.get("general.random_seed") is not None:
             f.write("random_seed=" + config_dict.get("general.random_seed")
                     + "\n")
