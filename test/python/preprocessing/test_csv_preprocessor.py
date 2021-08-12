@@ -56,7 +56,7 @@ class TestGeneralParser(unittest.TestCase):
             [str(Path(input_dir) / Path(train_file)),
              str(Path(input_dir) / Path(valid_file)),
              str(Path(input_dir) / Path(test_file))],
-            ["srd"], [output_dir], num_partitions=1)
+            ["srd"], output_dir, num_partitions=1)
 
         assert (stats[2] == 1000)  # num_train
         assert (stats[3] == 100)  # num_valid
@@ -77,7 +77,7 @@ class TestGeneralParser(unittest.TestCase):
                      str(Path(input_dir) / Path(valid_file)),
                      str(Path(input_dir) / Path(train_file)),
                      str(Path(input_dir) / Path(train_file))],
-                     ["srd"], [output_dir])
+                     ["srd"], output_dir)
 
         self.assertTrue(stats[0] == 100)
         self.assertTrue(stats[1] == 10)
@@ -90,7 +90,7 @@ class TestGeneralParser(unittest.TestCase):
         with self.assertRaises(AssertionError):
             stats = general_parser(
                     [],
-                    ["srd"], [output_dir], dataset_split=(0.1, 0.1))
+                    ["srd"], output_dir, dataset_split=(0.1, 0.1))
 
     def test_format_invalid_format(self):
         """
@@ -103,35 +103,35 @@ class TestGeneralParser(unittest.TestCase):
                     [str(Path(input_dir) / Path(train_file)),
                      str(Path(input_dir) / Path(valid_file)),
                      str(Path(input_dir) / Path(test_file))],
-                    ["srdx"], [output_dir], dataset_split=(0.1, 0.1))
+                    ["srdx"], output_dir, dataset_split=(0.1, 0.1))
 
         with self.assertRaises(AssertionError):
             stats = general_parser(
                     [str(Path(input_dir) / Path(train_file)),
                      str(Path(input_dir) / Path(valid_file)),
                      str(Path(input_dir) / Path(test_file))],
-                    ["sr"], [output_dir], dataset_split=(0.1, 0.1))
+                    ["sr"], output_dir, dataset_split=(0.1, 0.1))
 
         with self.assertRaises(AssertionError):
             stats = general_parser(
                     [str(Path(input_dir) / Path(train_file)),
                      str(Path(input_dir) / Path(valid_file)),
                      str(Path(input_dir) / Path(test_file))],
-                    ["srx"], [output_dir], dataset_split=(0.1, 0.1))
+                    ["srx"], output_dir, dataset_split=(0.1, 0.1))
 
         with self.assertRaises(AssertionError):
             stats = general_parser(
                     [str(Path(input_dir) / Path(train_file)),
                      str(Path(input_dir) / Path(valid_file)),
                      str(Path(input_dir) / Path(test_file))],
-                    ["x"], [output_dir], dataset_split=(0.1, 0.1))
+                    ["x"], output_dir, dataset_split=(0.1, 0.1))
 
         with self.assertRaises(AssertionError):
             stats = general_parser(
                     [str(Path(input_dir) / Path(train_file)),
                      str(Path(input_dir) / Path(valid_file)),
                      str(Path(input_dir) / Path(test_file))],
-                    ["s"], [output_dir], dataset_split=(0.1, 0.1))
+                    ["s"], output_dir, dataset_split=(0.1, 0.1))
 
     def test_delim_basic(self):
         """
@@ -205,7 +205,7 @@ class TestGeneralParser(unittest.TestCase):
             general_parser([str(Path(input_dir) / Path(train_file)),
                             str(Path(input_dir) / Path(valid_file)),
                             str(Path(input_dir) / Path(test_file))],
-                           ["srd"], [output_dir], num_line_skip=1)
+                           ["srd"], output_dir, num_line_skip=1)
 
     def test_start_col_exception(self):
         """
@@ -221,7 +221,7 @@ class TestGeneralParser(unittest.TestCase):
             general_parser([str(Path(input_dir) / Path(train_file)),
                             str(Path(input_dir) / Path(valid_file)),
                             str(Path(input_dir) / Path(test_file))],
-                           ["srd"], [output_dir], start_col=2)
+                           ["srd"], output_dir, start_col=2)
 
     def test_dataset_split_single_file(self):
         """
@@ -233,7 +233,7 @@ class TestGeneralParser(unittest.TestCase):
         """
         stats = general_parser(
                     [str(Path(input_dir) / Path(train_file))],
-                    ["srd"], [output_dir], dataset_split=(0.1, 0.1))
+                    ["srd"], output_dir, dataset_split=(0.1, 0.1))
 
         self.assertTrue(stats[0] == 100)
         self.assertTrue(stats[1] == 10)
@@ -256,7 +256,7 @@ class TestGeneralParser(unittest.TestCase):
                      str(Path(input_dir) / Path(valid_file)),
                      str(Path(input_dir) / Path(train_file)),
                      str(Path(input_dir) / Path(train_file))],
-                    ["srd"], [output_dir], dataset_split=(0.1, 0.1)) 
+                    ["srd"], output_dir, dataset_split=(0.1, 0.1))
 
         self.assertTrue(stats[0] == 100)
         self.assertTrue(stats[1] == 10)
@@ -271,7 +271,7 @@ class TestGeneralParser(unittest.TestCase):
         with self.assertRaises(AssertionError):
             stats = general_parser(
                     [str(Path(input_dir) / Path(train_file))],
-                    ["srd"], [output_dir], dataset_split=(0.6, 0.7))
+                    ["srd"], output_dir, dataset_split=(0.6, 0.7))
 
     def test_remap_ids_false(self):
         """
@@ -280,7 +280,7 @@ class TestGeneralParser(unittest.TestCase):
         general_parser([str(Path(input_dir) / Path(train_file)),
                         str(Path(input_dir) / Path(valid_file)),
                         str(Path(input_dir) / Path(test_file))],
-                       ["srd"], [output_dir], remap_ids=False)
+                       ["srd"], output_dir, remap_ids=False)
 
         # internal_node_ids = np.fromfile(str(Path(output_dir)) /
         #                                 Path("node_mapping.bin"), dtype=int)
@@ -307,7 +307,7 @@ class TestGeneralParser(unittest.TestCase):
         general_parser([str(Path(input_dir) / Path(train_file)),
                         str(Path(input_dir) / Path(valid_file)),
                         str(Path(input_dir) / Path(test_file))],
-                       ["srd"], [output_dir], remap_ids=True)
+                       ["srd"], output_dir, remap_ids=True)
 
         # internal_node_ids = np.fromfile(str(Path(output_dir)) /
         #                                 Path("node_mapping.bin"), dtype=int)
@@ -338,7 +338,7 @@ class TestGeneralParser(unittest.TestCase):
         general_parser([str(Path(input_dir) / Path(train_file)),
                         str(Path(input_dir) / Path(valid_file)),
                         str(Path(input_dir) / Path(test_file))],
-                       ["srd"], [output_dir], num_partitions=3)
+                       ["srd"], output_dir, num_partitions=3)
 
         with open(str(Path(output_dir) /
                       Path("train_edges_partitions.txt")), 'r') as f:
@@ -354,13 +354,13 @@ class TestGeneralParser(unittest.TestCase):
             general_parser([str(Path(input_dir) / Path(train_file)),
                             str(Path(input_dir) / Path(valid_file)),
                             str(Path(input_dir) / Path(test_file))],
-                           ["srd"], [output_dir], num_partitions=-1)
+                           ["srd"], output_dir, num_partitions=-1)
 
         with self.assertRaises(AssertionError):
             general_parser([str(Path(input_dir) / Path(train_file)),
                             str(Path(input_dir) / Path(valid_file)),
                             str(Path(input_dir) / Path(test_file))],
-                           ["srd"], [output_dir], num_partitions=0)
+                           ["srd"], output_dir, num_partitions=0)
 
     def test_dtype_int32(self):
         """
@@ -369,7 +369,7 @@ class TestGeneralParser(unittest.TestCase):
         stats = general_parser([str(Path(input_dir) / Path(train_file)),
                                 str(Path(input_dir) / Path(valid_file)),
                                 str(Path(input_dir) / Path(test_file))],
-                               ["srd"], [output_dir], dtype=np.int32)
+                               ["srd"], output_dir, dtype=np.int32)
 
         self.assertEqual((Path(output_dir) /
                           Path("train_edges.pt")).stat().st_size, stats[2]*3*4)
@@ -385,7 +385,7 @@ class TestGeneralParser(unittest.TestCase):
         stats = general_parser([str(Path(input_dir) / Path(train_file)),
                                 str(Path(input_dir) / Path(valid_file)),
                                 str(Path(input_dir) / Path(test_file))],
-                               ["srd"], [output_dir], dtype=np.int64)
+                               ["srd"], output_dir, dtype=np.int64)
 
         self.assertEqual((Path(output_dir) /
                           Path("train_edges.pt")).stat().st_size, stats[2]*3*8)
