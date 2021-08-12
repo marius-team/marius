@@ -28,7 +28,7 @@ def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
     extract_file(download_path)
     return general_parser([str(Path(output_dir) /
                           Path("soc-LiveJournal1.txt"))], ["sd"],
-                          [output_dir], num_partitions=num_partitions,
+                          output_dir, num_partitions=num_partitions,
                           dataset_split=split)
 
 
@@ -45,7 +45,7 @@ def fb15k(output_dir, num_partitions=1):
              Path("freebase_mtr100_mte100-train.txt")),
              str(Path(output_dir) / Path("freebase_mtr100_mte100-valid.txt")),
              str(Path(output_dir) / Path("freebase_mtr100_mte100-test.txt"))],
-            ["srd"], [output_dir], num_partitions=num_partitions)
+            ["srd"], output_dir, num_partitions=num_partitions)
 
 
 def twitter(output_dir, num_partitions=1, split=(.05, .05)):
@@ -55,7 +55,7 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
 
     return general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))],
                           ["srd"],
-                          [output_dir], num_partitions=num_partitions,
+                          output_dir, num_partitions=num_partitions,
                           dataset_split=split, num_line_skip=1)
 
 
@@ -72,7 +72,7 @@ def freebase86m(output_dir, num_partitions=1):
          str(Path(output_dir) / Path("valid.txt")),
          str(Path(output_dir) / Path("test.txt"))],
         ["sdr"],
-        [output_dir], num_partitions=num_partitions)
+        output_dir, num_partitions=num_partitions)
 
 
 def wn18(output_dir, num_partitions=1):
@@ -87,7 +87,7 @@ def wn18(output_dir, num_partitions=1):
             [str(Path(output_dir) / Path("wordnet-mlj12-train.txt")),
              str(Path(output_dir) / Path("wordnet-mlj12-valid.txt")),
              str(Path(output_dir) / Path("wordnet-mlj12-test.txt"))], ["srd"],
-            [output_dir], num_partitions=num_partitions)
+            output_dir, num_partitions=num_partitions)
 
 
 def fb15k_237(output_dir, num_partitions=1):
@@ -102,7 +102,7 @@ def fb15k_237(output_dir, num_partitions=1):
         [str(Path(output_dir) / Path("train.txt")),
          str(Path(output_dir) / Path("valid.txt")),
          str(Path(output_dir) / Path("test.txt"))],
-        ["srd"], [output_dir], num_partitions=num_partitions)
+        ["srd"], output_dir, num_partitions=num_partitions)
 
 
 def wn18rr(output_dir, num_partitions=1):
@@ -117,7 +117,7 @@ def wn18rr(output_dir, num_partitions=1):
         [str(Path(output_dir) / Path("train.txt")),
          str(Path(output_dir) / Path("valid.txt")),
          str(Path(output_dir) / Path("test.txt"))],
-        ["srd"], [output_dir], num_partitions=num_partitions)
+        ["srd"], output_dir, num_partitions=num_partitions)
 
 
 def codex_s(output_dir, num_partitions=1):
@@ -132,7 +132,7 @@ def codex_s(output_dir, num_partitions=1):
     return general_parser([str(Path(output_dir) / Path("train.txt")),
                            str(Path(output_dir) / Path("valid.txt")),
                            str(Path(output_dir) / Path("test.txt"))],
-                          ["srd"], [output_dir],
+                          ["srd"], output_dir,
                           num_partitions=num_partitions)
 
 
@@ -147,7 +147,7 @@ def codex_m(output_dir, num_partitions=1):
     return general_parser([str(Path(output_dir) / Path("train.txt")),
                            str(Path(output_dir) / Path("valid.txt")),
                            str(Path(output_dir) / Path("test.txt"))],
-                          ["srd"], [output_dir], num_partitions=num_partitions)
+                          ["srd"], output_dir, num_partitions=num_partitions)
 
 
 def codex_l(output_dir, num_partitions=1):
@@ -161,7 +161,7 @@ def codex_l(output_dir, num_partitions=1):
     return general_parser([str(Path(output_dir) / Path("train.txt")),
                            str(Path(output_dir) / Path("valid.txt")),
                            str(Path(output_dir) / Path("test.txt"))],
-                          ["srd"], [output_dir], num_partitions=num_partitions)
+                          ["srd"], output_dir, num_partitions=num_partitions)
 
 
 def drkg(output_dir, num_partitions=1, split=(.05, .05)):
@@ -170,7 +170,7 @@ def drkg(output_dir, num_partitions=1, split=(.05, .05)):
     extract_file(download_path)
 
     return general_parser([str(Path(output_dir) /
-                          Path("drkg.tsv"))], ["srd"], [output_dir],
+                          Path("drkg.tsv"))], ["srd"], output_dir,
                           num_partitions=num_partitions, dataset_split=split)
 
 
@@ -181,7 +181,7 @@ def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
 
     return general_parser([str(Path(output_dir) /
                            Path("hetionet-v1.0-edges.sif"))], ["srd"],
-                          [output_dir], num_partitions=num_partitions,
+                          output_dir, num_partitions=num_partitions,
                           dataset_split=split)
 
 
@@ -210,7 +210,7 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
                delimiter="\t", newline="\n")
 
     return general_parser([str(Path(output_dir) / Path("sample_edges.txt"))],
-                          ["srd"], [output_dir], dataset_split=split)
+                          ["srd"], output_dir, dataset_split=split)
 
 
 def openbiolink_hq(output_dir, num_partitions=1):
@@ -225,7 +225,7 @@ def openbiolink_hq(output_dir, num_partitions=1):
          Path("HQ_DIR/train_test_data/val_sample.csv")),
          str(Path(output_dir) /
          Path("HQ_DIR/train_test_data/test_sample.csv"))],
-        ["srd"], [output_dir], num_partitions=num_partitions, num_line_skip=0)
+        ["srd"], output_dir, num_partitions=num_partitions, num_line_skip=0)
 
 
 def openbiolink_lq(output_dir, num_partitions=1):
@@ -240,7 +240,7 @@ def openbiolink_lq(output_dir, num_partitions=1):
          Path("ALL_DIR/train_test_data/val_sample.csv")),
          str(Path(output_dir) /
          Path("ALL_DIR/train_test_data/test_sample.csv"))],
-        ["srd"], [output_dir], num_partitions=num_partitions, num_line_skip=0)
+        ["srd"], output_dir, num_partitions=num_partitions, num_line_skip=0)
 
 
 def ogbl_biokg(output_dir, num_partitions=1):
@@ -352,7 +352,7 @@ def parse_ogbn(files, output_dir, num_partitions=1):
                     [str(Path(output_dir) / Path("train.txt")),
                      str(Path(output_dir) / Path("valid.txt")),
                      str(Path(output_dir) / Path("test.txt"))],
-                    ["sd"], [output_dir],
+                    ["sd"], output_dir,
                     num_partitions=num_partitions)
     return stats
 
@@ -389,13 +389,13 @@ def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
             [str(Path(output_dir) / Path("train.txt")),
              str(Path(output_dir) / Path("valid.txt")),
              str(Path(output_dir) / Path("test.txt"))], ["srd"],
-            [output_dir], num_partitions=num_partitions)
+            output_dir, num_partitions=num_partitions)
     else:
         stats = general_parser(
             [str(Path(output_dir) / Path("train.txt")),
              str(Path(output_dir) / Path("valid.txt")),
              str(Path(output_dir) / Path("test.txt"))], ["sd"],
-            [output_dir], num_partitions=num_partitions)
+            output_dir, num_partitions=num_partitions)
     return stats
 
 
