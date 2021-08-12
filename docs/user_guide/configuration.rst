@@ -160,9 +160,9 @@ The loss section allows for setting loss function options.
 ===========================  ======  ========  ==========  ============================================================================================================================================================================================================  ===================
    Name                      Type    Required  Default     Valid Values                                                                                                                                                                                                  Description
 ---------------------------  ------  --------  ----------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  -------------------
-loss                         string  No        SoftMax      [:ref:`SoftMax<loss_functions>`, :ref:`Ranking<loss_functions>`, :ref:`BCEAfterSigmoid<loss_functions>`, :ref:`BCEWithLogits<loss_functions>`, :ref:`MSE<loss_functions>`, :ref:`SoftPlus<loss_functions>`]  Sets the loss function. The Ranking loss can be tuned with the margin parameter.
-margin                       float   No        0                                                                                                                                                                                                                         Sets the margin for the Ranking loss function
-reduction                    string  No        Mean         [Mean, Sum]                                                                                                                                                                                                  Sets the reduction to apply to the loss
+loss                         string  No        SoftMax      [SoftMax, Ranking, BCEAfterSigmoid, BCEWithLogits, MSE, SoftPlus]  Sets the loss function. The Ranking loss can be tuned with the margin parameter.
+margin                       float   No        0                                                                                                                                                                                                                         Sets the margin for the Ranking loss function.
+reduction                    string  No        Mean         [Mean, Sum]                                                                                                                                                                                                  Sets the reduction to apply to the loss.
 ===========================  ======  ========  ==========  ============================================================================================================================================================================================================  ===================                                                      
 
 
@@ -316,8 +316,6 @@ Here we show the defaults for each configuration options in .ini format.
     regularization_coef=2e-6
     regularization_norm=2
     optimizer=Adagrad
-    loss=SoftMax
-    margin=0
     average_gradients=false
     synchronous=false
     num_epochs=10
@@ -325,6 +323,11 @@ Here we show the defaults for each configuration options in .ini format.
     # large number used to effectively disable checkpointing
     checkpoint_interval=9999
     shuffle_interval=1
+
+    [loss]
+    loss=SoftMax
+    margin=0
+    reduction=Mean
 
     [training_pipeline]
     max_batches_in_flight=16
