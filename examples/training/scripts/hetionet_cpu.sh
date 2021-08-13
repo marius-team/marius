@@ -1,5 +1,5 @@
 # preprocess the hetionet graph and put preprocessed graph into output dir
-marius_preprocess hetionet output_dir/
+marius_preprocess output_dir/ --dataset hetionet
 
 # run marius on the preprocessed input
-marius_train examples/training/configs/hetionet_cpu.ini info
+marius_train examples/training/configs/hetionet_cpu.ini
