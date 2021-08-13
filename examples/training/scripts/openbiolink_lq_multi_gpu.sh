@@ -1,5 +1,5 @@
 # preprocess the openbiolink_lq graph and put preprocessed graph into output dir
-marius_preprocess openbiolink_lq output_dir/
+marius_preprocess output_dir/ --dataset openbiolink_lq
 
 # run marius on the preprocessed input
-marius_train examples/training/configs/openbiolink_lq_multi_gpu.ini info
+marius_train examples/training/configs/openbiolink_lq_multi_gpu.ini
