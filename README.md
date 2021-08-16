@@ -12,12 +12,12 @@ Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.o
 ## Requirements ##
 (Other versions may work, but are untested)
 * Ubuntu 18.04 or MacOS 10.15 
-* CUDA 10.1 or 10.2 (If using GPU training)
-* CuDNN 7 (If using GPU training)
+* CUDA >= 10 (If using GPU training)
 * pytorch >= 1.7
 * python >= 3.6
 * pip >= 21
-* GCC >= 9 (On Linux) or Clang 12.0 (On MacOS)
+* GCC >= 9 (On Linux) 
+* Clang >= 11 (On MacOS)
 * cmake >= 3.12
 * make >= 3.8
 
