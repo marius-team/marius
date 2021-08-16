@@ -38,10 +38,10 @@ DataSet::DataSet(Storage *edges, Storage *embeddings, Storage *emb_state, Storag
     timestamp_ = global_timestamp_allocator.getTimestamp();
 
     if (marius_options.storage.embeddings == BackendType::PartitionBuffer) {
-        SPDLOG_DEBUG("Setup Partition Ordering");
+        SPDLOG_DEBUG("Setup partition ordering");
         batches_ = ((PartitionBufferStorage *) node_embeddings_)->shuffleBeforeEvictions(batches_);
         batch_iterator_ = batches_.begin();
-        SPDLOG_DEBUG("Batches Shuffled");
+        SPDLOG_DEBUG("Batches shuffled");
         ((PartitionBufferStorage *) node_embeddings_)->setOrdering(batches_);
         ((PartitionBufferStorage *) node_embeddings_optimizer_state_)->setOrdering(batches_);
         SPDLOG_DEBUG("Edge bucket ordering set");
@@ -66,7 +66,7 @@ DataSet::DataSet(Storage *train_edges, Storage *eval_edges, Storage *test_edges,
     num_edges_ = edges_->getDim0();
 
     if (marius_options.evaluation.filtered_evaluation) {
-        SPDLOG_DEBUG("Filtered Evaluation");
+        SPDLOG_DEBUG("Filtered evaluation");
         train_edges_->load();
         validation_edges_->load();
         test_edges_->load();
@@ -113,7 +113,7 @@ DataSet::DataSet(Storage *train_edges, Storage *eval_edges, Storage *test_edges,
     num_relations_ = src_relations_->getDim0();
 
     initializeBatches();
-    SPDLOG_DEBUG("Batches Initialized");
+    SPDLOG_DEBUG("Batches initialized");
     batch_iterator_ = batches_.begin();
     timestamp_ = global_timestamp_allocator.getTimestamp();
 }
@@ -792,12 +792,12 @@ void DataSet::loadStorage() {
         src_relations_optimizer_state_->load();
         dst_relations_->load();
         dst_relations_optimizer_state_->load();
-        SPDLOG_DEBUG("Loaded Training Set");
+        SPDLOG_DEBUG("Loaded training set");
     } else {
         node_embeddings_->load();
         src_relations_->load();
         dst_relations_->load();
-        SPDLOG_DEBUG("Loaded Evaluation Set");
+        SPDLOG_DEBUG("Loaded evaluation set");
     }
     storage_loaded_ = true;
 }
@@ -811,12 +811,12 @@ void DataSet::unloadStorage() {
         src_relations_optimizer_state_->unload(true);
         dst_relations_->unload(true);
         dst_relations_optimizer_state_->unload(true);
-        SPDLOG_DEBUG("Unloaded Training Set");
+        SPDLOG_DEBUG("Unloaded training set");
     } else {
         node_embeddings_->unload();
         src_relations_->unload();
         dst_relations_->unload();
-        SPDLOG_DEBUG("Unloaded Evaluation Set");
+        SPDLOG_DEBUG("Unloaded evaluation set");
     }
     storage_loaded_ = false;
 }
