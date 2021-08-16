@@ -127,18 +127,21 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
             train_edge_storage = new FlatFile(train_filename, num_train, 3, marius_options.storage.edges_dtype);
             valid_edge_storage = new FlatFile(valid_filename, num_valid, 3, marius_options.storage.edges_dtype);
             test_edge_storage = new FlatFile(test_filename, num_test, 3, marius_options.storage.edges_dtype);
+            SPDLOG_DEBUG("Edges: FlatFile storage initialized.");
             break;
         }
         case BackendType::HostMemory: {
             train_edge_storage = new InMemory(train_filename, num_train, 3, marius_options.storage.edges_dtype, torch::kCPU);
             valid_edge_storage = new InMemory(valid_filename, num_valid, 3, marius_options.storage.edges_dtype, torch::kCPU);
             test_edge_storage = new InMemory(test_filename, num_test, 3, marius_options.storage.edges_dtype, torch::kCPU);
+            SPDLOG_DEBUG("Edges: HostMemory storage initialized.");
             break;
         }
         case BackendType::DeviceMemory: {
             train_edge_storage = new InMemory(train_filename, num_train, 3, marius_options.storage.edges_dtype, marius_options.general.device);
             valid_edge_storage = new InMemory(valid_filename, num_valid, 3, marius_options.storage.edges_dtype, marius_options.general.device);
             test_edge_storage = new InMemory(test_filename, num_test, 3, marius_options.storage.edges_dtype, marius_options.general.device);
+            SPDLOG_DEBUG("Edges: DeviceMemory storage initialized.");
             break;
         }
     }
@@ -169,12 +172,15 @@ tuple<Storage *, Storage *, Storage *> initializeEdges(bool train) {
         train_edge_storage->readPartitionSizes(train_edges_partitions);
 //        valid_edge_storage->readPartitionSizes(validation_edges_partitions);
 //        test_edge_storage->readPartitionSizes(test_edges_partitions);
+
+        SPDLOG_DEBUG("Read edge partition sizes.");
     }
 
     if (marius_options.storage.shuffle_input_edges) {
         train_edge_storage->shuffle();
         valid_edge_storage->shuffle();
         test_edge_storage->shuffle();
+        SPDLOG_DEBUG("Edges shuffled.");
     }
 
     return forward_as_tuple(train_edge_storage, valid_edge_storage, test_edge_storage);
@@ -237,9 +243,12 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
         }
         case BackendType::PartitionBuffer: {
             node_embedding_storage = new PartitionBufferStorage(node_embedding_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.storage.buffer_capacity, true);
+            SPDLOG_DEBUG("Node Embeddings: PartitionBuffer storage initialized.");
             if (train) {
                 optimizer_state_storage = new PartitionBufferStorage(optimizer_state_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.storage.buffer_capacity, false);
+                SPDLOG_DEBUG("Node Embeddings State: PartitionBuffer storage initialized.");
             }
+
             break;
         }
         case BackendType::FlatFile: {
@@ -248,15 +257,19 @@ tuple<Storage *, Storage *> initializeNodeEmbeddings(bool train) {
         }
         case BackendType::HostMemory: {
             node_embedding_storage = new InMemory(node_embedding_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, torch::kCPU);
+            SPDLOG_DEBUG("Node Embeddings: HostMemory storage initialized.");
             if (train) {
                 optimizer_state_storage = new InMemory(optimizer_state_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, torch::kCPU);
+                SPDLOG_DEBUG("Node Embeddings State: HostMemory storage initialized.");
             }
             break;
         }
         case BackendType::DeviceMemory: {
             node_embedding_storage = new InMemory(node_embedding_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.general.device);
+            SPDLOG_DEBUG("Node Embeddings: DeviceMemory storage initialized.");
             if (train) {
                 optimizer_state_storage = new InMemory(optimizer_state_filename, num_nodes, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.general.device);
+                SPDLOG_DEBUG("Node Embeddings State: DeviceMemory storage initialized.");
             }
             break;
         }
@@ -341,18 +354,22 @@ tuple<Storage *, Storage *, Storage *, Storage *> initializeRelationEmbeddings(b
         case BackendType::HostMemory: {
             src_relation_embedding_storage = new InMemory(src_relation_embedding_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, torch::kCPU);
             dst_relation_embedding_storage = new InMemory(dst_relation_embedding_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, torch::kCPU);
+            SPDLOG_DEBUG("Relation Embeddings: HostMemory storage initialized.");
             if (train) {
                 src_optimizer_state_storage = new InMemory(src_optimizer_state_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, torch::kCPU);
                 dst_optimizer_state_storage = new InMemory(dst_optimizer_state_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, torch::kCPU);
+                SPDLOG_DEBUG("Relation Embeddings State: HostMemory storage initialized.");
             }
             break;
         }
         case BackendType::DeviceMemory: {
             src_relation_embedding_storage = new InMemory(src_relation_embedding_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.general.device);
             dst_relation_embedding_storage = new InMemory(dst_relation_embedding_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.general.device);
+            SPDLOG_DEBUG("Relation Embeddings: DeviceMemory storage initialized.");
             if (train) {
                 src_optimizer_state_storage = new InMemory(src_optimizer_state_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.general.device);
                 dst_optimizer_state_storage = new InMemory(dst_optimizer_state_filename, num_relations, marius_options.model.embedding_size, marius_options.storage.embeddings_dtype, marius_options.general.device);
+                SPDLOG_DEBUG("Relation Embeddings State: DeviceMemory storage initialized.");
             }
             break;
         }
@@ -376,8 +393,19 @@ tuple<Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage 
 
     bool train = true;
     tuple<Storage *, Storage *, Storage *> edge_storages = initializeEdges(train);
+    SPDLOG_DEBUG("Edge storage initialized. Train: {}, Valid: {}, Test: {}",
+                 std::get<0>(edge_storages)->getDim0(),
+                 std::get<1>(edge_storages)->getDim0(),
+                 std::get<2>(edge_storages)->getDim0());
+
     tuple<Storage *, Storage *> node_embedding_storages = initializeNodeEmbeddings(train);
+    SPDLOG_DEBUG("Node embeddings initialized. Num embeddings: {}",
+                 std::get<0>(node_embedding_storages)->getDim0());
+
+
     tuple<Storage *, Storage *, Storage *, Storage *> relation_embedding_storages = initializeRelationEmbeddings(train);
+    SPDLOG_DEBUG("Relation embeddings initialized. Num embeddings: {}",
+                 std::get<0>(relation_embedding_storages)->getDim0());
 
     return std::tuple_cat(edge_storages, node_embedding_storages, relation_embedding_storages);
 }
@@ -397,8 +425,16 @@ tuple<Storage *, Storage *, Storage *, Storage *> initializeEval() {
 
     bool train = false;
     tuple<Storage *, Storage *, Storage *> edge_storages = initializeEdges(train);
+    SPDLOG_DEBUG("Edge storage initialized. Test: {}",
+                 std::get<2>(edge_storages)->getDim0());
+
     tuple<Storage *, Storage *> node_embedding_storages = initializeNodeEmbeddings(train);
+    SPDLOG_DEBUG("Node embeddings initialized. Num embeddings: {}",
+                 std::get<0>(node_embedding_storages)->getDim0());
+
     tuple<Storage *, Storage *, Storage *, Storage *> relation_embedding_storages = initializeRelationEmbeddings(train);
+    SPDLOG_DEBUG("Relation embeddings initialized. Num embeddings: {}",
+                 std::get<0>(relation_embedding_storages)->getDim0());
 
     return std::forward_as_tuple(std::get<2>(edge_storages), std::get<0>(node_embedding_storages), std::get<0>(relation_embedding_storages), std::get<2>(relation_embedding_storages));
 }
