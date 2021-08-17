@@ -437,8 +437,6 @@ void FlatFile::mem_load() {
         }
 
         data_ = torch::empty({dim0_size_, dim1_size_}, dtype_);
-        SPDLOG_DEBUG("Initialized memory edges");
-        process_mem_usage();
 
         int64_t offset = 0;
         int64_t read_size = dim0_size_ * dim1_size_ * dtype_size;
@@ -457,9 +455,6 @@ void FlatFile::mem_load() {
 
             offset += curr_bytes;
         }
-
-        SPDLOG_DEBUG("Read edges from disk");
-        process_mem_usage();
 
         loaded_ = true;
     }
@@ -501,13 +496,8 @@ void FlatFile::mem_unload(bool write) {
 
         close(fd_);
 
-        SPDLOG_DEBUG("Edges written");
-        process_mem_usage();
         loaded_ = false;
-        process_mem_usage();
         data_ = torch::Tensor();
-        SPDLOG_DEBUG("Nulled tensor and pointer");
-        process_mem_usage();
     }
 }
 
@@ -692,14 +682,8 @@ void InMemory::unload(bool write) {
         }
 
         close(fd_);
-
-        SPDLOG_DEBUG("Written");
-        process_mem_usage();
-
         loaded_ = false;
         data_ = torch::Tensor();
-        SPDLOG_DEBUG("Done");
-        process_mem_usage();
     }
 }
 
