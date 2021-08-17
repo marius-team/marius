@@ -389,7 +389,7 @@ def set_args():
                         help='Data files')
     parser.add_argument('format', metavar='format', nargs=1, type=str,
                         help='Format of data, eg. srd')
-    parser.add_argument('output_dir', metavar='output_dir', nargs=1, type=str,
+    parser.add_argument('output_dir', metavar='output_dir', type=str,
                         help='Output directory for preprocessed data')
     parser.add_argument('--delim', '-d', metavar='delim', type=str,
                         default="",
