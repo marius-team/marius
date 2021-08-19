@@ -175,8 +175,8 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
            (len(format[0]) == 2 and dst_idx != -1 and
             src_idx != -1)), "Format is specified incorrectly"
 
-    assert(Path(output_dir[0]).exists()), "Output directory not found"
-    output_dir = output_dir[0].strip("/")
+    assert(Path(output_dir).exists()), "Output directory not found"
+    output_dir = output_dir.strip("/")
     output_dir = output_dir + "/"
 
     if rel_idx == -1:
@@ -389,7 +389,7 @@ def set_args():
                         help='Data files')
     parser.add_argument('format', metavar='format', nargs=1, type=str,
                         help='Format of data, eg. srd')
-    parser.add_argument('output_dir', metavar='output_dir', nargs=1, type=str,
+    parser.add_argument('output_dir', metavar='output_dir', type=str,
                         help='Output directory for preprocessed data')
     parser.add_argument('--delim', '-d', metavar='delim', type=str,
                         default="",
