@@ -1,13 +1,23 @@
 # Marius #
 
-Marius is a system under active development for training embeddings for large-scale graphs on a single machine.
-
-Training on large scale graphs requires a large amount of data movement to get embedding parameters from storage to the computational device. 
-Marius is designed to mitigate/reduce data movement overheads using:
-- Pipelined training and IO
-- Partition caching and buffer-aware data orderings
+Marius is a system for large-scale graph learning. The system is currently in the alpha phase and is under active development.
 
 Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.org/abs/2101.08358), where experiment scripts and configurations can be found in the `osdi2021` branch.
+
+Currently we support:
+- Large-scale link prediction training
+- Preprocessing and training of datasets in CSV format (single-file)
+- Configuration file based API
+- Single GPU training and evaluation
+- Dataset sizes that fit in: GPU memory, CPU memory, and Disk.
+
+See `docs/user_guide` for more details.
+
+We are working on expanding the functionality of Marius to include:
+- Graph neural network support
+- Multi-GPU training
+- Node classification
+- Python API for user defined models, sampling and training procedures
 
 ## Requirements ##
 (Other versions may work, but are untested)
