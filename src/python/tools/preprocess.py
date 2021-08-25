@@ -670,7 +670,7 @@ def download_file(url, output_dir):
         The path to the downloaded files.
 
     Raises:
-        OSError: An error occurred when downloading is failed.
+        RuntimeError: An error occurred when downloading is failed.
     """
     output_dir = Path(output_dir)
     if not output_dir.exists():
@@ -688,7 +688,7 @@ def download_file(url, output_dir):
             print(f"Downloading {filename} to {filepath}")
             urlretrieve(url, str(filepath))
         except OSError:
-            raise OSError(f"Failed to download {filename}")
+            raise RuntimeError(f"Failed to download {filename}")
 
     return filepath
 
@@ -749,7 +749,7 @@ def extract_file(filepath):
             except:
                 raise RuntimeError("Undefined exception.")
     except EOFError:
-        raise EOFError("Dataset file isn't complete. Try download again.")
+        raise RuntimeError("Dataset file isn't complete. Try download again.")
 
     if filepath.exists():
         filepath.unlink()
