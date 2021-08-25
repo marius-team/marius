@@ -706,9 +706,8 @@ def extract_file(filepath):
 
     Raises:
         RuntimeError: An error occurred when the file format cannot be 
-            recognized.
-        EOFError: An error occurred when the file to be extracted is not 
-            complete.
+            recognized or the file to be extracted is not 
+            complete. Detailed information is given if the exception is raised.
         
     """
     print("Extracting")
