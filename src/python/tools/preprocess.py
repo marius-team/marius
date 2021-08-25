@@ -1,3 +1,9 @@
+"""Preprocess module of Marius.
+
+This module contains the functions for preprocessing both custom datasets and
+supported datasets.
+"""
+
 import argparse
 import gzip
 import re
@@ -23,6 +29,17 @@ from marius.tools.csv_converter import general_parser
 
 
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset live_journal.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+        split: The proportion of the validation and test sections.
+
+    Returns:
+        The statistics of current dataset.
+    """
     LIVE_JOURNAL_URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
     download_path = download_file(LIVE_JOURNAL_URL, output_dir)
     extract_file(download_path)
@@ -33,6 +50,16 @@ def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def fb15k(output_dir, num_partitions=1):
+    """Preprocesses the dataset fb15k.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     FB15K_URL = "https://dl.fbaipublicfiles.com/starspace/fb15k.tgz"
     download_path = download_file(FB15K_URL, output_dir)
     extract_file(download_path)
@@ -49,6 +76,17 @@ def fb15k(output_dir, num_partitions=1):
 
 
 def twitter(output_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset twitter.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+        split: The proportion of the validation and test sections.
+
+    Returns:
+        The statistics of current dataset.
+    """
     TWITTER_URL = "https://snap.stanford.edu/data/twitter-2010.txt.gz"
     download_path = download_file(TWITTER_URL, output_dir)
     extract_file(download_path)
@@ -60,6 +98,16 @@ def twitter(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def freebase86m(output_dir, num_partitions=1):
+    """Preprocesses the dataset freebase86m.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     FREEBASE86M_URL = "https://data.dgl.ai/dataset/Freebase.zip"
     download_path = download_file(FREEBASE86M_URL, output_dir)
     extract_file(download_path)
@@ -76,6 +124,16 @@ def freebase86m(output_dir, num_partitions=1):
 
 
 def wn18(output_dir, num_partitions=1):
+    """Preprocesses the dataset wn18.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     WN18_URL = "https://everest.hds.utc.fr/lib/exe/fetch.php?media=en:wordnet-mlj12.tar.gz"
     download_path = download_file(WN18_URL, output_dir)
     extract_file(download_path)
@@ -91,6 +149,16 @@ def wn18(output_dir, num_partitions=1):
 
 
 def fb15k_237(output_dir, num_partitions=1):
+    """Preprocesses the dataset fb15k_237.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     FB15K_237 = "https://data.deepai.org/FB15K-237.2.zip"
     download_path = download_file(FB15K_237, output_dir)
     extract_file(download_path)
@@ -106,6 +174,16 @@ def fb15k_237(output_dir, num_partitions=1):
 
 
 def wn18rr(output_dir, num_partitions=1):
+    """Preprocesses the dataset wn18rr.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     WN18RR_URL = "https://data.dgl.ai/dataset/wn18rr.zip"
     download_path = download_file(WN18RR_URL, output_dir)
     extract_file(download_path)
@@ -121,6 +199,16 @@ def wn18rr(output_dir, num_partitions=1):
 
 
 def codex_s(output_dir, num_partitions=1):
+    """Preprocesses the dataset codex_s.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     CODEX_S_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/train.txt"
     CODEX_S_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/valid.txt"
     CODEX_S_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/test.txt"
@@ -137,6 +225,16 @@ def codex_s(output_dir, num_partitions=1):
 
 
 def codex_m(output_dir, num_partitions=1):
+    """Preprocesses the dataset codex_m.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     CODEX_M_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/train.txt"
     CODEX_M_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/valid.txt"
     CODEX_M_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/test.txt"
@@ -151,6 +249,16 @@ def codex_m(output_dir, num_partitions=1):
 
 
 def codex_l(output_dir, num_partitions=1):
+    """Preprocesses the dataset codex_l.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     CODEX_L_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/train.txt"
     CODEX_L_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/valid.txt"
     CODEX_L_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/test.txt"
@@ -165,6 +273,17 @@ def codex_l(output_dir, num_partitions=1):
 
 
 def drkg(output_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset drkg.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+        split: The proportion of the validation and test sections.
+
+    Returns:
+        The statistics of current dataset.
+    """
     DRKG_URL = "https://dgl-data.s3-us-west-2.amazonaws.com/dataset/DRKG/drkg.tar.gz"
     download_path = download_file(DRKG_URL, output_dir)
     extract_file(download_path)
@@ -175,6 +294,17 @@ def drkg(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset hetionet.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+        split: The proportion of the validation and test sections.
+
+    Returns:
+        The statistics of current dataset.
+    """
     HETIONET_URL = "https://github.com/hetio/hetionet/raw/master/hetnet/tsv/hetionet-v1.0-edges.sif.gz"
     download_path = download_file(HETIONET_URL, output_dir)
     extract_file(download_path)
@@ -186,6 +316,17 @@ def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def kinships(output_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset kinships.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+        split: The proportion of the validation and test sections.
+
+    Returns:
+        The statistics of current dataset.
+    """
     KINSHIPS_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/kinship/kinship.data"
     download_path = download_file(KINSHIPS_URL, output_dir)
     edges = []
@@ -214,6 +355,16 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
 
 
 def openbiolink_hq(output_dir, num_partitions=1):
+    """Preprocesses the dataset openbiolink_hq.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OPENBIOLINK_HQ_URL = "https://zenodo.org/record/3834052/files/HQ_DIR.zip?download=1"
     download_path = download_file(OPENBIOLINK_HQ_URL, output_dir)
     extract_file(download_path)
@@ -229,6 +380,16 @@ def openbiolink_hq(output_dir, num_partitions=1):
 
 
 def openbiolink_lq(output_dir, num_partitions=1):
+    """Preprocesses the dataset openbiolink_lq.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OPENBIOLINK_LQ_URL = "https://samwald.info/res/OpenBioLink_2020_final/ALL_DIR.zip"
     download_path = download_file(OPENBIOLINK_LQ_URL, output_dir)
     extract_file(download_path)
@@ -244,6 +405,16 @@ def openbiolink_lq(output_dir, num_partitions=1):
 
 
 def ogbl_biokg(output_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_biokg.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OGBL_BIOKG_URL = "https://snap.stanford.edu/ogb/data/linkproppred/biokg.zip"
     download_path = download_file(OGBL_BIOKG_URL, output_dir)
     extract_file(download_path)
@@ -255,6 +426,16 @@ def ogbl_biokg(output_dir, num_partitions=1):
 
 
 def ogbl_ppa(output_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_ppa.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OGBL_PPA_URL = "https://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip"
     download_path = download_file(OGBL_PPA_URL, output_dir)
     extract_file(download_path)
@@ -266,6 +447,16 @@ def ogbl_ppa(output_dir, num_partitions=1):
 
 
 def ogbl_ddi(output_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_ddi.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OGBL_DDI_URL = "https://snap.stanford.edu/ogb/data/linkproppred/ddi.zip"
     download_path = download_file(OGBL_DDI_URL, output_dir)
     extract_file(download_path)
@@ -277,6 +468,16 @@ def ogbl_ddi(output_dir, num_partitions=1):
 
 
 def ogbl_collab(output_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_collab.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OGBL_COLLAB_URL = "https://snap.stanford.edu/ogb/data/linkproppred/collab.zip"
     download_path = download_file(OGBL_COLLAB_URL, output_dir)
     extract_file(download_path)
@@ -288,6 +489,16 @@ def ogbl_collab(output_dir, num_partitions=1):
 
 
 def ogbn_arxiv(output_dir, num_partitions=1):
+    """Preprocesses the dataset ogbn_arxiv.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OGBN_ARXIV_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip"
     download_path = download_file(OGBN_ARXIV_URL, output_dir)
     extract_file(download_path)
@@ -300,6 +511,16 @@ def ogbn_arxiv(output_dir, num_partitions=1):
 
 
 def ogbn_proteins(output_dir, num_partitions=1):
+    """Preprocesses the dataset ogbn_proteins.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OGBN_PROTEINS_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip"
     download_path = download_file(OGBN_PROTEINS_URL, output_dir)
     extract_file(download_path)
@@ -315,6 +536,16 @@ def ogbn_proteins(output_dir, num_partitions=1):
 
 
 def ogbn_products(output_dir, num_partitions=1):
+    """Preprocesses the dataset ogbn_products.
+
+    Args:
+        output_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     OGBN_PRODUCTS_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/products.zip"
     download_path = download_file(OGBN_PRODUCTS_URL, output_dir)
     extract_file(download_path)
@@ -330,6 +561,19 @@ def ogbn_products(output_dir, num_partitions=1):
 
 
 def parse_ogbn(files, output_dir, num_partitions=1):
+    """Parse ogbn datasets.
+
+    Retrieves the graph data from downloaded ogbn dataset files.
+
+    Args:
+        files: The original ogbn dataset files.
+        output_dir: The directory where the original dataset files and 
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     splits = []
     for file in files[0:-1]:
         nodes = pd.read_csv(file, compression='gzip', header=None)
@@ -358,6 +602,20 @@ def parse_ogbn(files, output_dir, num_partitions=1):
 
 
 def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
+    """Parse ogbl datasets.
+
+    Retrieves the graph from downloaded ogbl dataset files.
+
+    Args:
+        files: The original obgl dataset files.
+        has_rel: Indicates whether the current dataset has relation edges.
+        output_dir: The directory where the original dataset files and 
+            preprocessed files will be stored.
+        num_partitions: The number of data partitions.
+
+    Returns:
+        The statistics of current dataset.
+    """
     if has_rel is True:
         train_idx = torch.load(str(files[0]))
         valid_idx = torch.load(str(files[1]))
@@ -400,6 +658,20 @@ def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
 
 
 def download_file(url, output_dir):
+    """Downloads files.
+
+    Downloads the files to designated directory with given url.
+
+    Args:
+        url: The url to the files to be downloaded.
+        output_dir: The location to save all downloaded files.
+
+    Returns:
+        The path to the downloaded files.
+
+    Raises:
+        OSError: An error occurred when downloading is failed.
+    """
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir()
@@ -416,12 +688,29 @@ def download_file(url, output_dir):
             print(f"Downloading {filename} to {filepath}")
             urlretrieve(url, str(filepath))
         except OSError:
-            raise RuntimeError(f"Failed to download {filename}")
+            raise OSError(f"Failed to download {filename}")
 
     return filepath
 
 
 def extract_file(filepath):
+    """Extracts files.
+
+    Extracts the files pointed by filepath.
+
+    Args:
+        filepath: The path to the files needed to be extracted.
+
+    Returns:
+        The directory contains all extracted files.
+
+    Raises:
+        RuntimeError: An error occurred when the file format cannot be 
+            recognized.
+        EOFError: An error occurred when the file to be extracted is not 
+            complete.
+        
+    """
     print("Extracting")
     try:
         if tarfile.is_tarfile(str(filepath)):
@@ -460,7 +749,7 @@ def extract_file(filepath):
             except:
                 raise RuntimeError("Undefined exception.")
     except EOFError:
-        raise RuntimeError("Dataset file isn't complete. Try download again.")
+        raise EOFError("Dataset file isn't complete. Try download again.")
 
     if filepath.exists():
         filepath.unlink()
@@ -470,6 +759,19 @@ def extract_file(filepath):
 
 
 def update_param(config_dict, arg_dict):
+    """Updates parametars.
+
+    Updates parameters for the configuration files to be generated according to
+        command line arguments.
+
+    Args:
+        config_dict: The dict containing all configuration parameters and their
+            default values.
+        arg_dict: The dict containing all command line arguments.
+
+    Returns:
+        The updated configuration dict.
+    """
     if arg_dict.get("generate_config") is None:
         for key in config_dict:
             if arg_dict.get(key) is not None:
@@ -501,6 +803,12 @@ def update_param(config_dict, arg_dict):
 
 
 def set_args():
+    """Sets command line arguments for this preprocess module.
+
+    Returns:
+        The parser containing all command line arguments and the configuration
+            dict containing all parameters and their default values.
+    """
     parser = argparse.ArgumentParser(
                 description='Preprocess Datasets', prog='preprocess',
                 formatter_class=argparse.RawTextHelpFormatter,
@@ -566,6 +874,20 @@ def set_args():
 
 
 def parse_args(config_dict, args):
+    """Parse command line arguments.
+
+    Identifies the dataset to be preprocess and update configuration parameters
+        if they are set by command line arguments.
+
+    Args:
+        config_dict: The dict containing all configuration parameters and their
+            default values.
+        args: All command line arguments.
+
+    Returns:
+        The dict containing updated configuration parameters and the dict
+            containing parsed command line arguments. 
+    """
     arg_dict = vars(args)
     config_dict = update_param(config_dict, arg_dict)
     set_up_files(args.output_directory)
