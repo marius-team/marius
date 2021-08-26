@@ -27,12 +27,6 @@ from marius.tools.config_generator import update_data_path
 from marius.tools.config_generator import DEFAULT_CONFIG_FILE
 from marius.tools.csv_converter import general_parser
 
-# REMEMBER TO CHANGE THE DOCUMENTS ON OTUPUT_DIRECTORY
-
-
-
-
-
 
 def live_journal(data_dir, num_partitions=1, split=(.05, .05)):
     """Preprocesses the dataset live_journal.
@@ -400,9 +394,9 @@ def codex_m(data_dir, num_partitions=1):
 
 
 def codex_l(data_dir, num_partitions=1):
-   """Preprocesses the dataset codex_l.
+    """Preprocesses the dataset codex_l.
 
-   During preprocessing, Marius has randomly assigned integer ids to each node
+    During preprocessing, Marius has randomly assigned integer ids to each node
     and edge_type, where the mappings to the original ids are stored in
     node_mapping.txt and rel_mapping.txt.
     The edge list in original dataset files is then converted to an [|E|, 3]
@@ -1183,7 +1177,7 @@ def set_args():
                 epilog=(('Specify certain config (optional): ' +
                         '[--<section>.<key>=<value>]')))
     mode = parser.add_mutually_exclusive_group()
-    parser.add_argument('data_directory', metavar='data_directory',
+    parser.add_argument('output_directory', metavar='output_directory',
                         type=str, help='Directory to put graph data')
     mode.add_argument('--files', metavar='files', nargs='+', type=str,
                         help='Files containing custom dataset')
@@ -1194,7 +1188,7 @@ def set_args():
                         help='Number of partitions to split the edges into')
     parser.add_argument('--overwrite', action='store_true',
                         required=False,
-                        help=('Overwrites the data_directory if this is ' +
+                        help=('Overwrites the output_directory if this is ' +
                               'set. '
                               'Otherwise, files with same the names will be ' +
                               'treated as the data for current dataset.'))
@@ -1258,7 +1252,7 @@ def parse_args(config_dict, args):
     """
     arg_dict = vars(args)
     config_dict = update_param(config_dict, arg_dict)
-    set_up_files(args.data_directory)
+    set_up_files(args.output_directory)
     
     if arg_dict.get("dataset") is None:
         config_dict.update({"dataset": "custom"})
@@ -1298,17 +1292,17 @@ def main():
         "ogbn_products": ogbn_products,
     }
 
-    if args.overwrite and Path(args.data_directory).exists():
-        shutil.rmtree(args.data_directory)
+    if args.overwrite and Path(args.output_directory).exists():
+        shutil.rmtree(args.output_directory)
 
     if dataset_dict.get(args.dataset) is not None:
         print(args.dataset)
         stats = dataset_dict.get(args.dataset)(
-                                    args.data_directory, args.num_partitions)
+                                    args.output_directory, args.num_partitions)
     else:
         print("Preprocess custom dataset")
         stats = general_parser(args.files, args.format,
-                               args.data_directory, args.delim,
+                               args.output_directory, args.delim,
                                args.num_partitions,
                                args.dtype, args.not_remap_ids,
                                args.dataset_split,
@@ -1317,7 +1311,7 @@ def main():
 
 
     if args.generate_config is not None:
-        dir = args.data_directory
+        dir = args.output_directory
         config_dict = update_stats(stats, config_dict)
         config_dict = update_data_path(dir, config_dict)
         output_config(config_dict, dir)
