@@ -1,3 +1,9 @@
+"""Preprocess module of Marius.
+
+This module contains the functions for preprocessing both custom datasets and
+supported datasets.
+"""
+
 import argparse
 import gzip
 import re
@@ -22,172 +28,527 @@ from marius.tools.config_generator import DEFAULT_CONFIG_FILE
 from marius.tools.csv_converter import general_parser
 
 
-def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
+def live_journal(data_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset live_journal.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt, valid_edges.pt and test_edges.pt files.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        valid_edges.pt: Dump of tensor memroy for edges in the validation set.
+        test_edges.pt: Dump of tensor memroy for edges in the testing set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+        split: The proportion of the input data that will be used for
+            validation and testing during training. The argument takes a tuple
+            of length two where the first value is the proportion of validation
+            set and the second value is the proportion of testing set.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     LIVE_JOURNAL_URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
-    download_path = download_file(LIVE_JOURNAL_URL, output_dir)
+    download_path = download_file(LIVE_JOURNAL_URL, data_dir)
     extract_file(download_path)
-    return general_parser([str(Path(output_dir) /
+    return general_parser([str(Path(data_dir) /
                           Path("soc-LiveJournal1.txt"))], ["sd"],
-                          output_dir, num_partitions=num_partitions,
+                          data_dir, num_partitions=num_partitions,
                           dataset_split=split)
 
 
-def fb15k(output_dir, num_partitions=1):
+def fb15k(data_dir, num_partitions=1):
+    """Preprocesses the dataset fb15k.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     FB15K_URL = "https://dl.fbaipublicfiles.com/starspace/fb15k.tgz"
-    download_path = download_file(FB15K_URL, output_dir)
+    download_path = download_file(FB15K_URL, data_dir)
     extract_file(download_path)
-    for file in (output_dir / Path("FB15k")).iterdir():
-        file.rename(output_dir / Path(file.name))
-    (output_dir / Path("FB15k")).rmdir()
+    for file in (data_dir / Path("FB15k")).iterdir():
+        file.rename(data_dir / Path(file.name))
+    (data_dir / Path("FB15k")).rmdir()
 
     return general_parser(
-            [str(Path(output_dir) /
+            [str(Path(data_dir) /
              Path("freebase_mtr100_mte100-train.txt")),
-             str(Path(output_dir) / Path("freebase_mtr100_mte100-valid.txt")),
-             str(Path(output_dir) / Path("freebase_mtr100_mte100-test.txt"))],
-            ["srd"], output_dir, num_partitions=num_partitions)
+             str(Path(data_dir) / Path("freebase_mtr100_mte100-valid.txt")),
+             str(Path(data_dir) / Path("freebase_mtr100_mte100-test.txt"))],
+            ["srd"], data_dir, num_partitions=num_partitions)
 
 
-def twitter(output_dir, num_partitions=1, split=(.05, .05)):
+def twitter(data_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset twitter.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt, valid_edges.pt and test_edges.pt files.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        valid_edges.pt: Dump of tensor memroy for edges in the validation set.
+        test_edges.pt: Dump of tensor memroy for edges in the testing set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+        split: The proportion of the input data that will be used for
+            validation and testing during training. The argument takes a tuple
+            of length two where the first value is the proportion of validation
+            set and the second value is the proportion of testing set.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     TWITTER_URL = "https://snap.stanford.edu/data/twitter-2010.txt.gz"
-    download_path = download_file(TWITTER_URL, output_dir)
+    download_path = download_file(TWITTER_URL, data_dir)
     extract_file(download_path)
 
-    return general_parser([str(Path(output_dir) / Path("twitter-2010.txt"))],
+    return general_parser([str(Path(data_dir) / Path("twitter-2010.txt"))],
                           ["srd"],
-                          output_dir, num_partitions=num_partitions,
+                          data_dir, num_partitions=num_partitions,
                           dataset_split=split, num_line_skip=1)
 
 
-def freebase86m(output_dir, num_partitions=1):
+def freebase86m(data_dir, num_partitions=1):
+    """Preprocesses the dataset freebase86m.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     FREEBASE86M_URL = "https://data.dgl.ai/dataset/Freebase.zip"
-    download_path = download_file(FREEBASE86M_URL, output_dir)
+    download_path = download_file(FREEBASE86M_URL, data_dir)
     extract_file(download_path)
-    for file in (output_dir / Path("Freebase")).iterdir():
-        file.rename(output_dir / Path(file.name))
-    (output_dir / Path("Freebase")).rmdir()
+    for file in (data_dir / Path("Freebase")).iterdir():
+        file.rename(data_dir / Path(file.name))
+    (data_dir / Path("Freebase")).rmdir()
 
     return general_parser(
-        [str(Path(output_dir) / Path("train.txt")),
-         str(Path(output_dir) / Path("valid.txt")),
-         str(Path(output_dir) / Path("test.txt"))],
+        [str(Path(data_dir) / Path("train.txt")),
+         str(Path(data_dir) / Path("valid.txt")),
+         str(Path(data_dir) / Path("test.txt"))],
         ["sdr"],
-        output_dir, num_partitions=num_partitions)
+        data_dir, num_partitions=num_partitions)
 
 
-def wn18(output_dir, num_partitions=1):
+def wn18(data_dir, num_partitions=1):
+    """Preprocesses the dataset wn18.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     WN18_URL = "https://everest.hds.utc.fr/lib/exe/fetch.php?media=en:wordnet-mlj12.tar.gz"
-    download_path = download_file(WN18_URL, output_dir)
+    download_path = download_file(WN18_URL, data_dir)
     extract_file(download_path)
-    for file in (output_dir / Path("wordnet-mlj12")).iterdir():
-        file.rename(output_dir / Path(file.name))
-    (output_dir / Path("wordnet-mlj12")).rmdir()
+    for file in (data_dir / Path("wordnet-mlj12")).iterdir():
+        file.rename(data_dir / Path(file.name))
+    (data_dir / Path("wordnet-mlj12")).rmdir()
 
     return general_parser(
-            [str(Path(output_dir) / Path("wordnet-mlj12-train.txt")),
-             str(Path(output_dir) / Path("wordnet-mlj12-valid.txt")),
-             str(Path(output_dir) / Path("wordnet-mlj12-test.txt"))], ["srd"],
-            output_dir, num_partitions=num_partitions)
+            [str(Path(data_dir) / Path("wordnet-mlj12-train.txt")),
+             str(Path(data_dir) / Path("wordnet-mlj12-valid.txt")),
+             str(Path(data_dir) / Path("wordnet-mlj12-test.txt"))], ["srd"],
+            data_dir, num_partitions=num_partitions)
 
 
-def fb15k_237(output_dir, num_partitions=1):
+def fb15k_237(data_dir, num_partitions=1):
+    """Preprocesses the dataset fb15k_237.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     FB15K_237 = "https://data.deepai.org/FB15K-237.2.zip"
-    download_path = download_file(FB15K_237, output_dir)
+    download_path = download_file(FB15K_237, data_dir)
     extract_file(download_path)
-    for file in (output_dir / Path("Release")).iterdir():
-        file.rename(output_dir / Path(file.name))
-    (output_dir / Path("Release")).rmdir()
+    for file in (data_dir / Path("Release")).iterdir():
+        file.rename(data_dir / Path(file.name))
+    (data_dir / Path("Release")).rmdir()
 
     return general_parser(
-        [str(Path(output_dir) / Path("train.txt")),
-         str(Path(output_dir) / Path("valid.txt")),
-         str(Path(output_dir) / Path("test.txt"))],
-        ["srd"], output_dir, num_partitions=num_partitions)
+        [str(Path(data_dir) / Path("train.txt")),
+         str(Path(data_dir) / Path("valid.txt")),
+         str(Path(data_dir) / Path("test.txt"))],
+        ["srd"], data_dir, num_partitions=num_partitions)
 
 
-def wn18rr(output_dir, num_partitions=1):
+def wn18rr(data_dir, num_partitions=1):
+    """Preprocesses the dataset wn18rr.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     WN18RR_URL = "https://data.dgl.ai/dataset/wn18rr.zip"
-    download_path = download_file(WN18RR_URL, output_dir)
+    download_path = download_file(WN18RR_URL, data_dir)
     extract_file(download_path)
-    for file in (output_dir / Path("wn18rr")).iterdir():
-        file.rename(output_dir / Path(file.name))
-    (output_dir / Path("wn18rr")).rmdir()
+    for file in (data_dir / Path("wn18rr")).iterdir():
+        file.rename(data_dir / Path(file.name))
+    (data_dir / Path("wn18rr")).rmdir()
 
     return general_parser(
-        [str(Path(output_dir) / Path("train.txt")),
-         str(Path(output_dir) / Path("valid.txt")),
-         str(Path(output_dir) / Path("test.txt"))],
-        ["srd"], output_dir, num_partitions=num_partitions)
+        [str(Path(data_dir) / Path("train.txt")),
+         str(Path(data_dir) / Path("valid.txt")),
+         str(Path(data_dir) / Path("test.txt"))],
+        ["srd"], data_dir, num_partitions=num_partitions)
 
 
-def codex_s(output_dir, num_partitions=1):
+def codex_s(data_dir, num_partitions=1):
+    """Preprocesses the dataset codex_s.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     CODEX_S_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/train.txt"
     CODEX_S_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/valid.txt"
     CODEX_S_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-s/test.txt"
 
-    download_path = download_file(CODEX_S_TRAIN_URL, output_dir)
-    download_path = download_file(CODEX_S_VALID_URL, output_dir)
-    download_path = download_file(CODEX_S_TEST_URL, output_dir)
+    download_path = download_file(CODEX_S_TRAIN_URL, data_dir)
+    download_path = download_file(CODEX_S_VALID_URL, data_dir)
+    download_path = download_file(CODEX_S_TEST_URL, data_dir)
 
-    return general_parser([str(Path(output_dir) / Path("train.txt")),
-                           str(Path(output_dir) / Path("valid.txt")),
-                           str(Path(output_dir) / Path("test.txt"))],
-                          ["srd"], output_dir,
+    return general_parser([str(Path(data_dir) / Path("train.txt")),
+                           str(Path(data_dir) / Path("valid.txt")),
+                           str(Path(data_dir) / Path("test.txt"))],
+                          ["srd"], data_dir,
                           num_partitions=num_partitions)
 
 
-def codex_m(output_dir, num_partitions=1):
+def codex_m(data_dir, num_partitions=1):
+    """Preprocesses the dataset codex_m.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     CODEX_M_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/train.txt"
     CODEX_M_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/valid.txt"
     CODEX_M_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-m/test.txt"
-    download_path = download_file(CODEX_M_TRAIN_URL, output_dir)
-    download_path = download_file(CODEX_M_VALID_URL, output_dir)
-    download_path = download_file(CODEX_M_TEST_URL, output_dir)
+    download_path = download_file(CODEX_M_TRAIN_URL, data_dir)
+    download_path = download_file(CODEX_M_VALID_URL, data_dir)
+    download_path = download_file(CODEX_M_TEST_URL, data_dir)
 
-    return general_parser([str(Path(output_dir) / Path("train.txt")),
-                           str(Path(output_dir) / Path("valid.txt")),
-                           str(Path(output_dir) / Path("test.txt"))],
-                          ["srd"], output_dir, num_partitions=num_partitions)
+    return general_parser([str(Path(data_dir) / Path("train.txt")),
+                           str(Path(data_dir) / Path("valid.txt")),
+                           str(Path(data_dir) / Path("test.txt"))],
+                          ["srd"], data_dir, num_partitions=num_partitions)
 
 
-def codex_l(output_dir, num_partitions=1):
+def codex_l(data_dir, num_partitions=1):
+    """Preprocesses the dataset codex_l.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     CODEX_L_TRAIN_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/train.txt"
     CODEX_L_VALID_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/valid.txt"
     CODEX_L_TEST_URL = "https://raw.githubusercontent.com/tsafavi/codex/master/data/triples/codex-l/test.txt"
-    download_path = download_file(CODEX_L_TRAIN_URL, output_dir)
-    download_path = download_file(CODEX_L_VALID_URL, output_dir)
-    download_path = download_file(CODEX_L_TEST_URL, output_dir)
+    download_path = download_file(CODEX_L_TRAIN_URL, data_dir)
+    download_path = download_file(CODEX_L_VALID_URL, data_dir)
+    download_path = download_file(CODEX_L_TEST_URL, data_dir)
 
-    return general_parser([str(Path(output_dir) / Path("train.txt")),
-                           str(Path(output_dir) / Path("valid.txt")),
-                           str(Path(output_dir) / Path("test.txt"))],
-                          ["srd"], output_dir, num_partitions=num_partitions)
+    return general_parser([str(Path(data_dir) / Path("train.txt")),
+                           str(Path(data_dir) / Path("valid.txt")),
+                           str(Path(data_dir) / Path("test.txt"))],
+                          ["srd"], data_dir, num_partitions=num_partitions)
 
 
-def drkg(output_dir, num_partitions=1, split=(.05, .05)):
+def drkg(data_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset drkg.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt, valid_edges.pt and test_edges.pt files.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        valid_edges.pt: Dump of tensor memroy for edges in the validation set.
+        test_edges.pt: Dump of tensor memroy for edges in the testing set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+        split: The proportion of the input data that will be used for
+            validation and testing during training. The argument takes a tuple
+            of length two where the first value is the proportion of validation
+            set and the second value is the proportion of testing set.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     DRKG_URL = "https://dgl-data.s3-us-west-2.amazonaws.com/dataset/DRKG/drkg.tar.gz"
-    download_path = download_file(DRKG_URL, output_dir)
+    download_path = download_file(DRKG_URL, data_dir)
     extract_file(download_path)
 
-    return general_parser([str(Path(output_dir) /
-                          Path("drkg.tsv"))], ["srd"], output_dir,
+    return general_parser([str(Path(data_dir) /
+                          Path("drkg.tsv"))], ["srd"], data_dir,
                           num_partitions=num_partitions, dataset_split=split)
 
 
-def hetionet(output_dir, num_partitions=1, split=(.05, .05)):
+def hetionet(data_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset hetionet.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt, valid_edges.pt and test_edges.pt files.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        valid_edges.pt: Dump of tensor memroy for edges in the validation set.
+        test_edges.pt: Dump of tensor memroy for edges in the testing set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+        split: The proportion of the input data that will be used for
+            validation and testing during training. The argument takes a tuple
+            of length two where the first value is the proportion of validation
+            set and the second value is the proportion of testing set.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     HETIONET_URL = "https://github.com/hetio/hetionet/raw/master/hetnet/tsv/hetionet-v1.0-edges.sif.gz"
-    download_path = download_file(HETIONET_URL, output_dir)
+    download_path = download_file(HETIONET_URL, data_dir)
     extract_file(download_path)
 
-    return general_parser([str(Path(output_dir) /
+    return general_parser([str(Path(data_dir) /
                            Path("hetionet-v1.0-edges.sif"))], ["srd"],
-                          output_dir, num_partitions=num_partitions,
+                          data_dir, num_partitions=num_partitions,
                           dataset_split=split)
 
 
-def kinships(output_dir, num_partitions=1, split=(.05, .05)):
+def kinships(data_dir, num_partitions=1, split=(.05, .05)):
+    """Preprocesses the dataset kinships.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt, valid_edges.pt and test_edges.pt files.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        valid_edges.pt: Dump of tensor memroy for edges in the validation set.
+        test_edges.pt: Dump of tensor memroy for edges in the testing set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+        split: The proportion of the input data that will be used for
+            validation and testing during training. The argument takes a tuple
+            of length two where the first value is the proportion of validation
+            set and the second value is the proportion of testing set.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     KINSHIPS_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/kinship/kinship.data"
-    download_path = download_file(KINSHIPS_URL, output_dir)
+    download_path = download_file(KINSHIPS_URL, data_dir)
     edges = []
     pattern = re.compile("^(?P<rel>[a-z]+)" +
                          r"\((?P<n1>[A-Za-z]+).{2}(?P<n2>[A-Za-z]+)\)\n$")
@@ -203,133 +564,372 @@ def kinships(output_dir, num_partitions=1, split=(.05, .05)):
         node_2 = m.group("n2")
         edges.append([node_1, rel, node_2])
 
-    if (Path(output_dir) / Path("sample_edges.txt")).exists():
-        (Path(output_dir) / Path("sample_edges.txt")).unlink()
+    if (Path(data_dir) / Path("sample_edges.txt")).exists():
+        (Path(data_dir) / Path("sample_edges.txt")).unlink()
     np.random.shuffle(edges)
-    np.savetxt((Path(output_dir) / Path("sample_edges.txt")), edges, fmt="%s",
+    np.savetxt((Path(data_dir) / Path("sample_edges.txt")), edges, fmt="%s",
                delimiter="\t", newline="\n")
 
-    return general_parser([str(Path(output_dir) / Path("sample_edges.txt"))],
-                          ["srd"], output_dir, dataset_split=split)
+    return general_parser([str(Path(data_dir) / Path("sample_edges.txt"))],
+                          ["srd"], data_dir, dataset_split=split)
 
 
-def openbiolink_hq(output_dir, num_partitions=1):
+def openbiolink_hq(data_dir, num_partitions=1):
+    """Preprocesses the dataset openbiolink_hq.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OPENBIOLINK_HQ_URL = "https://zenodo.org/record/3834052/files/HQ_DIR.zip?download=1"
-    download_path = download_file(OPENBIOLINK_HQ_URL, output_dir)
+    download_path = download_file(OPENBIOLINK_HQ_URL, data_dir)
     extract_file(download_path)
 
     return general_parser(
-        [str(Path(output_dir) /
+        [str(Path(data_dir) /
          Path("HQ_DIR/train_test_data/train_sample.csv")),
-         str(Path(output_dir) /
+         str(Path(data_dir) /
          Path("HQ_DIR/train_test_data/val_sample.csv")),
-         str(Path(output_dir) /
+         str(Path(data_dir) /
          Path("HQ_DIR/train_test_data/test_sample.csv"))],
-        ["srd"], output_dir, num_partitions=num_partitions, num_line_skip=0)
+        ["srd"], data_dir, num_partitions=num_partitions, num_line_skip=0)
 
 
-def openbiolink_lq(output_dir, num_partitions=1):
+def openbiolink_lq(data_dir, num_partitions=1):
+    """Preprocesses the dataset openbiolink_lq.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OPENBIOLINK_LQ_URL = "https://samwald.info/res/OpenBioLink_2020_final/ALL_DIR.zip"
-    download_path = download_file(OPENBIOLINK_LQ_URL, output_dir)
+    download_path = download_file(OPENBIOLINK_LQ_URL, data_dir)
     extract_file(download_path)
 
     return general_parser(
-        [str(Path(output_dir) /
+        [str(Path(data_dir) /
          Path("ALL_DIR/train_test_data/train_sample.csv")),
-         str(Path(output_dir) /
+         str(Path(data_dir) /
          Path("ALL_DIR/train_test_data/val_sample.csv")),
-         str(Path(output_dir) /
+         str(Path(data_dir) /
          Path("ALL_DIR/train_test_data/test_sample.csv"))],
-        ["srd"], output_dir, num_partitions=num_partitions, num_line_skip=0)
+        ["srd"], data_dir, num_partitions=num_partitions, num_line_skip=0)
 
 
-def ogbl_biokg(output_dir, num_partitions=1):
+def ogbl_biokg(data_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_biokg.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OGBL_BIOKG_URL = "https://snap.stanford.edu/ogb/data/linkproppred/biokg.zip"
-    download_path = download_file(OGBL_BIOKG_URL, output_dir)
+    download_path = download_file(OGBL_BIOKG_URL, data_dir)
     extract_file(download_path)
-    files = [str(Path(output_dir) / Path("biokg/split/random/train.pt")),
-             str(Path(output_dir) / Path("biokg/split/random/valid.pt")),
-             str(Path(output_dir) / Path("biokg/split/random/test.pt"))]
+    files = [str(Path(data_dir) / Path("biokg/split/random/train.pt")),
+             str(Path(data_dir) / Path("biokg/split/random/valid.pt")),
+             str(Path(data_dir) / Path("biokg/split/random/test.pt"))]
 
-    return parse_ogbl(files, True, output_dir, num_partitions=num_partitions)
+    return parse_ogbl(files, True, data_dir, num_partitions=num_partitions)
 
 
-def ogbl_ppa(output_dir, num_partitions=1):
+def ogbl_ppa(data_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_ppa.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OGBL_PPA_URL = "https://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip"
-    download_path = download_file(OGBL_PPA_URL, output_dir)
+    download_path = download_file(OGBL_PPA_URL, data_dir)
     extract_file(download_path)
-    files = [str(Path(output_dir) / Path("ppassoc/split/throughput/train.pt")),
-             str(Path(output_dir) / Path("ppassoc/split/throughput/valid.pt")),
-             str(Path(output_dir) / Path("ppassoc/split/throughput/test.pt"))]
+    files = [str(Path(data_dir) / Path("ppassoc/split/throughput/train.pt")),
+             str(Path(data_dir) / Path("ppassoc/split/throughput/valid.pt")),
+             str(Path(data_dir) / Path("ppassoc/split/throughput/test.pt"))]
 
-    return parse_ogbl(files, False, output_dir, num_partitions=num_partitions)
+    return parse_ogbl(files, False, data_dir, num_partitions=num_partitions)
 
 
-def ogbl_ddi(output_dir, num_partitions=1):
+def ogbl_ddi(data_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_ddi.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OGBL_DDI_URL = "https://snap.stanford.edu/ogb/data/linkproppred/ddi.zip"
-    download_path = download_file(OGBL_DDI_URL, output_dir)
+    download_path = download_file(OGBL_DDI_URL, data_dir)
     extract_file(download_path)
-    files = [str(Path(output_dir) / Path("ddi/split/target/train.pt")),
-             str(Path(output_dir) / Path("ddi/split/target/valid.pt")),
-             str(Path(output_dir) / Path("ddi/split/target/test.pt"))]
+    files = [str(Path(data_dir) / Path("ddi/split/target/train.pt")),
+             str(Path(data_dir) / Path("ddi/split/target/valid.pt")),
+             str(Path(data_dir) / Path("ddi/split/target/test.pt"))]
 
-    return parse_ogbl(files, False, output_dir, num_partitions=num_partitions)
+    return parse_ogbl(files, False, data_dir, num_partitions=num_partitions)
 
 
-def ogbl_collab(output_dir, num_partitions=1):
+def ogbl_collab(data_dir, num_partitions=1):
+    """Preprocesses the dataset ogbl_collab.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OGBL_COLLAB_URL = "https://snap.stanford.edu/ogb/data/linkproppred/collab.zip"
-    download_path = download_file(OGBL_COLLAB_URL, output_dir)
+    download_path = download_file(OGBL_COLLAB_URL, data_dir)
     extract_file(download_path)
-    files = [str(Path(output_dir) / Path("collab/split/time/train.pt")),
-             str(Path(output_dir) / Path("collab/split/time/valid.pt")),
-             str(Path(output_dir) / Path("collab/split/time/test.pt"))]
+    files = [str(Path(data_dir) / Path("collab/split/time/train.pt")),
+             str(Path(data_dir) / Path("collab/split/time/valid.pt")),
+             str(Path(data_dir) / Path("collab/split/time/test.pt"))]
 
-    return parse_ogbl(files, False, output_dir, num_partitions=num_partitions)
+    return parse_ogbl(files, False, data_dir, num_partitions=num_partitions)
 
 
-def ogbn_arxiv(output_dir, num_partitions=1):
+def ogbn_arxiv(data_dir, num_partitions=1):
+    """Preprocesses the dataset ogbn_arxiv.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OGBN_ARXIV_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip"
-    download_path = download_file(OGBN_ARXIV_URL, output_dir)
+    download_path = download_file(OGBN_ARXIV_URL, data_dir)
     extract_file(download_path)
-    files = [str(Path(output_dir) / Path("arxiv/split/time/train.csv.gz")),
-             str(Path(output_dir) / Path("arxiv/split/time/valid.csv.gz")),
-             str(Path(output_dir) / Path("arxiv/split/time/test.csv.gz")),
-             str(Path(output_dir) / Path("arxiv/raw/edge.csv.gz"))]
+    files = [str(Path(data_dir) / Path("arxiv/split/time/train.csv.gz")),
+             str(Path(data_dir) / Path("arxiv/split/time/valid.csv.gz")),
+             str(Path(data_dir) / Path("arxiv/split/time/test.csv.gz")),
+             str(Path(data_dir) / Path("arxiv/raw/edge.csv.gz"))]
 
-    return parse_ogbn(files, output_dir, num_partitions=num_partitions)
+    return parse_ogbn(files, data_dir, num_partitions=num_partitions)
 
 
-def ogbn_proteins(output_dir, num_partitions=1):
+def ogbn_proteins(data_dir, num_partitions=1):
+    """Preprocesses the dataset ogbn_proteins.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OGBN_PROTEINS_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip"
-    download_path = download_file(OGBN_PROTEINS_URL, output_dir)
+    download_path = download_file(OGBN_PROTEINS_URL, data_dir)
     extract_file(download_path)
-    files = [str(Path(output_dir) /
+    files = [str(Path(data_dir) /
              Path("proteins/split/species/train.csv.gz")),
-             str(Path(output_dir) /
+             str(Path(data_dir) /
              Path("proteins/split/species/valid.csv.gz")),
-             str(Path(output_dir) /
+             str(Path(data_dir) /
              Path("proteins/split/species/test.csv.gz")),
-             str(Path(output_dir) / Path("proteins/raw/edge.csv.gz"))]
+             str(Path(data_dir) / Path("proteins/raw/edge.csv.gz"))]
 
-    return parse_ogbn(files, output_dir, num_partitions=num_partitions)
+    return parse_ogbn(files, data_dir, num_partitions=num_partitions)
 
 
-def ogbn_products(output_dir, num_partitions=1):
+def ogbn_products(data_dir, num_partitions=1):
+    """Preprocesses the dataset ogbn_products.
+
+    During preprocessing, Marius has randomly assigned integer ids to each node
+    and edge_type, where the mappings to the original ids are stored in
+    node_mapping.txt and rel_mapping.txt.
+    The edge list in original dataset files is then converted to an [|E|, 3]
+    int32 tensor, shuffled and then the contents of the tensor are written to 
+    the train_edges.pt file.
+    After the preprocess, the following files will be created in the designated
+        directory:
+        train_edges.pt: Dump of tensor memory for edges in the training set.
+        node_mapping.txt: Mapping of original node ids to unique int32 ids.
+        rel_mapping.txt: Mapping of original edge_type ids to unique int32 ids.
+
+    Args:
+        data_dir: The directory where the original dataset files and
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset. In the mean time, the original
+        dataset files are downloaded and the preprocessed data files described
+        above are created. All of these files are saved in data_dir.
+    """
     OGBN_PRODUCTS_URL = "http://snap.stanford.edu/ogb/data/nodeproppred/products.zip"
-    download_path = download_file(OGBN_PRODUCTS_URL, output_dir)
+    download_path = download_file(OGBN_PRODUCTS_URL, data_dir)
     extract_file(download_path)
-    files = [str(Path(output_dir) /
+    files = [str(Path(data_dir) /
              Path("products/split/sales_ranking/train.csv.gz")),
-             str(Path(output_dir) /
+             str(Path(data_dir) /
              Path("products/split/sales_ranking/valid.csv.gz")),
-             str(Path(output_dir) /
+             str(Path(data_dir) /
              Path("products/split/sales_ranking/test.csv.gz")),
-             str(Path(output_dir) / Path("products/raw/edge.csv.gz"))]
+             str(Path(data_dir) / Path("products/raw/edge.csv.gz"))]
 
-    return parse_ogbn(files, output_dir, num_partitions=num_partitions)
+    return parse_ogbn(files, data_dir, num_partitions=num_partitions)
 
 
-def parse_ogbn(files, output_dir, num_partitions=1):
+def parse_ogbn(files, data_dir, num_partitions=1):
+    """Parse ogbn datasets.
+
+    Retrieves the graph data from downloaded ogbn dataset files.
+
+    Args:
+        files: The original ogbn dataset files.
+        data_dir: The directory where the original dataset files and 
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset.
+    """
     splits = []
     for file in files[0:-1]:
         nodes = pd.read_csv(file, compression='gzip', header=None)
@@ -341,23 +941,38 @@ def parse_ogbn(files, output_dir, num_partitions=1):
     valid_edges = edges.loc[np.in1d(edges[0], splits[1])]
     test_edges = edges.loc[np.in1d(edges[0], splits[2])]
 
-    train_edges.to_csv(str(Path(output_dir) /
+    train_edges.to_csv(str(Path(data_dir) /
                        Path("train.txt")), sep="\t", header=False, index=False)
-    valid_edges.to_csv(str(Path(output_dir) /
+    valid_edges.to_csv(str(Path(data_dir) /
                        Path("valid.txt")), sep="\t", header=False, index=False)
-    test_edges.to_csv(str(Path(output_dir) /
+    test_edges.to_csv(str(Path(data_dir) /
                       Path("test.txt")), sep="\t", header=False, index=False)
 
     stats = general_parser(
-                    [str(Path(output_dir) / Path("train.txt")),
-                     str(Path(output_dir) / Path("valid.txt")),
-                     str(Path(output_dir) / Path("test.txt"))],
-                    ["sd"], output_dir,
+                    [str(Path(data_dir) / Path("train.txt")),
+                     str(Path(data_dir) / Path("valid.txt")),
+                     str(Path(data_dir) / Path("test.txt"))],
+                    ["sd"], data_dir,
                     num_partitions=num_partitions)
     return stats
 
 
-def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
+def parse_ogbl(files, has_rel, data_dir, num_partitions=1):
+    """Parse ogbl datasets.
+
+    Retrieves the graph from downloaded ogbl dataset files.
+
+    Args:
+        files: The original obgl dataset files.
+        has_rel: Indicates whether the current dataset has relation edges.
+        data_dir: The directory where the original dataset files and 
+            preprocessed files will be stored.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
+
+    Returns:
+        The statistics of current dataset.
+    """
     if has_rel is True:
         train_idx = torch.load(str(files[0]))
         valid_idx = torch.load(str(files[1]))
@@ -376,37 +991,51 @@ def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
         valid_list = torch.load(files[1]).get("edge")
         test_list = torch.load(files[2]).get("edge")
 
-    np.savetxt(str(Path(output_dir) / Path("train.txt")),
+    np.savetxt(str(Path(data_dir) / Path("train.txt")),
                train_list, fmt="%s", delimiter="\t", newline="\n")
-    np.savetxt(str(Path(output_dir) / Path("valid.txt")),
+    np.savetxt(str(Path(data_dir) / Path("valid.txt")),
                valid_list, fmt="%s", delimiter="\t", newline="\n")
-    np.savetxt(str(Path(output_dir) / Path("test.txt")),
+    np.savetxt(str(Path(data_dir) / Path("test.txt")),
                test_list, fmt="%s", delimiter="\t", newline="\n")
     print("Conversion completed.")
 
     if has_rel is True:
         stats = general_parser(
-            [str(Path(output_dir) / Path("train.txt")),
-             str(Path(output_dir) / Path("valid.txt")),
-             str(Path(output_dir) / Path("test.txt"))], ["srd"],
-            output_dir, num_partitions=num_partitions)
+            [str(Path(data_dir) / Path("train.txt")),
+             str(Path(data_dir) / Path("valid.txt")),
+             str(Path(data_dir) / Path("test.txt"))], ["srd"],
+            data_dir, num_partitions=num_partitions)
     else:
         stats = general_parser(
-            [str(Path(output_dir) / Path("train.txt")),
-             str(Path(output_dir) / Path("valid.txt")),
-             str(Path(output_dir) / Path("test.txt"))], ["sd"],
-            output_dir, num_partitions=num_partitions)
+            [str(Path(data_dir) / Path("train.txt")),
+             str(Path(data_dir) / Path("valid.txt")),
+             str(Path(data_dir) / Path("test.txt"))], ["sd"],
+            data_dir, num_partitions=num_partitions)
     return stats
 
 
-def download_file(url, output_dir):
-    output_dir = Path(output_dir)
-    if not output_dir.exists():
-        output_dir.mkdir()
+def download_file(url, data_dir):
+    """Downloads files.
+
+    Downloads the files from the input url to the designated data directory.
+
+    Args:
+        url: The url to the files to be downloaded.
+        data_dir: The location to save all downloaded files.
+
+    Returns:
+        The path to the downloaded files.
+
+    Raises:
+        RuntimeError: An error occurred when downloading is failed.
+    """
+    data_dir = Path(data_dir)
+    if not data_dir.exists():
+        data_dir.mkdir()
 
     url_components = urlparse(url)
     filename = Path(url_components.path + url_components.query).name
-    filepath = output_dir / filename
+    filepath = data_dir / filename
 
     if filepath.is_file():
         print(f"File already exists: {filepath} May be outdated!")
@@ -422,6 +1051,23 @@ def download_file(url, output_dir):
 
 
 def extract_file(filepath):
+    """Extracts files from a compressed file.
+
+    Extracts the files pointed by filepath. The supported file formats include
+    gzip, gz, tar.gz, tgz, tar, bz2, zip.
+
+    Args:
+        filepath: The path to the files needed to be extracted.
+
+    Returns:
+        The directory contains all extracted files.
+
+    Raises:
+        RuntimeError: An error occurred when the file format cannot be 
+            recognized or the file to be extracted is not 
+            complete. Detailed information is given if the exception is raised.
+
+    """
     print("Extracting")
     try:
         if tarfile.is_tarfile(str(filepath)):
@@ -470,6 +1116,24 @@ def extract_file(filepath):
 
 
 def update_param(config_dict, arg_dict):
+    """Updates parametars.
+
+    Updates parameters for the configuration files to be generated according to
+        command line arguments.
+
+    Args:
+        config_dict: The dict containing all configuration parameters and their
+            default values.
+        arg_dict: The dict containing all command line arguments.
+
+    Returns:
+        The updated configuration dict.
+
+    Raises:
+        RuntimeError: An error occurred if users specify a certain
+            configuration parameter while the command line argument
+            generate_config is not set.
+    """
     if arg_dict.get("generate_config") is None:
         for key in config_dict:
             if arg_dict.get(key) is not None:
@@ -501,6 +1165,12 @@ def update_param(config_dict, arg_dict):
 
 
 def set_args():
+    """Sets command line arguments for this preprocess module.
+
+    Returns:
+        The parser containing all command line arguments and the configuration
+        dict containing all parameters and their default values.
+    """
     parser = argparse.ArgumentParser(
                 description='Preprocess Datasets', prog='preprocess',
                 formatter_class=argparse.RawTextHelpFormatter,
@@ -566,6 +1236,20 @@ def set_args():
 
 
 def parse_args(config_dict, args):
+    """Parse command line arguments.
+
+    Identifies the dataset to be preprocess and update configuration parameters
+        if they are set by command line arguments.
+
+    Args:
+        config_dict: The dict containing all configuration parameters and their
+            default values.
+        args: All command line arguments.
+
+    Returns:
+        The dict containing updated configuration parameters and the dict
+        containing parsed command line arguments. 
+    """
     arg_dict = vars(args)
     config_dict = update_param(config_dict, arg_dict)
     set_up_files(args.output_directory)
