@@ -58,27 +58,6 @@ Decoder
 	:protected-members:
 	:undoc-members:
 
-.. doxygenclass:: LossFunction
-	:project: Marius
-	:members:
-	:private-members:
-	:protected-members:
-	:undoc-members:
-
-.. doxygenclass:: SoftMax
-	:project: Marius
-	:members:
-	:private-members:
-	:protected-members:
-	:undoc-members:
-
-.. doxygenclass:: RankingLoss
-	:project: Marius
-	:members:
-	:private-members:
-	:protected-members:
-	:undoc-members:
-
 .. doxygenclass:: LinkPredictionDecoder
 	:project: Marius
 	:members:

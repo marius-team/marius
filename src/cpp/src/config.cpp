@@ -260,8 +260,6 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
     float regularization_coef; // Regularization Coefficient
     int regularization_norm; // Norm of the regularization
     OptimizerType optimizer_type; string s_optimizer_type; // Optimizer to use
-    LossFunctionType loss_function_type; string s_loss_function_type; // Loss to use
-    float margin; // Margin to use in ranking loss
     bool average_gradients; // If true gradients will be averaged when accumulated, summed if false
     bool synchronous; // If true training will be synchronous
     int num_epochs; // Number of epochs to train
@@ -277,13 +275,19 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
     f_var_map.push_back((OptInfo<float>){&regularization_coef, 2e-6, "training", "regularization_coef", {0, FLOAT_MAX}});
     i_var_map.push_back((OptInfo<int>){&regularization_norm, 2, "training", "regularization_norm", {0, INT32_MAX}});
     s_var_map.push_back((OptInfo<std::string>){&s_optimizer_type, "Adagrad", "training", "optimizer"});
-    s_var_map.push_back((OptInfo<std::string>){&s_loss_function_type, "SoftMax", "training", "loss"});
-    f_var_map.push_back((OptInfo<float>){&margin, 0, "training", "margin", {0, FLOAT_MAX}});
     b_var_map.push_back((OptInfo<bool>){&average_gradients, false, "training", "average_gradients"});
     b_var_map.push_back((OptInfo<bool>){&synchronous, false, "training", "synchronous"});
     i_var_map.push_back((OptInfo<int>){&num_epochs, 10, "training", "num_epochs", {1, INT32_MAX}});
     i_var_map.push_back((OptInfo<int>){&checkpoint_interval, 9999, "training", "checkpoint_interval", {1, INT32_MAX}});
     i_var_map.push_back((OptInfo<int>){&shuffle_interval, 1, "training", "shuffle_interval", {1, INT32_MAX}});
+
+    // LossOptions
+    LossFunctionType loss_function_type; string s_loss_function_type; // Loss to use
+    float margin; // Margin to use in ranking loss
+    ReductionType reduction_type; string s_reduction_type; // reduction method to use
+    s_var_map.push_back((OptInfo<std::string>){&s_loss_function_type, "SoftMax", "loss", "loss"});
+    f_var_map.push_back((OptInfo<float>){&margin, 0, "loss", "margin", {0, FLOAT_MAX}});
+    s_var_map.push_back((OptInfo<std::string>){&s_reduction_type, "Sum", "loss", "reduction"});
 
     // Training pipeline options
     int max_batches_in_flight; // Vary the amount of batches allowed in the pipeline at once
@@ -580,11 +584,28 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
         loss_function_type = LossFunctionType::RankingLoss;
     } else if (s_loss_function_type == "SoftMax") {
         loss_function_type = LossFunctionType::SoftMax;
+    } else if (s_loss_function_type == "BCEAfterSigmoid") {
+        loss_function_type = LossFunctionType::BCEAfterSigmoidLoss;
+    } else if (s_loss_function_type == "BCEWithLogits") {
+        loss_function_type = LossFunctionType::BCEWithLogitsLoss;
+    } else if (s_loss_function_type == "MSE") {
+        loss_function_type = LossFunctionType::MSELoss;
+    } else if (s_loss_function_type == "SoftPlus") {
+        loss_function_type = LossFunctionType::SoftPlusLoss;
     } else {
-        SPDLOG_ERROR("Unrecognized loss function {}. Options are [Ranking, SoftMax].", s_loss_function_type);
+        SPDLOG_ERROR("Unrecognized loss function {}. Options are [SoftMax, Ranking, BCEAfterSigmoid, BCEWithLogits, MSE, SoftPlus].", s_loss_function_type);
         exit(-1);
     }
     
+    if (s_reduction_type == "Sum") {
+        reduction_type = ReductionType::Sum;
+    } else if (s_reduction_type == "Mean") {
+        reduction_type = ReductionType::Mean;
+    } else {
+        SPDLOG_ERROR("Unrecognized reduction type {}. Options are [Sum, Mean].", s_reduction_type);
+        exit(-1);
+    }
+
     if (s_eval_negative_sampling_access == "UniformCrossPartition") {
         eval_negative_sampling_access = NegativeSamplingAccess::UniformCrossPartition;
     } else if (s_eval_negative_sampling_access == "Uniform" ){
@@ -656,13 +677,17 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
         regularization_coef,
         regularization_norm,
         optimizer_type,
-        loss_function_type,
-        margin,
         average_gradients,
         synchronous,
         num_epochs,
         checkpoint_interval,
         shuffle_interval
+    };
+
+    LossOptions loss_options = {
+        loss_function_type,
+        margin,
+        reduction_type
     };
 
     TrainingPipelineOptions training_pipeline_options = {
@@ -726,6 +751,7 @@ MariusOptions parseConfig(int64_t argc, char *argv[]) {
         model_options,
         storage_options,
         training_options,
+        loss_options,
         training_pipeline_options,
         evaluation_options,
         evaluation_pipeline_options,
@@ -742,6 +768,8 @@ void logConfig() {
     SPDLOG_DEBUG("########## Storage Options ##########");
 
     SPDLOG_DEBUG("########## Training Options ##########");
+
+    SPDLOG_DEBUG("########## Loss Options ##########");
 
     SPDLOG_DEBUG("########## Training Pipeline Options ##########");
 

@@ -2,9 +2,9 @@
 // Created by Jason Mohoney on 2019-11-20.
 //
 
-#include "decoder.h"
-
 #include "config.h"
+#include "decoder.h"
+#include "loss.h"
 
 using std::tuple;
 using std::make_tuple;
@@ -103,24 +103,6 @@ Embeddings TranslationOperator::operator()(const Embeddings &embs, const Relatio
 Embeddings NoOp::operator()(const Embeddings &embs, const Relations &rels) {
     (void) rels;
     return embs;
-}
-
-torch::Tensor SoftMax::operator()(const torch::Tensor &pos_scores, const torch::Tensor &neg_scores) {
-    auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(pos_scores.device());
-    auto scores = torch::cat({pos_scores.unsqueeze(1), neg_scores.logsumexp(1, true)}, 1);
-    torch::nn::functional::CrossEntropyFuncOptions options;
-    options.reduction(torch::kSum);
-    auto loss = torch::nn::functional::cross_entropy(scores, pos_scores.new_zeros({}, device_options).expand(pos_scores.size(0)), options);
-    return loss;
-}
-
-torch::Tensor RankingLoss::operator()(const torch::Tensor &pos_scores, const torch::Tensor &neg_scores) {
-    auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(pos_scores.device());
-    torch::nn::functional::MarginRankingLossFuncOptions options;
-    options.reduction(torch::kSum);
-    options.margin(margin_);
-    auto loss = torch::nn::functional::margin_ranking_loss(neg_scores, pos_scores.unsqueeze(1), pos_scores.new_full({1, 1}, -1, device_options), options);
-    return loss;
 }
 
 NodeClassificationDecoder::NodeClassificationDecoder() {}
@@ -224,32 +206,37 @@ void LinkPredictionDecoder::forward(Batch *batch, bool train) {
 }
 
 DistMult::DistMult() {
-    if (marius_options.training.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax();
-    } else if (marius_options.training.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.training.margin);
-    }
+    loss_function_ = getLossFunction(marius_options.loss.loss_function_type);
     comparator_ = new DotCompare();
     relation_operator_ = new HadamardOperator();
 }
 
 TransE::TransE() {
-    if (marius_options.training.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax();
-    } else if (marius_options.training.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.training.margin);
-    }
+    loss_function_ = getLossFunction(marius_options.loss.loss_function_type);
     comparator_ = new CosineCompare();
     relation_operator_ = new TranslationOperator();
 }
 
 ComplEx::ComplEx() {
-    if (marius_options.training.loss_function_type == LossFunctionType::SoftMax) {
-        loss_function_ = new SoftMax();
-    } else if (marius_options.training.loss_function_type == LossFunctionType::RankingLoss) {
-        loss_function_ = new RankingLoss(marius_options.training.margin);
-    }
+    loss_function_ = getLossFunction(marius_options.loss.loss_function_type);
     comparator_ = new DotCompare();
     relation_operator_ = new ComplexHadamardOperator();
 }
 
+LossFunction *getLossFunction(LossFunctionType loss_function_type){
+    if (loss_function_type == LossFunctionType::SoftMax) {
+        return new SoftMax(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::RankingLoss) {
+        return new RankingLoss(marius_options.loss.margin, marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::BCEAfterSigmoidLoss) {
+        return new BCEAfterSigmoidLoss(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::BCEWithLogitsLoss) {
+        return new BCEWithLogitsLoss(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::MSELoss) {
+        return new MSELoss(marius_options.loss.reduction_type);
+    } else if (loss_function_type == LossFunctionType::SoftPlusLoss) {
+        return new SoftPlusLoss(marius_options.loss.reduction_type);
+    } else {
+       return NULL;
+    }
+}

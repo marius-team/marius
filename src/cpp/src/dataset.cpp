@@ -38,10 +38,13 @@ DataSet::DataSet(Storage *edges, Storage *embeddings, Storage *emb_state, Storag
     timestamp_ = global_timestamp_allocator.getTimestamp();
 
     if (marius_options.storage.embeddings == BackendType::PartitionBuffer) {
+        SPDLOG_DEBUG("Setup partition ordering");
         batches_ = ((PartitionBufferStorage *) node_embeddings_)->shuffleBeforeEvictions(batches_);
         batch_iterator_ = batches_.begin();
+        SPDLOG_DEBUG("Batches shuffled");
         ((PartitionBufferStorage *) node_embeddings_)->setOrdering(batches_);
         ((PartitionBufferStorage *) node_embeddings_optimizer_state_)->setOrdering(batches_);
+        SPDLOG_DEBUG("Edge bucket ordering set");
     }
 }
 
@@ -61,9 +64,9 @@ DataSet::DataSet(Storage *train_edges, Storage *eval_edges, Storage *test_edges,
     test_edges_ = test_edges;
     edges_ = validation_edges_;
     num_edges_ = edges_->getDim0();
-    SPDLOG_DEBUG("Loaded Edges");
 
     if (marius_options.evaluation.filtered_evaluation) {
+        SPDLOG_DEBUG("Filtered evaluation");
         train_edges_->load();
         validation_edges_->load();
         test_edges_->load();
@@ -100,6 +103,7 @@ DataSet::DataSet(Storage *train_edges, Storage *eval_edges, Storage *test_edges,
                                    embeddings->getDim0(),
                                    marius_options.model.embedding_size,
                                    marius_options.storage.embeddings_dtype, torch::kCPU);
+        SPDLOG_DEBUG("Node embeddings for initialized");
     } else {
         node_embeddings_ = embeddings;
     }
@@ -109,6 +113,7 @@ DataSet::DataSet(Storage *train_edges, Storage *eval_edges, Storage *test_edges,
     num_relations_ = src_relations_->getDim0();
 
     initializeBatches();
+    SPDLOG_DEBUG("Batches initialized");
     batch_iterator_ = batches_.begin();
     timestamp_ = global_timestamp_allocator.getTimestamp();
 }
@@ -132,7 +137,6 @@ DataSet::DataSet(Storage *test_edges, Storage *embeddings, Storage *src_relation
         SPDLOG_ERROR("Filtered MRR requires supplying train and test edges");
         exit(-1);
     }
-
 
     if (marius_options.storage.embeddings == BackendType::PartitionBuffer) {
         node_embeddings_ = new InMemory(marius_options.path.experiment_directory
@@ -173,6 +177,7 @@ void DataSet::initializeBatches() {
 
     vector<Batch *> batches;
     if (marius_options.storage.embeddings == BackendType::PartitionBuffer && train_) {
+        SPDLOG_DEBUG("Getting batches from partitions");
         edge_bucket_sizes_ = edges_->getEdgeBucketSizes();
         for (auto iter = edge_bucket_sizes_.begin(); iter != edge_bucket_sizes_.end(); iter++) {
             batch_size = *iter;
@@ -193,7 +198,9 @@ void DataSet::initializeBatches() {
         auto ordered_batches = applyOrdering(batches_);
         batches_ = ordered_batches;
         splitBatches();
+        SPDLOG_DEBUG("Split edge buckets into batches");
     } else {
+        SPDLOG_DEBUG("Getting batches from edge list");
         batch_size = marius_options.training.batch_size;
         if (!train_) {
             batch_size = marius_options.evaluation.batch_size;
@@ -785,12 +792,12 @@ void DataSet::loadStorage() {
         src_relations_optimizer_state_->load();
         dst_relations_->load();
         dst_relations_optimizer_state_->load();
-        SPDLOG_DEBUG("Loaded Training Set");
+        SPDLOG_DEBUG("Loaded training set");
     } else {
         node_embeddings_->load();
         src_relations_->load();
         dst_relations_->load();
-        SPDLOG_DEBUG("Loaded Evaluation Set");
+        SPDLOG_DEBUG("Loaded evaluation set");
     }
     storage_loaded_ = true;
 }
@@ -804,12 +811,12 @@ void DataSet::unloadStorage() {
         src_relations_optimizer_state_->unload(true);
         dst_relations_->unload(true);
         dst_relations_optimizer_state_->unload(true);
-        SPDLOG_DEBUG("Unloaded Training Set");
+        SPDLOG_DEBUG("Unloaded training set");
     } else {
         node_embeddings_->unload();
         src_relations_->unload();
         dst_relations_->unload();
-        SPDLOG_DEBUG("Unloaded Evaluation Set");
+        SPDLOG_DEBUG("Unloaded evaluation set");
     }
     storage_loaded_ = false;
 }

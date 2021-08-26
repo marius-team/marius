@@ -1,23 +1,33 @@
 # Marius #
 
-Marius is a system under active development for training embeddings for large-scale graphs on a single machine.
-
-Training on large scale graphs requires a large amount of data movement to get embedding parameters from storage to the computational device. 
-Marius is designed to mitigate/reduce data movement overheads using:
-- Pipelined training and IO
-- Partition caching and buffer-aware data orderings
+Marius is a system for large-scale graph learning. The system is currently in the alpha phase and is under active development.
 
 Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.org/abs/2101.08358), where experiment scripts and configurations can be found in the `osdi2021` branch.
+
+Currently we support:
+- Large-scale link prediction training
+- Preprocessing and training of datasets in CSV format (single-file)
+- Configuration file based API
+- Single GPU training and evaluation
+- Dataset sizes that fit in: GPU memory, CPU memory, and Disk.
+
+See `docs/user_guide` for more details.
+
+We are working on expanding the functionality of Marius to include:
+- Graph neural network support
+- Multi-GPU training
+- Node classification
+- Python API for user defined models, sampling and training procedures
 
 ## Requirements ##
 (Other versions may work, but are untested)
 * Ubuntu 18.04 or MacOS 10.15 
-* CUDA 10.1 or 10.2 (If using GPU training)
-* CuDNN 7 (If using GPU training)
+* CUDA >= 10 (If using GPU training)
 * pytorch >= 1.7
 * python >= 3.6
 * pip >= 21
-* GCC >= 9 (On Linux) or Clang 12.0 (On MacOS)
+* GCC >= 9 (On Linux) 
+* Clang >= 11 (On MacOS)
 * cmake >= 3.12
 * make >= 3.8
 
@@ -179,4 +189,17 @@ Arxiv Version:
       primaryClass={cs.LG}
 }
 ```
-OSDI Version (not yet available):
+OSDI Version:
+```
+@inproceedings {273733,
+                author = {Jason Mohoney and Roger Waleffe and Henry Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
+                title = {Marius: Learning Massive Graph Embeddings on a Single Machine},
+                booktitle = {15th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 21)},
+                year = {2021},
+                isbn = {978-1-939133-22-9},
+                pages = {533--549},
+                url = {https://www.usenix.org/conference/osdi21/presentation/mohoney},
+                publisher = {{USENIX} Association},
+                month = jul,
+}
+```
