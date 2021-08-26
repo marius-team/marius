@@ -54,8 +54,8 @@ def live_journal(data_dir, num_partitions=1, split=(.05, .05)):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
         split: The proportion of the input data that will be used for
             validation and testing during training. The argument takes a tuple
             of length two where the first value is the proportion of validation
@@ -93,8 +93,8 @@ def fb15k(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -136,8 +136,8 @@ def twitter(data_dir, num_partitions=1, split=(.05, .05)):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
         split: The proportion of the input data that will be used for
             validation and testing during training. The argument takes a tuple
             of length two where the first value is the proportion of validation
@@ -176,8 +176,8 @@ def freebase86m(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -217,8 +217,8 @@ def wn18(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -257,8 +257,8 @@ def fb15k_237(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -297,8 +297,8 @@ def wn18rr(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -337,8 +337,8 @@ def codex_s(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -378,8 +378,8 @@ def codex_m(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -417,8 +417,8 @@ def codex_l(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -458,8 +458,8 @@ def drkg(data_dir, num_partitions=1, split=(.05, .05)):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
         split: The proportion of the input data that will be used for
             validation and testing during training. The argument takes a tuple
             of length two where the first value is the proportion of validation
@@ -499,8 +499,8 @@ def hetionet(data_dir, num_partitions=1, split=(.05, .05)):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
         split: The proportion of the input data that will be used for
             validation and testing during training. The argument takes a tuple
             of length two where the first value is the proportion of validation
@@ -541,8 +541,8 @@ def kinships(data_dir, num_partitions=1, split=(.05, .05)):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
         split: The proportion of the input data that will be used for
             validation and testing during training. The argument takes a tuple
             of length two where the first value is the proportion of validation
@@ -598,8 +598,8 @@ def openbiolink_hq(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -638,8 +638,8 @@ def openbiolink_lq(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -678,8 +678,8 @@ def ogbl_biokg(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -714,8 +714,8 @@ def ogbl_ppa(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -750,8 +750,8 @@ def ogbl_ddi(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -786,8 +786,8 @@ def ogbl_collab(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -822,8 +822,8 @@ def ogbn_arxiv(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -859,8 +859,8 @@ def ogbn_proteins(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -899,8 +899,8 @@ def ogbn_products(data_dir, num_partitions=1):
     Args:
         data_dir: The directory where the original dataset files and
             preprocessed files will be stored.
-        num_partitions: The number of data partitions that will be used to
-            split the input graph.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset. In the mean time, the original
@@ -930,7 +930,8 @@ def parse_ogbn(files, data_dir, num_partitions=1):
         files: The original ogbn dataset files.
         data_dir: The directory where the original dataset files and 
             preprocessed files will be stored.
-        num_partitions: The number of data partitions.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset.
@@ -972,7 +973,8 @@ def parse_ogbl(files, has_rel, data_dir, num_partitions=1):
         has_rel: Indicates whether the current dataset has relation edges.
         data_dir: The directory where the original dataset files and 
             preprocessed files will be stored.
-        num_partitions: The number of data partitions.
+        num_partitions: The number of graph partitions that the graph nodes are
+            uniformly partitioned into.
 
     Returns:
         The statistics of current dataset.
@@ -1173,7 +1175,7 @@ def set_args():
 
     Returns:
         The parser containing all command line arguments and the configuration
-            dict containing all parameters and their default values.
+        dict containing all parameters and their default values.
     """
     parser = argparse.ArgumentParser(
                 description='Preprocess Datasets', prog='preprocess',
@@ -1252,7 +1254,7 @@ def parse_args(config_dict, args):
 
     Returns:
         The dict containing updated configuration parameters and the dict
-            containing parsed command line arguments. 
+        containing parsed command line arguments. 
     """
     arg_dict = vars(args)
     config_dict = update_param(config_dict, arg_dict)
