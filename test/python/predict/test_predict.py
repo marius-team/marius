@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import numpy as np
 import argparse
+import subprocess
 from marius.tools.preprocess import wn18
 from marius.tools.predict import parse_infer_list
 from marius.tools.predict import set_args
@@ -14,12 +15,12 @@ class TestPredict(unittest.TestCase):
     Tests for predict
     """
     dataset_dir = Path("./output_dir")
-    data_dir = Path("./data/")
+    data_dir = Path("./data/marius/")
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
     rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
-    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
-    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
-    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
+    node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
 
     @classmethod
     def setUpClass(self):
@@ -43,12 +44,13 @@ class TestPredict(unittest.TestCase):
         if Path("./output_dir").exists():
             shutil.rmtree(Path("./output_dir"))
 
+
     def test_cmd_line_infer_list(self):
         """
         Check if inference can be extracted from command line correctly
         """
         parser = set_args()
-        args = parser.parse_args(["./data", "./output_dir", "3", 
+        args = parser.parse_args(["./data/marius", "./output_dir", "3", 
                                   "-s", "s1", "-r", "r1"])
         args_dict = vars(args)
         self.assertEqual(args_dict.get("src"), "s1")
@@ -67,7 +69,7 @@ class TestPredict(unittest.TestCase):
                       ["08621598","_hypernym",""]]
         np.savetxt("./infer_list", infer_list, delimiter=",", fmt="%s")
         parser = set_args()
-        args = parser.parse_args(["./data", "./output_dir", "3", 
+        args = parser.parse_args(["./data/marius", "./output_dir", "3", 
                     "-f", "./infer_list", "-dc", "TransE"])
         args_dict = vars(args)
         self.assertEqual(args_dict.get("decoder"), "TransE")
@@ -92,7 +94,7 @@ class TestPredict(unittest.TestCase):
         
         np.savetxt("./infer_list", infer_list, delimiter=",", fmt="%s")
         parser = set_args()
-        args = parser.parse_args(["./data", "./output_dir", "3", 
+        args = parser.parse_args(["./data/marius/", "./output_dir", "3", 
                     "-f", "./infer_list", "-dc", "TransE", 
                     "-s", "s1", "-r", "r1"])
         args_dict = vars(args)
@@ -112,7 +114,7 @@ class TestPredict(unittest.TestCase):
                       ["03902220","_part_of",""],
                       ["","_hypernym","08102555"],
                       ["08621598","_hypernym",""]]
-        
+
         decoders = ["DisMult", "TransE", "ComplEx"]
         ks = [4,6,8]
 
@@ -122,5 +124,38 @@ class TestPredict(unittest.TestCase):
             self.assertEqual(top_nodes_list.shape[0], 4)
             self.assertEqual(top_nodes_list.shape[1], ks[i])
 
-    
+    def test_experiment_name(self):
+        """
+        Check if perform_link_prediction can handle embedding directory other
+        than ./data/marius/
+        """
+        data_dir = Path("./data/other_name/")
+        node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+        lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+        rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
         
+        if not Path("./data/other_name/embeddings").exists():
+            Path("./data/other_name/embeddings").mkdir(parents=True)
+        if not Path("./data/other_name/relations").exists():
+            Path("./data/other_name/relations").mkdir(parents=True)
+        
+        node_embs = np.random.rand(409430,).astype(np.float32).flatten().tofile(node_embs_file)
+        lhs_embs = np.random.rand(180,).astype(np.float32).flatten().tofile(lhs_embs_file)
+        rhs_embs = np.random.rand(180,).astype(np.float32).flatten().tofile(rhs_embs_file)
+
+        infer_list = [["01371092","_hypernym",""],
+                      ["03902220","_part_of",""],
+                      ["","_hypernym","08102555"],
+                      ["08621598","_hypernym",""]]
+
+        decoders = ["DisMult", "TransE", "ComplEx"]
+        ks = [4,6,8]
+
+        for i in range(len(decoders)):
+            top_nodes_list = np.array(perform_link_prediction(data_dir,
+                    self.dataset_dir, infer_list, ks[i], decoders[i]))
+            self.assertEqual(top_nodes_list.shape[0], 4)
+            self.assertEqual(top_nodes_list.shape[1], ks[i])
+        
+        self.data_dir = Path("./data/marius/")
+        print()

@@ -20,9 +20,9 @@ def get_embs(mapping_file, embs_file):
 def output_embeddings(data_dir, dataset_dir, output_dir, fmt):
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
     rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
-    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
-    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
-    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
+    node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
 
     node_embs = get_embs(node_mapping_file, node_embs_file)
     lhs_embs = get_embs(rel_mapping_file, lhs_embs_file)

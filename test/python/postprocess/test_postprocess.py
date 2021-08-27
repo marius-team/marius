@@ -13,12 +13,12 @@ class TestPostprocess(unittest.TestCase):
     Tests for postprocess
     """
     dataset_dir = Path("./output_dir")
-    data_dir = Path("./data/")
+    data_dir = Path("./data/marius")
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
     rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
-    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
-    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
-    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
+    node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
 
     @classmethod
     def setUpClass(self):
@@ -103,5 +103,30 @@ class TestPostprocess(unittest.TestCase):
         self.assertTrue((self.dataset_dir / Path("src_relations_embeddings.csv")).exists())
         self.assertTrue((self.dataset_dir / Path("dst_relations_embeddings.csv")).exists())
 
+    def test_experiment_name(self):
+        """
+        Check if output_embeddings can handle embedding directory other than
+            ./data/marius/
+        """
 
+        data_dir = Path("./data/other_name/")
+        node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+        lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+        rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
         
+        if not Path("./data/other_name/embeddings").exists():
+            Path("./data/other_name/embeddings").mkdir(parents=True)
+        if not Path("./data/other_name/relations").exists():
+            Path("./data/other_name/relations").mkdir(parents=True)
+        
+        node_embs = np.random.rand(409430,).astype(np.float32).flatten().tofile(node_embs_file)
+        lhs_embs = np.random.rand(180,).astype(np.float32).flatten().tofile(lhs_embs_file)
+        rhs_embs = np.random.rand(180,).astype(np.float32).flatten().tofile(rhs_embs_file)
+
+        node_embs, lhs_embs, rhs_embs = output_embeddings(self.data_dir, self.dataset_dir, Path("./output_dir"), "CSV")
+        self.assertTrue((self.dataset_dir / Path("node_embeddings.csv")).exists())
+        self.assertTrue((self.dataset_dir / Path("src_relations_embeddings.csv")).exists())
+        self.assertTrue((self.dataset_dir / Path("dst_relations_embeddings.csv")).exists())
+        self.assertEqual(node_embs.shape, (40943, 10))
+        self.assertEqual(lhs_embs.shape, (18, 10))
+        self.assertEqual(rhs_embs.shape, (18, 10))
