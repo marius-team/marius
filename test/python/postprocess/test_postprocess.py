@@ -35,7 +35,7 @@ class TestPostprocess(unittest.TestCase):
 
 
     @classmethod
-    def tearDownClass(self):s
+    def tearDownClass(self):
         if Path("./data").exists():
             shutil.rmtree(Path("./data"))
         
