@@ -14,12 +14,12 @@ class TestPredict(unittest.TestCase):
     Tests for predict
     """
     dataset_dir = Path("./output_dir")
-    data_dir = Path("./data/")
+    data_dir = Path("./data/marius/")
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
     rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
-    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
-    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
-    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
+    node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
 
     @classmethod
     def setUpClass(self):
@@ -48,7 +48,7 @@ class TestPredict(unittest.TestCase):
         Check if inference can be extracted from command line correctly
         """
         parser = set_args()
-        args = parser.parse_args(["./data", "./output_dir", "3", 
+        args = parser.parse_args(["./data/marius", "./output_dir", "3", 
                                   "-s", "s1", "-r", "r1"])
         args_dict = vars(args)
         self.assertEqual(args_dict.get("src"), "s1")
@@ -67,7 +67,7 @@ class TestPredict(unittest.TestCase):
                       ["08621598","_hypernym",""]]
         np.savetxt("./infer_list", infer_list, delimiter=",", fmt="%s")
         parser = set_args()
-        args = parser.parse_args(["./data", "./output_dir", "3", 
+        args = parser.parse_args(["./data/marius", "./output_dir", "3", 
                     "-f", "./infer_list", "-dc", "TransE"])
         args_dict = vars(args)
         self.assertEqual(args_dict.get("decoder"), "TransE")
@@ -92,7 +92,7 @@ class TestPredict(unittest.TestCase):
         
         np.savetxt("./infer_list", infer_list, delimiter=",", fmt="%s")
         parser = set_args()
-        args = parser.parse_args(["./data", "./output_dir", "3", 
+        args = parser.parse_args(["./data/marius/", "./output_dir", "3", 
                     "-f", "./infer_list", "-dc", "TransE", 
                     "-s", "s1", "-r", "r1"])
         args_dict = vars(args)

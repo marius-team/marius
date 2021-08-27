@@ -73,9 +73,9 @@ def transe_infer(node_emb, rel_emb, all_embs):
 def perform_link_prediction(data_dir, dataset_dir, infer_list, k, decoder):
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
     rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
-    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
-    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
-    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
+    node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
 
     node_mapping_dict, node_mapping_r_dict, node_embs = get_emb_dict(node_mapping_file, node_embs_file)
     top_nodes_list = []

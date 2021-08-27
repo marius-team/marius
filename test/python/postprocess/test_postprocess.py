@@ -13,12 +13,12 @@ class TestPostprocess(unittest.TestCase):
     Tests for postprocess
     """
     dataset_dir = Path("./output_dir")
-    data_dir = Path("./data/")
+    data_dir = Path("./data/marius")
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
     rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
-    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
-    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
-    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
+    node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
 
     @classmethod
     def setUpClass(self):
@@ -35,7 +35,7 @@ class TestPostprocess(unittest.TestCase):
 
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(self):s
         if Path("./data").exists():
             shutil.rmtree(Path("./data"))
         
