@@ -126,12 +126,10 @@ class TestPredict(unittest.TestCase):
 
     def test_experiment_name(self):
         """
-        Check if output_embeddings can handle embedding directory other than
-            ./data/marius/
+        Check if perform_link_prediction can handle embedding directory other
+        than ./data/marius/
         """
         data_dir = Path("./data/other_name/")
-        node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
-        rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
         node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
         lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
         rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
