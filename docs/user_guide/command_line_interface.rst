@@ -31,45 +31,48 @@ The available options:
 
 ::
 
- usage: preprocess [-h] [--files files [files ...]] [--dataset dataset] [--num_partitions num_partitions] [--overwrite]
- [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
- [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
- output_directory
+    usage: preprocess [-h] [--download_directory download_directory] [--files files [files ...] | --dataset dataset] [--num_partitions num_partitions]
+                    [--overwrite] [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
+                    [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
+                    output_directory
 
- Preprocess Datasets
+    Preprocess Datasets
 
- positional arguments:
- output_directory      Directory to put graph data
+    positional arguments:
+    output_directory      Directory to put preprocessed graph data.
 
- optional arguments:
- -h, --help            show this help message and exit
- --files files [files ...]
-     Files containing custom dataset
- --dataset dataset     Supported dataset to preprocess
- --num_partitions num_partitions
-     Number of partitions to split the edges into
- --overwrite           Overwrites the output_directory if this issetOtherwise, files with same the names will be treated as the data for current dataset.
- --generate_config [generate_config], -gc [generate_config]
-     Generates a single-GPU/multi-CPU/multi-GPU training configuration file by default.
-     Valid options (default to GPU): [GPU, CPU, multi-GPU]
- --format format       Format of data, eg. srd
- --delim delim, -d delim
-     Specifies the delimiter
- --dtype dtype         Indicates the numpy.dtype
- --not_remap_ids       If set, will not remap ids
- --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
-     Split dataset into specified fractions
- --start_col start_col, -sc start_col
-     Indicates the column index to start from
- --num_line_skip num_line_skip, -nls num_line_skip
-     Indicates number of lines to skip from the beginning
+    optional arguments:
+    -h, --help            show this help message and exit
+    --download_directory download_directory
+                            Directory to put downloaded data files for supported datasets.
+    --files files [files ...]
+                            Files containing custom dataset
+    --dataset dataset     Supported dataset to preprocess
+    --num_partitions num_partitions
+                            Number of partitions to split the edges into
+    --overwrite           Removes the output_directory and download_directory if this is set.
+                            Otherwise, files with same the names from previous run may interfere with files of current run.
+    --generate_config [generate_config], -gc [generate_config]
+                            Generates a single-GPU training configuration file by default.
+                            Valid options (default to GPU): [GPU, CPU, multi-GPU]
+    --format format       Format of data, eg. srd
+    --delim delim, -d delim
+                            Specifies the delimiter
+    --dtype dtype         Indicates the numpy.dtype
+    --not_remap_ids       If set, will not remap ids
+    --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
+                            Split dataset into specified fractions
+    --start_col start_col, -sc start_col
+                            Indicates the column index to start from
+    --num_line_skip num_line_skip, -nls num_line_skip
+                            Indicates number of lines to skip from the beginning
 
- Specify certain config (optional): [--<section>.<key>=<value>]
+    Specify certain config (optional): [--<section>.<key>=<value>]
 
 output_directory
 ++++++++++++++++
 ``<output_directory>`` is a **required** argument for ``marius_preprocess``. 
-It is the directory where all the files created by ``marius_preprocess`` wil be stored.
+It is the directory where all the preprocessed files created by ``marius_preprocess`` wil be stored.
 ``marius_preprocess`` will create this file if it does not exist.
 ``marius_preprocess`` outputs the following files to ``<output_directory>``.
 For the preprocessing of supported datasets, ``<output_directory>`` also includes
@@ -105,6 +108,12 @@ The source, relation and destination of edge ``i`` can be retrieved from
 files by reading 3 4-byte integers (or 8-byte integers if using int64 data type for storage)
 at the offset in the file ``i * 3 * 4`` (or ``i * 3 * 8`` when using int64).
 
+\-\-download_directory <download_directory>
++++++++++++++++++++++++++++++++++++++++++++
+``--download_directory`` is an **optional** argument for ``marius_preprocess``.
+It is the directory where ``marius_preprocess`` puts all downloaded files for
+:ref:`built-in datasets`. The default value of this argument is ``download_dir``.
+
 \-\-files <files ...>
 +++++++++++++++++++++
 ``--files`` is an **optional** argument for ``marius_preprocess``.
@@ -135,10 +144,8 @@ The default value for ``<num_partitions>`` is one.
 \-\-overwrite
 +++++++++++++
 ``--overwrite`` is an **optional** argument for ``marius_preprocess``. If this option is set, then
-the ``<output_directory>`` will be overwritten. Otherwise, ``marius_preprocess`` will treat the files
-in ``<output_directory>`` with the same file names as the latest files for current run. When switching
-from one dataset to another one, the converted data files of the previous dataset in same ``<output_directory>``
-may be treated as the already-preprocessed data files for the current dataset if this option is not set.
+the ``<output_directory>`` and ``<download_directory>`` will removed before the preprocessing starts
+to prevent files left from the previous runs to interfere with files from current run.
 
 \-\-generate_config <device>, \-gc <device>
 +++++++++++++++++++++++++++++++++++++++++++

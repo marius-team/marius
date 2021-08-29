@@ -1201,10 +1201,11 @@ def set_args():
                         help='Number of partitions to split the edges into')
     parser.add_argument('--overwrite', action='store_true',
                         required=False,
-                        help=('Overwrites the output_directory if this is ' +
-                              'set. '
-                              'Otherwise, files with same the names will be ' +
-                              'treated as the data for current dataset.'))
+                        help=('Removes the output_directory and ' +
+                              'download_directory if this is set.\n'
+                              'Otherwise, files with same the names from ' +
+                              'previous run may interfere with files of ' +
+                              'current run.'))
     parser.add_argument('--generate_config', '-gc', metavar='generate_config',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', const="GPU",
@@ -1306,8 +1307,11 @@ def main():
         "ogbn_products": ogbn_products,
     }
 
-    if args.overwrite and Path(args.output_directory).exists():
-        shutil.rmtree(args.output_directory)
+    if args.overwrite:
+        if Path(args.output_directory).exists():
+            shutil.rmtree(args.output_directory)
+        if Path(args.download_directory).exists():
+            shutil.rmtree(args.download_directory)
 
     if dataset_dict.get(args.dataset) is not None:
         print(args.dataset)
@@ -1324,7 +1328,6 @@ def main():
                                args.dataset_split,
                                args.start_col,
                                args.num_line_skip)
-
 
     if args.generate_config is not None:
         dir = args.output_directory

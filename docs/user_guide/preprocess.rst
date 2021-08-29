@@ -160,6 +160,8 @@ The second approach can be done in the following steps:
 
 The names of the output files can be anything, as long as the path options are set in the configuration file.
 
+.. _built-in datasets:
+
 Built-in datasets
 ----------------------------------------------------------
 
@@ -202,14 +204,15 @@ For example, preprocessing the wn18 dataset produces the following output
 ::
 
     user@ubuntu: marius_preprocess output_dir/ --dataset wn18
-    Downloading fetch.phpmedia=en:wordnet-mlj12.tar.gz to output_dir/fetch.phpmedia=en:wordnet-mlj12.tar.gz
+    wn18
+    Downloading fetch.phpmedia=en:wordnet-mlj12.tar.gz to download_dir/fetch.phpmedia=en:wordnet-mlj12.tar.gz
     Extracting
     Extraction completed
     Detected delimiter: ~   ~
-    Reading in output_dir/wordnet-mlj12-train.txt   1/3
-    Reading in output_dir/wordnet-mlj12-valid.txt   2/3
-    Reading in output_dir/wordnet-mlj12-test.txt   3/3
-    Number of instance per file: [141442, 5000, 5000]
+    Reading in download_dir/wordnet-mlj12-train.txt   1/3
+    Reading in download_dir/wordnet-mlj12-valid.txt   2/3
+    Reading in download_dir/wordnet-mlj12-test.txt   3/3
+    Number of instance per file:[141442, 5000, 5000]
     Number of nodes: 40943
     Number of edges: 151442
     Number of relations: 18
