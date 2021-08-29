@@ -250,7 +250,7 @@ def join_files(files, regex, num_line_skip, data_cols, delim):
             compose the edges.
         delim: The delimiter between two columns in the dataset file.
 
-    Retruns:
+    Returns:
         The joint file is returned as a list of one file. Meaning while, 
         num_line_skip is set to zero and data_cols is set to the first two or
         three columns depends on if the edges in the dataset has relations.
