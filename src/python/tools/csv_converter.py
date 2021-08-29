@@ -363,6 +363,8 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
            (len(format[0]) == 2 and dst_idx != -1 and
             src_idx != -1)), "Format is specified incorrectly"
 
+    if not Path(output_dir).exists():
+        Path(output_dir).mkdir(parents=True)
     assert(Path(output_dir).exists()), "Output directory not found"
     output_dir = output_dir.strip("/")
     output_dir = output_dir + "/"

@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 from marius.tools.csv_converter import general_parser
 from test.python.helpers import dataset_generator
+from marius.tools.preprocess import wn18
 
 TEST_DIR = "./output_dir"
 test_data_dir = "./test/test_data/"
@@ -17,6 +18,7 @@ output_dir = TEST_DIR
 train_path = str(Path(input_dir) / Path(train_file))
 valid_path = str(Path(input_dir) / Path(valid_file))
 test_path = str(Path(input_dir) / Path(test_file))
+download_dir = Path("./download_dir")
 
 
 class TestGeneralParser(unittest.TestCase):
@@ -30,6 +32,9 @@ class TestGeneralParser(unittest.TestCase):
 
         if Path(input_dir).exists():
             shutil.rmtree(Path(input_dir))
+
+        if Path(download_dir).exists():
+            shutil.rmtree(Path(download_dir))
 
         Path(input_dir).mkdir()
         shutil.copy(str(Path(test_data_dir) / Path(train_file)),
@@ -47,6 +52,9 @@ class TestGeneralParser(unittest.TestCase):
 
         if Path(input_dir).exists():
             shutil.rmtree(Path(input_dir))
+
+        if Path(download_dir).exists():
+            shutil.rmtree(Path(download_dir))
 
     def test_basic(self):
         """
@@ -411,3 +419,17 @@ class TestGeneralParser(unittest.TestCase):
                           Path("valid_edges.pt")).stat().st_size, 100*3*4)
         self.assertEqual((Path(output_dir) /
                           Path("test_edges.pt")).stat().st_size, 100*3*4)
+
+    def test_download_dir(self):
+        """
+        Check if download_dir is created correctly and if dataset files are
+            stored in download_dir
+        """
+        wn18(download_dir, output_dir)
+        self.assertTrue(Path(download_dir).exists())
+        self.assertTrue((Path(download_dir) /
+                         Path("wordnet-mlj12-train.txt")).exists())
+        self.assertTrue((Path(download_dir) /
+                         Path("wordnet-mlj12-valid.txt")).exists())
+        self.assertTrue((Path(download_dir) /
+                         Path("wordnet-mlj12-test.txt")).exists())

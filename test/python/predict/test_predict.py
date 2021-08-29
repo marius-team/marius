@@ -13,6 +13,7 @@ class TestPredict(unittest.TestCase):
     """
     Tests for predict
     """
+    download_dir = Path("./download_dir")
     dataset_dir = Path("./output_dir")
     data_dir = Path("./data/")
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
@@ -23,7 +24,7 @@ class TestPredict(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        wn18(str(self.dataset_dir))
+        wn18(str(self.download_dir), str(self.dataset_dir))
         
         if not Path("./data/marius/embeddings").exists():
             Path("./data/marius/embeddings").mkdir(parents=True)
@@ -42,6 +43,9 @@ class TestPredict(unittest.TestCase):
         
         if Path("./output_dir").exists():
             shutil.rmtree(Path("./output_dir"))
+
+        if Path("./download_dir").exists():
+            shutil.rmtree(Path("./download_dir"))
 
     def test_cmd_line_infer_list(self):
         """

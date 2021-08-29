@@ -40,6 +40,9 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
     def tearDown(self):
         if Path("./output_dir").exists():
             shutil.rmtree(Path("./output_dir"))
+        
+        if Path("./download_dir").exists():
+            shutil.rmtree(Path("./download_dir"))
 
     def test_device_default(self):
         """

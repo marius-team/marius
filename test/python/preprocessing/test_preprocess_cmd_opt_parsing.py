@@ -37,6 +37,9 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         if not Path("./output_dir").exists():
             Path("./output_dir").mkdir()
 
+        if Path("./download_dir").exists():
+            shutil.rmtree(Path("./download_dir"))
+
     @classmethod
     def tearDown(self):
         if Path("./output_dir").exists():
