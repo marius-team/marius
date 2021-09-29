@@ -97,9 +97,9 @@ class TestGeneralParser(unittest.TestCase):
         Check if address starts with "/" can be parsed correctly.
         """
         general_parser(
-            [str(Path(input_dir).cwd() / Path(train_file)),
-             str(Path(input_dir).cwd() / Path(valid_file)),
-             str(Path(input_dir).cwd() / Path(test_file))],
+            [str(Path(input_dir).cwd() / Path(input_dir) / Path(train_file)),
+             str(Path(input_dir).cwd() / Path(input_dir) / Path(valid_file)),
+             str(Path(input_dir).cwd() / Path(input_dir) / Path(test_file))],
             ["srd"], output_dir, num_partitions=1)
 
 
