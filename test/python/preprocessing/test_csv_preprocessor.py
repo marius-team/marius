@@ -92,6 +92,17 @@ class TestGeneralParser(unittest.TestCase):
                     [],
                     ["srd"], output_dir, dataset_split=(0.1, 0.1))
 
+    def test_address_parsing(self):
+        """
+        Check if address starts with "/" can be parsed correctly.
+        """
+        general_parser(
+            [str(Path(input_dir).cwd() / Path(train_file)),
+             str(Path(input_dir).cwd() / Path(valid_file)),
+             str(Path(input_dir).cwd() / Path(test_file))],
+            ["srd"], output_dir, num_partitions=1)
+
+
     def test_format_invalid_format(self):
         """
         Check if exception is thrown if format is specified incorrectly
