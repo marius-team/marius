@@ -175,9 +175,8 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
            (len(format[0]) == 2 and dst_idx != -1 and
             src_idx != -1)), "Format is specified incorrectly"
 
-    assert(Path(output_dir).exists()), "Output directory not found"
-    output_dir = output_dir.strip("/")
-    output_dir = output_dir + "/"
+    output_dir = Path(output_dir)
+    assert(output_dir.exists()), "Output directory not found"
 
     if rel_idx == -1:
         data_cols = [(i+start_col) for i in [0, 1]]
@@ -286,7 +285,7 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
         if len(files) == 3:
             temp_files = [files[0]]
 
-        train_out = output_dir + "train_edges.pt"
+        train_out = output_dir / Path("train_edges.pt")
         with open(train_out, "wb") as f:
             for file in temp_files:
                 for chunk in pd.read_csv(file, sep=delim, header=None,
@@ -316,12 +315,12 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                 edges, offsets = partition_edges(edges, num_partitions,
                                                  len(node_ids))
                 f.write(bytes(edges))
-                with open(output_dir + "train_edges_partitions.txt", "w") as g:
+                with open(output_dir / Path("train_edges_partitions.txt"), "w") as g:
                     g.writelines([str(o) + "\n" for o in offsets])
 
     if len(files) > 1 and len(files) < 4:
-        test_out = output_dir + "test_edges.pt"
-        valid_out = output_dir + "valid_edges.pt"
+        test_out = output_dir / Path("test_edges.pt")
+        valid_out = output_dir / Path("valid_edges.pt")
         with open(valid_out, "wb") as f:
             for chunk in pd.read_csv(files[1], sep=delim, header=None,
                                      chunksize=chunksize,
@@ -364,12 +363,12 @@ def general_parser(files, format, output_dir, delim="", num_partitions=1,
                     f.write(bytes(edges))
                     i += chunksize
 
-    node_mapping = output_dir + "node_mapping.txt"
+    node_mapping = output_dir / Path("node_mapping.txt")
     node_dict_items = np.array(list(nodes_dict.items()))
     np.savetxt(node_mapping, node_dict_items, fmt='%s', delimiter='\t')
 
     if rel_idx != -1:
-        rel_mapping = output_dir + "rel_mapping.txt"
+        rel_mapping = output_dir / Path("rel_mapping.txt")
         rels_dict_items = np.array(list(rels_dict.items()))
         np.savetxt(rel_mapping, rels_dict_items, fmt='%s', delimiter='\t')
 
