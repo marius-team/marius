@@ -246,7 +246,8 @@ marius_config_generator
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 This command lets users to create a Marius configuration file from the command line with
-some parameters specified according to their needs.
+some parameters specified according to their needs. Options are provided for generating 
+Marius configuration files for both custom (``--stats``) and supported datasets (``--dataset``).
 This command can be called with:
 
 ::
@@ -289,18 +290,25 @@ The available options:
 \-\-data_directory <data_directory>
 +++++++++++++++++++++++++++++++++++
 ``--data_directory`` is an **optional** argument. It specifies the directory where ``marius_preprocess`` stores
-preprocessed data.
+preprocessed data. 
 
 \-\-dataset <dataset>, \-d <dataset>
 ++++++++++++++++++++++++++++++++++++
-``--dataset`` is an **optional** argument. It specifies the name of the supported dataset. It should not be
-used when ``--stats`` is in use.
+``--dataset`` is an **optional** argument. This argument is used when users want to 
+generate a Marius configuration file for a supported dataset.
+It specifies the name of the supported dataset which its configuration file will be generated. 
+It should not be used when ``--stats`` is in use. To see which datasets are supported by Marius, check out
+:ref:`dataset` table.
 
 \-\-stats <num_nodes> <num_relations> <num_train> <num_valid> <num_test>, \-s <num_nodes> <num_relations> <num_train> <num_valid> <num_test>
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ``--stats <num_nodes> <num_relations> <num_train> <num_valid> <num_test>, -s <num_nodes> <num_relations> <num_train> <num_valid> <num_test>``
-is an **optional** argument. It specifies the stats of the dataset to be trained over. It should not be used at the same
-time with option ``--dataset``.
+is an **optional** argument. 
+This argument is used when users want to generate a Marius configuration file for
+a custom dataset. Users need to manually pass the statistics of the dataset in the order of 
+number of nodes, number of relations, number of edges in training set, number of edges in validation set, 
+number of edges in testing set. 
+It should not be used at the same time with option ``--dataset``.
 
 \-\-device <device>, \-dev <device>
 +++++++++++++++++

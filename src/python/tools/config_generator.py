@@ -130,25 +130,27 @@ def set_args():
                         '[--<section>.<key>=<value>]'))
     mode = parser.add_mutually_exclusive_group()
     parser.add_argument('output_directory', metavar='output_directory',
-                        type=str, help='Directory to put configs \nAlso ' +
+                        type=str, help='Directory to save Marius ' +
+                        'configuration files \nAlso ' +
                         'assumed to be the default directory of preprocessed' +
                         ' data if --data_directory is not specified')
     parser.add_argument('--data_directory', metavar='data_directory',
                         type=str, help='Directory of the preprocessed data')
     mode.add_argument('--dataset', '-d', metavar='dataset', type=str,
-                      help='Dataset to preprocess')
+                      help='Name of the supported dataset for generating ' +
+                           'Marius configuration file')
     mode.add_argument('--stats', '-s',
                       metavar=('num_nodes', 'num_relations', 'num_train',
                                'num_valid', 'num_test'),
-                      nargs=5, help='Dataset statistics\n' +
+                      nargs=5, help='Custom Dataset statistics\n' +
                       'Enter in order of num_nodes, num_relations, num_train' +
                       ' num_valid, num_test')
     parser.add_argument('--device', '-dev', metavar='generate_config',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', default='GPU',
                         help=('Generates configs for a single-GPU/multi-CPU' +
-                              '/multi-GPU training configuration file by ' +
-                              'default. \nValid options (default to GPU): ' +
+                              '/multi-GPU Marius configuration file' +
+                              '. \nValid options (default to GPU): ' +
                               '[GPU, CPU, multi-GPU]'))
 
     config_dict, valid_dict = read_template(DEFAULT_CONFIG_FILE)
