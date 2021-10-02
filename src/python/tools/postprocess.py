@@ -53,10 +53,10 @@ def set_args():
         description='Retrieve trained embeddings',
         prog='postprocess'
     )
-    parser.add_argument('trained_embeddings_directory',
-                        metavar='trained_embeddings_directory',
+    parser.add_argument('model_directory',
+                        metavar='model_directory',
                         type=str,
-                        help='Directory containing trained embeddings')
+                        help='Directory containing trained model')
     parser.add_argument('dataset_directory',
                         metavar='dataset_directory',
                         type=str,
@@ -79,7 +79,7 @@ def set_args():
 def main():
     parser = set_args()
     args = parser.parse_args()
-    data_dir = args.trained_embeddings_directory
+    data_dir = args.model_directory
     dataset_dir = args.dataset_directory
     output_dir = args.output_directory
     fmt = args.format
