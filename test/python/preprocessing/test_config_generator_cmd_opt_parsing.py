@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 from marius.tools.config_generator import set_args
 from marius.tools.config_generator import parse_args
+from marius.tools.config_generator import read_dataset_stats
 from marius.tools.config_generator import read_template
 
 
@@ -178,3 +179,21 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             args = parser.parse_args(self.cmd_args[13])
             config_dict = parse_args(args)
+
+    def test_save_load_custom_dataset_stats(self):
+        """
+        Check if dataset stats can be stored by preprocess and loaded by
+            config_generator correctly
+        """
+        stats_path = Path("./output_dir/custom_dataset_stats.json")
+        cmd_arg = ["marius_preprocess", "./output_dir", "-d", "wn18"]
+        subprocess.run(cmd_arg)
+        self.assertTrue(stats_path.exists())
+        stats = read_dataset_stats(stats_path)
+        self.assertEqual(stats[0], 40943)
+        self.assertEqual(stats[1], 18)
+        self.assertEqual(stats[2], 141442)
+        self.assertEqual(stats[3], 5000)
+        self.assertEqual(stats[4], 5000)
+
+
