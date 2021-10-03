@@ -108,6 +108,7 @@ def read_dataset_stats(path):
     
     stats = list(stats_dict.values())
     num_nodes_per_file = stats[2].strip('[]').split(", ")
+    num_nodes_per_file = [int(i) for i in num_nodes_per_file]
     stats.pop(2)
     stats = stats + num_nodes_per_file
     return stats

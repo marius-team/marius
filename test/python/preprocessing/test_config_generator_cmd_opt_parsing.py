@@ -186,7 +186,7 @@ class TestConfigGeneratorCmdOptParser(unittest.TestCase):
             config_generator correctly
         """
         stats_path = Path("./output_dir/custom_dataset_stats.json")
-        cmd_arg = ["marius_preprocess", "./output_dir", "-d", "wn18"]
+        cmd_arg = ["marius_preprocess", "./output_dir", "--dataset", "wn18"]
         subprocess.run(cmd_arg)
         self.assertTrue(stats_path.exists())
         stats = read_dataset_stats(stats_path)
