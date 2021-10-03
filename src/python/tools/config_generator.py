@@ -2,6 +2,7 @@ from pathlib import Path
 import argparse
 import pandas as pd
 import os
+import json
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_CONFIG_FILE = os.path.join(HERE, "config_templates",
@@ -101,6 +102,17 @@ def update_stats(stats, config_dict):
     return config_dict
 
 
+def read_dataset_stats(path):
+    with open(path, "r") as f:
+        stats_dict = json.load(f)
+    
+    stats = list(stats_dict.values())
+    num_nodes_per_file = stats[2].strip('[]').split(", ")
+    stats.pop(2)
+    stats = stats + num_nodes_per_file
+    return stats
+
+
 def update_data_path(dir, config_dict):
     config_dict.update({"path.train_edges": str(dir.strip("/") +
                         "/train_edges.pt")})
@@ -143,6 +155,10 @@ def set_args():
                       nargs=5, help='Dataset statistics\n' +
                       'Enter in order of num_nodes, num_relations, num_train' +
                       ' num_valid, num_test')
+    mode.add_argument('--dataset_stats_path', '-dsp',
+                      metavar='dataset_stats_path', type=str,
+                      help='Path to the JSON file which contains custom ' +
+                           'dataset statistics.')
     parser.add_argument('--device', '-dev', metavar='generate_config',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', default='GPU',
@@ -187,6 +203,9 @@ def parse_args(args):
         arg_dict = update_dataset_stats(arg_dict.get("dataset"), arg_dict)
     elif arg_dict.get("stats") is not None:
         arg_dict = update_stats(arg_dict.get("stats"), arg_dict)
+    elif arg_dict.get("dataset_stats_path") is not None:
+        stats = read_dataset_stats(arg_dict.get("dataset_stats_path"))
+        arg_dict = update_stats(stats, arg_dict)
     else:
         raise RuntimeError("Must specify either dataset or dataset stats.")
 

@@ -75,25 +75,27 @@ It is the directory where all the files created by ``marius_preprocess`` wil be 
 For the preprocessing of supported datasets, ``<output_directory>`` also includes
 the downloaded raw dataset.
 
-==================  ============
-File                Description
-------------------  ------------
-train_edges.pt      Contains edges for training set;
+============================  ============
+File                          Description
+----------------------------  ------------
+train_edges.pt                Contains edges for training set;
 
-                    Should be set for ``path.train_edges`` in Marius configuration file
-valid_edges.pt      Contains edges for validation set; 
+                              Should be set for ``path.train_edges`` in Marius configuration file
+valid_edges.pt                Contains edges for validation set; 
 
-                    Should be set for ``path.valid_edges`` in Marius configuration file
-test_edges.pt       Contains edges for test set; 
+                              Should be set for ``path.valid_edges`` in Marius configuration file
+test_edges.pt                 Contains edges for test set; 
 
-                    Should be set for ``path.train_edges`` in Marius configuration file
-node_mapping.txt    Contains 2 columns; 
+                              Should be set for ``path.train_edges`` in Marius configuration file
+node_mapping.txt              Contains 2 columns; 
 
-                    The first column is all the original node IDs from raw data, the second column is all the remapped node IDs
-rel_mapping.txt     Contains 2 columns; 
+                              The first column is all the original node IDs from raw data, the second column is all the remapped node IDs
+rel_mapping.txt               Contains 2 columns; 
 
-                    The first column is all the original relation IDs from raw data, the second column is all the remapped relation IDs
-==================  ============
+                              The first column is all the original relation IDs from raw data, the second column is all the remapped relation IDs
+
+custom_dataset_stats.json     The file which contains the statistics of the preprocessed custom dataset
+============================  ============
 
 Each edge in ``train_edges.pt``, ``valid_edges.pt``, and ``test_edges.pt`` is stored
 in the format of ``source relation destination`` on 1 row.
@@ -257,28 +259,31 @@ The available options:
 
 ::
 
-    usage: config_generator [-h] [--data_directory data_directory] [--dataset dataset | --stats num_nodes num_edge_types num_train num_valid num_test]
-    [--device [generate_config]]
-    output_directory
+    usage: config_generator [-h] [--data_directory data_directory]
+                        [--dataset dataset | --stats num_nodes num_relations num_train num_valid num_test | --dataset_stats_path dataset_stats_path]
+                        [--device [generate_config]]
+                        output_directory
 
     Generate configs
 
     positional arguments:
     output_directory      Directory to put configs
-    Also assumed to be the default directory of preprocessed data if --data_directory is not specified
+                            Also assumed to be the default directory of preprocessed data if --data_directory is not specified
 
     optional arguments:
     -h, --help            show this help message and exit
     --data_directory data_directory
-    Directory of the preprocessed data
+                            Directory of the preprocessed data
     --dataset dataset, -d dataset
-    Dataset to preprocess
-    --stats num_nodes num_edge_types num_train num_valid num_test, -s num_nodes num_edge_types num_train num_valid num_test
-    Dataset statistics
-    Enter in order of num_nodes, num_edge_types, num_train num_valid, num_test
+                            Dataset to preprocess
+    --stats num_nodes num_relations num_train num_valid num_test, -s num_nodes num_relations num_train num_valid num_test
+                            Dataset statistics
+                            Enter in order of num_nodes, num_relations, num_train num_valid, num_test
+    --dataset_stats_path dataset_stats_path, -dsp dataset_stats_path
+                            Path to the JSON file which contains custom dataset statistics
     --device [generate_config], -dev [generate_config]
-    Generates configs for a single-GPU/multi-CPU/multi-GPU training configuration file by default.
-    Valid options (default to GPU): [GPU, CPU, multi-GPU]
+                            Generates configs for a single-GPU/multi-CPU/multi-GPU training configuration file by default.
+                            Valid options (default to GPU): [GPU, CPU, multi-GPU]
 
     Specify certain config (optional): [--<section>.<key>=<value>]
 
@@ -301,6 +306,16 @@ used when ``--stats`` is in use.
 ``--stats <num_nodes> <num_relations> <num_train> <num_valid> <num_test>, -s <num_nodes> <num_relations> <num_train> <num_valid> <num_test>``
 is an **optional** argument. It specifies the stats of the dataset to be trained over. It should not be used at the same
 time with option ``--dataset``.
+
+\-\-dataset_stats_path <dataset_stats_path>, \-dsp <dataset_stats_path>
+``--dataset_stats_path <dataset_stats_path>, -dsp <dataset_stats_path>`` is 
+an **optional** argument. After a custom 
+dataset is preprocessed, a JSON is created to store the statistics of the custom 
+dataset. 
+This option can be used to specify the path to this JSON statistics file.
+Then config_generator generates a Marius configuration file based on these 
+statistics. This option should not be used when 
+option ``--dataset`` or ``--stats`` is used.
 
 \-\-device <device>, \-dev <device>
 +++++++++++++++++

@@ -4,6 +4,7 @@ import re
 import shutil
 import tarfile
 import zipfile
+import json
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
@@ -500,6 +501,15 @@ def update_param(config_dict, arg_dict):
     return config_dict
 
 
+def save_stats(stats, output_directory):
+    stats_dict = {"num_nodes": stats[0],
+                  "num_relations": stats[1],
+                  "num_edges_per_file": str(stats[2:])}
+    output_path = Path(output_directory) / Path("custom_dataset_stats.json")
+    with open(output_path, "w") as f:
+        json.dump(stats_dict, f)
+
+
 def set_args():
     parser = argparse.ArgumentParser(
                 description='Preprocess Datasets', prog='preprocess',
@@ -625,6 +635,7 @@ def main():
                                args.start_col,
                                args.num_line_skip)
 
+    save_stats(stats, args.output_directory)
 
     if args.generate_config is not None:
         dir = args.output_directory
