@@ -1192,36 +1192,38 @@ def set_args():
                         type=str, default="download_dir",
                         help='Directory to put downloaded data ' +
                         'files for supported datasets.')
-    mode.add_argument('--files', metavar='files', nargs='+', type=str,
-                      help='Files containing custom dataset')
+    mode.add_argument('--input_files', metavar='input_files', nargs='+',
+                      type=str,
+                      help='Input files of custom dataset')
     mode.add_argument('--dataset', metavar='dataset',
-                        type=str, help='Supported dataset to preprocess')
+                        type=str,
+                        help='Name of supported dataset to preprocess')
     parser.add_argument('--num_partitions', metavar='num_partitions',
                         required=False, type=int, default=1,
                         help='Number of partitions to split the edges into')
-    parser.add_argument('--overwrite', action='store_true',
-                        required=False,
-                        help=('Removes the output_directory and ' +
-                              'download_directory if this is set.\n'
-                              'Otherwise, files with same the names from ' +
-                              'previous run may interfere with files of ' +
-                              'current run.'))
-    parser.add_argument('--generate_config', '-gc', metavar='generate_config',
+    parser.add_argument('--generate_template_config', '-gtc', 
+                        metavar='generate_template_config',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', const="GPU",
                         help=('Generates a single-GPU ' +
-                              'training configuration file by default. ' +
+                              'training configuration file which contains ' +
+                              'parameters with default values. ' +
                               '\nValid options (default to GPU): ' +
                               '[GPU, CPU, multi-GPU]'))
     parser.add_argument('--format', metavar='format', nargs=1, type=str,
                         default=['srd'],
-                        help='Format of data, eg. srd')
+                        help='Specifies the sequence of source, destination ' +
+                             '(and relation) in input data files, eg. srd')
     parser.add_argument('--delim', '-d', metavar='delim', type=str,
                         default="",
-                        help='Specifies the delimiter')
-    parser.add_argument('--dtype', metavar='dtype', type=np.dtype,
+                        help='Specifies the delimiter between source, ' +
+                             '(relation,) destination strings in input ' +
+                             'data files.')
+    parser.add_argument('--remap_id_dtype', metavar='remap_id_dtype',
+                        type=np.dtype,
                         default=np.int32,
-                        help='Indicates the numpy.dtype')
+                        help='Indicates the data format to store the ' +
+                             'remapped IDs.')
     parser.add_argument('--not_remap_ids', action='store_false',
                         help='If set, will not remap ids')
     parser.add_argument('--dataset_split', '-ds', metavar='dataset_split',
@@ -1229,11 +1231,12 @@ def set_args():
                         help='Split dataset into specified fractions')
     parser.add_argument('--start_col', '-sc', metavar='start_col', type=int,
                         default=0,
-                        help='Indicates the column index to start from')
+                        help='Indicates the column index to start parsing ' +
+                             'source/destination nodes( or relation).')
     parser.add_argument('--num_line_skip', '-nls', metavar='num_line_skip',
                         type=int, default=None,
-                        help='Indicates number of lines to ' +
-                             'skip from the beginning')
+                        help='Indicates number of lines/rows to ' +
+                             'skip from the beginning of the file.')
 
     config_dict, valid_dict = read_template(DEFAULT_CONFIG_FILE)
 
@@ -1307,12 +1310,6 @@ def main():
         "ogbn_products": ogbn_products,
     }
 
-    if args.overwrite:
-        if Path(args.output_directory).exists():
-            shutil.rmtree(args.output_directory)
-        if Path(args.download_directory).exists():
-            shutil.rmtree(args.download_directory)
-
     if dataset_dict.get(args.dataset) is not None:
         print(args.dataset)
         stats = dataset_dict.get(args.dataset)(
@@ -1321,7 +1318,7 @@ def main():
                                             args.num_partitions)
     else:
         print("Preprocess custom dataset")
-        stats = general_parser(args.files, args.format,
+        stats = general_parser(args.input_files, args.format,
                                args.output_directory, args.delim,
                                args.num_partitions,
                                args.dtype, args.not_remap_ids,
@@ -1329,7 +1326,7 @@ def main():
                                args.start_col,
                                args.num_line_skip)
 
-    if args.generate_config is not None:
+    if args.generate_template_config is not None:
         dir = args.output_directory
         config_dict = update_stats(stats, config_dict)
         config_dict = update_data_path(dir, config_dict)

@@ -206,7 +206,8 @@ def partition_edges(edges, num_partitions, num_nodes):
     In the case of large scale graphs that have an embedding table which
     exceeds CPU memory capacity, this function can partition the graph nodes
     uniformly into num_partitions partitions and group the edges into edge
-    buckets, see partition_scheme for more details.
+    buckets. This partitioning method assumes that all edges fit in memory.
+    See partition_scheme for more details.
 
     Args:
         edges: All edges of original dataset.

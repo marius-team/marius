@@ -31,10 +31,12 @@ The available options:
 
 ::
 
-    usage: preprocess [-h] [--download_directory download_directory] [--files files [files ...] | --dataset dataset] [--num_partitions num_partitions]
-                    [--overwrite] [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
-                    [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
-                    output_directory
+    usage: preprocess [-h] [--download_directory download_directory] [--input_files input_files [input_files ...] |
+                  --dataset dataset] [--num_partitions num_partitions]
+                  [--generate_template_config [generate_template_config]] [--format format] [--delim delim]
+                  [--remap_id_dtype remap_id_dtype] [--not_remap_ids] [--dataset_split dataset_split dataset_split]
+                  [--start_col start_col] [--num_line_skip num_line_skip]
+                  output_directory
 
     Preprocess Datasets
 
@@ -45,27 +47,26 @@ The available options:
     -h, --help            show this help message and exit
     --download_directory download_directory
                             Directory to put downloaded data files for supported datasets.
-    --files files [files ...]
-                            Files containing custom dataset
-    --dataset dataset     Supported dataset to preprocess
+    --input_files input_files [input_files ...]
+                            Input files of custom dataset
+    --dataset dataset     Name of supported dataset to preprocess
     --num_partitions num_partitions
                             Number of partitions to split the edges into
-    --overwrite           Removes the output_directory and download_directory if this is set.
-                            Otherwise, files with same the names from previous run may interfere with files of current run.
-    --generate_config [generate_config], -gc [generate_config]
-                            Generates a single-GPU training configuration file by default.
+    --generate_template_config [generate_template_config], -gtc [generate_template_config]
+                            Generates a single-GPU training configuration file which contains parameters with default values.
                             Valid options (default to GPU): [GPU, CPU, multi-GPU]
-    --format format       Format of data, eg. srd
+    --format format       Specifies the sequence of source, destination (and relation) in input data files, eg. srd
     --delim delim, -d delim
-                            Specifies the delimiter
-    --dtype dtype         Indicates the numpy.dtype
+                            Specifies the delimiter between source, (relation,) destination strings in input data files.
+    --remap_id_dtype remap_id_dtype
+                            Indicates the data format to store the remapped IDs.
     --not_remap_ids       If set, will not remap ids
     --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
                             Split dataset into specified fractions
     --start_col start_col, -sc start_col
-                            Indicates the column index to start from
+                            Indicates the column index to start parsing source/destination nodes( or relation).
     --num_line_skip num_line_skip, -nls num_line_skip
-                            Indicates number of lines to skip from the beginning
+                            Indicates number of lines/rows to skip from the beginning of the file.
 
     Specify certain config (optional): [--<section>.<key>=<value>]
 
@@ -114,24 +115,26 @@ at the offset in the file ``i * 3 * 4`` (or ``i * 3 * 8`` when using int64).
 It is the directory where ``marius_preprocess`` puts all downloaded files for
 :ref:`built-in datasets`. The default value of this argument is ``download_dir``.
 
-\-\-files <files ...>
+\-\-intput_files <files ...>
 +++++++++++++++++++++
-``--files`` is an **optional** argument for ``marius_preprocess``.
+``--intput_files`` is an **optional** argument for ``marius_preprocess``.
 It should be a list of files containing custom dataset. It should not be used
-at the same time when ``--dataset`` is used.
+at the same time when ``--dataset`` is used. The input dataset files should 
+have columnar format where each edge occupies its own row and is composed of 
+a source node, a destination node (and a relation) separated by a delimiter.
 
 For example, the following command preprocesses the custom dataset composed of ``custom_train.csv``,
 ``custom_valid.csv`` and ``custom_test.csv`` and stores them into directory ``output_dir``.
 
 ::
 
- marius_preprocess output_dir --files custom_train.csv custom_valid.csv custom_test.csv
+ marius_preprocess output_dir --input_files custom_train.csv custom_valid.csv custom_test.csv
 
 \-\-dataset <dataset>
 +++++++++++++++++++++
 ``--dataset`` is an **optional** argument for ``marius_preprocess``.
 It can be one of the names of a Marius supported dataset. 
-It should not be used at the same time when ``--files`` is used.
+It should not be used at the same time when ``--input_files`` is used.
 To see which datasets are supported by Marius, check out
 :ref:`dataset` table.
 
@@ -147,35 +150,35 @@ The default value for ``<num_partitions>`` is one.
 the ``<output_directory>`` and ``<download_directory>`` will removed before the preprocessing starts
 to prevent files left from the previous runs to interfere with files from current run.
 
-\-\-generate_config <device>, \-gc <device>
-+++++++++++++++++++++++++++++++++++++++++++
-``--generate_config <device>, -gc <device>`` is an **optional** argument for ``marius_preprocess``.
+\-\-generate_template_config <device>, \-gtc <device>
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+``--generate_template_config <device>, -gtc <device>`` is an **optional** argument for ``marius_preprocess``.
 If this option is set, ``marius_preprocess`` will generate a Marius configuration
 file in the ``<output_directory>`` with all configuration parameters set to the recommended defaults if not 
 explicitly defined.
 
 The generated Marius configuration is for single-GPU setting by default if ``<device>`` is not set.
 If other device, such as ``CPU`` or ``multi-GPU``, is required, users can just append the option after
-``--generate_config``, e.g. ``--generate_config CPU``.
+``--generate_template_config``, e.g. ``--generate_template_config CPU``.
 
 For example, the following example will set ``general.device=CPU`` in the Marius 
 configuration file generated for dataset WordNet18 (``wn18_cpu.ini``).
 
 ::
 
- marius_preprocess ./output_dir --dataset wn18 --generate_config CPU
+ marius_preprocess ./output_dir --dataset wn18 --generate_template_config CPU
 
 \-\-<section>.<key>=<value>
 +++++++++++++++++++++++++++
 ``--<section>.<key>=<value>`` is an **optional** argument for ``marius_preprocess``.
-When ``--generate_config <device>`` is set, ``--<section>.<key>=<value>`` can be used
+When ``--generate_template_config <device>`` is set, ``--<section>.<key>=<value>`` can be used
 to change the value of certain option in the Marius configuration file generated.
 For example, the following example will set ``model.embedding_sze=256`` and ``training.num_epochs=100``
 in the Marius configuration file generated for custom dataset composed of ``custom_dataset.csv`` (``custom_gpu.ini``).
 
 ::
 
- marius_preprocess ./output_dir --files custom_dataset.csv --generate_config --model.embedding_sze=256 --training.num_epochs=100
+ marius_preprocess ./output_dir --input_files custom_dataset.csv --generate_template_config --model.embedding_sze=256 --training.num_epochs=100
 
 \-\-format <format>
 +++++++++++++++++++
@@ -189,7 +192,7 @@ storing edges in the sequence of source node, relation and destination node.
 
 ::
 
- marius_preprocess ./output_dir --files custom_dataset.csv --format src
+ marius_preprocess ./output_dir --input_files custom_dataset.csv --format src
 
 \-\-delim <delim>, \-d <delim>
 +++++++++++++++++++++++++++++
@@ -198,9 +201,9 @@ storing edges in the sequence of source node, relation and destination node.
 If ``<delim>`` is not set, ``marius_preprocess`` will use Python Sniffer to detect a delimiter.
 The delimiter is printed to the terminal so users can verify it.
 
-\-\-dtype <dtype>
-+++++++++++++++++
-``--dtype <dtype>`` is an **optional** argument for ``marius_preprocess``.
+\-\-remap_id_dtype <dtype>
+++++++++++++++++++++++++++
+``--remap_id_dtype <dtype>`` is an **optional** argument for ``marius_preprocess``.
 It defines the format for storing each node remapped ID and relation remapped ID. The current supported
 format is ``int32`` and ``int64``. 
 When storing in ``int32``, each remapped ID will be a 4-byte integer.
@@ -214,6 +217,7 @@ The default ``<dtype>`` is set to ``int32``.
 \-\-not_remap_ids
 +++++++++++++++++
 ``--not_remap_ids`` is an **optional** argument for ``marius_preprocess``.
+During the preprocess, nodes and relations are all mapped to numerical IDs.
 If this option is set, the remapped IDs of nodes and relations will be the same 
 as the read-in order of the nodes and relations from original dataset.
 
@@ -231,7 +235,7 @@ validation, and test sets with a corresponding proportion of 0.99, 0.05, and 0.0
 
 ::
 
- marius_preprocess ./output_dir --files custom_dataset.csv --dataset_split 0.05 0.05
+ marius_preprocess ./output_dir --input_files custom_dataset.csv --dataset_split 0.05 0.05
 
 \-\-start_col <start_col>
 +++++++++++++++++++++++++
