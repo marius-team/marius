@@ -1321,7 +1321,7 @@ def main():
         stats = general_parser(args.input_files, args.format,
                                args.output_directory, args.delim,
                                args.num_partitions,
-                               args.dtype, args.not_remap_ids,
+                               args.remap_id_dtype, args.not_remap_ids,
                                args.dataset_split,
                                args.start_col,
                                args.num_line_skip)
