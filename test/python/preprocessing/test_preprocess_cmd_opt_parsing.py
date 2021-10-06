@@ -14,22 +14,22 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
     cmd_args = [
             ["./output_dir", "--dataset", "wn18", "--generate_template_config",
              "--num_partitions", "5"],
-            ["./output_dir", "--dataset", "wn18", "-gc", "GPU"],
-            ["./output_dir", "--dataset", "wn18", "-gc", "CPU",
+            ["./output_dir", "--dataset", "wn18", "-gtc", "GPU"],
+            ["./output_dir", "--dataset", "wn18", "-gtc", "CPU",
              "--model.embedding_size=400", "--training.batch_size=51200",
              "--training.num_epochs=23"],
-            ["./output_dir", "--dataset", "wn18", "-gc", "GPU",
+            ["./output_dir", "--dataset", "wn18", "-gtc", "GPU",
              "--general.embedding_size=400"],
             ["./output_dir", "--dataset", "wn18", "--general.embedding_size=200"],
             ["--dataset", "wn18", "./output_dir"],
             ["--dataset", "wn18"],
             ["./output_dir", "--dataset", "wn18", "CPU"],
-            ["./output_dir", "--dataset", "wn18", "--gc", "--model.decoder"],
+            ["./output_dir", "--dataset", "wn18", "--gtc", "--model.decoder"],
             [],
             ["./output_dir", "--dataset", "wn18", "multi_cpu"],
-            ["./output_dir", "--dataset", "wn18", "--gc",
+            ["./output_dir", "--dataset", "wn18", "--gtc",
              "--storage.edge_bucket_ordering=EliminationCus"],
-            ["marius_preprocess", "./output_dir", "--dataset", "wn18", "-gc"]
+            ["marius_preprocess", "./output_dir", "--dataset", "wn18", "-gtc"]
         ]
 
     @classmethod
@@ -58,7 +58,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
 
     def test_gpu(self):
         """
-        Check if --gc can parse device choice correctly
+        Check if --gtc can parse device choice correctly
         """
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[1])
@@ -172,9 +172,9 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         subprocess.run(["python3", "./src/python/tools/preprocess.py",
                         "./output_dir",
-                        "--files",
+                        "--input_files",
                         "./test/test_data/train_edges.txt",
                         "./test/test_data/valid_edges.txt",
                         "./test/test_data/test_edges.txt",
-                        "-gc", "CPU"])
+                        "-gtc", "CPU"])
         self.assertTrue(Path("./output_dir/custom_cpu.ini").exists())
