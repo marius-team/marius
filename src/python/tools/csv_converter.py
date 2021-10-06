@@ -581,20 +581,23 @@ def set_args():
     parser = argparse.ArgumentParser(
         description='csv converter', prog='csv_converter',
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('files', metavar='files', nargs='+', type=str,
-                        help='Data files')
+    parser.add_argument('input_files', metavar='input_files', nargs='+', type=str,
+                        help='Input files of custom dataset')
     parser.add_argument('format', metavar='format', nargs=1, type=str,
                         help='Format of data, eg. srd')
     parser.add_argument('output_dir', metavar='output_dir', type=str,
                         help='Output directory for preprocessed data')
     parser.add_argument('--delim', '-d', metavar='delim', type=str,
                         default="",
-                        help='Specifies the delimiter')
+                        help='Specifies the delimiter between source, ' +
+                             'destination(and relation) in input data ' +
+                             'files, eg. srd')
     parser.add_argument('--num_partitions', '-np', metavar='num_partitions',
                         type=int, default=1, help='number of partitions')
-    parser.add_argument('--dtype', metavar='dtype', type=np.dtype,
+    parser.add_argument('--remap_id_dtype', metavar='remap_id_dtype', type=np.dtype,
                         default=np.int32,
-                        help='Indicates the numpy.dtype')
+                        help='Indicates the data format to store the ' +
+                             'remapped IDs.')
     parser.add_argument('--not_remap_ids', action='store_false',
                         help='If set, will not remap ids')
     parser.add_argument('--dataset_split', '-ds', metavar='dataset_split',
@@ -602,11 +605,12 @@ def set_args():
                         help='Split dataset into specified fractions')
     parser.add_argument('--start_col', '-sc', metavar='start_col', type=int,
                         default=0,
-                        help='Indicates the column index to start from')
+                        help='Indicates the column index to start parsing ' +
+                             'source/destination nodes( or relation).')
     parser.add_argument('--num_line_skip', '-nls', metavar='num_line_skip',
                         type=int, default=None,
                         help='Indicates number of lines to ' +
-                             'skip from the beginning')
+                             'skip from the beginning of the file.')
 
     args = parser.parse_args()
     arg_dict = vars(args)
@@ -617,7 +621,7 @@ def set_args():
 
 def main():
     arg_dict = set_args()
-    general_parser(arg_dict.get("files"), arg_dict.get("format"),
+    general_parser(arg_dict.get("input_files"), arg_dict.get("format"),
                    arg_dict.get("output_dir"), arg_dict.get("delim"),
                    arg_dict.get("num_partitions"), arg_dict.get("dtype"),
                    arg_dict.get("not_remap_ids"), arg_dict.get("dataset_split"),
