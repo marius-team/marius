@@ -623,7 +623,7 @@ def main():
     arg_dict = set_args()
     general_parser(arg_dict.get("input_files"), arg_dict.get("format"),
                    arg_dict.get("output_dir"), arg_dict.get("delim"),
-                   arg_dict.get("num_partitions"), arg_dict.get("dtype"),
+                   arg_dict.get("num_partitions"),arg_dict.get("remap_id_dtype"),
                    arg_dict.get("not_remap_ids"), arg_dict.get("dataset_split"),
                    arg_dict.get("start_col"), arg_dict.get("num_line_skip"))
 

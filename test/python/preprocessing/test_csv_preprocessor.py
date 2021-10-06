@@ -411,7 +411,7 @@ class TestGeneralParser(unittest.TestCase):
              str(Path(input_dir) / Path(train_file)),
              str(Path(input_dir) / Path(valid_file)),
              str(Path(input_dir) / Path(test_file)),
-             "srd", output_dir, "--dtype=int32"], capture_output=True)
+             "srd", output_dir, "--remap_id_dtype=int32"], capture_output=True)
 
         self.assertEqual((Path(output_dir) /
                           Path("train_edges.pt")).stat().st_size, 1000*3*4)
