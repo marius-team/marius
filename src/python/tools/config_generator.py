@@ -143,7 +143,7 @@ def set_args():
                       nargs=5, help='Dataset statistics\n' +
                       'Enter in order of num_nodes, num_relations, num_train' +
                       ' num_valid, num_test')
-    parser.add_argument('--device', '-dev', metavar='generate_config',
+    parser.add_argument('--device', '-dev', metavar='device',
                         choices=["GPU", "CPU", "multi-GPU"],
                         nargs='?', default='GPU',
                         help=('Generates configs for a single-GPU/multi-CPU' +

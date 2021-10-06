@@ -12,7 +12,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
     Tests for functions parsing command line arguments
     """
     cmd_args = [
-            ["./output_dir", "--dataset", "wn18", "--generate_config",
+            ["./output_dir", "--dataset", "wn18", "--generate_template_config",
              "--num_partitions", "5"],
             ["./output_dir", "--dataset", "wn18", "-gc", "GPU"],
             ["./output_dir", "--dataset", "wn18", "-gc", "CPU",
@@ -45,9 +45,9 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         if Path("./output_dir").exists():
             shutil.rmtree(Path("./output_dir"))
 
-    def test_generate_config_default(self):
+    def test_generate_template_config_default(self):
         """
-        Check if default value of --generate_config is assigned correctly
+        Check if default value of --generate_template_config is assigned correctly
         """
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[0])
@@ -93,7 +93,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
     def test_inconsistent_training_config(self):
         """
         Check if excpetion is thrown if trainig config is specified without
-            --generate_config being specified
+            --generate_template_config being specified
         """
         parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
@@ -102,13 +102,13 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
 
     def test_required_args(self):
         """
-        Check if args.generate_config is set correctly if --generate_config
+        Check if args.generate_template_config is set correctly if --generate_template_config
             is not specified
         """
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[5])
         config_dict, arg_dict = parse_args(config_dict, args)
-        self.assertTrue(arg_dict.get("generate_config") is None)
+        self.assertTrue(arg_dict.get("generate_template_config") is None)
 
     def test_required_arg_omitted(self):
         """

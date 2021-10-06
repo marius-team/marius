@@ -221,13 +221,13 @@ For example, preprocessing the wn18 dataset produces the following output
 Generating configuration files
 ------------------------------
 
-The ``marius_preprocess`` tool can generate a training configuration file for the input dataset using the argument ``--generate_config <device>``, where the <device> is CPU for cpu-based processing, and GPU for gpu-based processing.
+The ``marius_preprocess`` tool can generate a training configuration file for the input dataset using the argument ``--generate_template_config <device>``, where the <device> is CPU for cpu-based processing, and GPU for gpu-based processing.
 
 Specific configuration options can be set by passing ``--<section>.<key>=<value>`` to the command for each option. E.g.
 
 ::
 
-    marius_preprocess output_dir/ --dataset wn18 --generate_config CPU --model.embedding_size=256 --training.num_epochs=100
+    marius_preprocess output_dir/ --dataset wn18 --generate_template_config CPU --model.embedding_size=256 --training.num_epochs=100
 
 This will preprocess the wn18 dataset and will generate a configuration file with following options set:
 

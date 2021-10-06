@@ -269,7 +269,7 @@ The available options:
 ::
 
     usage: config_generator [-h] [--data_directory data_directory] [--dataset dataset | --stats num_nodes num_edge_types num_train num_valid num_test]
-    [--device [generate_config]]
+    [--device [device]]
     output_directory
 
     Generate configs
@@ -287,7 +287,7 @@ The available options:
     --stats num_nodes num_edge_types num_train num_valid num_test, -s num_nodes num_edge_types num_train num_valid num_test
     Dataset statistics
     Enter in order of num_nodes, num_edge_types, num_train num_valid, num_test
-    --device [generate_config], -dev [generate_config]
+    --device [device], -dev [device]
     Generates configs for a single-GPU/multi-CPU/multi-GPU training configuration file by default.
     Valid options (default to GPU): [GPU, CPU, multi-GPU]
 

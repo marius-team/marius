@@ -1140,27 +1140,27 @@ def update_param(config_dict, arg_dict):
     Raises:
         RuntimeError: An error occurred if users specify a certain
             configuration parameter while the command line argument
-            generate_config is not set.
+            generate_template_config is not set.
     """
-    if arg_dict.get("generate_config") is None:
+    if arg_dict.get("generate_template_config") is None:
         for key in config_dict:
             if arg_dict.get(key) is not None:
                 raise RuntimeError(
-                    "Please specify --generate_config when " +
+                    "Please specify --generate_template_config when " +
                     "specifying generating options"
                 )
     else:
-        if arg_dict.get("generate_config") is None:
+        if arg_dict.get("generate_template_config") is None:
             config_dict.update({"device": "GPU"})
             config_dict.update({"general.device": "GPU"})
-        elif arg_dict.get("generate_config") == "multi-GPU":
+        elif arg_dict.get("generate_template_config") == "multi-GPU":
             config_dict.update({"device": "multi_GPU"})
             config_dict.update({"general.device": "multi-GPU"})
         else:
             config_dict.update({"general.device":
-                                arg_dict.get("generate_config")})
+                                arg_dict.get("generate_template_config")})
             config_dict.update({"device":
-                                arg_dict.get("generate_config")})
+                                arg_dict.get("generate_template_config")})
 
         for key in config_dict.keys():
             if arg_dict.get(key) is not None:
