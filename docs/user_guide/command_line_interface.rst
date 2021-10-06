@@ -383,10 +383,12 @@ similar to the following.
     [info] [03/18/21 01:33:19.271] Num Eval Batches: 50
     [info] [03/18/21 01:33:19.271] Auc: 0.973, Avg Ranks: 24.477, MRR: 0.491, Hits@1: 0.357, Hits@5: 0.651, Hits@10: 0.733, Hits@20: 0.806, Hits@50: 0.895, Hits@100: 0.943
 
-After the training is finished, Marius will generate a directory according to the ``path.data_directory`` option for storing all the trained model
-and a directory ``logs/`` for all the log information during the training.
+After the training is finished, Marius stores the model, dataset and log information in the 
+``<path.data_directory>/<general.experiment_name>`` directory. If these options 
+are not set in the configuration file, the default directory ``data/marius`` will be used.
 
-The following is the description of each file in ``path.data_directory``.
+The following is the description of each file in ``<path.data_directory>/<general.experiment_name>`` 
+(the default ``general.experiment_name`` is set to ``marius``).
 
 =========================================  ================
 File                                       Description
@@ -466,30 +468,30 @@ This command can be called with:
 
 ::
 
-    marius_postprocess <trained_embedding_directory> <dataset_directory> [OPTIONS]
+    marius_postprocess <model_directory> <dataset_directory> [OPTIONS]
 
 The available options:
 
 ::
 
-    usage: postprocess [-h] [--output_directory output_directory] [--format format] trained_embeddings_directory dataset_directory
+    usage: postprocess [-h] [--output_directory output_directory] [--format format] model_directory dataset_directory
 
     Retrieve trained embeddings
 
     positional arguments:
-    trained_embeddings_directory
-                            Directory containing trained embeddings
+    model_directory       Directory containing trained model
     dataset_directory     Directory containing the dataset for training
 
     optional arguments:
     -h, --help            show this help message and exit
     --output_directory output_directory, -o output_directory
-                            Directory to put retrieved embeddings. If is not set, will output retrieved embeddings to dataset directory.
+                            Directory to put retrieved embeddings. If is not set, will output retrieved embeddings to
+                            dataset directory.
     --format format, -f format
                             Data format to store retrieved embeddings
 
-The ``<trained_embedding_directory>`` is the directory created 
-by ``marius_train`` containing all trained embeddings.
+The ``<model_directory>`` is the directory ``<path.data_directory>/<general.experiment_name>`` created 
+by ``marius_train`` which contains the trained model.
 The ``<dataset_directory>`` is the directory created by ``marius_preprocess`` to store preprocessed data.
 
 \-\-output_directory <output_directory>, \-o <output_directory>
@@ -513,12 +515,11 @@ The following command shows how to use ``marius_postprocess`` for retrieving tra
 
 ::
 
-    marius_postprocess ./data/ ./dataset_directory --output_directory output_dir -f CSV
+    marius_postprocess ./data/marius/ ./dataset_directory --output_directory output_dir -f CSV
 
-In this case, ``./data/`` is the directory created by ``marius_train`` containing all the
-trained embeddings. ``./dataset_directory`` is the directory created by ``marius_preprocess``
-containing all preprocessed data files.
-These embeddings will be stored in the CSV format.
+In this case, ``./data/marius/`` is the directory created by ``marius_train`` which contains 
+the trained model. ``./dataset_directory`` is the directory created by ``marius_preprocess``
+containing all preprocessed data files. This command will store the embeddings in CSV format.
 
 
 .. _user_guide_marius_predict:
@@ -560,7 +561,8 @@ The available options are:
     --file_input file_input, -f file_input
                             File containing all required information for batch inference
 
-The ``<trained_embeddings_directory>`` is the directory ``data/`` created by ``marius_train``.
+The ``<trained_embeddings_directory>`` is the directory 
+``<path.data_directory>/<general.experiment_name>`` created by ``marius_train``.
 The ``<dataset_directory>`` is the directory containing the ``node_mapping.txt`` and ``rel_mapping.txt`` files.
 The ``<k>`` controls the number of predicted node to output.
 
@@ -611,4 +613,4 @@ in the following example.
 
 ::
 
-    marius_predict ./data/ ./dataset_directory 5 -s source_node_id -r relation_id
+    marius_predict ./data/marius/ ./dataset_directory 5 -s source_node_id -r relation_id

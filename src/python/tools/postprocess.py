@@ -20,9 +20,9 @@ def get_embs(mapping_file, embs_file):
 def output_embeddings(data_dir, dataset_dir, output_dir, fmt):
     node_mapping_file = Path(dataset_dir) / Path("node_mapping.txt")
     rel_mapping_file = Path(dataset_dir) / Path("rel_mapping.txt")
-    node_embs_file = Path(data_dir) / Path("marius/embeddings/embeddings.bin")
-    lhs_embs_file = Path(data_dir) / Path("marius/relations/src_relations.bin")
-    rhs_embs_file = Path(data_dir) / Path("marius/relations/dst_relations.bin")
+    node_embs_file = Path(data_dir) / Path("embeddings/embeddings.bin")
+    lhs_embs_file = Path(data_dir) / Path("relations/src_relations.bin")
+    rhs_embs_file = Path(data_dir) / Path("relations/dst_relations.bin")
 
     node_embs = get_embs(node_mapping_file, node_embs_file)
     lhs_embs = get_embs(rel_mapping_file, lhs_embs_file)
@@ -53,10 +53,10 @@ def set_args():
         description='Retrieve trained embeddings',
         prog='postprocess'
     )
-    parser.add_argument('trained_embeddings_directory',
-                        metavar='trained_embeddings_directory',
+    parser.add_argument('model_directory',
+                        metavar='model_directory',
                         type=str,
-                        help='Directory containing trained embeddings')
+                        help='Directory containing trained model')
     parser.add_argument('dataset_directory',
                         metavar='dataset_directory',
                         type=str,
@@ -79,7 +79,7 @@ def set_args():
 def main():
     parser = set_args()
     args = parser.parse_args()
-    data_dir = args.trained_embeddings_directory
+    data_dir = args.model_directory
     dataset_dir = args.dataset_directory
     output_dir = args.output_directory
     fmt = args.format

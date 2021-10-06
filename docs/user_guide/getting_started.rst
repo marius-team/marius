@@ -134,7 +134,7 @@ can help retrieve the trained embeddings and perform link prediction tasks.
 
 Marius provides ``marius_postprocess`` for users to retrieve the trained embeddings in the 
 required format.
-The following command retrieves the trained embeddings stored in ``./data/``
+The following command retrieves the trained embeddings stored in ``./data/marius/``
 and store them in CSV format in
 the directory ``embeddings/``. The directory ``./training_data/`` is the directory
 containing the preprocessed data used for training.
@@ -144,7 +144,7 @@ Users just need to replace ``CSV`` with name of the format they want in the foll
 
 ::
 
-    marius_postprocess ./data/ ./training_data/ --output_directory ./embeddings/ --format CSV
+    marius_postprocess ./data/marius/ ./training_data/ --output_directory ./embeddings/ --format CSV
 
 Link prediction on trained embeddings is supported by ``marius_predict``. 
 Given a source node and type of relation, the 
@@ -154,7 +154,7 @@ the command.
 
 ::
     
-    marius_predict ./data/ ./training_data/ 10 --src __saxony_NN_1  --rel _member_meronym
+    marius_predict ./data/marius/ ./training_data/ 10 --src __saxony_NN_1  --rel _member_meronym
 
 The left-hand-side relation type is used since the link prediction performed in 
 this case starts from source node to destination node.
