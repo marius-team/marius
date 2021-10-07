@@ -512,7 +512,7 @@ def set_args():
     mode.add_argument('--files', metavar='files', nargs='+', type=str,
                         help='Files containing custom dataset')
     mode.add_argument('--dataset', metavar='dataset',
-                        type=str, help='Supported dataset to preprocess')
+                        type=str, help='Built-in dataset to preprocess')
     parser.add_argument('--num_partitions', metavar='num_partitions',
                         required=False, type=int, default=1,
                         help='Number of partitions to split the edges into')

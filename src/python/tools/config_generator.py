@@ -137,7 +137,7 @@ def set_args():
     parser.add_argument('--data_directory', metavar='data_directory',
                         type=str, help='Directory of the preprocessed data')
     mode.add_argument('--dataset', '-d', metavar='dataset', type=str,
-                      help='Name of the supported dataset for generating ' +
+                      help='Name of the built-in dataset for generating ' +
                            'Marius configuration file')
     mode.add_argument('--stats', '-s',
                       metavar=('num_nodes', 'num_relations', 'num_train',

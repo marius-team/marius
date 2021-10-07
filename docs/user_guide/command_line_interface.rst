@@ -31,40 +31,40 @@ The available options:
 
 ::
 
- usage: preprocess [-h] [--files files [files ...]] [--dataset dataset] [--num_partitions num_partitions] [--overwrite]
- [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
- [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
- output_directory
+    usage: preprocess [-h] [--files files [files ...] | --dataset dataset] [--num_partitions num_partitions] [--overwrite]
+                    [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
+                    [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
+                    output_directory
 
- Preprocess Datasets
+    Preprocess Datasets
 
- positional arguments:
- output_directory      Directory to put graph data
+    positional arguments:
+    output_directory      Directory to put graph data
 
- optional arguments:
- -h, --help            show this help message and exit
- --files files [files ...]
-     Files containing custom dataset
- --dataset dataset     Supported dataset to preprocess
- --num_partitions num_partitions
-     Number of partitions to split the edges into
- --overwrite           Overwrites the output_directory if this issetOtherwise, files with same the names will be treated as the data for current dataset.
- --generate_config [generate_config], -gc [generate_config]
-     Generates a single-GPU/multi-CPU/multi-GPU training configuration file by default.
-     Valid options (default to GPU): [GPU, CPU, multi-GPU]
- --format format       Format of data, eg. srd
- --delim delim, -d delim
-     Specifies the delimiter
- --dtype dtype         Indicates the numpy.dtype
- --not_remap_ids       If set, will not remap ids
- --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
-     Split dataset into specified fractions
- --start_col start_col, -sc start_col
-     Indicates the column index to start from
- --num_line_skip num_line_skip, -nls num_line_skip
-     Indicates number of lines to skip from the beginning
+    optional arguments:
+    -h, --help            show this help message and exit
+    --files files [files ...]
+                            Files containing custom dataset
+    --dataset dataset     Built-in dataset to preprocess
+    --num_partitions num_partitions
+                            Number of partitions to split the edges into
+    --overwrite           Overwrites the output_directory if this is set. Otherwise, files with same the names will be treated as the data for current dataset.
+    --generate_config [generate_config], -gc [generate_config]
+                            Generates a single-GPU training configuration file by default.
+                            Valid options (default to GPU): [GPU, CPU, multi-GPU]
+    --format format       Format of data, eg. srd
+    --delim delim, -d delim
+                            Specifies the delimiter
+    --dtype dtype         Indicates the numpy.dtype
+    --not_remap_ids       If set, will not remap ids
+    --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
+                            Split dataset into specified fractions
+    --start_col start_col, -sc start_col
+                            Indicates the column index to start from
+    --num_line_skip num_line_skip, -nls num_line_skip
+                            Indicates number of lines to skip from the beginning
 
- Specify certain config (optional): [--<section>.<key>=<value>]
+    Specify certain config (optional): [--<section>.<key>=<value>]
 
 output_directory
 ++++++++++++++++
@@ -72,7 +72,7 @@ output_directory
 It is the directory where all the files created by ``marius_preprocess`` wil be stored.
 ``marius_preprocess`` will create this file if it does not exist.
 ``marius_preprocess`` outputs the following files to ``<output_directory>``.
-For the preprocessing of supported datasets, ``<output_directory>`` also includes
+For the preprocessing of built-in datasets, ``<output_directory>`` also includes
 the downloaded raw dataset.
 
 ==================  ============
@@ -121,7 +121,7 @@ For example, the following command preprocesses the custom dataset composed of `
 \-\-dataset <dataset>
 +++++++++++++++++++++
 ``--dataset`` is an **optional** argument for ``marius_preprocess``.
-It can be one of the names of a Marius supported dataset. 
+It can be one of the names of a Marius built-in dataset. 
 It should not be used at the same time when ``--files`` is used.
 To see which datasets are supported by Marius, check out
 :ref:`dataset` table.
@@ -247,7 +247,7 @@ marius_config_generator
 
 This command lets users to create a Marius configuration file from the command line with
 some parameters specified according to their needs. Options are provided for generating 
-Marius configuration files for both custom (``--stats``) and supported datasets (``--dataset``).
+Marius configuration files for both custom (``--stats``) and built-in datasets (``--dataset``).
 This command can be called with:
 
 ::
@@ -258,28 +258,29 @@ The available options:
 
 ::
 
-    usage: config_generator [-h] [--data_directory data_directory] [--dataset dataset | --stats num_nodes num_edge_types num_train num_valid num_test]
-    [--device [generate_config]]
-    output_directory
+    usage: config_generator [-h] [--data_directory data_directory]
+                        [--dataset dataset | --stats num_nodes num_relations num_train num_valid num_test]
+                        [--device [generate_config]]
+                        output_directory
 
     Generate configs
 
     positional arguments:
-    output_directory      Directory to put configs
-    Also assumed to be the default directory of preprocessed data if --data_directory is not specified
+    output_directory      Directory to save Marius configuration files
+                            Also assumed to be the default directory of preprocessed data if --data_directory is not specified
 
     optional arguments:
     -h, --help            show this help message and exit
     --data_directory data_directory
-    Directory of the preprocessed data
+                            Directory of the preprocessed data
     --dataset dataset, -d dataset
-    Dataset to preprocess
-    --stats num_nodes num_edge_types num_train num_valid num_test, -s num_nodes num_edge_types num_train num_valid num_test
-    Dataset statistics
-    Enter in order of num_nodes, num_edge_types, num_train num_valid, num_test
+                            Name of the built-in dataset for generating Marius configuration file
+    --stats num_nodes num_relations num_train num_valid num_test, -s num_nodes num_relations num_train num_valid num_test
+                            Custom Dataset statistics
+                            Enter in order of num_nodes, num_relations, num_train num_valid, num_test
     --device [generate_config], -dev [generate_config]
-    Generates configs for a single-GPU/multi-CPU/multi-GPU training configuration file by default.
-    Valid options (default to GPU): [GPU, CPU, multi-GPU]
+                            Generates configs for a single-GPU/multi-CPU/multi-GPU Marius configuration file.
+                            Valid options (default to GPU): [GPU, CPU, multi-GPU]
 
     Specify certain config (optional): [--<section>.<key>=<value>]
 
@@ -295,9 +296,9 @@ preprocessed data.
 \-\-dataset <dataset>, \-d <dataset>
 ++++++++++++++++++++++++++++++++++++
 ``--dataset`` is an **optional** argument. This argument is used when users want to 
-generate a Marius configuration file for a supported dataset.
-It specifies the name of the supported dataset which its configuration file will be generated. 
-It should not be used when ``--stats`` is in use. To see which datasets are supported by Marius, check out
+generate a Marius configuration file for a built-in dataset.
+It specifies the name of the built-in dataset which its configuration file will be generated. 
+It should not be used when ``--stats`` is in use. To see which datasets are built-in by Marius, check out
 :ref:`dataset` table.
 
 \-\-stats <num_nodes> <num_relations> <num_train> <num_valid> <num_test>, \-s <num_nodes> <num_relations> <num_train> <num_valid> <num_test>
