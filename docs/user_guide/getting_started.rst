@@ -91,8 +91,7 @@ Training embeddings on such a graph requires three steps:
     Marius also offers ``marius_config_generator`` to generate a configuration file
     for the users given the basic information of dataset statistics and where to store
     the created configuration file. ``marius_config_generator`` can be used to generate
-    configuration files for both custom and built-in datasets by passing different
-    options.
+    configuration files for both custom and built-in datasets.
     All other configuration parameters will be set to the default value.
     Users are given the options to specify the values of certain parameters.
     The following command shows how to use ``marius_config_generator`` to generate 

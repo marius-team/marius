@@ -297,7 +297,7 @@ preprocessed data.
 ++++++++++++++++++++++++++++++++++++
 ``--dataset`` is an **optional** argument. This argument is used when users want to 
 generate a Marius configuration file for a built-in dataset.
-It specifies the name of the built-in dataset which its configuration file will be generated. 
+It specifies the name of the built-in dataset for which the configuration file will be generated.
 It should not be used when ``--stats`` is in use. To see which datasets are built-in by Marius, check out
 :ref:`dataset` table.
 
