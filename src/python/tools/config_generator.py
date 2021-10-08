@@ -67,10 +67,16 @@ def read_template(file):
     return config_dict, valid_dict
 
 
-def set_up_files(output_directory):
+def set_up_files(dir_path):
+    duplicate_idx = 0
+
+    while Path(dir_path).exists():
+        duplicate_idx = duplicate_idx + 1
+        dir_path = Path(str(dir_path) + "_" + str(duplicate_idx))
+
     try:
-        if not Path(output_directory).exists():
-            Path(output_directory).mkdir(parents=False, exist_ok=False)
+        if not Path(dir_path).exists():
+            Path(dir_path).mkdir(parents=False, exist_ok=False)
     except FileExistsError:
         print("Directory already exists.")
     except FileNotFoundError:

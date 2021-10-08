@@ -21,6 +21,8 @@ from marius.tools.config_generator import update_data_path
 from marius.tools.config_generator import DEFAULT_CONFIG_FILE
 from marius.tools.csv_converter import general_parser
 
+HERE = Path.cwd()
+OUTPUT_DIR = None
 
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
     LIVE_JOURNAL_URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
@@ -507,7 +509,7 @@ def set_args():
                 epilog=(('Specify certain config (optional): ' +
                         '[--<section>.<key>=<value>]')))
     mode = parser.add_mutually_exclusive_group()
-    parser.add_argument('output_directory', metavar='output_directory',
+    parser.add_argument('--output_directory', metavar='output_directory',
                         type=str, help='Directory to put graph data')
     mode.add_argument('--files', metavar='files', nargs='+', type=str,
                         help='Files containing custom dataset')
@@ -568,13 +570,23 @@ def set_args():
 def parse_args(config_dict, args):
     arg_dict = vars(args)
     config_dict = update_param(config_dict, arg_dict)
-    set_up_files(args.output_directory)
-    
+
     if arg_dict.get("dataset") is None:
         config_dict.update({"dataset": "custom"})
+        if arg_dict.get("files") is None:
+            raise RuntimeError("Must pass either built-in dataset name or" +
+                    " custom dataset files.")
     else:
         config_dict.update({"dataset": arg_dict.get("dataset")})
-    
+
+    if arg_dict.get("output_directory") is None:
+        OUTPUT_DIR = HERE / Path("../../../" +
+                    str(config_dict.get("dataset") + "_dataset"))
+    else:
+        OUTPUT_DIR = Path(arg_dict.get("output_directory"))
+
+    set_up_files(OUTPUT_DIR)
+
     return config_dict, arg_dict
 
 
@@ -608,17 +620,17 @@ def main():
         "ogbn_products": ogbn_products,
     }
 
-    if args.overwrite and Path(args.output_directory).exists():
-        shutil.rmtree(args.output_directory)
+    if args.overwrite and Path(OUTPUT_DIR).exists():
+        shutil.rmtree(OUTPUT_DIR)
 
     if dataset_dict.get(args.dataset) is not None:
         print(args.dataset)
         stats = dataset_dict.get(args.dataset)(
-                                    args.output_directory, args.num_partitions)
+                                    OUTPUT_DIR, args.num_partitions)
     else:
         print("Preprocess custom dataset")
         stats = general_parser(args.files, args.format,
-                               args.output_directory, args.delim,
+                               OUTPUT_DIR, args.delim,
                                args.num_partitions,
                                args.dtype, args.not_remap_ids,
                                args.dataset_split,
@@ -627,7 +639,7 @@ def main():
 
 
     if args.generate_config is not None:
-        dir = args.output_directory
+        dir = OUTPUT_DIR
         config_dict = update_stats(stats, config_dict)
         config_dict = update_data_path(dir, config_dict)
         output_config(config_dict, dir)
