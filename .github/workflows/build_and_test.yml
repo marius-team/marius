@@ -164,6 +164,6 @@ jobs:
         run:   |
           python3 -c "import marius as m"
           python3 -c "from marius.tools import preprocess"
-          marius_preprocess output_dir/ --dataset fb15k
+          marius_preprocess --output_directory output_dir/ --dataset fb15k
           pytest test
 
