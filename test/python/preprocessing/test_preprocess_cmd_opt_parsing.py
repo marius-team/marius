@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import shutil
 from pathlib import Path
+from marius.tools.config_generator import output_config
 from marius.tools.preprocess import set_args
 from marius.tools.preprocess import parse_args
 
@@ -12,35 +13,48 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
     Tests for functions parsing command line arguments
     """
     cmd_args = [
-            ["./output_dir", "--dataset", "wn18", "--generate_config",
-             "--num_partitions", "5"],
-            ["./output_dir", "--dataset", "wn18", "-gc", "GPU"],
-            ["./output_dir", "--dataset", "wn18", "-gc", "CPU",
+            ["--output_directory", "./output_dir", "--dataset", "wn18",
+             "--generate_config", "--num_partitions", "5"],
+            ["--output_directory", "./output_dir", "--dataset", "wn18", "-gc",
+             "GPU"],
+            ["--output_directory", "./output_dir", "--dataset", "wn18", "-gc",
+             "CPU",
              "--model.embedding_size=400", "--training.batch_size=51200",
              "--training.num_epochs=23"],
-            ["./output_dir", "--dataset", "wn18", "-gc", "GPU",
-             "--general.embedding_size=400"],
-            ["./output_dir", "--dataset", "wn18", "--general.embedding_size=200"],
-            ["--dataset", "wn18", "./output_dir"],
+            ["--output_directory", "./output_dir", "--dataset", "wn18", "-gc",
+             "GPU", "--general.embedding_size=400"],
+            ["--output_directory", "./output_dir", "--dataset", "wn18",
+             "--general.embedding_size=200"],
+            ["--dataset", "wn18", "--output_directory", "./output_dir"],  # 5
             ["--dataset", "wn18"],
-            ["./output_dir", "--dataset", "wn18", "CPU"],
-            ["./output_dir", "--dataset", "wn18", "--gc", "--model.decoder"],
+            ["--output_directory", "./output_dir", "--dataset", "wn18", "CPU"],
+            ["--output_directory", "./output_dir", "--dataset", "wn18", "--gc",
+             "--model.decoder"],
             [],
-            ["./output_dir", "--dataset", "wn18", "multi_cpu"],
-            ["./output_dir", "--dataset", "wn18", "--gc",
+            ["--output_directory", "./output_dir", "--dataset", "wn18",
+             "multi_cpu"], # 10
+            ["--output_directory", "./output_dir", "--dataset", "wn18", "--gc",
              "--storage.edge_bucket_ordering=EliminationCus"],
-            ["marius_preprocess", "./output_dir", "--dataset", "wn18", "-gc"]
+            ["marius_preprocess", "--output_directory", "./output_dir",
+             "--dataset", "wn18", "-gc"],
+            ["--files",
+             "./test/test_data/train_edges.txt",
+             "./test/test_data/valid_edges.txt",
+             "./test/test_data/test_edges.txt"] # 13
         ]
 
-    @classmethod
-    def setUp(self):
-        if not Path("./output_dir").exists():
-            Path("./output_dir").mkdir()
+    dataset_dirs = []
+
+    # @classmethod
+    # def setUp(self):
+    #     if not Path("./output_dir").exists():
+    #         Path("./output_dir").mkdir()
 
     @classmethod
     def tearDown(self):
-        if Path("./output_dir").exists():
-            shutil.rmtree(Path("./output_dir"))
+        for dir in self.dataset_dirs:
+            if Path(dir).exists():
+                shutil.rmtree(Path(dir))
 
     def test_generate_config_default(self):
         """
@@ -48,7 +62,8 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[0])
-        config_dict, arg_dict = parse_args(config_dict, args)
+        config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.dataset_dirs.append(output_dir)
         self.assertTrue(config_dict.get("dataset") == "wn18")
         self.assertTrue(config_dict.get("device") == "GPU")
         self.assertTrue(arg_dict.get("num_partitions") == 5)
@@ -59,7 +74,8 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[1])
-        config_dict, arg_dict = parse_args(config_dict, args)
+        config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.dataset_dirs.append(output_dir)
         self.assertTrue(config_dict.get("dataset") == "wn18")
         self.assertTrue(config_dict.get("device") == "GPU")
         self.assertTrue(arg_dict.get("output_directory") == "./output_dir")
@@ -70,7 +86,8 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[2])
-        config_dict, arg_dict = parse_args(config_dict, args)
+        config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.dataset_dirs.append(output_dir)
         self.assertTrue(config_dict.get("dataset") == "wn18")
         self.assertTrue(config_dict.get("device") == "CPU")
         self.assertTrue(arg_dict.get("output_directory") == "./output_dir")
@@ -95,7 +112,8 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         with self.assertRaises(SystemExit):
             args = parser.parse_args(self.cmd_args[4])
-            config_dict, arg_dict = parse_args(config_dict, args)
+            config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+            self.dataset_dirs.append(output_dir)
 
     def test_required_args(self):
         """
@@ -104,16 +122,30 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[5])
-        config_dict, arg_dict = parse_args(config_dict, args)
+        config_dict, arg_dict, output_dir = parse_args(config_dict, args)
         self.assertTrue(arg_dict.get("generate_config") is None)
 
-    def test_required_arg_omitted(self):
+    def test_output_directory_not_specified_build_in_dataset(self):
         """
-        Check if exception is thrown when output_directory is given
+        Check if exception is thrown when output_directory is not given and 
+            if output_directory is set to correct value when built-in dataset
+            is specified
         """
         parser, config_dict = set_args()
-        with self.assertRaises(SystemExit):
-            args = parser.parse_args(self.cmd_args[6])
+        args = parser.parse_args(self.cmd_args[6])
+        config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.assertTrue("wn18_dataset" in str(output_dir))
+
+    def test_output_directory_not_spcified_custom_dataset(self):
+        """
+        Check if exception is thrown when output_directory is not given and
+            if output_directory is set to correct value when preprocessing
+            custom datasets
+        """
+        parser, config_dict = set_args()
+        args = parser.parse_args(self.cmd_args[13])
+        config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.assertTrue("custom_dataset" in str(output_dir))
 
     def test_training_config_missing(self):
         """
@@ -137,8 +169,9 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         Check if exception is thrown when no arg is given
         """
         parser, config_dict = set_args()
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(RuntimeError):
             args = parser.parse_args(self.cmd_args[9])
+            config_dict, arg_dict, output_dir = parse_args(config_dict, args)
 
     def test_invalid_arg(self):
         """
@@ -160,18 +193,27 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         """
         Check if config file is generated into the correct directory
         """
-        subprocess.run(self.cmd_args[12])
-        self.assertTrue(Path("./output_dir/wn18_gpu.ini").exists())
+        proc = subprocess.run(self.cmd_args[12], capture_output=True)
+        
+        proc_output = proc.stdout.decode('utf-8')
+        output_dir = proc_output.split('\n')[0].split(' ')[-1]
+        self.dataset_dirs.append(output_dir)
+        self.assertTrue((Path(output_dir) / Path("wn18_gpu.ini")).exists())
 
     def test_custom_dataset(self):
         """
         Check if custom dataset is processed correctly
         """
-        subprocess.run(["python3", "./src/python/tools/preprocess.py",
+        proc = subprocess.run(["python3", "./src/python/tools/preprocess.py",
+                        "--output_directory",
                         "./output_dir",
                         "--files",
                         "./test/test_data/train_edges.txt",
                         "./test/test_data/valid_edges.txt",
                         "./test/test_data/test_edges.txt",
-                        "-gc", "CPU"])
-        self.assertTrue(Path("./output_dir/custom_cpu.ini").exists())
+                        "-gc", "CPU"], capture_output=True)
+
+        proc_output = proc.stdout.decode('utf-8')
+        output_dir = proc_output.split('\n')[0].split(' ')[-1]
+        self.dataset_dirs.append(output_dir)
+        self.assertTrue((Path(output_dir) / Path("custom_cpu.ini")).exists())

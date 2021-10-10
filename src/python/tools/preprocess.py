@@ -15,7 +15,7 @@ import torch
 
 from marius.tools.config_generator import output_config
 from marius.tools.config_generator import read_template
-#from marius.tools.config_generator import set_up_files
+from marius.tools.config_generator import set_up_files
 from marius.tools.config_generator import update_stats
 from marius.tools.config_generator import update_data_path
 from marius.tools.config_generator import DEFAULT_CONFIG_FILE
@@ -402,8 +402,7 @@ def parse_ogbl(files, has_rel, output_dir, num_partitions=1):
 
 def download_file(url, output_dir):
     output_dir = Path(output_dir)
-    if not output_dir.exists():
-        output_dir.mkdir()
+    assert(Path(output_dir).exists()), "Output directory not found"
 
     url_components = urlparse(url)
     filename = Path(url_components.path + url_components.query).name
@@ -592,6 +591,7 @@ def main():
     parser, config_dict = set_args()
     args = parser.parse_args()
     config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+    print(f"output directory set to {output_dir}")
 
     dataset_dict = {
         "twitter": twitter,

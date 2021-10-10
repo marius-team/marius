@@ -44,7 +44,7 @@ def output_config(config_dict, output_dir):
             for key in opts:
                 if key.split(".")[0] == sec:
                     f.write(key.split(".")[1] +
-                            "=" + config_dict.get(key) + "\n")
+                            "=" + str(config_dict.get(key)) + "\n")
 
 
 def read_template(file):
@@ -114,22 +114,21 @@ def update_stats(stats, config_dict):
 
 
 def update_data_path(dir, config_dict):
-    config_dict.update({"path.train_edges": str(dir.strip("/") +
-                        "/train_edges.pt")})
-    config_dict.update({"path.train_edges_partitions": str(dir.strip("/") +
-                        "/train_edges_partitions.txt")})
-    config_dict.update({"path.validation_edges": str(dir.strip("/") +
-                        "/valid_edges.pt")})
-    config_dict.update({"path.test_edges": str(dir.strip("/") +
-                        "/test_edges.pt")})
-    config_dict.update({"path.node_labels": str(dir.strip("/") +
-                        "/node_mapping.txt")})
-    config_dict.update({"path.relation_labels": str(dir.strip("/") +
-                        "/rel_mapping.txt")})
-    config_dict.update({"path.node_ids": str(dir.strip("/") +
-                        "/node_mapping.bin")})
-    config_dict.update({"path.relations_ids": str(dir.strip("/") +
-                        "/rel_mapping.bin")})
+    config_dict.update({"path.train_edges": Path(dir) / Path("train_edges.pt")})
+    config_dict.update({"path.train_edges_partitions": Path(dir) /
+                        Path("/train_edges_partitions.txt")})
+    config_dict.update({"path.validation_edges": Path(dir) /
+                        Path("/valid_edges.pt")})
+    config_dict.update({"path.test_edges": Path(dir) /
+                        Path("/test_edges.pt")})
+    config_dict.update({"path.node_labels": Path(dir) /
+                        Path("/node_mapping.txt")})
+    config_dict.update({"path.relation_labels": Path(dir) /
+                        Path("/rel_mapping.txt")})
+    config_dict.update({"path.node_ids": Path(dir) /
+                        Path("/node_mapping.bin")})
+    config_dict.update({"path.relations_ids": Path(dir) /
+                        Path("/rel_mapping.bin")})
 
     return config_dict
 

@@ -6,14 +6,20 @@ import pytest
 import os
 import marius as m
 from marius.tools import preprocess
+from marius.tools.config_generator import set_up_files
 
 
 class TestFB15K(unittest.TestCase):
+    output_path = None
+
+    @classmethod
+    def setUp(self):
+        output_path = set_up_files("output_dir")
 
     @classmethod
     def tearDown(self):
-        if Path("output_dir").exists():
-            shutil.rmtree(Path("output_dir"))
+        if Path(self.output_path).exists():
+            shutil.rmtree(Path(self.output_path))
         if Path("training_data").exists():
             shutil.rmtree(Path("training_data"))
 

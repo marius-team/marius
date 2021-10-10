@@ -3,6 +3,7 @@ from pathlib import Path
 from marius.tools.postprocess import get_embs
 from marius.tools.postprocess import output_embeddings
 from marius.tools.preprocess import wn18
+from marius.tools.config_generator import set_up_files
 import subprocess
 import shutil
 import numpy as np
@@ -22,6 +23,7 @@ class TestPostprocess(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
+        self.dataset_dir = set_up_files(self.dataset_dir)
         wn18(str(self.dataset_dir))
         
         if not Path("./data/marius/embeddings").exists():
@@ -39,8 +41,8 @@ class TestPostprocess(unittest.TestCase):
         if Path("./data").exists():
             shutil.rmtree(Path("./data"))
         
-        if Path("./output_dir").exists():
-            shutil.rmtree(Path("./output_dir"))
+        if Path(self.dataset_dir).exists():
+            shutil.rmtree(Path(self.dataset_dir))
 
     def test_get_embs(self):
         """
