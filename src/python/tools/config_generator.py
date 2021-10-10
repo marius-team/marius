@@ -70,9 +70,13 @@ def read_template(file):
 def set_up_files(dir_path):
     duplicate_idx = 0
 
-    while Path(dir_path).exists():
-        duplicate_idx = duplicate_idx + 1
+    if Path(dir_path).exists():
+        duplicate_idx += 1
         dir_path = Path(str(dir_path) + "_" + str(duplicate_idx))
+        while dir_path.exists():
+            temp_path = str(dir_path)[:-1 * len(str(duplicate_idx))]
+            duplicate_idx += 1
+            dir_path = Path(temp_path + str(duplicate_idx))
 
     try:
         if not Path(dir_path).exists():
@@ -81,6 +85,8 @@ def set_up_files(dir_path):
         print("Directory already exists.")
     except FileNotFoundError:
         print("Incorrect parent path given for output directory.")
+
+    return dir_path
 
 
 def update_dataset_stats(dataset, config_dict):

@@ -15,14 +15,13 @@ import torch
 
 from marius.tools.config_generator import output_config
 from marius.tools.config_generator import read_template
-from marius.tools.config_generator import set_up_files
+#from marius.tools.config_generator import set_up_files
 from marius.tools.config_generator import update_stats
 from marius.tools.config_generator import update_data_path
 from marius.tools.config_generator import DEFAULT_CONFIG_FILE
 from marius.tools.csv_converter import general_parser
 
 HERE = Path.cwd()
-OUTPUT_DIR = None
 
 def live_journal(output_dir, num_partitions=1, split=(.05, .05)):
     LIVE_JOURNAL_URL = "https://snap.stanford.edu/data/soc-LiveJournal1.txt.gz"
@@ -580,20 +579,19 @@ def parse_args(config_dict, args):
         config_dict.update({"dataset": arg_dict.get("dataset")})
 
     if arg_dict.get("output_directory") is None:
-        OUTPUT_DIR = HERE / Path("../../../" +
-                    str(config_dict.get("dataset") + "_dataset"))
+        output_dir = HERE / Path(str(config_dict.get("dataset") + "_dataset"))
     else:
-        OUTPUT_DIR = Path(arg_dict.get("output_directory"))
+        output_dir = Path(arg_dict.get("output_directory"))
 
-    set_up_files(OUTPUT_DIR)
+    output_dir = set_up_files(output_dir)
 
-    return config_dict, arg_dict
+    return config_dict, arg_dict, output_dir
 
 
 def main():
     parser, config_dict = set_args()
     args = parser.parse_args()
-    config_dict, arg_dict = parse_args(config_dict, args)
+    config_dict, arg_dict, output_dir = parse_args(config_dict, args)
 
     dataset_dict = {
         "twitter": twitter,
@@ -620,17 +618,17 @@ def main():
         "ogbn_products": ogbn_products,
     }
 
-    if args.overwrite and Path(OUTPUT_DIR).exists():
-        shutil.rmtree(OUTPUT_DIR)
+    if args.overwrite and Path(output_dir).exists():
+        shutil.rmtree(output_dir)
 
     if dataset_dict.get(args.dataset) is not None:
         print(args.dataset)
         stats = dataset_dict.get(args.dataset)(
-                                    OUTPUT_DIR, args.num_partitions)
+                                    output_dir, args.num_partitions)
     else:
         print("Preprocess custom dataset")
         stats = general_parser(args.files, args.format,
-                               OUTPUT_DIR, args.delim,
+                               output_dir, args.delim,
                                args.num_partitions,
                                args.dtype, args.not_remap_ids,
                                args.dataset_split,
@@ -639,7 +637,7 @@ def main():
 
 
     if args.generate_config is not None:
-        dir = OUTPUT_DIR
+        dir = output_dir
         config_dict = update_stats(stats, config_dict)
         config_dict = update_data_path(dir, config_dict)
         output_config(config_dict, dir)
