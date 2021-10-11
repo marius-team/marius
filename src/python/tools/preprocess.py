@@ -15,7 +15,6 @@ import torch
 
 from marius.tools.config_generator import output_config
 from marius.tools.config_generator import read_template
-from marius.tools.config_generator import set_up_files
 from marius.tools.config_generator import update_stats
 from marius.tools.config_generator import update_data_path
 from marius.tools.config_generator import DEFAULT_CONFIG_FILE
@@ -467,6 +466,28 @@ def extract_file(filepath):
 
     print("Extraction completed")
     return filepath.parent
+
+
+def set_up_files(dir_path):
+    duplicate_idx = 0
+
+    if Path(dir_path).exists():
+        duplicate_idx += 1
+        dir_path = Path(str(dir_path) + "_" + str(duplicate_idx))
+        while dir_path.exists():
+            temp_path = str(dir_path)[:-1 * len(str(duplicate_idx))]
+            duplicate_idx += 1
+            dir_path = Path(temp_path + str(duplicate_idx))
+
+    try:
+        if not Path(dir_path).exists():
+            Path(dir_path).mkdir(parents=False, exist_ok=False)
+    except FileExistsError:
+        print("Directory already exists.")
+    except FileNotFoundError:
+        print("Incorrect parent path given for output directory.")
+
+    return dir_path
 
 
 def update_param(config_dict, arg_dict):

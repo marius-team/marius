@@ -68,16 +68,6 @@ def read_template(file):
 
 
 def set_up_files(dir_path):
-    duplicate_idx = 0
-
-    if Path(dir_path).exists():
-        duplicate_idx += 1
-        dir_path = Path(str(dir_path) + "_" + str(duplicate_idx))
-        while dir_path.exists():
-            temp_path = str(dir_path)[:-1 * len(str(duplicate_idx))]
-            duplicate_idx += 1
-            dir_path = Path(temp_path + str(duplicate_idx))
-
     try:
         if not Path(dir_path).exists():
             Path(dir_path).mkdir(parents=False, exist_ok=False)
