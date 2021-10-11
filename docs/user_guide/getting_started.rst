@@ -47,7 +47,7 @@ __kobenhavn_NN_1    _instance_hypernym  __national_capital_NN_1
 
 Training embeddings on such a graph requires three steps:
 
-#. Preprocess the dataset ``marius_preprocess output_dir/ --files custom_dataset.csv``
+#. Preprocess the dataset ``marius_preprocess --output_directory output_dir/ --files custom_dataset.csv``
 
     ``output_dir`` defines the directory to save all the preprocessed data. 
     The option ``--files`` can be used to pass the files containing the custom dataset.

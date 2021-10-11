@@ -25,52 +25,54 @@ This command can be called with:
 
 ::
 
- marius_preprocess <output_directory> [OPTIONS]
+ marius_preprocess [OPTIONS]
 
 The available options:
 
 ::
 
- usage: preprocess [-h] [--files files [files ...]] [--dataset dataset] [--num_partitions num_partitions] [--overwrite]
- [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids]
- [--dataset_split dataset_split dataset_split] [--start_col start_col] [--num_line_skip num_line_skip]
- output_directory
+    usage: preprocess [-h] [--output_directory output_directory] [--files files [files ...] | --dataset dataset] [--num_partitions num_partitions] [--overwrite]
+                    [--generate_config [generate_config]] [--format format] [--delim delim] [--dtype dtype] [--not_remap_ids] [--dataset_split dataset_split dataset_split]
+                    [--start_col start_col] [--num_line_skip num_line_skip]
 
- Preprocess Datasets
+    Preprocess Datasets
 
- positional arguments:
- output_directory      Directory to put graph data
+    optional arguments:
+    -h, --help            show this help message and exit
+    --output_directory output_directory
+                            Directory to put graph data
+    --files files [files ...]
+                            Files containing custom dataset
+    --dataset dataset     Supported dataset to preprocess
+    --num_partitions num_partitions
+                            Number of partitions to split the edges into
+    --overwrite           Overwrites the output_directory if this is set. Otherwise, files with same the names will be treated as the data for current dataset.
+    --generate_config [generate_config], -gc [generate_config]
+                            Generates a single-GPU training configuration file by default.
+                            Valid options (default to GPU): [GPU, CPU, multi-GPU]
+    --format format       Format of data, eg. srd
+    --delim delim, -d delim
+                            Specifies the delimiter
+    --dtype dtype         Indicates the numpy.dtype
+    --not_remap_ids       If set, will not remap ids
+    --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
+                            Split dataset into specified fractions
+    --start_col start_col, -sc start_col
+                            Indicates the column index to start from
+    --num_line_skip num_line_skip, -nls num_line_skip
+                            Indicates number of lines to skip from the beginning
 
- optional arguments:
- -h, --help            show this help message and exit
- --files files [files ...]
-     Files containing custom dataset
- --dataset dataset     Supported dataset to preprocess
- --num_partitions num_partitions
-     Number of partitions to split the edges into
- --overwrite           Overwrites the output_directory if this issetOtherwise, files with same the names will be treated as the data for current dataset.
- --generate_config [generate_config], -gc [generate_config]
-     Generates a single-GPU/multi-CPU/multi-GPU training configuration file by default.
-     Valid options (default to GPU): [GPU, CPU, multi-GPU]
- --format format       Format of data, eg. srd
- --delim delim, -d delim
-     Specifies the delimiter
- --dtype dtype         Indicates the numpy.dtype
- --not_remap_ids       If set, will not remap ids
- --dataset_split dataset_split dataset_split, -ds dataset_split dataset_split
-     Split dataset into specified fractions
- --start_col start_col, -sc start_col
-     Indicates the column index to start from
- --num_line_skip num_line_skip, -nls num_line_skip
-     Indicates number of lines to skip from the beginning
-
- Specify certain config (optional): [--<section>.<key>=<value>]
+    Specify certain config (optional): [--<section>.<key>=<value>]
 
 output_directory
 ++++++++++++++++
-``<output_directory>`` is a **required** argument for ``marius_preprocess``. 
-It is the directory where all the files created by ``marius_preprocess`` wil be stored.
-``marius_preprocess`` will create this file if it does not exist.
+``<output_directory>`` is a **optional** argument for ``marius_preprocess``. 
+It is the base directory where all the files created by ``marius_preprocess`` wil be stored.
+``marius_preprocess`` will create this directory if it does not exist. If users specifies a 
+built-in dataset, the default base directory name would be ``<built-in dataset>_dataset``.
+If users want to preprocess a custom dataset, the default base directory name would 
+be ``custom_dataset``. If there is already a file with the same name, ``marius_preprocess`` 
+would incrementally append a number after the original file name.
 ``marius_preprocess`` outputs the following files to ``<output_directory>``.
 For the preprocessing of supported datasets, ``<output_directory>`` also includes
 the downloaded raw dataset.
@@ -116,7 +118,7 @@ For example, the following command preprocesses the custom dataset composed of `
 
 ::
 
- marius_preprocess output_dir --files custom_train.csv custom_valid.csv custom_test.csv
+    marius_preprocess --output_directory output_dir --files custom_train.csv custom_valid.csv custom_test.csv
 
 \-\-dataset <dataset>
 +++++++++++++++++++++
@@ -156,7 +158,7 @@ configuration file generated for dataset WordNet18 (``wn18_cpu.ini``).
 
 ::
 
- marius_preprocess ./output_dir --dataset wn18 --generate_config CPU
+    marius_preprocess --output_directory ./output_dir --dataset wn18 --generate_config CPU
 
 \-\-<section>.<key>=<value>
 +++++++++++++++++++++++++++
@@ -168,7 +170,7 @@ in the Marius configuration file generated for custom dataset composed of ``cust
 
 ::
 
- marius_preprocess ./output_dir --files custom_dataset.csv --generate_config --model.embedding_sze=256 --training.num_epochs=100
+    marius_preprocess --output_directory ./output_dir --files custom_dataset.csv --generate_config --model.embedding_sze=256 --training.num_epochs=100
 
 \-\-format <format>
 +++++++++++++++++++
@@ -182,7 +184,7 @@ storing edges in the sequence of source node, relation and destination node.
 
 ::
 
- marius_preprocess ./output_dir --files custom_dataset.csv --format src
+    marius_preprocess --output_directory ./output_dir --files custom_dataset.csv --format src
 
 \-\-delim <delim>, \-d <delim>
 +++++++++++++++++++++++++++++
@@ -224,7 +226,7 @@ validation, and test sets with a corresponding proportion of 0.99, 0.05, and 0.0
 
 ::
 
- marius_preprocess ./output_dir --files custom_dataset.csv --dataset_split 0.05 0.05
+    marius_preprocess --output_directory ./output_dir --files custom_dataset.csv --dataset_split 0.05 0.05
 
 \-\-start_col <start_col>
 +++++++++++++++++++++++++

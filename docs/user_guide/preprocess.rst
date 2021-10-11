@@ -20,7 +20,9 @@ Below we will cover:
 Preprocessing CSVs, TSVs and other delimited formats
 ----------------------------------------------------------
 
-The dataset must be stored as an edge list in a delimited file format, where each row of the file(s) corresponds to a single edge in the input dataset. Where each row is a tuple of source, edge-type, and destination ids. If the input dataset has only one type of edge, then there are only two columns in the file.
+The dataset must be stored as an edge list in a delimited file format, where each row of the file(s) corresponds to a 
+single edge in the input dataset. Where each row is a tuple of source, edge-type, and destination ids. 
+If the input dataset has only one type of edge, then there are only two columns in the file.
 
 When the delimiter is a comma, the file is a standard CSV as below.
 
@@ -35,9 +37,11 @@ To perform the conversion on this dataset of ``|E|`` edges we call ``marius_prep
 
 ::
 
-    marius_preprocess example_dir/ --files example.csv
+    marius_preprocess --output_directory example_dir/ --files example.csv
 
-Where ``example_dir/`` contains the location of the dataset after preprocessing. If our file was a TSV instead, the preprocessing command will be the same as the preprocessor automatically detects the delimiter of the file.
+Where ``example_dir/`` contains the location of the dataset after preprocessing. 
+If our file was a TSV instead, the preprocessing command will be the same as the 
+preprocessor automatically detects the delimiter of the file.
 
 
 
@@ -62,7 +66,7 @@ The preprocessor supports datasets with predefined train/valid/test splits by pa
 
 ::
 
-    marius_preprocess example_dir/ --files train.csv valid.csv test.csv --delim ","
+    marius_preprocess --output_directory example_dir/ --files train.csv valid.csv test.csv --delim ","
 
 After this, the files ``valid_edges.pt`` and ``test_edges.pt`` will be created in ``example_dir`` and their paths will need to be set in the configuration file.
 
@@ -72,14 +76,14 @@ If the train/valid/test splits are not predefined, the preprocessor can perform 
 
 ::
 
-    marius_preprocess example_dir/ --files example.csv --delim "," --dataset_split .05 .1
+    marius_preprocess --output_directory example_dir/ --files example.csv --delim "," --dataset_split .05 .1
 
 
 .9/.1 train/test split.
 
 ::
 
-    marius_preprocess example_dir/ --files example.csv --delim "," --dataset_split 0 .1
+    marius_preprocess --output_directory example_dir/ --files example.csv --delim "," --dataset_split 0 .1
 
 
 Handling file headers, column order, and offset columns in the input dataset
@@ -103,7 +107,7 @@ We can preprocess this dataset using the following command
 
 ::
 
-    marius_preprocess example_dir/ --files example.csv --delim "," --num_line_skip 3 --start_col 1 --format "sdr"
+    marius_preprocess --output_directory example_dir/ --files example.csv --delim "," --num_line_skip 3 --start_col 1 --format "sdr"
 
 ``--num_line_skip 3`` Tells the preprocessor to skip the first three lines of the file.
 
@@ -118,7 +122,7 @@ Large scale graphs may have an embedding table which exceeds CPU memory capacity
 
 ::
 
-    marius_preprocess example_dir/ --files example.csv --delim "," --num_partitions 16
+    marius_preprocess --output_directory example_dir/ --files example.csv --delim "," --num_partitions 16
 
 This will partition the nodes of the graph uniformly into 16 partitions and will group the edges into edge buckets, see partition_scheme for more details. The output directory will look like the following:
 
@@ -167,7 +171,7 @@ Datasets can be downloaded and preprocessed by using:
 
 ::
 
-    marius_preprocess example_dir/ --dataset <dataset_name>
+    marius_preprocess --output_directory example_dir/ --dataset <dataset_name>
 
 Marius supports the following datasets out-of-the-box:
 
@@ -201,7 +205,7 @@ For example, preprocessing the wn18 dataset produces the following output
 
 ::
 
-    user@ubuntu: marius_preprocess output_dir/ --dataset wn18
+    user@ubuntu: marius_preprocess --output_directory output_dir/ --dataset wn18
     Downloading fetch.phpmedia=en:wordnet-mlj12.tar.gz to output_dir/fetch.phpmedia=en:wordnet-mlj12.tar.gz
     Extracting
     Extraction completed
@@ -224,7 +228,7 @@ Specific configuration options can be set by passing ``--<section>.<key>=<value>
 
 ::
 
-    marius_preprocess output_dir/ --dataset wn18 --generate_config CPU --model.embedding_size=256 --training.num_epochs=100
+    marius_preprocess --output_directory output_dir/ --dataset wn18 --generate_config CPU --model.embedding_size=256 --training.num_epochs=100
 
 This will preprocess the wn18 dataset and will generate a configuration file with following options set:
 
