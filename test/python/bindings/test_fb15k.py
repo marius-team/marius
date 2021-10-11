@@ -15,6 +15,7 @@ class TestFB15K(unittest.TestCase):
     @classmethod
     def setUp(self):
         self.output_path = set_up_files("output_dir")
+        print(self.output_path)
 
     @classmethod
     def tearDown(self):

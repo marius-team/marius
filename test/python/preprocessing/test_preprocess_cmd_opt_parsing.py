@@ -45,11 +45,6 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
 
     dataset_dirs = []
 
-    # @classmethod
-    # def setUp(self):
-    #     if not Path("./output_dir").exists():
-    #         Path("./output_dir").mkdir()
-
     @classmethod
     def tearDown(self):
         for dir in self.dataset_dirs:
