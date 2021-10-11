@@ -140,7 +140,7 @@ def set_args():
                 epilog=('Specify certain config (optional): ' +
                         '[--<section>.<key>=<value>]'))
     mode = parser.add_mutually_exclusive_group()
-    parser.add_argument('--output_directory', metavar='output_directory',
+    parser.add_argument('output_directory', metavar='output_directory',
                         type=str, help='Directory to put configs \nAlso ' +
                         'assumed to be the default directory of preprocessed' +
                         ' data if --data_directory is not specified')
@@ -193,11 +193,9 @@ def parse_args(args):
     if arg_dict.get("general.random_seed") == "#":
         arg_dict.pop("general.random_seed")
 
-    use_built_in_ds = None
     if arg_dict.get("dataset") is not None:
         arg_dict.update({"dataset": arg_dict.get("dataset")})
         arg_dict = update_dataset_stats(arg_dict.get("dataset"), arg_dict)
-        use_built_in
     elif arg_dict.get("stats") is not None:
         arg_dict = update_stats(arg_dict.get("stats"), arg_dict)
     else:
