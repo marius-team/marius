@@ -118,6 +118,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[5])
         config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.dataset_dirs.append(output_dir)
         self.assertTrue(arg_dict.get("generate_config") is None)
 
     def test_output_directory_not_specified_build_in_dataset(self):
@@ -129,6 +130,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[6])
         config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.dataset_dirs.append(output_dir)
         self.assertTrue("wn18_dataset" in str(output_dir))
 
     def test_output_directory_not_spcified_custom_dataset(self):
@@ -140,6 +142,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         parser, config_dict = set_args()
         args = parser.parse_args(self.cmd_args[13])
         config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+        self.dataset_dirs.append(output_dir)
         self.assertTrue("custom_dataset" in str(output_dir))
 
     def test_training_config_missing(self):
@@ -167,6 +170,7 @@ class TestPreprocessCmdOptParser(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             args = parser.parse_args(self.cmd_args[9])
             config_dict, arg_dict, output_dir = parse_args(config_dict, args)
+            self.dataset_dirs.append(output_dir)
 
     def test_invalid_arg(self):
         """
