@@ -23,7 +23,7 @@ We are working on expanding the functionality of Marius to include:
 (Other versions may work, but are untested)
 * Ubuntu 18.04 or MacOS 10.15 
 * CUDA >= 10 (If using GPU training)
-* pytorch >= 1.7
+* 1.7 <= pytorch < 1.10
 * python >= 3.6
 * pip >= 21
 * GCC >= 9 (On Linux) 
