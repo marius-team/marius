@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataLoader &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="DENSEGraph" href="dense_graph.html" />
+    <link rel="prev" title="Batch" href="batch.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Python API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../configuration/index.html">marius.config</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">marius.data</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="samplers/index.html">samplers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch.html">Batch</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">DataLoader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dense_graph.html">DENSEGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graph.html">MariusGraph</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../manager/index.html">marius.manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nn/index.html">marius.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline/index.html">marius.pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reporting/index.html">marius.report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">marius.storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/index.html">marius.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide/index.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Python API</a> &raquo;</li>
+          <li><a href="index.html">marius.data</a> &raquo;</li>
+      <li>DataLoader</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/data/dataloader.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dataloader">
+<h1>DataLoader<a class="headerlink" href="#dataloader" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.data.DataLoader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.data.</span></span><span class="sig-name descname"><span class="pre">DataLoader</span></span><a class="headerlink" href="#marius.data.DataLoader" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.data.DataLoader.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: marius._data.DataLoader, graph_storage: GraphModelStorage, learning_task: str, training_config: marius._config.TrainingConfig, evaluation_config: marius._config.EvaluationConfig, encoder_config: marius._config.EncoderConfig) -&gt; None</p></li>
+<li><p>__init__(self: marius._data.DataLoader, graph_storage: GraphModelStorage, learning_task: str, batch_size: int = 1000, neg_sampler: marius._data.samplers.NegativeSampler = None, nbr_sampler: marius._data.samplers.NeighborSampler = None, train: bool = False) -&gt; None</p></li>
+<li><p>__init__(self: marius._data.DataLoader, edges: Optional[at::Tensor], learning_task: str, nodes: Optional[at::Tensor] = None, node_features: Optional[at::Tensor] = None, node_embeddings: Optional[at::Tensor] = None, node_optim_state: Optional[at::Tensor] = None, node_labels: Optional[at::Tensor] = None, train_edges: Optional[at::Tensor] = None, batch_size: int = 1000, neg_sampler: marius._data.samplers.NegativeSampler = None, nbr_sampler: marius._data.samplers.NeighborSampler = None, filter_edges: List[at::Tensor] = [], train: bool = False) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.all_read">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all_read</span></span><a class="headerlink" href="#marius.data.DataLoader.all_read" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.batch_id_offset">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_id_offset</span></span><a class="headerlink" href="#marius.data.DataLoader.batch_id_offset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.batches">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batches</span></span><a class="headerlink" href="#marius.data.DataLoader.batches" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.batches_left">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batches_left</span></span><a class="headerlink" href="#marius.data.DataLoader.batches_left" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.batches_processed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batches_processed</span></span><a class="headerlink" href="#marius.data.DataLoader.batches_processed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.clearBatches">
+<span class="sig-name descname"><span class="pre">clearBatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.clearBatches" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.current_edge">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_edge</span></span><a class="headerlink" href="#marius.data.DataLoader.current_edge" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.edgeSample">
+<span class="sig-name descname"><span class="pre">edgeSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.edgeSample" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.edge_buckets_per_buffer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_buckets_per_buffer</span></span><a class="headerlink" href="#marius.data.DataLoader.edge_buckets_per_buffer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.edge_sampler">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_sampler</span></span><a class="headerlink" href="#marius.data.DataLoader.edge_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.epochComplete">
+<span class="sig-name descname"><span class="pre">epochComplete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#marius.data.DataLoader.epochComplete" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.epochs_processed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">epochs_processed</span></span><a class="headerlink" href="#marius.data.DataLoader.epochs_processed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.evaluation_config">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">evaluation_config</span></span><a class="headerlink" href="#marius.data.DataLoader.evaluation_config" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.evaluation_negative_sampler">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">evaluation_negative_sampler</span></span><a class="headerlink" href="#marius.data.DataLoader.evaluation_negative_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.evaluation_neighbor_sampler">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">evaluation_neighbor_sampler</span></span><a class="headerlink" href="#marius.data.DataLoader.evaluation_neighbor_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.finishedBatch">
+<span class="sig-name descname"><span class="pre">finishedBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.finishedBatch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.getBatch">
+<span class="sig-name descname"><span class="pre">getBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">marius._data.DataLoader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device:</span> <span class="pre">Optional[at::Device]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perform_map:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></span><a class="headerlink" href="#marius.data.DataLoader.getBatch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.getBatchesProcessed">
+<span class="sig-name descname"><span class="pre">getBatchesProcessed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.data.DataLoader.getBatchesProcessed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.getEpochsProcessed">
+<span class="sig-name descname"><span class="pre">getEpochsProcessed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.data.DataLoader.getEpochsProcessed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.getNextBatch">
+<span class="sig-name descname"><span class="pre">getNextBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></span><a class="headerlink" href="#marius.data.DataLoader.getNextBatch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.getNumEdges">
+<span class="sig-name descname"><span class="pre">getNumEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.data.DataLoader.getNumEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.graph_storage">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graph_storage</span></span><a class="headerlink" href="#marius.data.DataLoader.graph_storage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.hasNextBatch">
+<span class="sig-name descname"><span class="pre">hasNextBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#marius.data.DataLoader.hasNextBatch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.initializeBatches">
+<span class="sig-name descname"><span class="pre">initializeBatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_encode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.initializeBatches" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.isTrain">
+<span class="sig-name descname"><span class="pre">isTrain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#marius.data.DataLoader.isTrain" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.loadCPUParameters">
+<span class="sig-name descname"><span class="pre">loadCPUParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.loadCPUParameters" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.loadGPUParameters">
+<span class="sig-name descname"><span class="pre">loadGPUParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.loadGPUParameters" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.loadStorage">
+<span class="sig-name descname"><span class="pre">loadStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.loadStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.negative_sampler">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negative_sampler</span></span><a class="headerlink" href="#marius.data.DataLoader.negative_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.neighbor_sampler">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighbor_sampler</span></span><a class="headerlink" href="#marius.data.DataLoader.neighbor_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.nextEpoch">
+<span class="sig-name descname"><span class="pre">nextEpoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.nextEpoch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.nodeSample">
+<span class="sig-name descname"><span class="pre">nodeSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.nodeSample" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.node_ids_per_buffer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_ids_per_buffer</span></span><a class="headerlink" href="#marius.data.DataLoader.node_ids_per_buffer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.setActiveEdges">
+<span class="sig-name descname"><span class="pre">setActiveEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.setActiveEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.setActiveNodes">
+<span class="sig-name descname"><span class="pre">setActiveNodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.setActiveNodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.setBufferOrdering">
+<span class="sig-name descname"><span class="pre">setBufferOrdering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.setBufferOrdering" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.setTestSet">
+<span class="sig-name descname"><span class="pre">setTestSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.setTestSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.setTrainSet">
+<span class="sig-name descname"><span class="pre">setTrainSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.setTrainSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.setValidationSet">
+<span class="sig-name descname"><span class="pre">setValidationSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.setValidationSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.train">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train</span></span><a class="headerlink" href="#marius.data.DataLoader.train" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.training_config">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_config</span></span><a class="headerlink" href="#marius.data.DataLoader.training_config" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.training_negative_sampler">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_negative_sampler</span></span><a class="headerlink" href="#marius.data.DataLoader.training_negative_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.data.DataLoader.training_neighbor_sampler">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_neighbor_sampler</span></span><a class="headerlink" href="#marius.data.DataLoader.training_neighbor_sampler" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.unloadStorage">
+<span class="sig-name descname"><span class="pre">unloadStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">write</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.unloadStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.data.DataLoader.updateEmbeddingsForBatch">
+<span class="sig-name descname"><span class="pre">updateEmbeddingsForBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DataLoader.updateEmbeddingsForBatch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="batch.html" class="btn btn-neutral float-left" title="Batch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dense_graph.html" class="btn btn-neutral float-right" title="DENSEGraph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

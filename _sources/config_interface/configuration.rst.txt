@@ -1,0 +1,57 @@
+
+Overview
+======================
+
+The configuration interface allows for high-performance training and evaluation of models without need for writing code.
+
+Configuration files are defined in YAML format and are grouped up into four sections:
+
+- Model: Defines the architecture of the model, neighbor sampling configuration, loss, and optimizer(s)
+- Storage: Specifies the input dataset and how to store the graph, features, and embeddings.
+- Training: Sets options for the training procedure and hyperparameters. E.g. batch size, negative sampling.
+- Evaluation: Sets options for the evaluation procedure (if any). The options here are similar to those in the training section.
+
+
+Link Prediction Example
+-----------------------
+
+In this example, we show how to define a configuration file for training a 3-layer GraphSage (TODO_LINK) GNN for link prediction on fb15k_237 (TODO_LINK).
+
+This example assumes that marius has been installed with pip (TODO_LINK) the dataset has been preprocessed with the following command:
+
+``marius_preprocess --dataset fb15k_237 --output_dir fb15k_237_example/``
+
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Node Classification Example
+---------------------------
+
+In this example, we show how to define a configuration file for training a 3-layer GAT (TODO_LINK) GNN for node classification on ogbn_arxiv (TODO_LINK).
+
+This example assumes that marius has been installed with pip (TODO_LINK) the dataset has been preprocessed with the following command:
+
+``marius_preprocess --dataset ogbn_arxiv --output_dir ogbn_arxiv_example/``
+
+
+1. Define the model:
+^^^^^^^^^^^^^^^^^^^^
+
+2. Set storage and dataset:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+3. Configure training and evaluation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Defining Encoder Architectures
+------------------------------
+
+Advanced Configuration
+----------------------
+
+Pipeline
+^^^^^^^^
+
+Partition Buffer
+^^^^^^^^^^^^^^^^

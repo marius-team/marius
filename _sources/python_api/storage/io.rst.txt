@@ -1,0 +1,4 @@
+IO Helpers
+=======================================
+
+.. autofunction:: marius.storage.initialize_from_file

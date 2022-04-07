@@ -1,0 +1,7 @@
+EdgeDecoderModel
+=======================================
+
+.. autoclass:: marius.nn.decoders.node.NodeDecoderModel
+    :members:
+    :undoc-members:
+    :special-members: __init__

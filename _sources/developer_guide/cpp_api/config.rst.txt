@@ -1,0 +1,68 @@
+.. _config:
+
+Config
+********************
+
+.. doxygenvariable:: marius_options
+    :project: Marius
+
+.. doxygenfunction:: parseConfig
+    :project: Marius
+
+.. doxygenfunction:: validateNumericalOptions
+    :project: Marius
+
+.. doxygenstruct:: MariusOptions
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: GeneralOptions
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: ModelConfig
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: StorageConfig
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: TrainingConfig
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: TrainingPipelineConfig
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: EvaluationPipelineConfig
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: PathOptions
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygenstruct:: ReportingOptions
+    :project: Marius
+    :members:
+    :undoc-members:
+
+.. doxygennamespace:: PathConstants
+    :project: Marius
+
+.. doxygenclass:: TimestampAllocator
+    :project: Marius
+    :members:
+    :private-members:
+    :protected-members:
+    :undoc-members:

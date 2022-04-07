@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>converters &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="datasets" href="../datasets/index.html" />
+    <link rel="prev" title="preprocess" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Python API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../configuration/index.html">marius.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../data/index.html">marius.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../manager/index.html">marius.manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../nn/index.html">marius.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../pipeline/index.html">marius.pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../reporting/index.html">marius.report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../storage/index.html">marius.storage</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">marius.tools</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../configuration/index.html">configuration</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">preprocess</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">converters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../datasets/index.html">datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../partitioners/index.html">partitioners</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../readers/index.html">readers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../writers/index.html">writers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../export_and_inference/index.html">Model Export and Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../graph_learning/index.html">Graph Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../developer_guide/index.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Debugging and FAQ</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Python API</a> &raquo;</li>
+          <li><a href="../../index.html">marius.tools</a> &raquo;</li>
+          <li><a href="../index.html">preprocess</a> &raquo;</li>
+      <li>converters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/python_api/tools/preprocess/converters/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-marius.tools.preprocess.converters">
+<span id="converters"></span><h1>converters<a class="headerlink" href="#module-marius.tools.preprocess.converters" title="Permalink to this headline"></a></h1>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="preprocess" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../datasets/index.html" class="btn btn-neutral float-right" title="datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

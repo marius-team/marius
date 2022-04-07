@@ -1,0 +1,26 @@
+Custom Dataset Link Prediction
+---------------------------------------------
+
+1. Preprocess Dataset
+^^^^^^^^^^^^^^^^^^^^^
+
+1.1 Command Line
+""""""""""""""""
+
+1.2 Python Dataset Class
+""""""""""""""""""""""""
+
+2. Define Configuration File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+3. Train Model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+4. Inference
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+4.1 Command Line
+""""""""""""""""
+
+4.2 Load Into Python
+""""""""""""""""""""

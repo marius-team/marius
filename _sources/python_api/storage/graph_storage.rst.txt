@@ -1,0 +1,7 @@
+GraphStorage
+=======================================
+
+.. autoclass:: marius.storage.GraphStorage
+    :members:
+    :undoc-members:
+    :special-members: __init__

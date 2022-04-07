@@ -1,0 +1,20 @@
+Small Scale Node Classification (OGBN-Arxiv)
+---------------------------------------------
+
+1. Preprocess Dataset
+^^^^^^^^^^^^^^^^^^^^^
+
+2. Define Configuration File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+3. Train Model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+4. Inference
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+4.1 Command Line
+""""""""""""""""
+
+4.2 Load Into Python
+""""""""""""""""""""

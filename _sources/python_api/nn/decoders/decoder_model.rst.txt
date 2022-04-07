@@ -1,0 +1,7 @@
+DecoderModel
+=======================================
+
+.. autoclass:: marius.nn.decoders.DecoderModel
+    :members:
+    :undoc-members:
+    :special-members: __init__

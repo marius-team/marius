@@ -1,0 +1,20 @@
+.. Marius documentation master file, created by
+    sphinx-quickstart on Tue Oct 20 13:17:05 2020.
+
+C++ API
+**************************
+
+.. toctree::
+    :glob:
+    :maxdepth: 2
+    :caption: C++ API
+
+    common/*
+    configuration/*
+    data/*
+    nn/*
+    pipeline/*
+    reporting/*
+    storage/*
+
+

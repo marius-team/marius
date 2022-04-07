@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>marius.config &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="marius.data" href="../data/index.html" />
+    <link rel="prev" title="Python API" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">marius.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data/index.html">marius.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../manager/index.html">marius.manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nn/index.html">marius.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline/index.html">marius.pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reporting/index.html">marius.report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storage/index.html">marius.storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/index.html">marius.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide/index.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Python API</a> &raquo;</li>
+      <li>marius.config</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/python_api/configuration/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-marius.config">
+<span id="marius-config"></span><h1>marius.config<a class="headerlink" href="#module-marius.config" title="Permalink to this headline"></a></h1>
+<p>Configuration and options for API objects.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.ActivationFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">ActivationFunction</span></span><a class="headerlink" href="#marius.config.ActivationFunction" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>RELU</p>
+<p>SIGMOID</p>
+<p>NONE</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.ActivationFunction.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ActivationFunction.NONE:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.ActivationFunction.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.ActivationFunction.RELU">
+<span class="sig-name descname"><span class="pre">RELU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ActivationFunction.RELU:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.ActivationFunction.RELU" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.ActivationFunction.SIGMOID">
+<span class="sig-name descname"><span class="pre">SIGMOID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ActivationFunction.SIGMOID:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.ActivationFunction.SIGMOID" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ActivationFunction.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.ActivationFunction.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ActivationFunction.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.ActivationFunction.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.AdagradOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">AdagradOptions</span></span><a class="headerlink" href="#marius.config.AdagradOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdagradOptions.eps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eps</span></span><a class="headerlink" href="#marius.config.AdagradOptions.eps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdagradOptions.init_value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_value</span></span><a class="headerlink" href="#marius.config.AdagradOptions.init_value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdagradOptions.lr_decay">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lr_decay</span></span><a class="headerlink" href="#marius.config.AdagradOptions.lr_decay" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdagradOptions.weight_decay">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight_decay</span></span><a class="headerlink" href="#marius.config.AdagradOptions.weight_decay" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.AdamOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">AdamOptions</span></span><a class="headerlink" href="#marius.config.AdamOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdamOptions.amsgrad">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amsgrad</span></span><a class="headerlink" href="#marius.config.AdamOptions.amsgrad" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdamOptions.beta_1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta_1</span></span><a class="headerlink" href="#marius.config.AdamOptions.beta_1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdamOptions.beta_2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta_2</span></span><a class="headerlink" href="#marius.config.AdamOptions.beta_2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdamOptions.eps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eps</span></span><a class="headerlink" href="#marius.config.AdamOptions.eps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.AdamOptions.weight_decay">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight_decay</span></span><a class="headerlink" href="#marius.config.AdamOptions.weight_decay" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.CheckpointConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">CheckpointConfig</span></span><a class="headerlink" href="#marius.config.CheckpointConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.CheckpointConfig.dir">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dir</span></span><a class="headerlink" href="#marius.config.CheckpointConfig.dir" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.CheckpointConfig.interval">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interval</span></span><a class="headerlink" href="#marius.config.CheckpointConfig.interval" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.CheckpointConfig.save_best">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_best</span></span><a class="headerlink" href="#marius.config.CheckpointConfig.save_best" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.CheckpointConfig.save_edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_edges</span></span><a class="headerlink" href="#marius.config.CheckpointConfig.save_edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.CheckpointConfig.save_encoded">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_encoded</span></span><a class="headerlink" href="#marius.config.CheckpointConfig.save_encoded" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.CheckpointConfig.save_state">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_state</span></span><a class="headerlink" href="#marius.config.CheckpointConfig.save_state" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.ConstantInitOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">ConstantInitOptions</span></span><a class="headerlink" href="#marius.config.ConstantInitOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ConstantInitOptions.constant">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constant</span></span><a class="headerlink" href="#marius.config.ConstantInitOptions.constant" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">DatasetConfig</span></span><a class="headerlink" href="#marius.config.DatasetConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.base_directory">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">base_directory</span></span><a class="headerlink" href="#marius.config.DatasetConfig.base_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.node_feature_dim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_feature_dim</span></span><a class="headerlink" href="#marius.config.DatasetConfig.node_feature_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.num_classes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_classes</span></span><a class="headerlink" href="#marius.config.DatasetConfig.num_classes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.num_edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_edges</span></span><a class="headerlink" href="#marius.config.DatasetConfig.num_edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.num_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_nodes</span></span><a class="headerlink" href="#marius.config.DatasetConfig.num_nodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.num_relations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_relations</span></span><a class="headerlink" href="#marius.config.DatasetConfig.num_relations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.num_test">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_test</span></span><a class="headerlink" href="#marius.config.DatasetConfig.num_test" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.num_train">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_train</span></span><a class="headerlink" href="#marius.config.DatasetConfig.num_train" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.num_valid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_valid</span></span><a class="headerlink" href="#marius.config.DatasetConfig.num_valid" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DatasetConfig.rel_feature_dim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rel_feature_dim</span></span><a class="headerlink" href="#marius.config.DatasetConfig.rel_feature_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.DecoderConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">DecoderConfig</span></span><a class="headerlink" href="#marius.config.DecoderConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DecoderConfig.optimizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optimizer</span></span><a class="headerlink" href="#marius.config.DecoderConfig.optimizer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DecoderConfig.options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.config.DecoderConfig.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DecoderConfig.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.DecoderConfig.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.DecoderOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">DecoderOptions</span></span><a class="headerlink" href="#marius.config.DecoderOptions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.DecoderType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">DecoderType</span></span><a class="headerlink" href="#marius.config.DecoderType" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>NODE</p>
+<p>DISTMULT</p>
+<p>TRANSE</p>
+<p>COMPLEX</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.DecoderType.COMPLEX">
+<span class="sig-name descname"><span class="pre">COMPLEX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;DecoderType.COMPLEX:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.DecoderType.COMPLEX" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.DecoderType.DISTMULT">
+<span class="sig-name descname"><span class="pre">DISTMULT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;DecoderType.DISTMULT:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.DecoderType.DISTMULT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.DecoderType.NODE">
+<span class="sig-name descname"><span class="pre">NODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;DecoderType.NODE:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.DecoderType.NODE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.DecoderType.TRANSE">
+<span class="sig-name descname"><span class="pre">TRANSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;DecoderType.TRANSE:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.DecoderType.TRANSE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DecoderType.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.DecoderType.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DecoderType.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.DecoderType.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.DenseLayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">DenseLayerOptions</span></span><a class="headerlink" href="#marius.config.DenseLayerOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DenseLayerOptions.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.DenseLayerOptions.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.DenseLayerType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">DenseLayerType</span></span><a class="headerlink" href="#marius.config.DenseLayerType" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>NONE</p>
+<p>LINEAR</p>
+<p>CONV</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.DenseLayerType.CONV">
+<span class="sig-name descname"><span class="pre">CONV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;DenseLayerType.CONV:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.DenseLayerType.CONV" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.DenseLayerType.LINEAR">
+<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;DenseLayerType.LINEAR:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.DenseLayerType.LINEAR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.DenseLayerType.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;DenseLayerType.NONE:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.DenseLayerType.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DenseLayerType.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.DenseLayerType.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DenseLayerType.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.DenseLayerType.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.DropoutSamplingOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">DropoutSamplingOptions</span></span><a class="headerlink" href="#marius.config.DropoutSamplingOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.DropoutSamplingOptions.rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate</span></span><a class="headerlink" href="#marius.config.DropoutSamplingOptions.rate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">EdgeBucketOrdering</span></span><a class="headerlink" href="#marius.config.EdgeBucketOrdering" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>OLD_BETA</p>
+<p>NEW_BETA</p>
+<p>ALL_BETA</p>
+<p>TWO_LEVEL_BETA</p>
+<p>CUSTOM</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering.ALL_BETA">
+<span class="sig-name descname"><span class="pre">ALL_BETA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EdgeBucketOrdering.ALL_BETA:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.EdgeBucketOrdering.ALL_BETA" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering.CUSTOM">
+<span class="sig-name descname"><span class="pre">CUSTOM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EdgeBucketOrdering.CUSTOM:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#marius.config.EdgeBucketOrdering.CUSTOM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering.NEW_BETA">
+<span class="sig-name descname"><span class="pre">NEW_BETA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EdgeBucketOrdering.NEW_BETA:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.EdgeBucketOrdering.NEW_BETA" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering.OLD_BETA">
+<span class="sig-name descname"><span class="pre">OLD_BETA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EdgeBucketOrdering.OLD_BETA:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.EdgeBucketOrdering.OLD_BETA" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering.TWO_LEVEL_BETA">
+<span class="sig-name descname"><span class="pre">TWO_LEVEL_BETA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EdgeBucketOrdering.TWO_LEVEL_BETA:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.EdgeBucketOrdering.TWO_LEVEL_BETA" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.EdgeBucketOrdering.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeBucketOrdering.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.EdgeBucketOrdering.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderMethod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">EdgeDecoderMethod</span></span><a class="headerlink" href="#marius.config.EdgeDecoderMethod" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>ONLY_POS</p>
+<p>CORRUPT_NODE</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderMethod.CORRUPT_NODE">
+<span class="sig-name descname"><span class="pre">CORRUPT_NODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EdgeDecoderMethod.CORRUPT_NODE:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.EdgeDecoderMethod.CORRUPT_NODE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderMethod.ONLY_POS">
+<span class="sig-name descname"><span class="pre">ONLY_POS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;EdgeDecoderMethod.ONLY_POS:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.EdgeDecoderMethod.ONLY_POS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderMethod.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.EdgeDecoderMethod.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderMethod.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.EdgeDecoderMethod.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">EdgeDecoderOptions</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions.decoder_method">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decoder_method</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions.decoder_method" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions.input_dim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_dim</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions.input_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions.inverse_edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inverse_edges</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions.inverse_edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.EmbeddingLayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">EmbeddingLayerOptions</span></span><a class="headerlink" href="#marius.config.EmbeddingLayerOptions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.EncoderConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">EncoderConfig</span></span><a class="headerlink" href="#marius.config.EncoderConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EncoderConfig.eval_neighbor_sampling">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eval_neighbor_sampling</span></span><a class="headerlink" href="#marius.config.EncoderConfig.eval_neighbor_sampling" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EncoderConfig.layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layers</span></span><a class="headerlink" href="#marius.config.EncoderConfig.layers" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EncoderConfig.train_neighbor_sampling">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train_neighbor_sampling</span></span><a class="headerlink" href="#marius.config.EncoderConfig.train_neighbor_sampling" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.EvaluationConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">EvaluationConfig</span></span><a class="headerlink" href="#marius.config.EvaluationConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EvaluationConfig.batch_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#marius.config.EvaluationConfig.batch_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EvaluationConfig.epochs_per_eval">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">epochs_per_eval</span></span><a class="headerlink" href="#marius.config.EvaluationConfig.epochs_per_eval" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EvaluationConfig.full_graph_evaluation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">full_graph_evaluation</span></span><a class="headerlink" href="#marius.config.EvaluationConfig.full_graph_evaluation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EvaluationConfig.negative_sampling">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negative_sampling</span></span><a class="headerlink" href="#marius.config.EvaluationConfig.negative_sampling" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EvaluationConfig.pipeline">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pipeline</span></span><a class="headerlink" href="#marius.config.EvaluationConfig.pipeline" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.FeatureLayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">FeatureLayerOptions</span></span><a class="headerlink" href="#marius.config.FeatureLayerOptions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.GATLayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">GATLayerOptions</span></span><a class="headerlink" href="#marius.config.GATLayerOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GATLayerOptions.attention_dropout">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">attention_dropout</span></span><a class="headerlink" href="#marius.config.GATLayerOptions.attention_dropout" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GATLayerOptions.average_heads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">average_heads</span></span><a class="headerlink" href="#marius.config.GATLayerOptions.average_heads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GATLayerOptions.input_dropout">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_dropout</span></span><a class="headerlink" href="#marius.config.GATLayerOptions.input_dropout" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GATLayerOptions.negative_slope">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negative_slope</span></span><a class="headerlink" href="#marius.config.GATLayerOptions.negative_slope" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GATLayerOptions.num_heads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_heads</span></span><a class="headerlink" href="#marius.config.GATLayerOptions.num_heads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.GNNLayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">GNNLayerOptions</span></span><a class="headerlink" href="#marius.config.GNNLayerOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GNNLayerOptions.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.GNNLayerOptions.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">GNNLayerType</span></span><a class="headerlink" href="#marius.config.GNNLayerType" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>NONE</p>
+<p>GRAPH_SAGE</p>
+<p>GCN</p>
+<p>GAT</p>
+<p>RGCN</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType.GAT">
+<span class="sig-name descname"><span class="pre">GAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GNNLayerType.GAT:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.GNNLayerType.GAT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType.GCN">
+<span class="sig-name descname"><span class="pre">GCN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GNNLayerType.GCN:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.GNNLayerType.GCN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType.GRAPH_SAGE">
+<span class="sig-name descname"><span class="pre">GRAPH_SAGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GNNLayerType.GRAPH_SAGE:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.GNNLayerType.GRAPH_SAGE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GNNLayerType.NONE:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.GNNLayerType.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType.RGCN">
+<span class="sig-name descname"><span class="pre">RGCN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GNNLayerType.RGCN:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#marius.config.GNNLayerType.RGCN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.GNNLayerType.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GNNLayerType.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.GNNLayerType.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.GraphSageAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">GraphSageAggregator</span></span><a class="headerlink" href="#marius.config.GraphSageAggregator" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>GCN</p>
+<p>MEAN</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.GraphSageAggregator.GCN">
+<span class="sig-name descname"><span class="pre">GCN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GraphSageAggregator.GCN:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.GraphSageAggregator.GCN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.GraphSageAggregator.MEAN">
+<span class="sig-name descname"><span class="pre">MEAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;GraphSageAggregator.MEAN:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.GraphSageAggregator.MEAN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GraphSageAggregator.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.GraphSageAggregator.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GraphSageAggregator.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.GraphSageAggregator.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.GraphSageLayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">GraphSageLayerOptions</span></span><a class="headerlink" href="#marius.config.GraphSageLayerOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.GraphSageLayerOptions.aggregator">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aggregator</span></span><a class="headerlink" href="#marius.config.GraphSageLayerOptions.aggregator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.InitConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">InitConfig</span></span><a class="headerlink" href="#marius.config.InitConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.InitConfig.options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.config.InitConfig.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.InitConfig.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.InitConfig.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.InitDistribution">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">InitDistribution</span></span><a class="headerlink" href="#marius.config.InitDistribution" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>ZEROS</p>
+<p>ONES</p>
+<p>CONSTANT</p>
+<p>UNIFORM</p>
+<p>NORMAL</p>
+<p>GLOROT_UNIFORM</p>
+<p>GLOROT_NORMAL</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.CONSTANT">
+<span class="sig-name descname"><span class="pre">CONSTANT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;InitDistribution.CONSTANT:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.InitDistribution.CONSTANT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.GLOROT_NORMAL">
+<span class="sig-name descname"><span class="pre">GLOROT_NORMAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;InitDistribution.GLOROT_NORMAL:</span> <span class="pre">6&gt;</span></em><a class="headerlink" href="#marius.config.InitDistribution.GLOROT_NORMAL" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.GLOROT_UNIFORM">
+<span class="sig-name descname"><span class="pre">GLOROT_UNIFORM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;InitDistribution.GLOROT_UNIFORM:</span> <span class="pre">5&gt;</span></em><a class="headerlink" href="#marius.config.InitDistribution.GLOROT_UNIFORM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.NORMAL">
+<span class="sig-name descname"><span class="pre">NORMAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;InitDistribution.NORMAL:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#marius.config.InitDistribution.NORMAL" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.ONES">
+<span class="sig-name descname"><span class="pre">ONES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;InitDistribution.ONES:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.InitDistribution.ONES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.UNIFORM">
+<span class="sig-name descname"><span class="pre">UNIFORM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;InitDistribution.UNIFORM:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.InitDistribution.UNIFORM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.ZEROS">
+<span class="sig-name descname"><span class="pre">ZEROS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;InitDistribution.ZEROS:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.InitDistribution.ZEROS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.InitDistribution.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.InitDistribution.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.InitDistribution.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.InitOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">InitOptions</span></span><a class="headerlink" href="#marius.config.InitOptions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LayerConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LayerConfig</span></span><a class="headerlink" href="#marius.config.LayerConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.activation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activation</span></span><a class="headerlink" href="#marius.config.LayerConfig.activation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.bias">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bias</span></span><a class="headerlink" href="#marius.config.LayerConfig.bias" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.bias_init">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bias_init</span></span><a class="headerlink" href="#marius.config.LayerConfig.bias_init" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.init">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><a class="headerlink" href="#marius.config.LayerConfig.init" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.input_dim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_dim</span></span><a class="headerlink" href="#marius.config.LayerConfig.input_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.optimizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optimizer</span></span><a class="headerlink" href="#marius.config.LayerConfig.optimizer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.config.LayerConfig.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.output_dim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_dim</span></span><a class="headerlink" href="#marius.config.LayerConfig.output_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerConfig.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.LayerConfig.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LayerOptions</span></span><a class="headerlink" href="#marius.config.LayerOptions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LayerType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LayerType</span></span><a class="headerlink" href="#marius.config.LayerType" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>NONE</p>
+<p>EMBEDDING</p>
+<p>FEATURE</p>
+<p>GNN</p>
+<p>DENSE</p>
+<p>REDUCTION</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LayerType.DENSE">
+<span class="sig-name descname"><span class="pre">DENSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LayerType.DENSE:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#marius.config.LayerType.DENSE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LayerType.EMBEDDING">
+<span class="sig-name descname"><span class="pre">EMBEDDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LayerType.EMBEDDING:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.LayerType.EMBEDDING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LayerType.FEATURE">
+<span class="sig-name descname"><span class="pre">FEATURE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LayerType.FEATURE:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.LayerType.FEATURE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LayerType.GNN">
+<span class="sig-name descname"><span class="pre">GNN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LayerType.GNN:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.LayerType.GNN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LayerType.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LayerType.NONE:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.LayerType.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LayerType.REDUCTION">
+<span class="sig-name descname"><span class="pre">REDUCTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LayerType.REDUCTION:</span> <span class="pre">5&gt;</span></em><a class="headerlink" href="#marius.config.LayerType.REDUCTION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerType.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.LayerType.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LayerType.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.LayerType.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LearningTask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LearningTask</span></span><a class="headerlink" href="#marius.config.LearningTask" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>NODE_CLASSIFICATION</p>
+<p>LINK_PREDICTION</p>
+<p>ENCODE</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LearningTask.ENCODE">
+<span class="sig-name descname"><span class="pre">ENCODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LearningTask.ENCODE:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.LearningTask.ENCODE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LearningTask.LINK_PREDICTION">
+<span class="sig-name descname"><span class="pre">LINK_PREDICTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LearningTask.LINK_PREDICTION:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.LearningTask.LINK_PREDICTION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LearningTask.NODE_CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">NODE_CLASSIFICATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LearningTask.NODE_CLASSIFICATION:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.LearningTask.NODE_CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LearningTask.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.LearningTask.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LearningTask.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.LearningTask.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LossConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LossConfig</span></span><a class="headerlink" href="#marius.config.LossConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LossConfig.options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.config.LossConfig.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LossConfig.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.LossConfig.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LossFunctionType</span></span><a class="headerlink" href="#marius.config.LossFunctionType" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>SOFTMAX</p>
+<p>RANKING</p>
+<p>BCE_AFTER_SIGMOID</p>
+<p>BCE_WITH_LOGITS</p>
+<p>MSE</p>
+<p>SOFTPLUS</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.BCE_AFTER_SIGMOID">
+<span class="sig-name descname"><span class="pre">BCE_AFTER_SIGMOID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossFunctionType.BCE_AFTER_SIGMOID:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.BCE_AFTER_SIGMOID" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.BCE_WITH_LOGITS">
+<span class="sig-name descname"><span class="pre">BCE_WITH_LOGITS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossFunctionType.BCE_WITH_LOGITS:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.BCE_WITH_LOGITS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.MSE">
+<span class="sig-name descname"><span class="pre">MSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossFunctionType.MSE:</span> <span class="pre">5&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.MSE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.RANKING">
+<span class="sig-name descname"><span class="pre">RANKING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossFunctionType.RANKING:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.RANKING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.SOFTMAX">
+<span class="sig-name descname"><span class="pre">SOFTMAX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossFunctionType.SOFTMAX:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.SOFTMAX" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.SOFTPLUS">
+<span class="sig-name descname"><span class="pre">SOFTPLUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossFunctionType.SOFTPLUS:</span> <span class="pre">6&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.SOFTPLUS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.LossFunctionType.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.LossFunctionType.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LossOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LossOptions</span></span><a class="headerlink" href="#marius.config.LossOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LossOptions.loss_reduction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loss_reduction</span></span><a class="headerlink" href="#marius.config.LossOptions.loss_reduction" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.LossReduction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LossReduction</span></span><a class="headerlink" href="#marius.config.LossReduction" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>MEAN</p>
+<p>SUM</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossReduction.MEAN">
+<span class="sig-name descname"><span class="pre">MEAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossReduction.MEAN:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.LossReduction.MEAN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.LossReduction.SUM">
+<span class="sig-name descname"><span class="pre">SUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LossReduction.SUM:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.LossReduction.SUM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LossReduction.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.LossReduction.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.LossReduction.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.LossReduction.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.MariusConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">MariusConfig</span></span><a class="headerlink" href="#marius.config.MariusConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.MariusConfig.evaluation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">evaluation</span></span><a class="headerlink" href="#marius.config.MariusConfig.evaluation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.MariusConfig.model">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#marius.config.MariusConfig.model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.MariusConfig.storage">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">storage</span></span><a class="headerlink" href="#marius.config.MariusConfig.storage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.MariusConfig.training">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#marius.config.MariusConfig.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.ModelConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">ModelConfig</span></span><a class="headerlink" href="#marius.config.ModelConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ModelConfig.decoder">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decoder</span></span><a class="headerlink" href="#marius.config.ModelConfig.decoder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ModelConfig.dense_optimizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dense_optimizer</span></span><a class="headerlink" href="#marius.config.ModelConfig.dense_optimizer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ModelConfig.encoder">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">encoder</span></span><a class="headerlink" href="#marius.config.ModelConfig.encoder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ModelConfig.learning_task">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">learning_task</span></span><a class="headerlink" href="#marius.config.ModelConfig.learning_task" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ModelConfig.loss">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loss</span></span><a class="headerlink" href="#marius.config.ModelConfig.loss" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ModelConfig.random_seed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random_seed</span></span><a class="headerlink" href="#marius.config.ModelConfig.random_seed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ModelConfig.sparse_optimizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sparse_optimizer</span></span><a class="headerlink" href="#marius.config.ModelConfig.sparse_optimizer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.NegativeSamplingConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">NegativeSamplingConfig</span></span><a class="headerlink" href="#marius.config.NegativeSamplingConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NegativeSamplingConfig.degree_fraction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degree_fraction</span></span><a class="headerlink" href="#marius.config.NegativeSamplingConfig.degree_fraction" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NegativeSamplingConfig.filtered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filtered</span></span><a class="headerlink" href="#marius.config.NegativeSamplingConfig.filtered" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NegativeSamplingConfig.negatives_per_positive">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negatives_per_positive</span></span><a class="headerlink" href="#marius.config.NegativeSamplingConfig.negatives_per_positive" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NegativeSamplingConfig.num_chunks">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_chunks</span></span><a class="headerlink" href="#marius.config.NegativeSamplingConfig.num_chunks" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">NeighborSamplingConfig</span></span><a class="headerlink" href="#marius.config.NeighborSamplingConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingConfig.options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.config.NeighborSamplingConfig.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingConfig.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.NeighborSamplingConfig.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingConfig.use_hashmap_sets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_hashmap_sets</span></span><a class="headerlink" href="#marius.config.NeighborSamplingConfig.use_hashmap_sets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingConfig.use_incoming_nbrs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_incoming_nbrs</span></span><a class="headerlink" href="#marius.config.NeighborSamplingConfig.use_incoming_nbrs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingConfig.use_outgoing_nbrs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_outgoing_nbrs</span></span><a class="headerlink" href="#marius.config.NeighborSamplingConfig.use_outgoing_nbrs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingLayer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">NeighborSamplingLayer</span></span><a class="headerlink" href="#marius.config.NeighborSamplingLayer" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>ALL</p>
+<p>UNIFORM</p>
+<p>DROPOUT</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingLayer.ALL">
+<span class="sig-name descname"><span class="pre">ALL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NeighborSamplingLayer.ALL:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.NeighborSamplingLayer.ALL" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingLayer.DROPOUT">
+<span class="sig-name descname"><span class="pre">DROPOUT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NeighborSamplingLayer.DROPOUT:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.NeighborSamplingLayer.DROPOUT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingLayer.UNIFORM">
+<span class="sig-name descname"><span class="pre">UNIFORM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NeighborSamplingLayer.UNIFORM:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.NeighborSamplingLayer.UNIFORM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingLayer.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.NeighborSamplingLayer.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingLayer.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.NeighborSamplingLayer.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.NeighborSamplingOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">NeighborSamplingOptions</span></span><a class="headerlink" href="#marius.config.NeighborSamplingOptions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.NodePartitionOrdering">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">NodePartitionOrdering</span></span><a class="headerlink" href="#marius.config.NodePartitionOrdering" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>DISPERSED</p>
+<p>SEQUENTIAL</p>
+<p>CUSTOM</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.NodePartitionOrdering.CUSTOM">
+<span class="sig-name descname"><span class="pre">CUSTOM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NodePartitionOrdering.CUSTOM:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.NodePartitionOrdering.CUSTOM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.NodePartitionOrdering.DISPERSED">
+<span class="sig-name descname"><span class="pre">DISPERSED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NodePartitionOrdering.DISPERSED:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.NodePartitionOrdering.DISPERSED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.NodePartitionOrdering.SEQUENTIAL">
+<span class="sig-name descname"><span class="pre">SEQUENTIAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NodePartitionOrdering.SEQUENTIAL:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.NodePartitionOrdering.SEQUENTIAL" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NodePartitionOrdering.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.NodePartitionOrdering.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NodePartitionOrdering.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.NodePartitionOrdering.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.NormalInitOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">NormalInitOptions</span></span><a class="headerlink" href="#marius.config.NormalInitOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NormalInitOptions.mean">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean</span></span><a class="headerlink" href="#marius.config.NormalInitOptions.mean" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.NormalInitOptions.std">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std</span></span><a class="headerlink" href="#marius.config.NormalInitOptions.std" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.OptimizerConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">OptimizerConfig</span></span><a class="headerlink" href="#marius.config.OptimizerConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.OptimizerConfig.options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.config.OptimizerConfig.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.OptimizerConfig.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.OptimizerConfig.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.OptimizerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">OptimizerOptions</span></span><a class="headerlink" href="#marius.config.OptimizerOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.OptimizerOptions.learning_rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#marius.config.OptimizerOptions.learning_rate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.OptimizerType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">OptimizerType</span></span><a class="headerlink" href="#marius.config.OptimizerType" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>SGD</p>
+<p>ADAM</p>
+<p>ADAGRAD</p>
+<p>DEFAULT</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.OptimizerType.ADAGRAD">
+<span class="sig-name descname"><span class="pre">ADAGRAD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;OptimizerType.ADAGRAD:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.OptimizerType.ADAGRAD" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.OptimizerType.ADAM">
+<span class="sig-name descname"><span class="pre">ADAM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;OptimizerType.ADAM:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.OptimizerType.ADAM" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.OptimizerType.DEFAULT">
+<span class="sig-name descname"><span class="pre">DEFAULT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;OptimizerType.DEFAULT:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.OptimizerType.DEFAULT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.OptimizerType.SGD">
+<span class="sig-name descname"><span class="pre">SGD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;OptimizerType.SGD:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.OptimizerType.SGD" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.OptimizerType.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.OptimizerType.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.OptimizerType.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.OptimizerType.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.PartitionBufferOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">PartitionBufferOptions</span></span><a class="headerlink" href="#marius.config.PartitionBufferOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PartitionBufferOptions.buffer_capacity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">buffer_capacity</span></span><a class="headerlink" href="#marius.config.PartitionBufferOptions.buffer_capacity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PartitionBufferOptions.edge_bucket_ordering">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_bucket_ordering</span></span><a class="headerlink" href="#marius.config.PartitionBufferOptions.edge_bucket_ordering" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PartitionBufferOptions.fine_to_coarse_ratio">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fine_to_coarse_ratio</span></span><a class="headerlink" href="#marius.config.PartitionBufferOptions.fine_to_coarse_ratio" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PartitionBufferOptions.node_partition_ordering">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_partition_ordering</span></span><a class="headerlink" href="#marius.config.PartitionBufferOptions.node_partition_ordering" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PartitionBufferOptions.num_partitions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_partitions</span></span><a class="headerlink" href="#marius.config.PartitionBufferOptions.num_partitions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PartitionBufferOptions.prefetching">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prefetching</span></span><a class="headerlink" href="#marius.config.PartitionBufferOptions.prefetching" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">PipelineConfig</span></span><a class="headerlink" href="#marius.config.PipelineConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.batch_device_queue_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_device_queue_size</span></span><a class="headerlink" href="#marius.config.PipelineConfig.batch_device_queue_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.batch_host_queue_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_host_queue_size</span></span><a class="headerlink" href="#marius.config.PipelineConfig.batch_host_queue_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.batch_loader_threads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_loader_threads</span></span><a class="headerlink" href="#marius.config.PipelineConfig.batch_loader_threads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.batch_transfer_threads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_transfer_threads</span></span><a class="headerlink" href="#marius.config.PipelineConfig.batch_transfer_threads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.compute_threads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_threads</span></span><a class="headerlink" href="#marius.config.PipelineConfig.compute_threads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.gradient_transfer_threads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient_transfer_threads</span></span><a class="headerlink" href="#marius.config.PipelineConfig.gradient_transfer_threads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.gradient_update_threads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient_update_threads</span></span><a class="headerlink" href="#marius.config.PipelineConfig.gradient_update_threads" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.gradients_device_queue_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradients_device_queue_size</span></span><a class="headerlink" href="#marius.config.PipelineConfig.gradients_device_queue_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.gradients_host_queue_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradients_host_queue_size</span></span><a class="headerlink" href="#marius.config.PipelineConfig.gradients_host_queue_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.staleness_bound">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">staleness_bound</span></span><a class="headerlink" href="#marius.config.PipelineConfig.staleness_bound" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.PipelineConfig.sync">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sync</span></span><a class="headerlink" href="#marius.config.PipelineConfig.sync" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.RankingLossOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">RankingLossOptions</span></span><a class="headerlink" href="#marius.config.RankingLossOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.RankingLossOptions.loss_reduction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loss_reduction</span></span><a class="headerlink" href="#marius.config.RankingLossOptions.loss_reduction" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.RankingLossOptions.margin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">margin</span></span><a class="headerlink" href="#marius.config.RankingLossOptions.margin" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">ReductionLayerOptions</span></span><a class="headerlink" href="#marius.config.ReductionLayerOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerOptions.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.ReductionLayerOptions.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">ReductionLayerType</span></span><a class="headerlink" href="#marius.config.ReductionLayerType" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>NONE</p>
+<p>CONCAT</p>
+<p>LINEAR</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerType.CONCAT">
+<span class="sig-name descname"><span class="pre">CONCAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ReductionLayerType.CONCAT:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.ReductionLayerType.CONCAT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerType.LINEAR">
+<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ReductionLayerType.LINEAR:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.ReductionLayerType.LINEAR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerType.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ReductionLayerType.NONE:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.ReductionLayerType.NONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerType.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.ReductionLayerType.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.ReductionLayerType.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.ReductionLayerType.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.StorageBackend">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">StorageBackend</span></span><a class="headerlink" href="#marius.config.StorageBackend" title="Permalink to this definition"></a></dt>
+<dd><p>Members:</p>
+<p>PARTITION_BUFFER</p>
+<p>FLAT_FILE</p>
+<p>HOST_MEMORY</p>
+<p>DEVICE_MEMORY</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.StorageBackend.DEVICE_MEMORY">
+<span class="sig-name descname"><span class="pre">DEVICE_MEMORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;StorageBackend.DEVICE_MEMORY:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#marius.config.StorageBackend.DEVICE_MEMORY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.StorageBackend.FLAT_FILE">
+<span class="sig-name descname"><span class="pre">FLAT_FILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;StorageBackend.FLAT_FILE:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#marius.config.StorageBackend.FLAT_FILE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.StorageBackend.HOST_MEMORY">
+<span class="sig-name descname"><span class="pre">HOST_MEMORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;StorageBackend.HOST_MEMORY:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#marius.config.StorageBackend.HOST_MEMORY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.config.StorageBackend.PARTITION_BUFFER">
+<span class="sig-name descname"><span class="pre">PARTITION_BUFFER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;StorageBackend.PARTITION_BUFFER:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.StorageBackend.PARTITION_BUFFER" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageBackend.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#marius.config.StorageBackend.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageBackend.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#marius.config.StorageBackend.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.StorageBackendConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">StorageBackendConfig</span></span><a class="headerlink" href="#marius.config.StorageBackendConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageBackendConfig.options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.config.StorageBackendConfig.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageBackendConfig.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#marius.config.StorageBackendConfig.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.StorageConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">StorageConfig</span></span><a class="headerlink" href="#marius.config.StorageConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.dataset">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#marius.config.StorageConfig.dataset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.device_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">device_ids</span></span><a class="headerlink" href="#marius.config.StorageConfig.device_ids" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.device_type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">device_type</span></span><a class="headerlink" href="#marius.config.StorageConfig.device_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edges</span></span><a class="headerlink" href="#marius.config.StorageConfig.edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.embeddings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">embeddings</span></span><a class="headerlink" href="#marius.config.StorageConfig.embeddings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.export_encoded_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">export_encoded_nodes</span></span><a class="headerlink" href="#marius.config.StorageConfig.export_encoded_nodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">features</span></span><a class="headerlink" href="#marius.config.StorageConfig.features" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.full_graph_evaluation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">full_graph_evaluation</span></span><a class="headerlink" href="#marius.config.StorageConfig.full_graph_evaluation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nodes</span></span><a class="headerlink" href="#marius.config.StorageConfig.nodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.prefetch">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prefetch</span></span><a class="headerlink" href="#marius.config.StorageConfig.prefetch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageConfig.shuffle_input">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shuffle_input</span></span><a class="headerlink" href="#marius.config.StorageConfig.shuffle_input" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.StorageOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">StorageOptions</span></span><a class="headerlink" href="#marius.config.StorageOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.StorageOptions.dtype">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#marius.config.StorageOptions.dtype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">TrainingConfig</span></span><a class="headerlink" href="#marius.config.TrainingConfig" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.batch_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#marius.config.TrainingConfig.batch_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.checkpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">checkpoint</span></span><a class="headerlink" href="#marius.config.TrainingConfig.checkpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.epochs_per_shuffle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">epochs_per_shuffle</span></span><a class="headerlink" href="#marius.config.TrainingConfig.epochs_per_shuffle" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.logs_per_epoch">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logs_per_epoch</span></span><a class="headerlink" href="#marius.config.TrainingConfig.logs_per_epoch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.negative_sampling">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negative_sampling</span></span><a class="headerlink" href="#marius.config.TrainingConfig.negative_sampling" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.num_epochs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_epochs</span></span><a class="headerlink" href="#marius.config.TrainingConfig.num_epochs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.pipeline">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pipeline</span></span><a class="headerlink" href="#marius.config.TrainingConfig.pipeline" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.resume_from_checkpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resume_from_checkpoint</span></span><a class="headerlink" href="#marius.config.TrainingConfig.resume_from_checkpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.resume_training">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resume_training</span></span><a class="headerlink" href="#marius.config.TrainingConfig.resume_training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.TrainingConfig.save_model">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_model</span></span><a class="headerlink" href="#marius.config.TrainingConfig.save_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.UniformInitOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">UniformInitOptions</span></span><a class="headerlink" href="#marius.config.UniformInitOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.UniformInitOptions.scale_factor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scale_factor</span></span><a class="headerlink" href="#marius.config.UniformInitOptions.scale_factor" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.config.UniformSamplingOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">UniformSamplingOptions</span></span><a class="headerlink" href="#marius.config.UniformSamplingOptions" title="Permalink to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="marius.config.UniformSamplingOptions.max_neighbors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_neighbors</span></span><a class="headerlink" href="#marius.config.UniformSamplingOptions.max_neighbors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getActivationFunction">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getActivationFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.ActivationFunction" title="marius._config.ActivationFunction"><span class="pre">marius._config.ActivationFunction</span></a></span></span><a class="headerlink" href="#marius.config.getActivationFunction" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getDecoderType">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getDecoderType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.DecoderType" title="marius._config.DecoderType"><span class="pre">marius._config.DecoderType</span></a></span></span><a class="headerlink" href="#marius.config.getDecoderType" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getDenseLayerType">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getDenseLayerType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.DenseLayerType" title="marius._config.DenseLayerType"><span class="pre">marius._config.DenseLayerType</span></a></span></span><a class="headerlink" href="#marius.config.getDenseLayerType" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getDtype">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getDtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">c10::ScalarType</span></span></span><a class="headerlink" href="#marius.config.getDtype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getEdgeBucketOrderingEnum">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getEdgeBucketOrderingEnum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.EdgeBucketOrdering" title="marius._config.EdgeBucketOrdering"><span class="pre">marius._config.EdgeBucketOrdering</span></a></span></span><a class="headerlink" href="#marius.config.getEdgeBucketOrderingEnum" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getEdgeDecoderMethod">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getEdgeDecoderMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.EdgeDecoderMethod" title="marius._config.EdgeDecoderMethod"><span class="pre">marius._config.EdgeDecoderMethod</span></a></span></span><a class="headerlink" href="#marius.config.getEdgeDecoderMethod" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getGNNLayerType">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getGNNLayerType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.GNNLayerType" title="marius._config.GNNLayerType"><span class="pre">marius._config.GNNLayerType</span></a></span></span><a class="headerlink" href="#marius.config.getGNNLayerType" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getGraphSageAggregator">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getGraphSageAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.GraphSageAggregator" title="marius._config.GraphSageAggregator"><span class="pre">marius._config.GraphSageAggregator</span></a></span></span><a class="headerlink" href="#marius.config.getGraphSageAggregator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getInitDistribution">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getInitDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.InitDistribution" title="marius._config.InitDistribution"><span class="pre">marius._config.InitDistribution</span></a></span></span><a class="headerlink" href="#marius.config.getInitDistribution" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getLayerType">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getLayerType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.LayerType" title="marius._config.LayerType"><span class="pre">marius._config.LayerType</span></a></span></span><a class="headerlink" href="#marius.config.getLayerType" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getLearningTask">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getLearningTask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.LearningTask" title="marius._config.LearningTask"><span class="pre">marius._config.LearningTask</span></a></span></span><a class="headerlink" href="#marius.config.getLearningTask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getLossFunctionType">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getLossFunctionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.LossFunctionType" title="marius._config.LossFunctionType"><span class="pre">marius._config.LossFunctionType</span></a></span></span><a class="headerlink" href="#marius.config.getLossFunctionType" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getLossReduction">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getLossReduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.LossReduction" title="marius._config.LossReduction"><span class="pre">marius._config.LossReduction</span></a></span></span><a class="headerlink" href="#marius.config.getLossReduction" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getNeighborSamplingLayer">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getNeighborSamplingLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.NeighborSamplingLayer" title="marius._config.NeighborSamplingLayer"><span class="pre">marius._config.NeighborSamplingLayer</span></a></span></span><a class="headerlink" href="#marius.config.getNeighborSamplingLayer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getNodePartitionOrderingEnum">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getNodePartitionOrderingEnum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.NodePartitionOrdering" title="marius._config.NodePartitionOrdering"><span class="pre">marius._config.NodePartitionOrdering</span></a></span></span><a class="headerlink" href="#marius.config.getNodePartitionOrderingEnum" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getOptimizerType">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getOptimizerType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.OptimizerType" title="marius._config.OptimizerType"><span class="pre">marius._config.OptimizerType</span></a></span></span><a class="headerlink" href="#marius.config.getOptimizerType" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getReductionLayerType">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getReductionLayerType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.ReductionLayerType" title="marius._config.ReductionLayerType"><span class="pre">marius._config.ReductionLayerType</span></a></span></span><a class="headerlink" href="#marius.config.getReductionLayerType" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.getStorageBackend">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">getStorageBackend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.StorageBackend" title="marius._config.StorageBackend"><span class="pre">marius._config.StorageBackend</span></a></span></span><a class="headerlink" href="#marius.config.getStorageBackend" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="marius.config.loadConfig">
+<span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">loadConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#marius.config.MariusConfig" title="marius._config.MariusConfig"><span class="pre">marius._config.MariusConfig</span></a></span></span><a class="headerlink" href="#marius.config.loadConfig" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../data/index.html" class="btn btn-neutral float-right" title="marius.data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

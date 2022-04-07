@@ -1,0 +1,17 @@
+GraphEncoder
+=======================================
+
+.. autoclass:: marius.pipeline.GraphEncoder
+    :members:
+    :undoc-members:
+    :special-members: __init__
+
+.. autoclass:: marius.pipeline.SynchronousGraphEncoder
+    :members:
+    :undoc-members:
+    :special-members: __init__
+
+.. autoclass:: marius.pipeline.PipelineGraphEncoder
+    :members:
+    :undoc-members:
+    :special-members: __init__

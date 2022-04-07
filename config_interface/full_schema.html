@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration Schema &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python API" href="../python_api/index.html" />
+    <link rel="prev" title="Sample Files" href="samples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">Build and Install</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Configuration Interface</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="samples.html">Sample Files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration Schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#model-configuration">Model Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#encoder-configuration">Encoder Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#decoder-configuration">Decoder Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#loss-configuration">Loss Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optimizer-configuration">Optimizer Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#storage-configuration">Storage Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dataset-configuration">Dataset Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#storage-backend-configuration">Storage Backend Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#training-configuration">Training Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation-configuration">Evaluation Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../python_api/index.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../export_and_inference/index.html">Model Export and Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/index.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Debugging and FAQ</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Configuration Interface</a> &raquo;</li>
+      <li>Configuration Schema</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/config_interface/full_schema.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration-schema">
+<h1>Configuration Schema<a class="headerlink" href="#configuration-schema" title="Permalink to this headline"></a></h1>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">MariusConfig</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>model</p></td>
+<td><p>ModelConfig</p></td>
+<td><p>Defines model architecture, learning task, optimizers and loss function.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>storage</p></td>
+<td><p>StorageConfig</p></td>
+<td><p>Defines the input graph and how to store the graph (edges, features) and learned model (embeddings).</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>training</p></td>
+<td><p>TrainingConfig</p></td>
+<td><p>Hyperparameters for training.</p></td>
+<td><p>Training</p></td>
+</tr>
+<tr class="row-odd"><td><p>evaluation</p></td>
+<td><p>EvaluationConfig</p></td>
+<td><p>Hyperparameters for evaluation.</p></td>
+<td><p>Evaluation</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<section id="model-configuration">
+<h2>Model Configuration<a class="headerlink" href="#model-configuration" title="Permalink to this headline"></a></h2>
+<table class="colwidths-given docutils align-default" id="id2">
+<caption><span class="caption-text">ModelConfig</span><a class="headerlink" href="#id2" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>random_seed</p></td>
+<td><p>Int</p></td>
+<td><p>Random seed used to initialize, train, and evaluate the model. If not given, a seed will be generated.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>learning_task</p></td>
+<td><p>String</p></td>
+<td><p>Learning task for which the model is used. Valid values are [“LINK_PREDICTION”, “NODE_CLASSIFICATION”] (case insensitive). “LP” and “NC” can be used for shorthand. See TODO_REF_LEARNING_TASKS.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>encoder</p></td>
+<td><p>EncoderConfig</p></td>
+<td><p>Defines the architecture of the encoder and configuration of neighbor samplers. See TODO_REF_ENCODER_CONFIG.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>decoder</p></td>
+<td><p>DecoderConfig</p></td>
+<td><p>Denotes the decoder to apply to the output of the encoder. The decoder is learning task specific. See TODO_REF_DECODER_CONFIG.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>loss</p></td>
+<td><p>LossConfig</p></td>
+<td><p>Loss function to apply over the output of the decoder. See TODO_REF_LOSS_CONFIG.</p></td>
+<td><p>Required for training</p></td>
+</tr>
+<tr class="row-odd"><td><p>dense_optimizer</p></td>
+<td><p>OptimizerConfig</p></td>
+<td><p>Optimizer to use for dense model parameters. Where dense model parameters refer to all parameters besides the node embeddings. Where node embeddings are handled by the sparse_optimizer. See TODO_REF_OPTIMIZER_CONFIG for details.</p></td>
+<td><p>Required for training</p></td>
+</tr>
+<tr class="row-even"><td><p>sparse_optimizer</p></td>
+<td><p>OptimizerConfig</p></td>
+<td><p>Optimizer to use for the node embedding parameters. Currently only ADAGRAD is supported. See TODO_REF_OPTIMIZER_CONFIG for details.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<section id="encoder-configuration">
+<h3>Encoder Configuration<a class="headerlink" href="#encoder-configuration" title="Permalink to this headline"></a></h3>
+<table class="colwidths-given docutils align-default" id="id3">
+<caption><span class="caption-text">EncoderConfig</span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>layers</p></td>
+<td><p>List[List[LayerConfig]]</p></td>
+<td><p>Defines architecture of the encoder. Layers of the encoder are grouped into stages, where the layers within a stage are executed in parallel and the output of stage is the input to the successive stage. See TODO_REF_ENCODER_DEFINITION for details on defining encoder architectures.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>train_neighbor_sampling</p></td>
+<td><p>List[NeighborSamplingConfig]</p></td>
+<td><p>Sets the neighbor sampling configuration for each GNN layer for training (and evaluation if eval_neighbor_sampling is not set). Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder. See TODO_REF_NEIGHBOR_SAMPLING_CONFIG.</p></td>
+<td><p>Only for GNNs</p></td>
+</tr>
+<tr class="row-even"><td><p>eval_neighbor_sampling</p></td>
+<td><p>List[NeighborSamplingConfig]</p></td>
+<td><p>Sets the neighbor sampling configuration for each GNN layer for evaluation. Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder. If this field is not set then the sampling configuration used for training will be used for evaluation. See TODO_REF_NEIGHBOR_SAMPLING_CONFIG.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<table class="colwidths-given docutils align-default" id="id4">
+<caption><span class="caption-text">NeighborSamplingConfig</span><a class="headerlink" href="#id4" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>Denotes the type of the neighbor sampling layer. Options: [“ALL”, “UNIFORM”, “DROPOUT”].</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>NeighborSamplingOptions</p></td>
+<td><p>Specific options depending on the type of sampling layer.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<table class="colwidths-given docutils align-default" id="id5">
+<caption><span class="caption-text">UniformSamplingOptions[NeighborSamplingOptions]</span><a class="headerlink" href="#id5" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>num_neighbors</p></td>
+<td><p>Int</p></td>
+<td><p>Number of neighbors to sample in a given uniform sampling layer.</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<table class="colwidths-given docutils align-default" id="id6">
+<caption><span class="caption-text">DropoutSamplingOptions[NeighborSamplingOptions]</span><a class="headerlink" href="#id6" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>rate</p></td>
+<td><p>Float</p></td>
+<td><p>The dropout rate for a dropout layer.</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<section id="layer-configuration">
+<h4>Layer Configuration<a class="headerlink" href="#layer-configuration" title="Permalink to this headline"></a></h4>
+<table class="colwidths-given docutils align-default" id="id7">
+<caption><span class="caption-text">LayerConfig</span><a class="headerlink" href="#id7" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>Denotes the type of layer. Options: [“EMBEDDING”, “FEATURE”, “GNN” “REDUCTION”]</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>LayerOptions</p></td>
+<td><p>Layer specific options depending on the type.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>input_dim</p></td>
+<td><p>Int</p></td>
+<td><p>The dimension of the input to the layer.</p></td>
+<td><p>GNN and Reduction layers</p></td>
+</tr>
+<tr class="row-odd"><td><p>output_dim</p></td>
+<td><p>Int</p></td>
+<td><p>The output of dimension of the layer.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>init</p></td>
+<td><p>InitConfig</p></td>
+<td><p>Initialization method for the layer parameters. (Default GLOROT_UNIFORM (TODO_REF_INITIALIZATION)).</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>optimizer</p></td>
+<td><p>OptimizerConfig</p></td>
+<td><p>Optimizer to use for the parameters of this layer. If not given, the dense_optimizer is used.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>bias</p></td>
+<td><p>Bool</p></td>
+<td><p>Enable a bias to be applied to the output of the layer. (Default False)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>bias_init</p></td>
+<td><p>InitConfig</p></td>
+<td><p>Initialization method for the bias. The default initialization is zeroes (TODO_REF_INITIALIZATION).</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>bias</p></td>
+<td><p>Bool</p></td>
+<td><p>Enable a bias to be applied to the output of the layer. (Default False)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>activation</p></td>
+<td><p>String</p></td>
+<td><p>Activation function to apply to the output of the layer. Options [“RELU”, “SIGMOID”, “NONE”]. (Default “NONE”)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+<section id="layer-options">
+<h4>Layer Options<a class="headerlink" href="#layer-options" title="Permalink to this headline"></a></h4>
+<p><strong>GNN Layer Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id8">
+<caption><span class="caption-text">GraphSageLayerOptions[LayerOptions]</span><a class="headerlink" href="#id8" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>The type of the GNN layer, for GraphSage, this must be equal to “GRAPH_SAGE”.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>aggregator</p></td>
+<td><p>String</p></td>
+<td><p>Aggregation to use for graph sage, options are [“GCN”, “MEAN”]. (Default “MEAN”)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<table class="colwidths-given docutils align-default" id="id9">
+<caption><span class="caption-text">GATLayerOptions[LayerOptions]</span><a class="headerlink" href="#id9" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>The type of the GNN layer, for GAT, this must be equal to “GAT”.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_heads</p></td>
+<td><p>Int</p></td>
+<td><p>Number of attention heads to use. (Default 10)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>average_heads</p></td>
+<td><p>Bool</p></td>
+<td><p>If true, the attention heads will be averaged, otherwise they will be concatenated. (Default True)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>negative_slope</p></td>
+<td><p>Float</p></td>
+<td><p>Negative slope to use for LeakyReLU. (Default .2)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>input_dropout</p></td>
+<td><p>Float</p></td>
+<td><p>Dropout rate to apply to the input to the layer. (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>attention_dropout</p></td>
+<td><p>Float</p></td>
+<td><p>Dropout rate to apply to the attention weights. (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>Reduction Layer Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id10">
+<caption><span class="caption-text">ReductionLayerOptions[LayerOptions]</span><a class="headerlink" href="#id10" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>The type of the reduction layer. Options are: [“CONCAT”, “LINEAR”]. (Default “CONCAT”)</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+<section id="initialization-configuration">
+<h4>Initialization Configuration<a class="headerlink" href="#initialization-configuration" title="Permalink to this headline"></a></h4>
+<table class="colwidths-given docutils align-default" id="id11">
+<caption><span class="caption-text">InitConfig</span><a class="headerlink" href="#id11" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>The type of the initialization. Options are: [“GLOROT_UNIFORM”, “GLOROT_NORMAL”, “UNIFORM”, “NORMAL”, “ZEROES”, “ONES”, “CONSTANT”]. Default “GLOROT_UNIFORM”</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>InitOptions</p></td>
+<td><p>Initialization specific options depending on the type.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>Uniform Init Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id12">
+<caption><span class="caption-text">UniformInitOptions[InitOptions]</span><a class="headerlink" href="#id12" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>scale_factor</p></td>
+<td><p>Float</p></td>
+<td><p>The scale factor of the uniform distribution. (Default 1)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>Normal Init Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id13">
+<caption><span class="caption-text">NormalInitOptions[InitOptions]</span><a class="headerlink" href="#id13" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>mean</p></td>
+<td><p>Float</p></td>
+<td><p>The mean of the distribution. (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>std</p></td>
+<td><p>Float</p></td>
+<td><p>The standard deviation of the distribution. (Default 1.0)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>Constant Init Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id14">
+<caption><span class="caption-text">ConstantInitOptions[InitOptions]</span><a class="headerlink" href="#id14" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>constant</p></td>
+<td><p>Float</p></td>
+<td><p>The value to set all parameters. (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+</section>
+<section id="decoder-configuration">
+<h3>Decoder Configuration<a class="headerlink" href="#decoder-configuration" title="Permalink to this headline"></a></h3>
+<table class="colwidths-given docutils align-default" id="id15">
+<caption><span class="caption-text">DecoderConfig</span><a class="headerlink" href="#id15" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>Denotes the type of decoder. Options: [“DISTMULT”, “TRANSE”, “COMPLEX”, “NODE”]. The first three are decoders for link prediction and the “NODE” decoder is used for node classification.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>DecoderOptions</p></td>
+<td><p>Decoder specific options depending on the type.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>optimizer</p></td>
+<td><p>OptimizerConfig</p></td>
+<td><p>Optimizer to use for the parameters of the decoder (if any). If not given, the dense_optimizer is used.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<section id="decoder-options">
+<h4>Decoder Options<a class="headerlink" href="#decoder-options" title="Permalink to this headline"></a></h4>
+<p><strong>Edge Decoder Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id16">
+<caption><span class="caption-text">EdgeDecoderOptions[DecoderOptions]</span><a class="headerlink" href="#id16" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>inverse_edges</p></td>
+<td><p>Bool</p></td>
+<td><p>If true, the decoder will use two embeddings per edge-type (relation). Where one embedding is applied to the source node of an edge, and the other is applied to the destination node of an edge. Furthermore, the scores of the inverse of the edges will be computed (dst-&gt;rel-&gt;src) and used in the loss. (Default True)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>edge_decoder_method</p></td>
+<td><p>String</p></td>
+<td><p>Specifies how to apply the decoder to a given set of edges, and negatives. Options are [“ONLY_POS”, “CORRUPT_NODE”]. (Default “CORRUPT_NODE”)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+</section>
+<section id="loss-configuration">
+<h3>Loss Configuration<a class="headerlink" href="#loss-configuration" title="Permalink to this headline"></a></h3>
+<table class="colwidths-given docutils align-default" id="id17">
+<caption><span class="caption-text">LossConfig</span><a class="headerlink" href="#id17" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>Denotes the type of the loss function. Options: [“SOFTMAX”, “RANKING”, “CROSS_ENTROPY”, “BCE_AFTER_SIGMOID”, “BCE_WITH_LOGITS”, “MSE”, “SOFTPLUS”]. SEE TODO_REF_LOSS_FUNCTIONS for details on each loss function.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>LossOptions</p></td>
+<td><p>Loss function specific options depending on the type.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>Loss Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id18">
+<caption><span class="caption-text">LossOptions</span><a class="headerlink" href="#id18" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>reduction</p></td>
+<td><p>String</p></td>
+<td><p>The reduction to use for the loss. Options are [“SUM”, “MEAN”]. (Default “SUM”)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<table class="colwidths-given docutils align-default" id="id19">
+<caption><span class="caption-text">RankingLossOptions[LossOptions]</span><a class="headerlink" href="#id19" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>reduction</p></td>
+<td><p>String</p></td>
+<td><p>The reduction to use for the loss. Options are [“SUM”, “MEAN”]. (Default “SUM”)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>margin</p></td>
+<td><p>Float</p></td>
+<td><p>The margin for the ranking loss function. (Default .1)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+<section id="optimizer-configuration">
+<h3>Optimizer Configuration<a class="headerlink" href="#optimizer-configuration" title="Permalink to this headline"></a></h3>
+<table class="colwidths-given docutils align-default" id="id20">
+<caption><span class="caption-text">OptimizerConfig</span><a class="headerlink" href="#id20" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>Denotes the type of the optimizer. Options: [“SGD”, “ADAM”, “ADAGRAD”]. See TODO_REF_OPTIMIZERS for details on each optimizer.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>OptimizerOptions</p></td>
+<td><p>Optimizer specific options depending on the type.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>SGD Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id21">
+<caption><span class="caption-text">SGDOptions[OptimizerOptions]</span><a class="headerlink" href="#id21" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>learning_rate</p></td>
+<td><p>Float</p></td>
+<td><p>SGD learning rate. (Default .1)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>Adagrad Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id22">
+<caption><span class="caption-text">AdagradOptions[OptimizerOptions]</span><a class="headerlink" href="#id22" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>learning_rate</p></td>
+<td><p>Float</p></td>
+<td><p>Adagrad learning rate. (Default .1)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>eps</p></td>
+<td><p>Float</p></td>
+<td><p>Term added to the denominator to improve numerical stability. (Default 1e-10)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>init_value</p></td>
+<td><p>Float</p></td>
+<td><p>Initial accumulator value. (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>lr_decay</p></td>
+<td><p>Float</p></td>
+<td><p>Learning rate decay. (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>weight_decay</p></td>
+<td><p>Float</p></td>
+<td><p>Weight decay (L2 penalty). (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<p><strong>Adam Options</strong></p>
+<table class="colwidths-given docutils align-default" id="id23">
+<caption><span class="caption-text">AdamOptions[OptimizerOptions]</span><a class="headerlink" href="#id23" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>learning_rate</p></td>
+<td><p>Float</p></td>
+<td><p>Adam learning rate. (Default .1)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>amsgrad</p></td>
+<td><p>Bool</p></td>
+<td><p>Whether to use the AMSGrad variant of ADAM.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>beta_1</p></td>
+<td><p>Float</p></td>
+<td><p>Coefficient used for computing running averages of gradient and its square. (Default .9)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>beta_2</p></td>
+<td><p>Float</p></td>
+<td><p>Coefficient used for computing running averages of gradient and its square. (Default .999)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>eps</p></td>
+<td><p>Float</p></td>
+<td><p>Term added to the denominator to improve numerical stability. (Default 1e-8)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>weight_decay</p></td>
+<td><p>Float</p></td>
+<td><p>Weight decay (L2 penalty). (Default 0.0)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+</section>
+<section id="storage-configuration">
+<h2>Storage Configuration<a class="headerlink" href="#storage-configuration" title="Permalink to this headline"></a></h2>
+<table class="colwidths-given docutils align-default" id="id24">
+<caption><span class="caption-text">StorageConfig</span><a class="headerlink" href="#id24" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>device_type</p></td>
+<td><p>String</p></td>
+<td><p>Whether to use cpu or gpu training. Options are [“CPU”, “CUDA”]. (Default “CPU”)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>dataset</p></td>
+<td><p>DatasetConfig</p></td>
+<td><p>Contains information about the input dataset.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>edges</p></td>
+<td><p>StorageBackendConfig</p></td>
+<td><p>Storage backend of the edges. (Default edges.type = DEVICE_MEMORY, edges.options.dtype = int32)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>embeddings</p></td>
+<td><p>StorageBackendConfig</p></td>
+<td><p>Storage backend of the node embedding. (Default embeddings.type = DEVICE_MEMORY, embeddings.options.dtype = float32)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>features</p></td>
+<td><p>StorageBackendConfig</p></td>
+<td><p>Storage backend of the node features. (Default features.type DEVICE_MEMORY, features.options.dtype = float32)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>prefetch</p></td>
+<td><p>Bool</p></td>
+<td><p>If true and the nodes/features storage configuration uses a partition buffer, then node partitions and edge buckets will be prefetched. Note that this introduces additional memory overheads. (Default True)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>full_graph_evaluation</p></td>
+<td><p>Bool</p></td>
+<td><p>If true and the nodes/features storage configuration uses a partition buffer, evaluation will be performed with the full graph in memory (if there is enough memory). This is useful for fair comparisons across different storage configurations. (Default False)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<section id="dataset-configuration">
+<h3>Dataset Configuration<a class="headerlink" href="#dataset-configuration" title="Permalink to this headline"></a></h3>
+<table class="colwidths-given docutils align-default" id="id25">
+<caption><span class="caption-text">DatasetConfig</span><a class="headerlink" href="#id25" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>base_directory</p></td>
+<td><p>String</p></td>
+<td><p>Directory containing the prepreprocessed dataset. Also used to store model parameters and embedding table.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_edges</p></td>
+<td><p>Int</p></td>
+<td><p>Number of edges in the input graph. If link prediction, this should be set to the number of training edges.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>num_nodes</p></td>
+<td><p>Int</p></td>
+<td><p>Number of nodes in the input graph.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_relations</p></td>
+<td><p>Int</p></td>
+<td><p>Number of relations (edge-types) in the input graph. (Default 1)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>num_train</p></td>
+<td><p>Int</p></td>
+<td><p>Number of training examples. In link prediction the examples are edges, in node classification they are nodes.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_valid</p></td>
+<td><p>Int</p></td>
+<td><p>Number of validation examples. If not given, no validation will be performed</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>num_test</p></td>
+<td><p>Int</p></td>
+<td><p>Number of test examples. If not given, only training will occur.</p></td>
+<td><p>Evaluation</p></td>
+</tr>
+<tr class="row-odd"><td><p>node_feature_dim</p></td>
+<td><p>Int</p></td>
+<td><p>Dimension of the node features, if any.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>num_classes</p></td>
+<td><p>Int</p></td>
+<td><p>Number of class labels.</p></td>
+<td><p>Node classification</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+<section id="storage-backend-configuration">
+<h3>Storage Backend Configuration<a class="headerlink" href="#storage-backend-configuration" title="Permalink to this headline"></a></h3>
+<table class="colwidths-given docutils align-default" id="id26">
+<caption><span class="caption-text">StorageBackendConfig</span><a class="headerlink" href="#id26" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>String</p></td>
+<td><p>The type of storage backend to use. The valid options depend on the data being stored. For edges, the valid backends are [“FLAT_FILE”, “HOST_MEMORY” and “DEVICE_MEMORY”]. For embeddings and features, the valid chocies are [“PARTITION_BUFFER”, “HOST_MEMORY”, “DEVICE_MEMORY”]</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>StorageOptions</p></td>
+<td><p>Storage backend options depending on the type of storage.</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<section id="storage-backend-options">
+<h4>Storage Backend Options<a class="headerlink" href="#storage-backend-options" title="Permalink to this headline"></a></h4>
+<table class="colwidths-given docutils align-default" id="id27">
+<caption><span class="caption-text">StorageOptions</span><a class="headerlink" href="#id27" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>dtype</p></td>
+<td><p>String</p></td>
+<td><p>The datatype of the storage. Valid options [“FLOAT”, “FLOAT32”, “DOUBLE”, “FLOAT64”, “INT”, “INT32”, “LONG, “INT64”]. The default value depends on the data being stored. For edges, the default is “INT32”, otherwise the default is “FLOAT32”</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+<table class="colwidths-given docutils align-default" id="id28">
+<caption><span class="caption-text">PartitionBufferOptions[StorageOptions]</span><a class="headerlink" href="#id28" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>dtype</p></td>
+<td><p>String</p></td>
+<td><p>The datatype of the storage. Valid options [“FLOAT”, “FLOAT32”, “DOUBLE”, “FLOAT64”]. (Default “FLOAT32”)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_partitions</p></td>
+<td><p>Int</p></td>
+<td><p>Number of node partitions.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>buffer_capacity</p></td>
+<td><p>Int</p></td>
+<td><p>Number of partitions which can fit in the buffer.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>prefetching</p></td>
+<td><p>Bool</p></td>
+<td><p>If true, partitions will be prefetched and written to storage asynchronously. This prevents IO wait times at the cost of additional memory overheads. (Default True)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+</section>
+</section>
+<section id="training-configuration">
+<h2>Training Configuration<a class="headerlink" href="#training-configuration" title="Permalink to this headline"></a></h2>
+<table class="colwidths-given docutils align-default" id="id29">
+<caption><span class="caption-text">TrainingConfig</span><a class="headerlink" href="#id29" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>batch_size</p></td>
+<td><p>Int</p></td>
+<td><p>Amount of training examples per batch. (Default 1000)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>negative_sampling</p></td>
+<td><p>NegativeSamplingConfig</p></td>
+<td><p>Negative sampling configuration for link prediction.</p></td>
+<td><p>Link Prediction</p></td>
+</tr>
+<tr class="row-even"><td><p>num_epochs</p></td>
+<td><p>Int</p></td>
+<td><p>Number of epochs to train.</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>pipeline</p></td>
+<td><p>PipelineConfig</p></td>
+<td><p>Advanced configuration of the training pipeline. Defaults to synchronous training.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>epochs_per_shuffle</p></td>
+<td><p>Int</p></td>
+<td><p>Sets how often to shuffle the training data. (Default 1)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>logs_per_epoch</p></td>
+<td><p>Int</p></td>
+<td><p>Sets how often to report progress during an epoch. (Default 10)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>save_model</p></td>
+<td><p>Bool</p></td>
+<td><p>If true, the model will be saved at the end of training. (Default True)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>resume_training</p></td>
+<td><p>Bool</p></td>
+<td><p>If true, the training procedure will resume from the previous state and will train <cite>num_epochs</cite> further epochs.  (Default False)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+<section id="evaluation-configuration">
+<h2>Evaluation Configuration<a class="headerlink" href="#evaluation-configuration" title="Permalink to this headline"></a></h2>
+<table class="colwidths-given docutils align-default" id="id30">
+<caption><span class="caption-text">EvaluationConfig</span><a class="headerlink" href="#id30" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 11%" />
+<col style="width: 56%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>batch_size</p></td>
+<td><p>Int</p></td>
+<td><p>Amount of evaluation examples per batch. (Default 1000)</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>negative_sampling</p></td>
+<td><p>NegativeSamplingConfig</p></td>
+<td><p>Negative sampling configuration for link prediction.</p></td>
+<td><p>Link Prediction</p></td>
+</tr>
+<tr class="row-even"><td><p>pipeline</p></td>
+<td><p>PipelineConfig</p></td>
+<td><p>Advanced configuration of the evaluation pipeline. Defaults to synchronous evaluation.</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>epochs_per_eval</p></td>
+<td><p>Int</p></td>
+<td><p>Sets how often to evaluate the model. (Default 1)</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>YAML Sample</em></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="samples.html" class="btn btn-neutral float-left" title="Sample Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../python_api/index.html" class="btn btn-neutral float-right" title="Python API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

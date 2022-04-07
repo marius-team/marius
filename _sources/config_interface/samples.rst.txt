@@ -1,0 +1,51 @@
+
+Sample Files
+======================
+
+Model Configs
+-------------
+
+DistMult
+^^^^^^^^
+
+Graph Sage (3-layer)
+^^^^^^^^^^^^^^^^^^^^
+
+GAT (3-layer)
+^^^^^^^^^^^^^
+
+Embeddings + Features
+^^^^^^^^^^^^^^^^^^^^^
+
+Storage Configs
+---------------
+
+GPU Memory
+^^^^^^^^^^
+
+Mixed CPU-GPU
+^^^^^^^^^^^^^
+
+Disk-Based
+^^^^^^^^^^
+
+Training Configs
+----------------
+
+Synchronous Training
+^^^^^^^^^^^^^^^^^^^^
+
+Pipelined Training
+^^^^^^^^^^^^^^^^^^
+
+Evaluation Configs
+-------------------
+
+Link Prediction Filtered
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Link Prediction Unfiltered
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Node Classification
+^^^^^^^^^^^^^^^^^^^

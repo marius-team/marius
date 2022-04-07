@@ -1,0 +1,806 @@
+Configuration Schema
+=========================
+
+.. list-table:: MariusConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - model
+     - ModelConfig
+     - Defines model architecture, learning task, optimizers and loss function.
+     - Yes
+   * - storage
+     - StorageConfig
+     - Defines the input graph and how to store the graph (edges, features) and learned model (embeddings).
+     - Yes
+   * - training
+     - TrainingConfig
+     - Hyperparameters for training.
+     - Training
+   * - evaluation
+     - EvaluationConfig
+     - Hyperparameters for evaluation.
+     - Evaluation
+
+*YAML Sample*
+
+Model Configuration
+--------------------
+
+
+.. list-table:: ModelConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - random_seed
+     - Int
+     - Random seed used to initialize, train, and evaluate the model. If not given, a seed will be generated.
+     - No
+   * - learning_task
+     - String
+     - Learning task for which the model is used. Valid values are ["LINK_PREDICTION", "NODE_CLASSIFICATION"] (case insensitive). "LP" and "NC" can be used for shorthand. See TODO_REF_LEARNING_TASKS.
+     - Yes
+   * - encoder
+     - EncoderConfig
+     - Defines the architecture of the encoder and configuration of neighbor samplers. See TODO_REF_ENCODER_CONFIG.
+     - Yes
+   * - decoder
+     - DecoderConfig
+     - Denotes the decoder to apply to the output of the encoder. The decoder is learning task specific. See TODO_REF_DECODER_CONFIG.
+     - Yes
+   * - loss
+     - LossConfig
+     - Loss function to apply over the output of the decoder. See TODO_REF_LOSS_CONFIG.
+     - Required for training
+   * - dense_optimizer
+     - OptimizerConfig
+     - Optimizer to use for dense model parameters. Where dense model parameters refer to all parameters besides the node embeddings. Where node embeddings are handled by the sparse_optimizer. See TODO_REF_OPTIMIZER_CONFIG for details.
+     - Required for training
+   * - sparse_optimizer
+     - OptimizerConfig
+     - Optimizer to use for the node embedding parameters. Currently only ADAGRAD is supported. See TODO_REF_OPTIMIZER_CONFIG for details.
+     - No
+
+*YAML Sample*
+
+Encoder Configuration
+^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: EncoderConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - layers
+     - List[List[LayerConfig]]
+     - Defines architecture of the encoder. Layers of the encoder are grouped into stages, where the layers within a stage are executed in parallel and the output of stage is the input to the successive stage. See TODO_REF_ENCODER_DEFINITION for details on defining encoder architectures.
+     - Yes
+   * - train_neighbor_sampling
+     - List[NeighborSamplingConfig]
+     - Sets the neighbor sampling configuration for each GNN layer for training (and evaluation if eval_neighbor_sampling is not set). Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder. See TODO_REF_NEIGHBOR_SAMPLING_CONFIG.
+     - Only for GNNs
+   * - eval_neighbor_sampling
+     - List[NeighborSamplingConfig]
+     - Sets the neighbor sampling configuration for each GNN layer for evaluation. Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder. If this field is not set then the sampling configuration used for training will be used for evaluation. See TODO_REF_NEIGHBOR_SAMPLING_CONFIG.
+     - No
+
+*YAML Sample*
+
+.. list-table:: NeighborSamplingConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - Denotes the type of the neighbor sampling layer. Options: ["ALL", "UNIFORM", "DROPOUT"].
+     - Yes
+   * - options
+     - NeighborSamplingOptions
+     - Specific options depending on the type of sampling layer.
+     - No
+
+*YAML Sample*
+
+.. list-table:: UniformSamplingOptions[NeighborSamplingOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - num_neighbors
+     - Int
+     - Number of neighbors to sample in a given uniform sampling layer.
+     - Yes
+
+*YAML Sample*
+
+.. list-table:: DropoutSamplingOptions[NeighborSamplingOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - rate
+     - Float
+     - The dropout rate for a dropout layer.
+     - Yes
+
+*YAML Sample*
+
+Layer Configuration
+"""""""""""""""""""
+
+.. list-table:: LayerConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - Denotes the type of layer. Options: ["EMBEDDING", "FEATURE", "GNN" "REDUCTION"]
+     - Yes
+   * - options
+     - LayerOptions
+     - Layer specific options depending on the type.
+     - No
+   * - input_dim
+     - Int
+     - The dimension of the input to the layer.
+     - GNN and Reduction layers
+   * - output_dim
+     - Int
+     - The output of dimension of the layer.
+     - Yes
+   * - init
+     - InitConfig
+     - Initialization method for the layer parameters. (Default GLOROT_UNIFORM (TODO_REF_INITIALIZATION)).
+     - No
+   * - optimizer
+     - OptimizerConfig
+     - Optimizer to use for the parameters of this layer. If not given, the dense_optimizer is used.
+     - No
+   * - bias
+     - Bool
+     - Enable a bias to be applied to the output of the layer. (Default False)
+     - No
+   * - bias_init
+     - InitConfig
+     - Initialization method for the bias. The default initialization is zeroes (TODO_REF_INITIALIZATION).
+     - No
+   * - bias
+     - Bool
+     - Enable a bias to be applied to the output of the layer. (Default False)
+     - No
+   * - activation
+     - String
+     - Activation function to apply to the output of the layer. Options ["RELU", "SIGMOID", "NONE"]. (Default "NONE")
+     - No
+
+*YAML Sample*
+
+Layer Options
+"""""""""""""
+
+**GNN Layer Options**
+
+.. list-table:: GraphSageLayerOptions[LayerOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - The type of the GNN layer, for GraphSage, this must be equal to "GRAPH_SAGE".
+     - Yes
+   * - aggregator
+     - String
+     - Aggregation to use for graph sage, options are ["GCN", "MEAN"]. (Default "MEAN")
+     - No
+
+*YAML Sample*
+
+.. list-table:: GATLayerOptions[LayerOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - The type of the GNN layer, for GAT, this must be equal to "GAT".
+     - Yes
+   * - num_heads
+     - Int
+     - Number of attention heads to use. (Default 10)
+     - No
+   * - average_heads
+     - Bool
+     - If true, the attention heads will be averaged, otherwise they will be concatenated. (Default True)
+     - No
+   * - negative_slope
+     - Float
+     - Negative slope to use for LeakyReLU. (Default .2)
+     - No
+   * - input_dropout
+     - Float
+     - Dropout rate to apply to the input to the layer. (Default 0.0)
+     - No
+   * - attention_dropout
+     - Float
+     - Dropout rate to apply to the attention weights. (Default 0.0)
+     - No
+
+*YAML Sample*
+
+**Reduction Layer Options**
+
+.. list-table:: ReductionLayerOptions[LayerOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - The type of the reduction layer. Options are: ["CONCAT", "LINEAR"]. (Default "CONCAT")
+     - Yes
+
+*YAML Sample*
+
+Initialization Configuration
+""""""""""""""""""""""""""""
+
+.. list-table:: InitConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - The type of the initialization. Options are: ["GLOROT_UNIFORM", "GLOROT_NORMAL", "UNIFORM", "NORMAL", "ZEROES", "ONES", "CONSTANT"]. Default "GLOROT_UNIFORM"
+     - Yes
+   * - options
+     - InitOptions
+     - Initialization specific options depending on the type.
+     - No
+
+*YAML Sample*
+
+**Uniform Init Options**
+
+.. list-table:: UniformInitOptions[InitOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - scale_factor
+     - Float
+     - The scale factor of the uniform distribution. (Default 1)
+     - No
+
+*YAML Sample*
+
+**Normal Init Options**
+
+.. list-table:: NormalInitOptions[InitOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - mean
+     - Float
+     - The mean of the distribution. (Default 0.0)
+     - No
+   * - std
+     - Float
+     - The standard deviation of the distribution. (Default 1.0)
+     - No
+
+*YAML Sample*
+
+**Constant Init Options**
+
+.. list-table:: ConstantInitOptions[InitOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - constant
+     - Float
+     - The value to set all parameters. (Default 0.0)
+     - No
+
+*YAML Sample*
+
+Decoder Configuration
+^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: DecoderConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - Denotes the type of decoder. Options: ["DISTMULT", "TRANSE", "COMPLEX", "NODE"]. The first three are decoders for link prediction and the "NODE" decoder is used for node classification.
+     - Yes
+   * - options
+     - DecoderOptions
+     - Decoder specific options depending on the type.
+     - No
+   * - optimizer
+     - OptimizerConfig
+     - Optimizer to use for the parameters of the decoder (if any). If not given, the dense_optimizer is used.
+     - No
+
+*YAML Sample*
+
+Decoder Options
+""""""""""""""""
+
+**Edge Decoder Options**
+
+.. list-table:: EdgeDecoderOptions[DecoderOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - inverse_edges
+     - Bool
+     - If true, the decoder will use two embeddings per edge-type (relation). Where one embedding is applied to the source node of an edge, and the other is applied to the destination node of an edge. Furthermore, the scores of the inverse of the edges will be computed (dst->rel->src) and used in the loss. (Default True)
+     - No
+   * - edge_decoder_method
+     - String
+     - Specifies how to apply the decoder to a given set of edges, and negatives. Options are ["ONLY_POS", "CORRUPT_NODE"]. (Default "CORRUPT_NODE")
+     - No
+
+*YAML Sample*
+
+Loss Configuration
+^^^^^^^^^^^^^^^^^^
+
+.. list-table:: LossConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - Denotes the type of the loss function. Options: ["SOFTMAX", "RANKING", "CROSS_ENTROPY", "BCE_AFTER_SIGMOID", "BCE_WITH_LOGITS", "MSE", "SOFTPLUS"]. SEE TODO_REF_LOSS_FUNCTIONS for details on each loss function.
+     - Yes
+   * - options
+     - LossOptions
+     - Loss function specific options depending on the type.
+     - No
+
+*YAML Sample*
+
+**Loss Options**
+
+.. list-table:: LossOptions
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - reduction
+     - String
+     - The reduction to use for the loss. Options are ["SUM", "MEAN"]. (Default "SUM")
+     - No
+
+*YAML Sample*
+
+.. list-table:: RankingLossOptions[LossOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - reduction
+     - String
+     - The reduction to use for the loss. Options are ["SUM", "MEAN"]. (Default "SUM")
+     - No
+   * - margin
+     - Float
+     - The margin for the ranking loss function. (Default .1)
+     - No
+
+*YAML Sample*
+
+Optimizer Configuration
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: OptimizerConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - Denotes the type of the optimizer. Options: ["SGD", "ADAM", "ADAGRAD"]. See TODO_REF_OPTIMIZERS for details on each optimizer.
+     - Yes
+   * - options
+     - OptimizerOptions
+     - Optimizer specific options depending on the type.
+     - No
+
+*YAML Sample*
+
+**SGD Options**
+
+.. list-table:: SGDOptions[OptimizerOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - learning_rate
+     - Float
+     - SGD learning rate. (Default .1)
+     - No
+
+*YAML Sample*
+
+**Adagrad Options**
+
+.. list-table:: AdagradOptions[OptimizerOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - learning_rate
+     - Float
+     - Adagrad learning rate. (Default .1)
+     - No
+   * - eps
+     - Float
+     - Term added to the denominator to improve numerical stability. (Default 1e-10)
+     - No
+   * - init_value
+     - Float
+     - Initial accumulator value. (Default 0.0)
+     - No
+   * - lr_decay
+     - Float
+     - Learning rate decay. (Default 0.0)
+     - No
+   * - weight_decay
+     - Float
+     - Weight decay (L2 penalty). (Default 0.0)
+     - No
+
+*YAML Sample*
+
+**Adam Options**
+
+.. list-table:: AdamOptions[OptimizerOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - learning_rate
+     - Float
+     - Adam learning rate. (Default .1)
+     - No
+   * - amsgrad
+     - Bool
+     - Whether to use the AMSGrad variant of ADAM.
+     - No
+   * - beta_1
+     - Float
+     - Coefficient used for computing running averages of gradient and its square. (Default .9)
+     - No
+   * - beta_2
+     - Float
+     - Coefficient used for computing running averages of gradient and its square. (Default .999)
+     - No
+   * - eps
+     - Float
+     - Term added to the denominator to improve numerical stability. (Default 1e-8)
+     - No
+   * - weight_decay
+     - Float
+     - Weight decay (L2 penalty). (Default 0.0)
+     - No
+
+*YAML Sample*
+
+Storage Configuration
+----------------------
+
+.. list-table:: StorageConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - device_type
+     - String
+     - Whether to use cpu or gpu training. Options are ["CPU", "CUDA"]. (Default "CPU")
+     - No
+   * - dataset
+     - DatasetConfig
+     - Contains information about the input dataset.
+     - Yes
+   * - edges
+     - StorageBackendConfig
+     - Storage backend of the edges. (Default edges.type = DEVICE_MEMORY, edges.options.dtype = int32)
+     - No
+   * - embeddings
+     - StorageBackendConfig
+     - Storage backend of the node embedding. (Default embeddings.type = DEVICE_MEMORY, embeddings.options.dtype = float32)
+     - No
+   * - features
+     - StorageBackendConfig
+     - Storage backend of the node features. (Default features.type DEVICE_MEMORY, features.options.dtype = float32)
+     - No
+   * - prefetch
+     - Bool
+     - If true and the nodes/features storage configuration uses a partition buffer, then node partitions and edge buckets will be prefetched. Note that this introduces additional memory overheads. (Default True)
+     - No
+   * - full_graph_evaluation
+     - Bool
+     - If true and the nodes/features storage configuration uses a partition buffer, evaluation will be performed with the full graph in memory (if there is enough memory). This is useful for fair comparisons across different storage configurations. (Default False)
+     - No
+
+*YAML Sample*
+
+Dataset Configuration
+^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: DatasetConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - base_directory
+     - String
+     - Directory containing the prepreprocessed dataset. Also used to store model parameters and embedding table.
+     - Yes
+   * - num_edges
+     - Int
+     - Number of edges in the input graph. If link prediction, this should be set to the number of training edges.
+     - Yes
+   * - num_nodes
+     - Int
+     - Number of nodes in the input graph.
+     - Yes
+   * - num_relations
+     - Int
+     - Number of relations (edge-types) in the input graph. (Default 1)
+     - No
+   * - num_train
+     - Int
+     - Number of training examples. In link prediction the examples are edges, in node classification they are nodes.
+     - Yes
+   * - num_valid
+     - Int
+     - Number of validation examples. If not given, no validation will be performed
+     - No
+   * - num_test
+     - Int
+     - Number of test examples. If not given, only training will occur.
+     - Evaluation
+   * - node_feature_dim
+     - Int
+     - Dimension of the node features, if any.
+     - No
+   * - num_classes
+     - Int
+     - Number of class labels.
+     - Node classification
+
+*YAML Sample*
+
+Storage Backend Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: StorageBackendConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - type
+     - String
+     - The type of storage backend to use. The valid options depend on the data being stored. For edges, the valid backends are ["FLAT_FILE", "HOST_MEMORY" and "DEVICE_MEMORY"]. For embeddings and features, the valid chocies are ["PARTITION_BUFFER", "HOST_MEMORY", "DEVICE_MEMORY"]
+     - Yes
+   * - options
+     - StorageOptions
+     - Storage backend options depending on the type of storage.
+     - No
+
+*YAML Sample*
+
+Storage Backend Options
+"""""""""""""""""""""""
+
+.. list-table:: StorageOptions
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - dtype
+     - String
+     - The datatype of the storage. Valid options ["FLOAT", "FLOAT32", "DOUBLE", "FLOAT64", "INT", "INT32", "LONG, "INT64"]. The default value depends on the data being stored. For edges, the default is "INT32", otherwise the default is "FLOAT32"
+     - No
+
+*YAML Sample*
+
+.. list-table:: PartitionBufferOptions[StorageOptions]
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - dtype
+     - String
+     - The datatype of the storage. Valid options ["FLOAT", "FLOAT32", "DOUBLE", "FLOAT64"]. (Default "FLOAT32")
+     - No
+   * - num_partitions
+     - Int
+     - Number of node partitions.
+     - Yes
+   * - buffer_capacity
+     - Int
+     - Number of partitions which can fit in the buffer.
+     - Yes
+   * - prefetching
+     - Bool
+     - If true, partitions will be prefetched and written to storage asynchronously. This prevents IO wait times at the cost of additional memory overheads. (Default True)
+     - No
+
+*YAML Sample*
+
+Training Configuration
+-----------------------
+
+.. list-table:: TrainingConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - batch_size
+     - Int
+     - Amount of training examples per batch. (Default 1000)
+     - No
+   * - negative_sampling
+     - NegativeSamplingConfig
+     - Negative sampling configuration for link prediction.
+     - Link Prediction
+   * - num_epochs
+     - Int
+     - Number of epochs to train.
+     - Yes
+   * - pipeline
+     - PipelineConfig
+     - Advanced configuration of the training pipeline. Defaults to synchronous training.
+     - No
+   * - epochs_per_shuffle
+     - Int
+     - Sets how often to shuffle the training data. (Default 1)
+     - No
+   * - logs_per_epoch
+     - Int
+     - Sets how often to report progress during an epoch. (Default 10)
+     - No
+   * - save_model
+     - Bool
+     - If true, the model will be saved at the end of training. (Default True)
+     - No
+   * - resume_training
+     - Bool
+     - If true, the training procedure will resume from the previous state and will train `num_epochs` further epochs.  (Default False)
+     - No
+
+*YAML Sample*
+
+Evaluation Configuration
+-------------------------
+
+.. list-table:: EvaluationConfig
+   :widths: 15 10 50 15
+   :header-rows: 1
+
+   * - Key
+     - Type
+     - Description
+     - Required
+   * - batch_size
+     - Int
+     - Amount of evaluation examples per batch. (Default 1000)
+     - No
+   * - negative_sampling
+     - NegativeSamplingConfig
+     - Negative sampling configuration for link prediction.
+     - Link Prediction
+   * - pipeline
+     - PipelineConfig
+     - Advanced configuration of the evaluation pipeline. Defaults to synchronous evaluation.
+     - No
+   * - epochs_per_eval
+     - Int
+     - Sets how often to evaluate the model. (Default 1)
+     - No
+
+*YAML Sample*

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paleobiology Dataset Link Prediction &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Custom Dataset Link Prediction" href="lp_custom.html" />
+    <link rel="prev" title="Large Scale Link Prediction (OGB-WikiKG90Mv2)" href="lp_ogb_wikikg90mv2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_api/index.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Configuration Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="lp_fb15k237.html">Small Scale Link Prediction (FB15K-237)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lp_ogb_wikikg90mv2.html">Large Scale Link Prediction (OGB-WikiKG90Mv2)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Paleobiology Dataset Link Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dataset-information">Dataset Information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-the-dataset">1. Download the Dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-model-with-marius">2. Train Model with Marius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inference-with-python-using-embeddings-for-link-prediction">3. Inference with Python: Using Embeddings for Link Prediction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="lp_custom.html">Custom Dataset Link Prediction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nc_ogbn_arxiv.html">Small Scale Node Classification (OGBN-Arxiv)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nc_ogbn_papers100m.html">Large Scale Node Classification (OGBN-Papers100M)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nc_custom.html">Large Scale Node Classification (OGBN-Papers100M)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../python/index.html">Python Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide/index.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+          <li><a href="index.html">Configuration Examples</a> &raquo;</li>
+      <li>Paleobiology Dataset Link Prediction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/config/lp_paleobiology.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="paleobiology-dataset-link-prediction">
+<span id="lp-paleo"></span><h1>Paleobiology Dataset Link Prediction<a class="headerlink" href="#paleobiology-dataset-link-prediction" title="Permalink to this headline"></a></h1>
+<p>In this tutorial, we will use Marius to perform link prediction on a paleobiology knowledge graph dataset, i.e. predicting the existence of an edge between two nodes in a graph. This will cover the end-to-end process of downloading a dataset, running Marius to learn the embeddings of all the nodes and edges in the graph, and then using these embeddings to infer new links and make discoveries.</p>
+<section id="dataset-information">
+<h2>Dataset Information<a class="headerlink" href="#dataset-information" title="Permalink to this headline"></a></h2>
+<p>In our example we will train on a graph-structured paleobiology dataset which contains information about fossils and their relations to Earth. In this knowledge graph dataset, nodes represent different types of entities and directed edges are relationships between them. This dataset contains 14,752 nodes and 107,247 edges, with 5 possible relation types.</p>
+<p>The <strong>nodes/entities</strong> in this graph fall into 10 different types. They are:</p>
+<ol class="arabic simple">
+<li><p>Country</p></li>
+<li><p>State</p></li>
+<li><p>County</p></li>
+<li><p>Lithology</p></li>
+<li><p>Formation</p></li>
+<li><p>Geological Group</p></li>
+<li><p>Member</p></li>
+<li><p>Taxon</p></li>
+<li><p>Environment</p></li>
+<li><p>Geological Interval</p></li>
+</ol>
+<p>The directed edges/relations in this graph fall into 5 categories:</p>
+<ol class="arabic simple">
+<li><p>Consist of</p></li>
+<li><p>Collected from</p></li>
+<li><p>Located in</p></li>
+<li><p>Assigned to</p></li>
+<li><p>Interpretted as</p></li>
+</ol>
+<p>Every triplet in this knowledge graph dataset follows the structure of</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;[Source</span> <span class="pre">Node],</span> <span class="pre">[Relation],</span> <span class="pre">[Target</span> <span class="pre">Node]&gt;</span></code></p>
+<p>For example, the triplet</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;47880_taxon,</span> <span class="pre">collected_from,</span> <span class="pre">Wisconsin_state&gt;</span></code></p>
+<p>signifies a directed edge of type <code class="docutils literal notranslate"><span class="pre">collected</span> <span class="pre">from</span></code> pointing from the taxon (i.e. biological group) node with an ID number of 47880 to the state node <code class="docutils literal notranslate"><span class="pre">wisconsin_state</span></code>. With our dataset comes a taxon ID lookup table, from which we can see that the ID of 47880 represents Mammuthus, or mammoths. Semantically, this triplet means that mammoth fossils have been collected from Wisconsin.</p>
+<p>The goal of generating embeddings for the edges in this graph will be to use them to predict gaps in our knowledge base. After training our embeddings, we can fix a target node and relation type and predict potential source nodes. For example, we can fix our taxon type and relation type and make a query for potential source nodes, i.e. possible locations mammoths could be collected from which were not present in our knowledge base.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;47880_taxon,</span> <span class="pre">collected_from,</span> <span class="pre">?&gt;</span></code></p>
+<p>Using our embeddings, we can find the source node(s) with the highest probability of existing. If the probability is higher than some threshold, we can say that these predicted links should be considered true.</p>
+</section>
+<section id="download-the-dataset">
+<h2>1. Download the Dataset<a class="headerlink" href="#download-the-dataset" title="Permalink to this headline"></a></h2>
+<p>To download the dataset and helper files, clone the following repository into the directory of your choosing::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">team</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">examples</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>Enter the link prediction example directory::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">marius</span><span class="o">-</span><span class="n">examples</span><span class="o">/</span><span class="n">link</span><span class="o">-</span><span class="n">predict</span><span class="o">-</span><span class="n">example</span>
+</pre></div>
+</div>
+<p>This contains our paleobiology dataset, located in <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>, along with a sample configuration file <code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code> and link prediction Python script predict.py.</p>
+</section>
+<section id="train-model-with-marius">
+<h2>2. Train Model with Marius<a class="headerlink" href="#train-model-with-marius" title="Permalink to this headline"></a></h2>
+<p>We assume Marius has been downloaded and installed with PIP::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">team</span><span class="o">/</span><span class="n">marius</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">marius</span><span class="p">;</span> <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p><strong>Step 1: Define a Configuration File</strong></p>
+<p>Before we can run Marius we need to specify our model hyperparameters and path to our preprocessed graph dataset. The following configuration file, <code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code>, is included in <code class="docutils literal notranslate"><span class="pre">marius-examples/link-predict-example</span></code>. It contains standard options for link prediction. Note a few important parameters that might need to be changed based on your system:</p>
+<p><code class="docutils literal notranslate"><span class="pre">storage.device_type</span></code> : We assume training on GPU. If using CPU only, switch from <code class="docutils literal notranslate"><span class="pre">cuda</span></code> to <code class="docutils literal notranslate"><span class="pre">CPU</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">training.num_epochs</span></code>: The number of epochs to train for. Adjust higher or lower based on the desired accuracy of the embeddings. Our default is <code class="docutils literal notranslate"><span class="pre">100</span></code> epochs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">storage.dataset.base_directory</span></code>: We assume we are in the link prediction example directory <code class="docutils literal notranslate"><span class="pre">~/marius-examples/link-predict-example/</span></code> when running the training process, so our default relative path is <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>. Change if running from another directory.</p>
+<p><code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="p">:</span>
+    <span class="n">learning_task</span><span class="p">:</span> <span class="n">LINK_PREDICTION</span>
+    <span class="n">encoder</span><span class="p">:</span>
+        <span class="n">layers</span><span class="p">:</span>
+        <span class="o">-</span> <span class="o">-</span> <span class="nb">type</span><span class="p">:</span> <span class="n">EMBEDDING</span>
+            <span class="n">output_dim</span><span class="p">:</span> <span class="mi">50</span>
+    <span class="n">decoder</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">:</span> <span class="n">COMPLEX</span>
+    <span class="n">loss</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">:</span> <span class="n">SOFTMAX</span>
+    <span class="n">sparse_optimizer</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">:</span> <span class="n">ADAGRAD</span>
+        <span class="n">options</span><span class="p">:</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="mf">0.1</span>
+<span class="n">storage</span><span class="p">:</span>
+    <span class="n">device_type</span><span class="p">:</span> <span class="n">cuda</span>
+    <span class="n">dataset</span><span class="p">:</span>
+        <span class="n">base_directory</span><span class="p">:</span> <span class="n">dataset</span><span class="o">/</span>
+        <span class="n">num_edges</span><span class="p">:</span> <span class="mi">96522</span>
+        <span class="n">num_train</span><span class="p">:</span> <span class="mi">96522</span>
+        <span class="n">num_nodes</span><span class="p">:</span> <span class="mi">14752</span>
+        <span class="n">num_relations</span><span class="p">:</span> <span class="mi">5</span>
+        <span class="n">num_valid</span><span class="p">:</span> <span class="mi">5362</span>
+        <span class="n">num_test</span><span class="p">:</span> <span class="mi">5363</span>
+    <span class="n">edges</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">:</span> <span class="n">DEVICE_MEMORY</span>
+    <span class="n">embeddings</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">:</span> <span class="n">DEVICE_MEMORY</span>
+    <span class="n">save_model</span><span class="p">:</span> <span class="n">true</span>
+<span class="n">training</span><span class="p">:</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="mi">1000</span>
+    <span class="n">negative_sampling</span><span class="p">:</span>
+        <span class="n">num_chunks</span><span class="p">:</span> <span class="mi">100</span>
+        <span class="n">negatives_per_positive</span><span class="p">:</span> <span class="mi">512</span>
+        <span class="n">degree_fraction</span><span class="p">:</span> <span class="mf">0.0</span>
+        <span class="n">filtered</span><span class="p">:</span> <span class="n">false</span>
+    <span class="n">num_epochs</span><span class="p">:</span> <span class="mi">100</span>
+    <span class="n">pipeline</span><span class="p">:</span>
+        <span class="n">sync</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">epochs_per_shuffle</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">evaluation</span><span class="p">:</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="mi">1000</span>
+    <span class="n">negative_sampling</span><span class="p">:</span>
+        <span class="n">filtered</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">pipeline</span><span class="p">:</span>
+        <span class="n">sync</span><span class="p">:</span> <span class="n">true</span>
+</pre></div>
+</div>
+<p><strong>Step 2: Run Marius</strong></p>
+<p>Now that we have a configuration file and dataset ready, we simply need to run the training executable with our config file as the argument.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">marius_train</span> <span class="n">paleo_config</span><span class="o">.</span><span class="n">ini</span>
+</pre></div>
+</div>
+<p>The output should appear similar to::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">info</span><span class="p">]</span> <span class="p">[</span><span class="n">marius</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">45</span><span class="p">]</span> <span class="n">Start</span> <span class="n">initialization</span>
+<span class="n">Initialization</span> <span class="n">Complete</span><span class="p">:</span> <span class="mf">4.424</span><span class="n">s</span>
+<span class="c1">################ Starting training epoch 1 ################</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">10000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">10.36</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">20000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">20.72</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">30000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">31.08</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">40000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">41.44</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">50000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">51.80</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">60000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">62.16</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">70000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">72.52</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">80000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">82.88</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">90000</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">93.24</span><span class="o">%</span>
+<span class="n">Edges</span> <span class="n">processed</span><span class="p">:</span> <span class="p">[</span><span class="mi">96522</span><span class="o">/</span><span class="mi">96522</span><span class="p">],</span> <span class="mf">100.00</span><span class="o">%</span>
+<span class="c1">################ Finished training epoch 1 ################</span>
+<span class="n">Epoch</span> <span class="n">Runtime</span><span class="p">:</span> <span class="mi">527</span><span class="n">ms</span>
+<span class="n">Edges</span> <span class="n">per</span> <span class="n">Second</span><span class="p">:</span> <span class="mf">183153.7</span>
+<span class="n">Evaluating</span> <span class="n">validation</span> <span class="nb">set</span>
+<span class="o">=================================</span>
+<span class="n">Link</span> <span class="n">Prediction</span><span class="p">:</span> <span class="mi">10724</span> <span class="n">edges</span> <span class="n">evaluated</span>
+<span class="n">Mean</span> <span class="n">Rank</span><span class="p">:</span> <span class="mf">1426.696568</span>
+<span class="n">MRR</span><span class="p">:</span> <span class="mf">0.115575</span>
+<span class="n">Hits</span><span class="o">@</span><span class="mi">1</span><span class="p">:</span> <span class="mf">0.058653</span>
+<span class="n">Hits</span><span class="o">@</span><span class="mi">3</span><span class="p">:</span> <span class="mf">0.128683</span>
+<span class="n">Hits</span><span class="o">@</span><span class="mi">5</span><span class="p">:</span> <span class="mf">0.169153</span>
+<span class="n">Hits</span><span class="o">@</span><span class="mi">10</span><span class="p">:</span> <span class="mf">0.229952</span>
+<span class="n">Hits</span><span class="o">@</span><span class="mi">50</span><span class="p">:</span> <span class="mf">0.392111</span>
+<span class="n">Hits</span><span class="o">@</span><span class="mi">100</span><span class="p">:</span> <span class="mf">0.459437</span>
+<span class="o">=================================</span>
+</pre></div>
+</div>
+<p>After this has finished, our trained embeddings will be located in our output directory <code class="docutils literal notranslate"><span class="pre">[base_directory]/nodes/</span></code>.</p>
+</section>
+<section id="inference-with-python-using-embeddings-for-link-prediction">
+<h2>3. Inference with Python: Using Embeddings for Link Prediction<a class="headerlink" href="#inference-with-python-using-embeddings-for-link-prediction" title="Permalink to this headline"></a></h2>
+<p>Now that we have generated our embeddings for the dataset, we can perform link prediction to infer new edges in the graph. As previously mentioned, we can fix a target node and relation type and predict potential source nodes.</p>
+<p>Let’s use our prediction tool that uses the embeddings to predict the top K most likely destination nodes for a given source and relation. For this example, we will set the source node to <code class="docutils literal notranslate"><span class="pre">29741_taxon</span></code> and the relation to <code class="docutils literal notranslate"><span class="pre">collected_from</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;29741_taxon,</span> <span class="pre">collected_from,</span> <span class="pre">?&gt;</span></code></p>
+<p>Semantically, we are predicting where Taxon #29741, which represents the fossil Whitfieldella (a type of extint mollusk) could be collected from. If our embeddings are accurate, we should not only find existing edges in our output but also new ones, leading to the discovery of possible new places to search for these fossils.</p>
+<p>[TODO: CHANGE FROM PREDICT.PY TO  <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code>]</p>
+<p>Our output should appear similar to the following::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;Iowa_state&#39;</span><span class="p">,</span>
+<span class="s1">&#39;limestone_lithology&#39;</span><span class="p">,</span>
+<span class="s1">&#39;United States_country&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Hopkinton Dolomite_formation&#39;</span><span class="p">,</span>
+<span class="s1">&#39;dolomite_lithology&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Yushan_county&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Jiangxi_state&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Dubuque_county&#39;</span><span class="p">,</span>
+<span class="s1">&#39;China_country&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Shiyang_formation&#39;</span><span class="p">,</span>
+<span class="s1">&#39;JiangShan_county&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Cordell_formation&#39;</span><span class="p">,</span>
+<span class="s1">&#39;shale_lithology&#39;</span><span class="p">,</span>
+<span class="s1">&#39;mudstone_lithology&#39;</span><span class="p">,</span>
+<span class="s1">&#39;South Carolina_state&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We’ve successfully predicted destination nodes! Most of these edges already exist in the graph, proving the accuracy of our embeddings. However, new edges also appear, such as the edge to <code class="docutils literal notranslate"><span class="pre">Cordell_formation</span></code>. Outside experts have confirmed that this prediction is accurate, i.e. Whitfieldella can be found at the Cordell Formation, a geologic formation in Michigan. This example shows how using the embeddings generated by Marius, we can perform link prediction on a graph and make new discoveries.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lp_ogb_wikikg90mv2.html" class="btn btn-neutral float-left" title="Large Scale Link Prediction (OGB-WikiKG90Mv2)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lp_custom.html" class="btn btn-neutral float-right" title="Custom Dataset Link Prediction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
