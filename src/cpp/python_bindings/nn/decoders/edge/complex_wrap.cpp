@@ -12,6 +12,6 @@ void init_complex(py::module &m) {
             torch::TensorOptions options;
             options = options.device(torch::python::detail::py_object_to_device(py_device)).dtype(torch::python::detail::py_object_to_dtype(py_dtype));
             return std::make_shared<ComplEx>(num_relations, embedding_dim, options, use_inverse_relations, getEdgeDecoderMethod(decoder_method));
-        }), py::arg("num_relations"), py::arg("embedding_dim"), py::arg("use_inverse_relations") = true, py::arg("device") = py::none(), py::arg("dtype") = py::none(), py::arg("decoder_method") = "corrupt_node")
+        }), py::arg("num_relations"), py::arg("embedding_dim"), py::arg("use_inverse_relations") = true, py::arg("device") = py::none(), py::arg("dtype") = py::none(), py::arg("mode") = "train")
         .def("reset", &ComplEx::reset);
 }

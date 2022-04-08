@@ -4,7 +4,7 @@ import torch
 from marius.config import EncoderConfig, LayerConfig, LossOptions, LossReduction, LayerType, ActivationFunction, InitConfig, InitDistribution, LearningTask
 from marius.data import MariusGraph, DENSEGraph, Batch
 from marius.data.samplers import LayeredNeighborSampler
-from marius.nn import Model, SoftMax, SGDOptimizer, CrossEntropyLoss
+from marius.nn import Model, SoftmaxCrossEntropy, SGDOptimizer, CrossEntropyLoss
 from marius.nn.encoders import GeneralEncoder
 from marius.nn.layers import EmbeddingLayer, GraphSageLayer
 from marius.nn.decoders.edge import DistMult
@@ -54,9 +54,9 @@ def get_test_model_lp():
                        use_inverse_relations=False,
                        device=device,
                        dtype=dtype,
-                       decoder_method="only_pos")
+                       decoder_method="infer")
 
-    loss = SoftMax(reduction="sum")
+    loss = SoftmaxCrossEntropy(reduction="sum")
 
     reporter = LinkPredictionReporter()
 
@@ -76,9 +76,9 @@ def get_test_model_lp_neg():
                        use_inverse_relations=False,
                        device=device,
                        dtype=dtype,
-                       decoder_method="corrupt_node")
+                       mode="train")
 
-    loss = SoftMax(reduction="sum")
+    loss = SoftmaxCrossEntropy(reduction="sum")
 
     reporter = LinkPredictionReporter()
 
@@ -111,7 +111,7 @@ class CustomModelBasic(Model):
 
         loss_options = LossOptions()
         loss_options.loss_reduction = LossReduction.SUM
-        loss = SoftMax(reduction="sum")
+        loss = SoftmaxCrossEntropy(reduction="sum")
 
         super().__init__(encoder, decoder, loss, reporter)
 
@@ -124,7 +124,7 @@ class CustomModelOverrideForward(Model):
         else:
             reporter = NodeClassificationReporter()
 
-        loss = SoftMax(reduction="sum")
+        loss = SoftmaxCrossEntropy(reduction="sum")
 
         super().__init__(encoder, decoder, loss, reporter)
 

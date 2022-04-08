@@ -6,7 +6,7 @@ Loss Functions
     :undoc-members:
     :special-members: __init__
 
-.. autoclass:: marius.nn.SoftMax
+.. autoclass:: marius.nn.SoftmaxCrossEntropy
     :members:
     :undoc-members:
     :special-members: __init__

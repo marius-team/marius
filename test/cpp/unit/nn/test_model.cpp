@@ -50,7 +50,7 @@ TEST(TestModel, TestInitModelFromConfigLP) {
     decoder_options->edge_decoder_method = EdgeDecoderMethod::CORRUPT_NODE;
     decoder_config->options = decoder_options;
 
-    loss_config->type = LossFunctionType::SOFTMAX;
+    loss_config->type = LossFunctionType::SOFTMAX_CE;
     auto loss_options = std::make_shared<LossOptions>();
     loss_options->loss_reduction = LossReduction::SUM;
     loss_config->options = loss_options;
@@ -107,7 +107,7 @@ TEST(TestModel, TestInitModelFromConfigLP) {
     ASSERT_TRUE(is_not_instance);
 
     // test loss
-    is_instance = instance_of<LossFunction, SoftMax>(model->loss_function_);
+    is_instance = instance_of<LossFunction, SoftmaxCrossEntropy>(model->loss_function_);
     is_not_instance = !instance_of<LossFunction, SoftPlusLoss>(model->loss_function_);
 
     ASSERT_TRUE(is_instance);
@@ -154,7 +154,7 @@ TEST(TestModel, TestInitModelFromConfigNC) {
 
     decoder_config->type = DecoderType::NODE;
 
-    loss_config->type = LossFunctionType::SOFTMAX;
+    loss_config->type = LossFunctionType::SOFTMAX_CE;
     auto loss_options = std::make_shared<LossOptions>();
     loss_options->loss_reduction = LossReduction::SUM;
     loss_config->options = loss_options;
@@ -205,7 +205,7 @@ TEST(TestModel, TestInitModelFromConfigNC) {
     ASSERT_TRUE(is_not_instance);
 
     // test loss
-    is_instance = instance_of<LossFunction, SoftMax>(model->loss_function_);
+    is_instance = instance_of<LossFunction, SoftmaxCrossEntropy>(model->loss_function_);
     is_not_instance = !instance_of<LossFunction, SoftPlusLoss>(model->loss_function_);
 
     ASSERT_TRUE(is_instance);

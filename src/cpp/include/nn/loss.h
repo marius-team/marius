@@ -30,11 +30,11 @@ class LossFunction {
     virtual torch::Tensor operator()(torch::Tensor y_pred, torch::Tensor targets, bool scores) = 0;
 };
 
-class SoftMax : public LossFunction {
+class SoftmaxCrossEntropy : public LossFunction {
   private:
     LossReduction reduction_type_;
   public:
-    SoftMax(shared_ptr<LossOptions> options) {
+    SoftmaxCrossEntropy(shared_ptr<LossOptions> options) {
         reduction_type_ = options->loss_reduction;
     };
 

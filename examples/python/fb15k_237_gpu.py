@@ -21,9 +21,9 @@ def init_model(embedding_dim, num_nodes, num_relations, device, dtype):
                                           use_inverse_relations=True,
                                           device=device,
                                           dtype=dtype,
-                                          decoder_method="corrupt_node")
+                                          mode="train")
 
-    loss = m.nn.SoftMax(reduction="sum")
+    loss = m.nn.SoftmaxCrossEntropy(reduction="sum")
 
     # metrics to compute during evaluation
     reporter = m.report.LinkPredictionReporter()

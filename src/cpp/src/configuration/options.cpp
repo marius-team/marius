@@ -44,8 +44,8 @@ LossFunctionType getLossFunctionType(std::string string_val) {
 
     for (auto & c: string_val) c = toupper(c);
 
-    if (string_val == "SOFTMAX") {
-        return LossFunctionType::SOFTMAX;
+    if (string_val == "SOFTMAX_CE") {
+        return LossFunctionType::SOFTMAX_CE;
     } else if (string_val == "RANKING") {
         return LossFunctionType::RANKING;
     } else if (string_val == "CROSS_ENTROPY") {
@@ -221,6 +221,10 @@ EdgeDecoderMethod getEdgeDecoderMethod(std::string string_val) {
         return EdgeDecoderMethod::CORRUPT_NODE;
     } else if (string_val == "CORRUPT_REL") {
         return EdgeDecoderMethod::CORRUPT_REL;
+    } else if (string_val == "TRAIN") {
+        return EdgeDecoderMethod::CORRUPT_NODE;
+    } else if (string_val == "INFER") {
+        return EdgeDecoderMethod::ONLY_POS;
     } else {
         throw std::runtime_error("Unrecognized edge decoder type string");
     }

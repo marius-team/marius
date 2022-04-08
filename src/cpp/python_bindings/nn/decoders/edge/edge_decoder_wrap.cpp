@@ -14,7 +14,7 @@ void init_edge_decoder(py::module &m) {
             .def_readwrite("inverse_relations", &EdgeDecoder::inverse_relations_)
             .def_readwrite("num_relations", &EdgeDecoder::num_relations_)
             .def_readwrite("embedding_size", &EdgeDecoder::embedding_size_)
-            .def_readwrite("decoder_method", &EdgeDecoder::decoder_method_)
+            .def_readwrite("mode", &EdgeDecoder::decoder_method_)
             .def_readwrite("tensor_options", &EdgeDecoder::tensor_options_)
             .def_readwrite("use_inverse_relations", &EdgeDecoder::use_inverse_relations_)
             .def("apply_relation", &EdgeDecoder::apply_relation, py::arg("nodes"), py::arg("relations"))

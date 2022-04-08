@@ -29,7 +29,7 @@ void init_options(py::module &m) {
     m.def("getInitDistribution", &getInitDistribution, py::arg("string_val"));
 
     py::enum_<LossFunctionType>(m, "LossFunctionType")
-        .value("SOFTMAX", LossFunctionType::SOFTMAX)
+        .value("SOFTMAX_CE", LossFunctionType::SOFTMAX_CE)
         .value("RANKING", LossFunctionType::RANKING)
         .value("BCE_AFTER_SIGMOID", LossFunctionType::BCE_AFTER_SIGMOID)
         .value("BCE_WITH_LOGITS", LossFunctionType::BCE_WITH_LOGITS)
@@ -222,7 +222,7 @@ void init_options(py::module &m) {
     py::class_<EdgeDecoderOptions, DecoderOptions, std::shared_ptr<EdgeDecoderOptions>>(m, "EdgeDecoderOptions")
         .def(py::init<>())
         .def_readwrite("inverse_edges", &EdgeDecoderOptions::inverse_edges)
-        .def_readwrite("decoder_method", &EdgeDecoderOptions::edge_decoder_method)
+        .def_readwrite("mode", &EdgeDecoderOptions::edge_decoder_method)
         .def_readwrite("input_dim", &EdgeDecoderOptions::input_dim);
 
     py::class_<StorageOptions, std::shared_ptr<StorageOptions>>(m, "StorageOptions")

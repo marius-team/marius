@@ -43,7 +43,7 @@ in the encoder phase which is directly fed to the `DISTMULT` decoder. Both embed
      decoder:
        type: DISTMULT
      loss:
-       type: SOFTMAX
+       type: SOFTMAX_CE
        options:
          reduction: SUM
      dense_optimizer:
@@ -166,7 +166,7 @@ of an embedding layer in the encoder phase and a `DISTMULT` decoder.
          options:
            learning_rate: 0.1
      loss:
-       type: SOFTMAX
+       type: SOFTMAX_CE
        options:
          reduction: SUM
      dense_optimizer:
@@ -710,7 +710,7 @@ Decoder Options
      - No
    * - edge_decoder_method
      - String
-     - Specifies how to apply the decoder to a given set of edges, and negatives. Options are ["ONLY_POS", "CORRUPT_NODE"]. (Default "CORRUPT_NODE")
+     - Specifies how to apply the decoder to a given set of edges, and negatives. Options are ["infer", "train"]. (Default "train")
      - No
 
 .. code-block:: yaml
@@ -737,19 +737,19 @@ Loss Configuration
      - Required
    * - type
      - String
-     - Denotes the type of the loss function. Options: ["SOFTMAX", "RANKING", "CROSS_ENTROPY", "BCE_AFTER_SIGMOID", "BCE_WITH_LOGITS", "MSE", "SOFTPLUS"].
+     - Denotes the type of the loss function. Options: ["SOFTMAX_CE", "RANKING", "CROSS_ENTROPY", "BCE_AFTER_SIGMOID", "BCE_WITH_LOGITS", "MSE", "SOFTPLUS"].
      - Yes
    * - options
      - LossOptions
      - Loss function specific options depending on the type.
      - No
 
-Below is the configuration for a `SOFTMAX` loss function with `SUM` as the reduction method. 
+Below is the configuration for a `SOFTMAX_CE` loss function with `SUM` as the reduction method.
 
 .. code-block:: yaml
 
    loss:
-     type: SOFTMAX
+     type: SOFTMAX_CE
      options:
        reduction: SUM
 
@@ -769,12 +769,12 @@ Below is the configuration for a `SOFTMAX` loss function with `SUM` as the reduc
      - The reduction to use for the loss. Options are ["SUM", "MEAN"]. (Default "SUM")
      - No
 
-Below is the configuration for a `SOFTMAX` loss function with `MEAN` as the reduction method. 
+Below is the configuration for a `SOFTMAX_CE` loss function with `MEAN` as the reduction method.
 
 .. code-block:: yaml
 
    loss:
-     type: SOFTMAX
+     type: SOFTMAX_CE
      options:
        reduction: MEAN
 

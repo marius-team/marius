@@ -29,10 +29,10 @@ First check that the required software is installed (see above).
 The Python API can be accessed with ``import marius``.
 
 The following commands will be installed:
-- marius_train
-- marius_eval
-- marius_preprocess
-- marius_predict
+- marius_train: Train models using configuration files and the command line
+- marius_eval: Command line model evaluation
+- marius_preprocess: Built-in dataset downloading and preprocessing
+- marius_predict: Batch inference tool for link prediction or node classification
 
 
 CMake build (No Python API)
@@ -44,7 +44,7 @@ This does not build the Python API, but only the C++ sources and marius_train ex
 
         git clone https://github.com/marius-team/marius.git
 
-        # installs only marius.tools
+        # installs only marius.tools (required)
         MARIUS_NO_BINDINGS=1 pip3 install .
 
         mkdir build

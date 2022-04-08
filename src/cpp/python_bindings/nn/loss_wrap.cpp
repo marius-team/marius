@@ -17,11 +17,11 @@ void init_loss(py::module &m) {
         .def(py::init<>())
         .def("__call__", &LossFunction::operator(), py::arg("y_pred"), py::arg("targets"), py::arg("scores"));
 
-    py::class_<SoftMax, LossFunction, shared_ptr<SoftMax>>(m, "SoftMax")
+    py::class_<SoftmaxCrossEntropy, LossFunction, shared_ptr<SoftmaxCrossEntropy>>(m, "SoftmaxCrossEntropy")
         .def(py::init([] (string reduction) {
             auto options = std::make_shared<LossOptions>();
             options->loss_reduction = getLossReduction(reduction);
-            return std::make_shared<SoftMax>(options);
+            return std::make_shared<SoftmaxCrossEntropy>(options);
         }), py::arg("reduction") = "sum");
 
     py::class_<RankingLoss, LossFunction, shared_ptr<RankingLoss>>(m, "RankingLoss")

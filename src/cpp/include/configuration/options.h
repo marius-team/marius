@@ -30,7 +30,7 @@ enum class InitDistribution {
 InitDistribution getInitDistribution(std::string string_val);
 
 enum class LossFunctionType {
-    SOFTMAX,
+    SOFTMAX_CE,
     RANKING,
     CROSS_ENTROPY,
     BCE_AFTER_SIGMOID,

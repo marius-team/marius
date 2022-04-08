@@ -54,7 +54,7 @@ TEST(TestLoss, TestShapeMismatch) {
     EXPECT_NO_THROW(check_score_shapes(test_pos4, test_neg4));
 }
 
-TEST(TestLoss, TestSoftMax) {
+TEST(TestLoss, TestSoftmaxCrossEntropy) {
 
     auto loss_options_mean = std::make_shared<LossOptions>();
     loss_options_mean->loss_reduction = LossReduction::MEAN;
@@ -62,8 +62,8 @@ TEST(TestLoss, TestSoftMax) {
     auto loss_options_sum = std::make_shared<LossOptions>();
     loss_options_sum->loss_reduction = LossReduction::SUM;
 
-    auto *loss_fn_mean = new SoftMax(loss_options_mean);
-    auto *loss_fn_sum = new SoftMax(loss_options_sum);
+    auto *loss_fn_mean = new SoftmaxCrossEntropy(loss_options_mean);
+    auto *loss_fn_sum = new SoftmaxCrossEntropy(loss_options_sum);
 
     // test mean reduction
     ASSERT_NO_THROW(loss_fn_mean->operator()(test_pos1, test_neg1, true));
@@ -347,10 +347,10 @@ TEST(TestLoss, TestGetLossFunction) {
 
     // test softmax
     loss_config = std::make_shared<LossConfig>();
-    loss_config->type = LossFunctionType::SOFTMAX;
+    loss_config->type = LossFunctionType::SOFTMAX_CE;
     loss_config->options = loss_options_mean;
 
-    auto softmax_loss = new SoftMax(loss_options_mean);
+    auto softmax_loss = new SoftmaxCrossEntropy(loss_options_mean);
     auto ret_loss = getLossFunction(loss_config);
     ASSERT_EQ(softmax_loss->operator()(test_pos4, test_neg4, true).item<float>(), ret_loss->operator()(test_pos4, test_neg4, true).item<float>());
 

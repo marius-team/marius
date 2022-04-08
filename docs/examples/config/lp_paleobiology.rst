@@ -87,7 +87,7 @@ Before we can run Marius we need to specify our model hyperparameters and path t
             decoder:
                 type: COMPLEX
             loss:
-                type: SOFTMAX
+                type: SOFTMAX_CE
             sparse_optimizer:
                 type: ADAGRAD
                 options:

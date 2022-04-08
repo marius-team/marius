@@ -47,10 +47,10 @@ std::tuple<torch::Tensor, torch::Tensor> scores_to_labels(torch::Tensor pos_scor
     return std::forward_as_tuple(y_pred, labels);
 }
 
-torch::Tensor SoftMax::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
+torch::Tensor SoftmaxCrossEntropy::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
 
     if (!scores) {
-        throw MariusRuntimeException("Input to softmax loss function must be scores. Softmax is currently unsupported for classification.");
+        throw MariusRuntimeException("Input to SoftmaxCrossEntropy loss function must be scores. SoftmaxCrossEntropy is currently unsupported for classification.");
     }
 
     check_score_shapes(y_pred, labels);
@@ -185,8 +185,8 @@ std::shared_ptr<LossFunction> getLossFunction(shared_ptr<LossConfig> config) {
         throw UnexpectedNullPtrException();
     }
 
-    if (config->type == LossFunctionType::SOFTMAX) {
-        return std::make_shared<SoftMax>(config->options);
+    if (config->type == LossFunctionType::SOFTMAX_CE) {
+        return std::make_shared<SoftmaxCrossEntropy>(config->options);
     } else if (config->type == LossFunctionType::RANKING) {
         return  std::make_shared<RankingLoss>(std::dynamic_pointer_cast<RankingLossOptions>(config->options));
     } else if (config->type == LossFunctionType::CROSS_ENTROPY) {

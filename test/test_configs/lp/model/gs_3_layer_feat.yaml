@@ -60,7 +60,7 @@ encoder:
 decoder:
   type: DISTMULT
 loss:
-  type: SOFTMAX
+  type: SOFTMAX_CE
   options:
     reduction: SUM
 dense_optimizer:

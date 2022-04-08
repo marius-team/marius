@@ -119,7 +119,7 @@ class InitConfig:
 
 @dataclass
 class LossConfig:
-    type: str = "SOFTMAX"
+    type: str = "SOFTMAX_CE"
     options: LossOptions = LossOptions()
 
     def merge(self, input_config: DictConfig):

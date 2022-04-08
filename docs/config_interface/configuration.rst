@@ -84,7 +84,7 @@ This example assumes that marius has been installed with :doc:`pip <../build>` t
 |     decoder:                              |                                               |
 |       type: DISTMULT                      |                                               |
 |     loss:                                 |                                               |
-|       type: SOFTMAX                       |                                               |
+|       type: SOFTMAX_CE                       |                                               |
 |       options:                            |                                               |
 |         reduction: SUM                    |                                               |
 |     dense_optimizer:                      |                                               |
@@ -101,7 +101,7 @@ This example assumes that marius has been installed with :doc:`pip <../build>` t
 The above model configuration has 5 stages in the encoder section, each stage separated by a `--`. The first stage has 2 layers, one embedding layer with output 
 dimension 50 and another feature layer with output dimension of 50. The reduction layer in stage 2 takes input the combined vector of dimension 
 100 and outputs a 50 dimensional vector. It is followed by 3 stages of GNN layers. The output from the encoder is fed to the decoder of type DISMULT. 
-The loss function being used is Softmax with sum as the reduction method. The dense optimizer is for all model parameters except the node embeddings. 
+The loss function being used is SoftmaxCrossEntropy with sum as the reduction method. The dense optimizer is for all model parameters except the node embeddings.
 Node embedings are optimized by the sparse optimizer. 
 
 2. Set storage and dataset:
