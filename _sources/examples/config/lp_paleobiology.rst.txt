@@ -47,11 +47,11 @@ Using our embeddings, we can find the source node(s) with the highest probabilit
 
 1. Download the Dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To download the dataset and helper files, clone the following repository into the directory of your choosing:::
+To download the dataset and helper files, clone the following repository into the directory of your choosing::
 
     git clone https://github.com/marius-team/marius-examples.git
 
-Enter the link prediction example directory:::
+Enter the link prediction example directory::
 
     cd marius-examples/link-predict-example
 
@@ -59,7 +59,7 @@ This contains our paleobiology dataset, located in ``dataset/``, along with a sa
 
 2. Train Model with Marius
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-We assume Marius has been downloaded and installed with PIP:::
+We assume Marius has been downloaded and installed with PIP::
 
     git clone https://github.com/marius-team/marius.git
     cd marius; python3 -m pip install .
@@ -75,7 +75,7 @@ Before we can run Marius we need to specify our model hyperparameters and path t
 ``storage.dataset.base_directory``: We assume we are in the link prediction example directory ``~/marius-examples/link-predict-example/`` when running the training process, so our default relative path is ``dataset/``. Change if running from another directory.
 
 ``paleo_config.yaml``
-::
+.. code-block:: yaml
     model:
         learning_task: LINK_PREDICTION
         encoder:
@@ -127,9 +127,9 @@ Before we can run Marius we need to specify our model hyperparameters and path t
 
 Now that we have a configuration file and dataset ready, we simply need to run the training executable with our config file as the argument.::
 
-    marius_train paleo_config.ini
+    marius_train paleo_config.yaml
 
-The output should appear similar to:::
+The output should appear similar to::
 
     [info] [marius.cpp:45] Start initialization
     Initialization Complete: 4.424s
@@ -160,7 +160,26 @@ The output should appear similar to:::
     Hits@100: 0.459437
     =================================
 
-After this has finished, our trained embeddings will be located in our output directory ``[base_directory]/nodes/``.
+After this has finished, our output will be in our ``[base_directory]`` (using the provided config, this will be ``dataset/``.
+
+Here are the files that were created in training:
+Let's check again what was added in the ``datasets/custom_lp_example/`` directory. For clarity, we only list the files that were created in training. Notice that several files have been created, including the trained model, the embedding table, a full configuration file, and output logs:
+
+.. code-block:: bash
+
+   $ ls datasets/custom_lp_example/ 
+   model.pt                           # contains the dense model parameters, embeddings of the edge-types
+   model_state.pt                     # optimizer state of the trained model parameters
+   full_config.yaml                   # detailed config generated based on user-defined config
+   metadata.csv                       # information about metadata
+   logs/                              # logs containing output, error, debug information, and etc.
+   nodes/  
+     embeddings.bin                   # trained node embeddings of the graph
+     embeddings_state.bin             # node embedding optimizer state
+     ...
+   edges/   
+     ...
+   ...
 
 3. Inference with Python: Using Embeddings for Link Prediction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -173,25 +192,31 @@ Let's use our prediction tool that uses the embeddings to predict the top K most
 
 Semantically, we are predicting where Taxon #29741, which represents the fossil Whitfieldella (a type of extint mollusk) could be collected from. If our embeddings are accurate, we should not only find existing edges in our output but also new ones, leading to the discovery of possible new places to search for these fossils.
 
-[TODO: CHANGE FROM PREDICT.PY TO  ``marius_predict``]
+.. change from here once marius_infer updated
+We will use the Marius inference tool ``marius_infer`` to do this. In ``~marius-examples/link-predict-example/``, run::
 
-Our output should appear similar to the following:::
+    marius_predict --config paleo_config.yaml --output_dir results/ --metrics mrr mean_rank hits1 hits10 hits50 --save_scores --save_ranks
 
-    ['Iowa_state',
-    'limestone_lithology',
-    'United States_country',
-    'Hopkinton Dolomite_formation',
-    'dolomite_lithology',
-    'Yushan_county',
-    'Jiangxi_state',
-    'Dubuque_county',
-    'China_country',
-    'Shiyang_formation',
-    'JiangShan_county',
-    'Cordell_formation',
-    'shale_lithology',
-    'mudstone_lithology',
-    'South Carolina_state']
+This tool takes our config, an output directory, and our desired metrics as input, and perform link prediction evaluation over the test set of edges provided in the config file. Metrics are saved to ``results/metrics.txt`` and scores and ranks for each test edge are saved to ``results/scores.csv``.
+.. [TODO: CHANGE FROM PREDICT.PY TO  ``marius_predict``]
 
-We've successfully predicted destination nodes! Most of these edges already exist in the graph, proving the accuracy of our embeddings. However, new edges also appear, such as the edge to ``Cordell_formation``. Outside experts have confirmed that this prediction is accurate, i.e. Whitfieldella can be found at the Cordell Formation, a geologic formation in Michigan. This example shows how using the embeddings generated by Marius, we can perform link prediction on a graph and make new discoveries. 
+.. Our output should appear similar to the following
+
+..     ['Iowa_state',
+..     'limestone_lithology',
+..     'United States_country',
+..     'Hopkinton Dolomite_formation',
+..     'dolomite_lithology',
+..     'Yushan_county',
+..     'Jiangxi_state',
+..     'Dubuque_county',
+..     'China_country',
+..     'Shiyang_formation',
+..     'JiangShan_county',
+..     'Cordell_formation',
+..     'shale_lithology',
+..     'mudstone_lithology',
+..     'South Carolina_state']
+
+.. We've successfully predicted destination nodes! Most of these edges already exist in the graph, proving the accuracy of our embeddings. However, new edges also appear, such as the edge to ``Cordell_formation``. Outside experts have confirmed that this prediction is accurate, i.e. Whitfieldella can be found at the Cordell Formation, a geologic formation in Michigan. This example shows how using the embeddings generated by Marius, we can perform link prediction on a graph and make new discoveries. 
 

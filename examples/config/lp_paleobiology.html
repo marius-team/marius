@@ -151,11 +151,11 @@
 </section>
 <section id="download-the-dataset">
 <h2>1. Download the Dataset<a class="headerlink" href="#download-the-dataset" title="Permalink to this headline"></a></h2>
-<p>To download the dataset and helper files, clone the following repository into the directory of your choosing::</p>
+<p>To download the dataset and helper files, clone the following repository into the directory of your choosing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">team</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">examples</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
-<p>Enter the link prediction example directory::</p>
+<p>Enter the link prediction example directory:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">marius</span><span class="o">-</span><span class="n">examples</span><span class="o">/</span><span class="n">link</span><span class="o">-</span><span class="n">predict</span><span class="o">-</span><span class="n">example</span>
 </pre></div>
 </div>
@@ -163,7 +163,7 @@
 </section>
 <section id="train-model-with-marius">
 <h2>2. Train Model with Marius<a class="headerlink" href="#train-model-with-marius" title="Permalink to this headline"></a></h2>
-<p>We assume Marius has been downloaded and installed with PIP::</p>
+<p>We assume Marius has been downloaded and installed with PIP:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">team</span><span class="o">/</span><span class="n">marius</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">marius</span><span class="p">;</span> <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
@@ -173,61 +173,82 @@
 <p><code class="docutils literal notranslate"><span class="pre">storage.device_type</span></code> : We assume training on GPU. If using CPU only, switch from <code class="docutils literal notranslate"><span class="pre">cuda</span></code> to <code class="docutils literal notranslate"><span class="pre">CPU</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">training.num_epochs</span></code>: The number of epochs to train for. Adjust higher or lower based on the desired accuracy of the embeddings. Our default is <code class="docutils literal notranslate"><span class="pre">100</span></code> epochs.</p>
 <p><code class="docutils literal notranslate"><span class="pre">storage.dataset.base_directory</span></code>: We assume we are in the link prediction example directory <code class="docutils literal notranslate"><span class="pre">~/marius-examples/link-predict-example/</span></code> when running the training process, so our default relative path is <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>. Change if running from another directory.</p>
-<p><code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="p">:</span>
-    <span class="n">learning_task</span><span class="p">:</span> <span class="n">LINK_PREDICTION</span>
-    <span class="n">encoder</span><span class="p">:</span>
-        <span class="n">layers</span><span class="p">:</span>
-        <span class="o">-</span> <span class="o">-</span> <span class="nb">type</span><span class="p">:</span> <span class="n">EMBEDDING</span>
-            <span class="n">output_dim</span><span class="p">:</span> <span class="mi">50</span>
-    <span class="n">decoder</span><span class="p">:</span>
-        <span class="nb">type</span><span class="p">:</span> <span class="n">COMPLEX</span>
-    <span class="n">loss</span><span class="p">:</span>
-        <span class="nb">type</span><span class="p">:</span> <span class="n">SOFTMAX</span>
-    <span class="n">sparse_optimizer</span><span class="p">:</span>
-        <span class="nb">type</span><span class="p">:</span> <span class="n">ADAGRAD</span>
-        <span class="n">options</span><span class="p">:</span>
-        <span class="n">learning_rate</span><span class="p">:</span> <span class="mf">0.1</span>
-<span class="n">storage</span><span class="p">:</span>
-    <span class="n">device_type</span><span class="p">:</span> <span class="n">cuda</span>
-    <span class="n">dataset</span><span class="p">:</span>
-        <span class="n">base_directory</span><span class="p">:</span> <span class="n">dataset</span><span class="o">/</span>
-        <span class="n">num_edges</span><span class="p">:</span> <span class="mi">96522</span>
-        <span class="n">num_train</span><span class="p">:</span> <span class="mi">96522</span>
-        <span class="n">num_nodes</span><span class="p">:</span> <span class="mi">14752</span>
-        <span class="n">num_relations</span><span class="p">:</span> <span class="mi">5</span>
-        <span class="n">num_valid</span><span class="p">:</span> <span class="mi">5362</span>
-        <span class="n">num_test</span><span class="p">:</span> <span class="mi">5363</span>
-    <span class="n">edges</span><span class="p">:</span>
-        <span class="nb">type</span><span class="p">:</span> <span class="n">DEVICE_MEMORY</span>
-    <span class="n">embeddings</span><span class="p">:</span>
-        <span class="nb">type</span><span class="p">:</span> <span class="n">DEVICE_MEMORY</span>
-    <span class="n">save_model</span><span class="p">:</span> <span class="n">true</span>
-<span class="n">training</span><span class="p">:</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="mi">1000</span>
-    <span class="n">negative_sampling</span><span class="p">:</span>
-        <span class="n">num_chunks</span><span class="p">:</span> <span class="mi">100</span>
-        <span class="n">negatives_per_positive</span><span class="p">:</span> <span class="mi">512</span>
-        <span class="n">degree_fraction</span><span class="p">:</span> <span class="mf">0.0</span>
-        <span class="n">filtered</span><span class="p">:</span> <span class="n">false</span>
-    <span class="n">num_epochs</span><span class="p">:</span> <span class="mi">100</span>
-    <span class="n">pipeline</span><span class="p">:</span>
-        <span class="n">sync</span><span class="p">:</span> <span class="n">true</span>
-    <span class="n">epochs_per_shuffle</span><span class="p">:</span> <span class="mi">1</span>
-<span class="n">evaluation</span><span class="p">:</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="mi">1000</span>
-    <span class="n">negative_sampling</span><span class="p">:</span>
-        <span class="n">filtered</span><span class="p">:</span> <span class="n">true</span>
-    <span class="n">pipeline</span><span class="p">:</span>
-        <span class="n">sync</span><span class="p">:</span> <span class="n">true</span>
-</pre></div>
-</div>
+<p><code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code>
+.. code-block:: yaml</p>
+<blockquote>
+<div><dl>
+<dt>model:</dt><dd><p>learning_task: LINK_PREDICTION
+encoder:</p>
+<blockquote>
+<div><p>layers:
+- - type: EMBEDDING</p>
+<blockquote>
+<div><p>output_dim: 50</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="simple">
+<dt>decoder:</dt><dd><p>type: COMPLEX</p>
+</dd>
+<dt>loss:</dt><dd><p>type: SOFTMAX</p>
+</dd>
+<dt>sparse_optimizer:</dt><dd><p>type: ADAGRAD
+options:
+learning_rate: 0.1</p>
+</dd>
+</dl>
+</dd>
+<dt>storage:</dt><dd><p>device_type: cuda
+dataset:</p>
+<blockquote>
+<div><p>base_directory: dataset/
+num_edges: 96522
+num_train: 96522
+num_nodes: 14752
+num_relations: 5
+num_valid: 5362
+num_test: 5363</p>
+</div></blockquote>
+<dl class="simple">
+<dt>edges:</dt><dd><p>type: DEVICE_MEMORY</p>
+</dd>
+<dt>embeddings:</dt><dd><p>type: DEVICE_MEMORY</p>
+</dd>
+</dl>
+<p>save_model: true</p>
+</dd>
+<dt>training:</dt><dd><p>batch_size: 1000
+negative_sampling:</p>
+<blockquote>
+<div><p>num_chunks: 100
+negatives_per_positive: 512
+degree_fraction: 0.0
+filtered: false</p>
+</div></blockquote>
+<p>num_epochs: 100
+pipeline:</p>
+<blockquote>
+<div><p>sync: true</p>
+</div></blockquote>
+<p>epochs_per_shuffle: 1</p>
+</dd>
+<dt>evaluation:</dt><dd><p>batch_size: 1000
+negative_sampling:</p>
+<blockquote>
+<div><p>filtered: true</p>
+</div></blockquote>
+<dl class="simple">
+<dt>pipeline:</dt><dd><p>sync: true</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
 <p><strong>Step 2: Run Marius</strong></p>
 <p>Now that we have a configuration file and dataset ready, we simply need to run the training executable with our config file as the argument.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">marius_train</span> <span class="n">paleo_config</span><span class="o">.</span><span class="n">ini</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">marius_train</span> <span class="n">paleo_config</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
 </div>
-<p>The output should appear similar to::</p>
+<p>The output should appear similar to:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">info</span><span class="p">]</span> <span class="p">[</span><span class="n">marius</span><span class="o">.</span><span class="n">cpp</span><span class="p">:</span><span class="mi">45</span><span class="p">]</span> <span class="n">Start</span> <span class="n">initialization</span>
 <span class="n">Initialization</span> <span class="n">Complete</span><span class="p">:</span> <span class="mf">4.424</span><span class="n">s</span>
 <span class="c1">################ Starting training epoch 1 ################</span>
@@ -258,7 +279,24 @@
 <span class="o">=================================</span>
 </pre></div>
 </div>
-<p>After this has finished, our trained embeddings will be located in our output directory <code class="docutils literal notranslate"><span class="pre">[base_directory]/nodes/</span></code>.</p>
+<p>After this has finished, our output will be in our <code class="docutils literal notranslate"><span class="pre">[base_directory]</span></code> (using the provided config, this will be <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>.</p>
+<p>Here are the files that were created in training:
+Let’s check again what was added in the <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/</span></code> directory. For clarity, we only list the files that were created in training. Notice that several files have been created, including the trained model, the embedding table, a full configuration file, and output logs:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls datasets/custom_lp_example/
+model.pt                           <span class="c1"># contains the dense model parameters, embeddings of the edge-types</span>
+model_state.pt                     <span class="c1"># optimizer state of the trained model parameters</span>
+full_config.yaml                   <span class="c1"># detailed config generated based on user-defined config</span>
+metadata.csv                       <span class="c1"># information about metadata</span>
+logs/                              <span class="c1"># logs containing output, error, debug information, and etc.</span>
+nodes/
+  embeddings.bin                   <span class="c1"># trained node embeddings of the graph</span>
+  embeddings_state.bin             <span class="c1"># node embedding optimizer state</span>
+  ...
+edges/
+  ...
+...
+</pre></div>
+</div>
 </section>
 <section id="inference-with-python-using-embeddings-for-link-prediction">
 <h2>3. Inference with Python: Using Embeddings for Link Prediction<a class="headerlink" href="#inference-with-python-using-embeddings-for-link-prediction" title="Permalink to this headline"></a></h2>
@@ -266,26 +304,12 @@
 <p>Let’s use our prediction tool that uses the embeddings to predict the top K most likely destination nodes for a given source and relation. For this example, we will set the source node to <code class="docutils literal notranslate"><span class="pre">29741_taxon</span></code> and the relation to <code class="docutils literal notranslate"><span class="pre">collected_from</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">&lt;29741_taxon,</span> <span class="pre">collected_from,</span> <span class="pre">?&gt;</span></code></p>
 <p>Semantically, we are predicting where Taxon #29741, which represents the fossil Whitfieldella (a type of extint mollusk) could be collected from. If our embeddings are accurate, we should not only find existing edges in our output but also new ones, leading to the discovery of possible new places to search for these fossils.</p>
-<p>[TODO: CHANGE FROM PREDICT.PY TO  <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code>]</p>
-<p>Our output should appear similar to the following::</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;Iowa_state&#39;</span><span class="p">,</span>
-<span class="s1">&#39;limestone_lithology&#39;</span><span class="p">,</span>
-<span class="s1">&#39;United States_country&#39;</span><span class="p">,</span>
-<span class="s1">&#39;Hopkinton Dolomite_formation&#39;</span><span class="p">,</span>
-<span class="s1">&#39;dolomite_lithology&#39;</span><span class="p">,</span>
-<span class="s1">&#39;Yushan_county&#39;</span><span class="p">,</span>
-<span class="s1">&#39;Jiangxi_state&#39;</span><span class="p">,</span>
-<span class="s1">&#39;Dubuque_county&#39;</span><span class="p">,</span>
-<span class="s1">&#39;China_country&#39;</span><span class="p">,</span>
-<span class="s1">&#39;Shiyang_formation&#39;</span><span class="p">,</span>
-<span class="s1">&#39;JiangShan_county&#39;</span><span class="p">,</span>
-<span class="s1">&#39;Cordell_formation&#39;</span><span class="p">,</span>
-<span class="s1">&#39;shale_lithology&#39;</span><span class="p">,</span>
-<span class="s1">&#39;mudstone_lithology&#39;</span><span class="p">,</span>
-<span class="s1">&#39;South Carolina_state&#39;</span><span class="p">]</span>
+<p>We will use the Marius inference tool <code class="docutils literal notranslate"><span class="pre">marius_infer</span></code> to do this. In <code class="docutils literal notranslate"><span class="pre">~marius-examples/link-predict-example/</span></code>, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">marius_predict</span> <span class="o">--</span><span class="n">config</span> <span class="n">paleo_config</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">output_dir</span> <span class="n">results</span><span class="o">/</span> <span class="o">--</span><span class="n">metrics</span> <span class="n">mrr</span> <span class="n">mean_rank</span> <span class="n">hits1</span> <span class="n">hits10</span> <span class="n">hits50</span> <span class="o">--</span><span class="n">save_scores</span> <span class="o">--</span><span class="n">save_ranks</span>
 </pre></div>
 </div>
-<p>We’ve successfully predicted destination nodes! Most of these edges already exist in the graph, proving the accuracy of our embeddings. However, new edges also appear, such as the edge to <code class="docutils literal notranslate"><span class="pre">Cordell_formation</span></code>. Outside experts have confirmed that this prediction is accurate, i.e. Whitfieldella can be found at the Cordell Formation, a geologic formation in Michigan. This example shows how using the embeddings generated by Marius, we can perform link prediction on a graph and make new discoveries.</p>
+<p>This tool takes our config, an output directory, and our desired metrics as input, and perform link prediction evaluation over the test set of edges provided in the config file. Metrics are saved to <code class="docutils literal notranslate"><span class="pre">results/metrics.txt</span></code> and scores and ranks for each test edge are saved to <code class="docutils literal notranslate"><span class="pre">results/scores.csv</span></code>.
+.. [TODO: CHANGE FROM PREDICT.PY TO  <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code>]</p>
 </section>
 </section>
 
