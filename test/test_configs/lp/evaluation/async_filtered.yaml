@@ -1,0 +1,5 @@
+batch_size: 20
+negative_sampling:
+  filtered: true
+pipeline:
+  sync: false

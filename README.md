@@ -1,131 +1,150 @@
 # Marius #
 
-Marius is a system for large-scale graph learning. The system is currently in the alpha phase and is under active development.
+Marius is a system under active development for training embeddings for large-scale graphs on a single machine.
+
+Training on large scale graphs requires a large amount of data movement to get embedding parameters from storage to the computational device. 
+Marius is designed to mitigate/reduce data movement overheads using:
+- Pipelined training and IO
+- Partition caching and buffer-aware data orderings
 
 Details on how Marius works can be found in our [OSDI '21 Paper](https://arxiv.org/abs/2101.08358), where experiment scripts and configurations can be found in the `osdi2021` branch.
-
-Currently we support:
-- Large-scale link prediction training
-- Preprocessing and training of datasets in CSV format (single-file)
-- Configuration file based API
-- Single GPU training and evaluation
-- Dataset sizes that fit in: GPU memory, CPU memory, and Disk.
-
-See `docs/user_guide` for more details.
-
-We are working on expanding the functionality of Marius to include:
-- Graph neural network support
-- Multi-GPU training
-- Node classification
-- Python API for user defined models, sampling and training procedures
 
 ## Requirements ##
 (Other versions may work, but are untested)
 * Ubuntu 18.04 or MacOS 10.15 
-* CUDA >= 10 (If using GPU training)
+* CUDA >= 10.1
+* CuDNN >= 7
 * 1.7 <= pytorch < 1.10
 * python >= 3.6
 * pip >= 21
-* GCC >= 9 (On Linux) 
-* Clang >= 11 (On MacOS)
+* GCC >= 9 (On Linux) or Clang 12.0 (On MacOS)
 * cmake >= 3.12
 * make >= 3.8
 
 
-## Installation from source with Pip ##
+## Installation from source with Pip (currently broken, see development build instructions) ##
 
-1. Install latest version of PyTorch for your CUDA version: https://pytorch.org/get-started/locally/
+1. Install latest version of PyTorch for your CUDA version:
 
-2. Clone the repository `git clone https://github.com/marius-team/marius.git`
+2. Clone the repository `git clone https://github.com/marius-team/marius-internal.git`
 
 3. Build and install Marius `cd marius; python3 -m pip install .`
 
-#### Full script (without torch install) ####
 
-```
-git clone https://github.com/marius-team/marius.git
-cd marius
-python3 -m pip install .
-```
+## Installation from source with CMake ##
+
+1. Clone the repository `git clone https://github.com/marius-team/marius-internal.git`
+
+2. Install dependencies `cd marius; python3 -m pip install -r requirements.txt`
+
+3. Create build directory `mkdir build; cd build`
+
+4. Run cmake in the build directory `cmake ../ -DUSE_OMP=1` (CPU-only build) or `cmake ../ -DUSE_OMP=1 -DUSE_CUDA=1` (GPU build)
+
+5. Make the marius executable. `make marius_train -j`
+
+
+## Development build ## 
+
+For development, it is best to use CMake to build the c++ sources, and use pip to install the python tools seperately. The build process is as follows (assuming working from the cloned repository root directory):
+
+1. Install python tools with `MARIUS_NO_BINDINGS=1 python3 -m pip install .`, the `MARIUS_NO_BINDINGS=1` environment variable tells pip not to build and install the C++ sources. So after this command you will have access to the marius_prepreprocess, marius_postprocess, and other python only modules. The `marius_train` and `marius_eval` executables will not be available and need to be built seperately.
+2. To build the `marius_train` executable, follow the CMake instructions in the previous section. After following those instructions you can use the `marius_train` command by invoking `build/marius_train <your_config.yaml>`
+
+When making modifications to the python, you only need to rerun `MARIUS_NO_BINDINGS=1 python3 -m pip install .`, and for the C++ you need to rerun the CMake build.
+
+NOTE: You must supply the path to the executable built by CMake: `<build_dir>/marius_train <your_config.yaml>`. If you run command without supplying the path to the build, then the `marius_train` command installed by pip will be used, which will not work when pip is run with the `MARIUS_NO_BINDINGS=1` flag.
+
+## Common development tasks ## 
+
+### Adding a new Python command line tool ### 
+
+1. Place the sources for your command line tool under `src/python/tools/<your_tool_name>`, make sure it has a main method as an entrypoint.
+2. Modify the `[options.entry_points]` in setup.cfg to let pip know that it should install your tool as a new command. https://github.com/marius-team/marius-internal/blob/main/setup.cfg#L47
+
+Use the existing command line tools as a guide if stuck.
+
+Install your tool by using `MARIUS_NO_BINDINGS=1 python3 -m pip install .`. After any edits to your tools sources, you will have to rerun the pip install. To avoid reinstalling each time, you can to use the `-e` editable flag with pip: `MARIUS_NO_BINDINGS=1 python3 -m pip install -e .`. However, this flag hasn't been tested with our build so it's possible it will not work.
+
+### Debugging with GDB ###
+
+C++ error messages are usually not very helpful. For debugging mysterious errors, you can use GDB to run Marius and get a stack trace for where the program failed.
+
+To use GDB, you will need to build Marius in Debug mode. You can do this by passing the `-DCMAKE_BUILD_TYPE=Debug` option to `cmake` when building. 
+
+If you are using Docker to run Marius, you will have to run your container using `--cap-add=SYS_PTRACE` for GDB to work. 
+
+Use `gdb <debug_build_dir>/marius_train` to enter GDB.
+
+Once within the GDB console use `run <your_config.yaml>` to start execution. When your error is hit, gdb will stop at the line which threw the error.
 
 ## Training a graph ##
 
-Training embeddings on a graph requires three steps. 
+Before training you will need to preprocess your input dataset. Using the FB15K_237 knowledge graph as an example, you can do this by running `marius_preprocess --dataset fb15k_237 <output_directory>`. 
 
-1. Define a configuration file. This example will use the config already defined in `examples/training/configs/fb15k_gpu.ini`
+The <output_directory> specifies where the preprocessed graph will be output and is set by the user. In this example assume we have already have directory created called `datasets/fb15k_237_example/` which we set as the <output_directory>. 
 
-   See `docs/configuration.rst` for full details on the configuration options.
+NOTE: If the above command fails due to any missing directory errors, please create the `<output_directory>/edges` and `<output_directory>/nodes` directories as a workaround.
 
-2. Preprocess the dataset `marius_preprocess output_dir/ --dataset fb15k`
+Training is run with `marius_train <your_config.yaml>` or `<build_dir>/marius_train <your_config.yaml>` if CMake was used to build the system. 
 
-   This command will download the freebase15k dataset and preprocess it for training, storing files in `output_dir/`. If a different output directory is used, the configuration file's path options will need to be updated accordingly.
+Example YAML config for the FB15K_237 dataset:
 
-3. Run the training executable with the config file `marius_train examples/training/configs/fb15k_gpu.ini`. 
-
-The output of the first epoch should be similar to the following.
-```[info] [03/18/21 01:33:16.173] Start preprocessing
-[info] [03/18/21 01:33:18.778] Metadata initialized
-[info] [03/18/21 01:33:18.778] Training set initialized
-[info] [03/18/21 01:33:18.779] Evaluation set initialized
-[info] [03/18/21 01:33:18.779] Preprocessing Complete: 2.605s
-[info] [03/18/21 01:33:18.791] ################ Starting training epoch 1 ################
-[info] [03/18/21 01:33:18.836] Total Edges Processed: 40000, Percent Complete: 0.082
-[info] [03/18/21 01:33:18.862] Total Edges Processed: 80000, Percent Complete: 0.163
-[info] [03/18/21 01:33:18.892] Total Edges Processed: 120000, Percent Complete: 0.245
-[info] [03/18/21 01:33:18.918] Total Edges Processed: 160000, Percent Complete: 0.327
-[info] [03/18/21 01:33:18.944] Total Edges Processed: 200000, Percent Complete: 0.408
-[info] [03/18/21 01:33:18.970] Total Edges Processed: 240000, Percent Complete: 0.490
-[info] [03/18/21 01:33:18.996] Total Edges Processed: 280000, Percent Complete: 0.571
-[info] [03/18/21 01:33:19.021] Total Edges Processed: 320000, Percent Complete: 0.653
-[info] [03/18/21 01:33:19.046] Total Edges Processed: 360000, Percent Complete: 0.735
-[info] [03/18/21 01:33:19.071] Total Edges Processed: 400000, Percent Complete: 0.816
-[info] [03/18/21 01:33:19.096] Total Edges Processed: 440000, Percent Complete: 0.898
-[info] [03/18/21 01:33:19.122] Total Edges Processed: 480000, Percent Complete: 0.980
-[info] [03/18/21 01:33:19.130] ################ Finished training epoch 1 ################
-[info] [03/18/21 01:33:19.130] Epoch Runtime (Before shuffle/sync): 339ms
-[info] [03/18/21 01:33:19.130] Edges per Second (Before shuffle/sync): 1425197.8
-[info] [03/18/21 01:33:19.130] Edges Shuffled
-[info] [03/18/21 01:33:19.130] Epoch Runtime (Including shuffle/sync): 339ms
-[info] [03/18/21 01:33:19.130] Edges per Second (Including shuffle/sync): 1425197.8
-[info] [03/18/21 01:33:19.148] Starting evaluating
-[info] [03/18/21 01:33:19.254] Pipeline flush complete
-[info] [03/18/21 01:33:19.271] Num Eval Edges: 50000
-[info] [03/18/21 01:33:19.271] Num Eval Batches: 50
-[info] [03/18/21 01:33:19.271] Auc: 0.973, Avg Ranks: 24.477, MRR: 0.491, Hits@1: 0.357, Hits@5: 0.651, Hits@10: 0.733, Hits@20: 0.806, Hits@50: 0.895, Hits@100: 0.943
+Note that the `base_directory` is set to the preprocessing output directory, `datasets/fb15k_237_example/`.
+```
+model:
+  learning_task: LINK_PREDICTION
+  encoder:
+    layers:
+      - - type: EMBEDDING
+          output_dim: 50
+  decoder:
+    type: DISTMULT
+  loss:
+    type: SOFTMAX
+  sparse_optimizer:
+    type: ADAGRAD
+    options:
+      learning_rate: 0.1
+storage:
+  device_type: cuda
+  dataset:
+    base_directory: datasets/fb15k_237_example/
+    num_edges: 272115
+    num_train: 272115
+    num_nodes: 14541
+    num_relations: 237
+    num_valid: 17535
+    num_test: 20466
+  edges:
+    type: DEVICE_MEMORY
+  embeddings:
+    type: DEVICE_MEMORY
+  save_model: true
+training:
+  batch_size: 1000
+  negative_sampling:
+    num_chunks: 10
+    negatives_per_positive: 500
+    degree_fraction: 0.0
+    filtered: false
+  num_epochs: 10
+  pipeline:
+    sync: true
+  epochs_per_shuffle: 1
+evaluation:
+  batch_size: 1000
+  negative_sampling:
+    filtered: true
+  pipeline:
+    sync: true
 ```
 
-To train using CPUs only, use the `examples/training/configs/fb15k_cpu.ini` configuration file instead.
+After running this configuration, the MRR output by the system should be about .25 after 10 epochs.
 
 ## Using the Python API ##
 
-### Sample Code ###
-
-Below is a sample python script which trains a single epoch of embeddings on fb15k.
-```
-import marius as m
-from marius.tools import preprocess
-
-def fb15k_example():
-
-    preprocess.fb15k(output_dir="output_dir/")
-    
-    config_path = "examples/training/configs/fb15k_cpu.ini"
-    config = m.parseConfig(config_path)
-
-    train_set, eval_set = m.initializeDatasets(config)
-
-    model = m.initializeModel(config.model.encoder_model, config.model.decoder_model)
-
-    trainer = m.SynchronousTrainer(train_set, model)
-    evaluator = m.SynchronousEvaluator(eval_set, model)
-
-    trainer.train(1)
-    evaluator.evaluate(True)
-
-
-if __name__ == "__main__":
-    fb15k_example()
-```
+TODO, Update Python API
 
 ## Marius in Docker ##
 
@@ -146,12 +165,11 @@ Start a bash session inside the container:
 
 
 ### Sample Dockerfile ###
-See `examples/docker/dockerfile`
 ```
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM nvidia/cuda:11.4.0-cudnn8-devel-ubuntu18.04
 RUN apt update
 
-RUN apt install -y g++ \ 
+RUN apt install -y g++ \
          make \
          wget \
          unzip \
@@ -174,7 +192,9 @@ RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
 # install pytorch
-RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+RUN python3 -m pip install torch==1.9.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+
+RUN python3 -m pip install networkx scipy
 ```
 
 ## Citing Marius ##
@@ -189,17 +209,4 @@ Arxiv Version:
       primaryClass={cs.LG}
 }
 ```
-OSDI Version:
-```
-@inproceedings {273733,
-                author = {Jason Mohoney and Roger Waleffe and Henry Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
-                title = {Marius: Learning Massive Graph Embeddings on a Single Machine},
-                booktitle = {15th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 21)},
-                year = {2021},
-                isbn = {978-1-939133-22-9},
-                pages = {533--549},
-                url = {https://www.usenix.org/conference/osdi21/presentation/mohoney},
-                publisher = {{USENIX} Association},
-                month = jul,
-}
-```
+OSDI Version (not yet available):

@@ -1,0 +1,42 @@
+learning_task: NODE_CLASSIFICATION
+encoder:
+  train_neighbor_sampling:
+    - type: ALL
+      use_incoming_nbrs: true
+      use_outgoing_nbrs: true
+  eval_neighbor_sampling:
+    - type: ALL
+      use_incoming_nbrs: true
+      use_outgoing_nbrs: true
+  layers:
+
+    - - type: FEATURE
+        output_dim: 10
+        bias: true
+        init:
+          type: GLOROT_NORMAL
+
+    - - type: GNN
+        options:
+          type: GRAPH_SAGE
+          aggregator: MEAN
+        input_dim: 10
+        output_dim: 10
+        bias: true
+        init:
+          type: GLOROT_NORMAL
+
+decoder:
+  type: NODE
+loss:
+  type: CROSS_ENTROPY
+  options:
+    reduction: SUM
+dense_optimizer:
+  type: ADAM
+  options:
+    learning_rate: 0.01
+sparse_optimizer:
+  type: ADAGRAD
+  options:
+    learning_rate: 0.1

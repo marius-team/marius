@@ -1,0 +1,6 @@
+batch_size: 100
+num_epochs: 2
+negative_sampling:
+  filtered: true
+pipeline:
+  sync: true

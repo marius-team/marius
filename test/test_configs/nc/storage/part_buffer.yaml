@@ -1,0 +1,26 @@
+device_type: cpu
+dataset: ???
+edges:
+  type: FLAT_FILE
+  options:
+    dtype: int
+embeddings:
+  type: PARTITION_BUFFER
+  options:
+    num_partitions: 8
+    buffer_capacity: 4
+    prefetching: false
+    fine_to_coarse_ratio: 2
+    num_cache_partitions: 0
+    node_partition_ordering: DISPERSED
+    randomly_assign_edge_buckets: true
+features:
+  type: PARTITION_BUFFER
+  options:
+    num_partitions: 8
+    buffer_capacity: 4
+    prefetching: false
+    fine_to_coarse_ratio: 2
+    num_cache_partitions: 0
+    node_partition_ordering: DISPERSED
+    randomly_assign_edge_buckets: true

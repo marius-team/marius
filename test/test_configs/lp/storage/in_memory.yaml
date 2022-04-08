@@ -1,0 +1,15 @@
+device_type: cpu
+dataset: ???
+edges:
+  type: HOST_MEMORY
+  options:
+    dtype: int
+embeddings:
+  type: HOST_MEMORY
+  options:
+    dtype: float
+features:
+  type: HOST_MEMORY
+  options:
+    dtype: float
+save_model: true
