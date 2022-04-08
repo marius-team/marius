@@ -6,12 +6,12 @@ GraphEncoder
     :undoc-members:
     :special-members: __init__
 
-.. autoclass:: marius.pipeline.SynchronousGraphEncoder
+.. autoclass:: marius.pipeline.SynchronousEncoder
     :members:
     :undoc-members:
     :special-members: __init__
 
-.. autoclass:: marius.pipeline.PipelineGraphEncoder
+.. autoclass:: marius.pipeline.PipelineEncoder
     :members:
     :undoc-members:
     :special-members: __init__

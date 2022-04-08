@@ -8,5 +8,4 @@ decoders
 
     edge/index
     node/index
-    decoder_model
     decoder

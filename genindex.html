@@ -38,15 +38,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config_interface/index.html">Configuration Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python_api/index.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export_and_inference/index.html">Model Export and Inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developer_guide/index.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Debugging and FAQ</a></li>
 </ul>
 
@@ -218,9 +216,13 @@
 </li>
         <li><a href="python_api/pipeline/graph_encoder.html#marius.pipeline.GraphEncoder.__init__">(marius.pipeline.GraphEncoder method)</a>
 </li>
+        <li><a href="python_api/pipeline/graph_encoder.html#marius.pipeline.PipelineEncoder.__init__">(marius.pipeline.PipelineEncoder method)</a>
+</li>
         <li><a href="python_api/pipeline/evaluator.html#marius.pipeline.PipelineEvaluator.__init__">(marius.pipeline.PipelineEvaluator method)</a>
 </li>
         <li><a href="python_api/pipeline/trainer.html#marius.pipeline.PipelineTrainer.__init__">(marius.pipeline.PipelineTrainer method)</a>
+</li>
+        <li><a href="python_api/pipeline/graph_encoder.html#marius.pipeline.SynchronousEncoder.__init__">(marius.pipeline.SynchronousEncoder method)</a>
 </li>
         <li><a href="python_api/pipeline/evaluator.html#marius.pipeline.SynchronousEvaluator.__init__">(marius.pipeline.SynchronousEvaluator method)</a>
 </li>
@@ -237,6 +239,8 @@
         <li><a href="python_api/reporting/reporters.html#marius.report.Reporter.__init__">(marius.report.Reporter method)</a>
 </li>
         <li><a href="python_api/storage/storage.html#marius.storage.FlatFile.__init__">(marius.storage.FlatFile method)</a>
+</li>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.__init__">(marius.storage.GraphModelStorage method)</a>
 </li>
         <li><a href="python_api/storage/storage.html#marius.storage.InMemory.__init__">(marius.storage.InMemory method)</a>
 </li>
@@ -297,7 +301,11 @@
       </ul></li>
       <li><a href="python_api/configuration/index.html#marius.config.ActivationFunction">ActivationFunction (class in marius.config)</a>
 </li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.active_edges">active_edges (marius.storage.GraphModelStorage property)</a>
+</li>
       <li><a href="python_api/data/graph.html#marius.data.MariusGraph.active_in_memory_subgraph">active_in_memory_subgraph (marius.data.MariusGraph property)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.active_nodes">active_nodes (marius.storage.GraphModelStorage property)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.OptimizerType.ADAGRAD">ADAGRAD (marius.config.OptimizerType attribute)</a>
 </li>
@@ -331,6 +339,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.addFilterEdges">addFilterEdges() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.GraphSageLayerOptions.aggregator">aggregator (marius.config.GraphSageLayerOptions property)</a>
 
       <ul>
@@ -533,10 +543,10 @@
 </li>
       <li><a href="python_api/reporting/reporters.html#marius.report.LinkPredictionReporter.compute_ranks">compute_ranks() (marius.report.LinkPredictionReporter method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/nn/decoders/edge/edge_decoder.html#marius.nn.decoders.edge.EdgeDecoder.compute_scores">compute_scores() (marius.nn.decoders.edge.EdgeDecoder method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/configuration/index.html#marius.config.PipelineConfig.compute_threads">compute_threads (marius.config.PipelineConfig property)</a>
 
       <ul>
@@ -576,6 +586,8 @@
       <li><a href="python_api/nn/loss.html#marius.nn.CrossEntropyLoss">CrossEntropyLoss (class in marius.nn)</a>
 </li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.current_edge">current_edge (marius.data.DataLoader property)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.current_subgraph_state">current_subgraph_state (marius.storage.GraphModelStorage property)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.EdgeBucketOrdering.CUSTOM">CUSTOM (marius.config.EdgeBucketOrdering attribute)</a>
 
@@ -985,6 +997,8 @@
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.StorageConfig.embeddings">(marius.tools.configuration.marius_config.StorageConfig attribute)</a>
 </li>
       </ul></li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.embeddingsOffDevice">embeddingsOffDevice() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/data/batch.html#marius.data.Batch.embeddingsToHost">embeddingsToHost() (marius.data.Batch method)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.LearningTask.ENCODE">ENCODE (marius.config.LearningTask attribute)</a>
@@ -1170,6 +1184,8 @@
       <ul>
         <li><a href="python_api/configuration/index.html#marius.config.StorageConfig.full_graph_evaluation">(marius.config.StorageConfig property)</a>
 </li>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.full_graph_evaluation">(marius.storage.GraphModelStorage property)</a>
+</li>
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.StorageConfig.full_graph_evaluation">(marius.tools.configuration.marius_config.StorageConfig attribute)</a>
 </li>
       </ul></li>
@@ -1198,6 +1214,10 @@
       <li><a href="python_api/nn/layers/gnn.html#marius.nn.layers.GCNLayer">GCNLayer (class in marius.nn.layers)</a>
 </li>
       <li><a href="python_api/nn/encoders/general_encoder.html#marius.nn.encoders.GeneralEncoder">GeneralEncoder (class in marius.nn.encoders)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.get_edges">get_edges() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.get_edges_range">get_edges_range() (marius.storage.GraphModelStorage method)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.getActivationFunction">getActivationFunction() (in module marius.config)</a>
 </li>
@@ -1251,17 +1271,51 @@
 </li>
       <li><a href="python_api/storage/storage.html#marius.storage.PartitionBufferStorage.getNextEvict">getNextEvict() (marius.storage.PartitionBufferStorage method)</a>
 </li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeEmbeddings">getNodeEmbeddings() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeEmbeddingsRange">getNodeEmbeddingsRange() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeEmbeddingState">getNodeEmbeddingState() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeEmbeddingStateRange">getNodeEmbeddingStateRange() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeFeatures">getNodeFeatures() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeFeaturesRange">getNodeFeaturesRange() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeIdsRange">getNodeIdsRange() (marius.storage.GraphModelStorage method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeLabels">getNodeLabels() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNodeLabelsRange">getNodeLabelsRange() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.getNodePartitionOrderingEnum">getNodePartitionOrderingEnum() (in module marius.config)</a>
 </li>
-      <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.getNumEdges">getNumEdges() (marius.data.DataLoader method)</a>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNumActiveEdges">getNumActiveEdges() (marius.storage.GraphModelStorage method)</a>
 </li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNumActiveNodes">getNumActiveNodes() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.getNumEdges">getNumEdges() (marius.data.DataLoader method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNumEdges">(marius.storage.GraphModelStorage method)</a>
+</li>
+      </ul></li>
       <li><a href="python_api/storage/storage.html#marius.storage.PartitionBufferStorage.getNumInMemory">getNumInMemory() (marius.storage.PartitionBufferStorage method)</a>
 </li>
       <li><a href="python_api/data/graph.html#marius.data.MariusGraph.getNumNeighbors">getNumNeighbors() (marius.data.MariusGraph method)</a>
 </li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNumNodes">getNumNodes() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNumNodesInMemory">getNumNodesInMemory() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getNumPartitions">getNumPartitions() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.getOptimizerType">getOptimizerType() (in module marius.config)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.getRandomNodeIds">getRandomNodeIds() (marius.storage.GraphModelStorage method)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.getReductionLayerType">getReductionLayerType() (in module marius.config)</a>
 </li>
@@ -1323,6 +1377,8 @@
 </li>
       <li><a href="python_api/pipeline/graph_encoder.html#marius.pipeline.GraphEncoder">GraphEncoder (class in marius.pipeline)</a>
 </li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage">GraphModelStorage (class in marius.storage)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.GraphSageAggregator">GraphSageAggregator (class in marius.config)</a>
 </li>
       <li><a href="python_api/nn/layers/gnn.html#marius.nn.layers.GraphSageLayer">GraphSageLayer (class in marius.nn.layers)</a>
@@ -1343,8 +1399,12 @@
 </li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.hasNextBatch">hasNextBatch() (marius.data.DataLoader method)</a>
 </li>
-      <li><a href="python_api/storage/storage.html#marius.storage.PartitionBufferStorage.hasSwap">hasSwap() (marius.storage.PartitionBufferStorage method)</a>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.hasSwap">hasSwap() (marius.storage.GraphModelStorage method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/storage.html#marius.storage.PartitionBufferStorage.hasSwap">(marius.storage.PartitionBufferStorage method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/nn/layers/gnn.html#marius.nn.layers.GATLayer.head_dim">head_dim (marius.nn.layers.GATLayer property)</a>
@@ -1384,6 +1444,8 @@
       <li><a href="python_api/nn/layers/layer.html#marius.nn.layers.Layer.init_bias">init_bias() (marius.nn.layers.Layer method)</a>
 </li>
       <li><a href="python_api/nn/layers/embedding.html#marius.nn.layers.EmbeddingLayer.init_embeddings">init_embeddings() (marius.nn.layers.EmbeddingLayer method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.init_subgraph">init_subgraph() (marius.storage.GraphModelStorage method)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.AdagradOptions.init_value">init_value (marius.config.AdagradOptions property)</a>
 
@@ -1533,10 +1595,10 @@
       </ul></li>
       <li><a href="python_api/nn/layers/reduction.html#marius.nn.layers.LinearReduction">LinearReduction (class in marius.nn.layers)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/configuration/index.html#marius.config.LearningTask.LINK_PREDICTION">LINK_PREDICTION (marius.config.LearningTask attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/reporting/reporters.html#marius.report.LinkPredictionReporter">LinkPredictionReporter (class in marius.report)</a>
 </li>
       <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.livejournal.Livejournal">Livejournal (class in marius.tools.preprocess.datasets.livejournal)</a>
@@ -1544,6 +1606,8 @@
       <li><a href="python_api/nn/model.html#marius.nn.Model.load">load() (marius.nn.Model method)</a>
 
       <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.load">(marius.storage.GraphModelStorage method)</a>
+</li>
         <li><a href="python_api/storage/storage.html#marius.storage.Storage.load">(marius.storage.Storage method)</a>
 </li>
       </ul></li>
@@ -1615,16 +1679,12 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="developer_guide/cpp_api/marius.html#_CPPv44mainiA_Pc">main (C++ function)</a>
-</li>
       <li><a href="python_api/configuration/index.html#marius.config.RankingLossOptions.margin">margin (marius.config.RankingLossOptions property)</a>
 
       <ul>
         <li><a href="python_api/tools/configuration/datatypes.html#marius.tools.configuration.datatypes.RankingLossOptions.margin">(marius.tools.configuration.datatypes.RankingLossOptions attribute)</a>
 </li>
       </ul></li>
-      <li><a href="developer_guide/cpp_api/marius.html#_CPPv46mariusiA_Pc">marius (C++ function)</a>
-</li>
       <li>
     marius.config
 
@@ -1889,6 +1949,8 @@
 </li>
       </ul></li>
       <li><a href="python_api/configuration/index.html#marius.config.EdgeBucketOrdering.NEW_BETA">NEW_BETA (marius.config.EdgeBucketOrdering attribute)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.next_subgraph_state">next_subgraph_state (marius.storage.GraphModelStorage property)</a>
 </li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.nextEpoch">nextEpoch() (marius.data.DataLoader method)</a>
 </li>
@@ -2348,6 +2410,8 @@
 </li>
       <li><a href="python_api/storage/storage.html#marius.storage.PartitionBufferStorage.performNextSwap">performNextSwap() (marius.storage.PartitionBufferStorage method)</a>
 </li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.performSwap">performSwap() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.EvaluationConfig.pipeline">pipeline (marius.config.EvaluationConfig property)</a>
 
       <ul>
@@ -2364,6 +2428,8 @@
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.PipelineConfig">(class in marius.tools.configuration.marius_config)</a>
 </li>
       </ul></li>
+      <li><a href="python_api/pipeline/graph_encoder.html#marius.pipeline.PipelineEncoder">PipelineEncoder (class in marius.pipeline)</a>
+</li>
       <li><a href="python_api/pipeline/evaluator.html#marius.pipeline.PipelineEvaluator">PipelineEvaluator (class in marius.pipeline)</a>
 </li>
       <li><a href="python_api/pipeline/trainer.html#marius.pipeline.PipelineTrainer">PipelineTrainer (class in marius.pipeline)</a>
@@ -2376,14 +2442,14 @@
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.StorageConfig.prefetch">(marius.tools.configuration.marius_config.StorageConfig attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/configuration/index.html#marius.config.PartitionBufferOptions.prefetching">prefetching (marius.config.PartitionBufferOptions property)</a>
 
       <ul>
         <li><a href="python_api/tools/configuration/datatypes.html#marius.tools.configuration.datatypes.PartitionBufferOptions.prefetching">(marius.tools.configuration.datatypes.PartitionBufferOptions attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/data/dense_graph.html#marius.data.DENSEGraph.prepareForNextLayer">prepareForNextLayer() (marius.data.DENSEGraph method)</a>
 </li>
       <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.dataset.Dataset.preprocess">preprocess() (marius.tools.preprocess.dataset.Dataset method)</a>
@@ -2680,24 +2746,52 @@
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.NodePartitionOrdering.SEQUENTIAL">SEQUENTIAL (marius.config.NodePartitionOrdering attribute)</a>
 </li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.set_edge_storage">set_edge_storage() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.set_node_storage">set_node_storage() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.setActiveEdges">setActiveEdges() (marius.data.DataLoader method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.setActiveEdges">(marius.storage.GraphModelStorage method)</a>
 </li>
+      </ul></li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.setActiveNodes">setActiveNodes() (marius.data.DataLoader method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.setActiveNodes">(marius.storage.GraphModelStorage method)</a>
 </li>
+      </ul></li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.setBufferOrdering">setBufferOrdering() (marius.data.DataLoader method)</a>
 
       <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.setBufferOrdering">(marius.storage.GraphModelStorage method)</a>
+</li>
         <li><a href="python_api/storage/storage.html#marius.storage.PartitionBufferStorage.setBufferOrdering">(marius.storage.PartitionBufferStorage method)</a>
 </li>
       </ul></li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.setFilterEdges">setFilterEdges() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/data/dense_graph.html#marius.data.DENSEGraph.setNodeProperties">setNodeProperties() (marius.data.DENSEGraph method)</a>
 </li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.setTestSet">setTestSet() (marius.data.DataLoader method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.setTestSet">(marius.storage.GraphModelStorage method)</a>
 </li>
+      </ul></li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.setTrainSet">setTrainSet() (marius.data.DataLoader method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.setTrainSet">(marius.storage.GraphModelStorage method)</a>
 </li>
+      </ul></li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.setValidationSet">setValidationSet() (marius.data.DataLoader method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.setValidationSet">(marius.storage.GraphModelStorage method)</a>
 </li>
+      </ul></li>
       <li><a href="python_api/configuration/index.html#marius.config.OptimizerType.SGD">SGD (marius.config.OptimizerType attribute)</a>
 </li>
       <li><a href="python_api/nn/optim.html#marius.nn.SGDOptimizer">SGDOptimizer (class in marius.nn)</a>
@@ -2710,6 +2804,8 @@
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.StorageConfig.shuffle_input">(marius.tools.configuration.marius_config.StorageConfig attribute)</a>
 </li>
       </ul></li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.shuffleEdges">shuffleEdges() (marius.storage.GraphModelStorage method)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.ActivationFunction.SIGMOID">SIGMOID (marius.config.ActivationFunction attribute)</a>
 </li>
       <li><a href="python_api/nn/loss.html#marius.nn.SoftMax">SoftMax (class in marius.nn)</a>
@@ -2721,6 +2817,8 @@
       <li><a href="python_api/nn/loss.html#marius.nn.SoftPlusLoss">SoftPlusLoss (class in marius.nn)</a>
 </li>
       <li><a href="python_api/storage/storage.html#marius.storage.Storage.sort">sort() (marius.storage.Storage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.sort_all_edges">sort_all_edges() (marius.storage.GraphModelStorage method)</a>
 </li>
       <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.dataset.Dataset.spark">spark (marius.tools.preprocess.dataset.Dataset attribute)</a>
 
@@ -2806,6 +2904,8 @@
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.MariusConfig.storage">(marius.tools.configuration.marius_config.MariusConfig attribute)</a>
 </li>
       </ul></li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.storage_ptrs">storage_ptrs (marius.storage.GraphModelStorage property)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.StorageBackend">StorageBackend (class in marius.config)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.StorageBackendConfig">StorageBackendConfig (class in marius.config)</a>
@@ -2842,6 +2942,8 @@
       </ul></li>
       <li><a href="python_api/storage/storage.html#marius.storage.PartitionBufferStorage.sync">sync() (marius.storage.PartitionBufferStorage method)</a>
 </li>
+      <li><a href="python_api/pipeline/graph_encoder.html#marius.pipeline.SynchronousEncoder">SynchronousEncoder (class in marius.pipeline)</a>
+</li>
       <li><a href="python_api/pipeline/evaluator.html#marius.pipeline.SynchronousEvaluator">SynchronousEvaluator (class in marius.pipeline)</a>
 </li>
       <li><a href="python_api/pipeline/trainer.html#marius.pipeline.SynchronousTrainer">SynchronousTrainer (class in marius.pipeline)</a>
@@ -2852,6 +2954,8 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="python_api/storage/storage.html#marius.storage.tensor_from_file">tensor_from_file() (in module marius.storage)</a>
+</li>
       <li><a href="python_api/nn/decoders/edge/edge_decoder.html#marius.nn.decoders.edge.EdgeDecoder.tensor_options">tensor_options (marius.nn.decoders.edge.EdgeDecoder property)</a>
 </li>
       <li><a href="python_api/tools/configuration/constants.html#marius.tools.configuration.constants.PathConstants.test_edge_buckets_path">test_edge_buckets_path (marius.tools.configuration.constants.PathConstants attribute)</a>
@@ -2914,10 +3018,10 @@
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.TrainingConfig">(class in marius.tools.configuration.marius_config)</a>
 </li>
       </ul></li>
-      <li><a href="python_api/nn/decoders/edge/transe.html#marius.nn.decoders.edge.TransE">TransE (class in marius.nn.decoders.edge)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="python_api/nn/decoders/edge/transe.html#marius.nn.decoders.edge.TransE">TransE (class in marius.nn.decoders.edge)</a>
+</li>
       <li><a href="python_api/configuration/index.html#marius.config.DecoderType.TRANSE">TRANSE (marius.config.DecoderType attribute)</a>
 </li>
       <li><a href="python_api/nn/decoders/edge/relation_operators.html#marius.nn.decoders.edge.TranslationOperator">TranslationOperator (class in marius.nn.decoders.edge)</a>
@@ -3002,13 +3106,27 @@
       </ul></li>
       <li><a href="python_api/data/batch.html#marius.data.Batch.unique_node_indices">unique_node_indices (marius.data.Batch property)</a>
 </li>
-      <li><a href="python_api/storage/storage.html#marius.storage.Storage.unload">unload() (marius.storage.Storage method)</a>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.unload">unload() (marius.storage.GraphModelStorage method)</a>
+
+      <ul>
+        <li><a href="python_api/storage/storage.html#marius.storage.Storage.unload">(marius.storage.Storage method)</a>
+</li>
+      </ul></li>
+      <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.unloadStorage">unloadStorage() (marius.data.DataLoader method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.update_subgraph">update_subgraph() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.updateAddNodeEmbeddings">updateAddNodeEmbeddings() (marius.storage.GraphModelStorage method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.unloadStorage">unloadStorage() (marius.data.DataLoader method)</a>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.updateAddNodeEmbeddingState">updateAddNodeEmbeddingState() (marius.storage.GraphModelStorage method)</a>
 </li>
-      <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.updateEmbeddingsForBatch">updateEmbeddingsForBatch() (marius.data.DataLoader method)</a>
+      <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.updateEmbeddings">updateEmbeddings() (marius.data.DataLoader method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.updatePutNodeEmbeddings">updatePutNodeEmbeddings() (marius.storage.GraphModelStorage method)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.updatePutNodeEmbeddingState">updatePutNodeEmbeddingState() (marius.storage.GraphModelStorage method)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.NeighborSamplingConfig.use_hashmap_sets">use_hashmap_sets (marius.config.NeighborSamplingConfig property)</a>
 
@@ -3031,6 +3149,8 @@
 </li>
       </ul></li>
       <li><a href="python_api/tools/configuration/datatypes.html#marius.tools.configuration.datatypes.EdgeDecoderOptions.use_relation_features">use_relation_features (marius.tools.configuration.datatypes.EdgeDecoderOptions attribute)</a>
+</li>
+      <li><a href="python_api/storage/graph_storage.html#marius.storage.GraphModelStorage.useInMemorySubGraph">useInMemorySubGraph() (marius.storage.GraphModelStorage method)</a>
 </li>
   </ul></td>
 </tr></table>

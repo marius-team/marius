@@ -6,6 +6,5 @@ node
     :glob:
     :maxdepth: 2
 
-    node_decoder_model
     node_decoder
     noop_node_decoder

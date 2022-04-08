@@ -1,6 +1,8 @@
 Storage
 =======================================
 
+.. autofunction:: marius.storage.tensor_from_file
+
 .. autoclass:: marius.storage.Storage
     :members:
     :undoc-members:

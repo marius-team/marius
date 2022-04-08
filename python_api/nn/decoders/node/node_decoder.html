@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="NoOpNodeDecoder" href="noop_node_decoder.html" />
-    <link rel="prev" title="EdgeDecoderModel" href="node_decoder_model.html" /> 
+    <link rel="prev" title="node" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,8 +41,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../config_interface/index.html">Configuration Interface</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Python API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../../configuration/index.html">marius.config</a></li>
@@ -52,7 +52,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">decoders</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../edge/index.html">edge</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="index.html">node</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../decoder_model.html">DecoderModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../decoder.html">Decoder</a></li>
 </ul>
 </li>
@@ -73,9 +72,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../export_and_inference/index.html">Model Export and Inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../developer_guide/index.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Debugging and FAQ</a></li>
 </ul>
 
@@ -126,7 +123,7 @@
 <h1>NodeDecoder<a class="headerlink" href="#nodedecoder" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marius.nn.decoders.node.NodeDecoder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">marius.nn.decoders.node.</span></span><span class="sig-name descname"><span class="pre">NodeDecoder</span></span><a class="headerlink" href="#marius.nn.decoders.node.NodeDecoder" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.decoders.node.</span></span><span class="sig-name descname"><span class="pre">NodeDecoder</span></span><a class="headerlink" href="#marius.nn.decoders.node.NodeDecoder" title="Permalink to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="marius.nn.decoders.node.NodeDecoder.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.nn.decoders.node.NodeDecoder.__init__" title="Permalink to this definition"></a></dt>
@@ -134,7 +131,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marius.nn.decoders.node.NodeDecoder.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">marius._nn.decoders.node.NodeDecoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs:</span> <span class="pre">at::Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.nn.decoders.node.NodeDecoder.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.decoders.node.NodeDecoder</span></em>, <em class="sig-param"><span class="pre">inputs:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.nn.decoders.node.NodeDecoder.forward" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -145,7 +142,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="node_decoder_model.html" class="btn btn-neutral float-left" title="EdgeDecoderModel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="node" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="noop_node_decoder.html" class="btn btn-neutral float-right" title="NoOpNodeDecoder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

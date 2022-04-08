@@ -8,9 +8,7 @@ edge
 
     comparators
     complex
-    corrupt_node_decoder
     distmult
-    edge_decoder_model
     edge_decoder
     relation_operators
     transe

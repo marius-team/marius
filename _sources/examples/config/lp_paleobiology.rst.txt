@@ -184,7 +184,7 @@ Let's check again what was added in the ``datasets/custom_lp_example/`` director
    ...
 
 3. Inference with Python: Using Embeddings for Link Prediction
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now that we have generated our embeddings for the dataset, we can perform link prediction to infer new edges in the graph. As previously mentioned, we can fix a target node and relation type and predict potential source nodes.
 

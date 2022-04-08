@@ -39,15 +39,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config_interface/index.html">Configuration Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../python_api/index.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../export_and_inference/index.html">Model Export and Inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/index.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq.html">Debugging and FAQ</a></li>
 </ul>
 
@@ -90,7 +88,44 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <p>The marius_preprocess command can be used to download and preprocess built-in datasets for link prediction and node classification. Custom link prediction datasets can also be preprocessed with this command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">marius_preprocess</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">output_directory</span> <span class="n">output_directory</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">edges</span> <span class="n">edges</span> <span class="p">[</span><span class="n">edges</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">dataset</span> <span class="n">dataset</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">num_partitions</span> <span class="n">num_partitions</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">partitioned_eval</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">delim</span> <span class="n">delim</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">dataset_split</span> <span class="n">dataset_split</span> <span class="p">[</span><span class="n">dataset_split</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">overwrite</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">spark</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">no_remap_ids</span><span class="p">]</span>
+
+<span class="n">Preprocess</span> <span class="n">built</span><span class="o">-</span><span class="ow">in</span> <span class="n">datasets</span> <span class="ow">and</span> <span class="n">custom</span> <span class="n">link</span> <span class="n">prediction</span> <span class="n">datasets</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+  <span class="o">--</span><span class="n">output_directory</span> <span class="n">output_directory</span>
+                        <span class="n">Directory</span> <span class="n">to</span> <span class="n">put</span> <span class="n">graph</span> <span class="n">data</span>
+  <span class="o">--</span><span class="n">edges</span> <span class="n">edges</span> <span class="p">[</span><span class="n">edges</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">File</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">edge</span> <span class="nb">list</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="n">custom</span> <span class="n">dataset</span>
+  <span class="o">--</span><span class="n">dataset</span> <span class="n">dataset</span>     <span class="n">Name</span> <span class="n">of</span> <span class="n">dataset</span> <span class="n">to</span> <span class="n">preprocess</span>
+  <span class="o">--</span><span class="n">num_partitions</span> <span class="n">num_partitions</span>
+                        <span class="n">Number</span> <span class="n">of</span> <span class="n">node</span> <span class="n">partitions</span>
+  <span class="o">--</span><span class="n">partitioned_eval</span>    <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">the</span> <span class="n">validation</span> <span class="ow">and</span><span class="o">/</span><span class="ow">or</span> <span class="n">the</span> <span class="n">test</span> <span class="nb">set</span> <span class="n">will</span> <span class="n">be</span> <span class="n">partitioned</span><span class="o">.</span>
+  <span class="o">--</span><span class="n">delim</span> <span class="n">delim</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">delim</span>
+                        <span class="n">Delimiter</span> <span class="n">to</span> <span class="n">use</span> <span class="k">for</span> <span class="n">delimited</span> <span class="n">file</span> <span class="n">inputs</span>
+  <span class="o">--</span><span class="n">dataset_split</span> <span class="n">dataset_split</span> <span class="p">[</span><span class="n">dataset_split</span> <span class="o">...</span><span class="p">],</span> <span class="o">-</span><span class="n">ds</span> <span class="n">dataset_split</span> <span class="p">[</span><span class="n">dataset_split</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">Split</span> <span class="n">dataset</span> <span class="n">into</span> <span class="n">specified</span> <span class="n">fractions</span>
+  <span class="o">--</span><span class="n">overwrite</span>           <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">the</span> <span class="n">preprocessed</span> <span class="n">dataset</span> <span class="n">will</span> <span class="n">be</span> <span class="n">overwritten</span> <span class="k">if</span> <span class="n">it</span> <span class="n">already</span> <span class="n">exists</span>
+  <span class="o">--</span><span class="n">spark</span>               <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">pyspark</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span> <span class="n">to</span> <span class="n">perform</span> <span class="n">the</span> <span class="n">preprocessing</span>
+  <span class="o">--</span><span class="n">no_remap_ids</span>        <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">the</span> <span class="n">node</span> <span class="n">ids</span> <span class="n">of</span> <span class="n">the</span> <span class="nb">input</span> <span class="n">dataset</span> <span class="n">will</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">remapped</span> <span class="n">to</span> <span class="n">random</span> <span class="n">integer</span> <span class="n">ids</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Preprocessing Built-in Datasets</p>
+<p>Preprocess the FB15K-237 knowledge graph
+<code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">--dataset</span> <span class="pre">fb15k_237</span> <span class="pre">--output_directory</span> <span class="pre">example_dir/</span></code></p>
+<p>Preprocess the ogbn_arxiv graph for node classification
+<code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">--dataset</span> <span class="pre">ogbn_arxiv</span> <span class="pre">--output_directory</span> <span class="pre">example_dir/</span></code></p>
+<p>Preprocessing custom edge lists for link prediction tasks</p>
+<p>Assume we have some input edge list in CSV form</p>
+<dl class="simple">
+<dt>::</dt><dd><p>src,rel,dst</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">--dataset</span> <span class="pre">ogbn_arxiv</span> <span class="pre">--output_directory</span> <span class="pre">example_dir/</span></code></p>
+
 
            </div>
           </div>

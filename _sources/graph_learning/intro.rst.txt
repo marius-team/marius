@@ -1,5 +1,5 @@
 Intro to Graph Embeddings
-********************
+***************************
 
 A brief overview of graph-structured data, graph embeddings, and their applications.
 

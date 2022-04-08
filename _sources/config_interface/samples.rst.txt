@@ -171,7 +171,7 @@ GAT (3 layer) has an initial stage consisting of an embedding layer. It is conne
 training/evaluation neighbor sampling layers is equal to the GNN stages defined in the model. 
 
 Embeddings + Features + Edges
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The supported storage backends for embeddings and features are `PARTITION_BUFFER`, `DEVICE_MEMORY` and `HOST_MEMORY`. For edges, 
 the supported backends are `FLAT_FILE`, `DEVICE_MEMORY`, `HOST_MEMORY`.

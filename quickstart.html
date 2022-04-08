@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick Start &mdash; Marius 0.0.2 documentation</title>
+  <title>Getting Started &mdash; Marius 0.0.2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/marius_theme.css" type="text/css" />
     <link rel="shortcut icon" href="_static/favicon.ico"/>
@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Build and Install" href="build.html" />
+    <link rel="next" title="Examples" href="examples/index.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
 </head>
 
@@ -41,15 +41,33 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="build.html">Build and Install</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#build-and-install">Build and Install</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pip-installation">Pip installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cmake-build-no-python-api">CMake build (No Python API)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-interface">Configuration Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#preprocess-configuration">Preprocess &amp; Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#training">Training</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inference">Inference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#python-api">Python API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#preprocess-dataset-and-load-graph-data">Preprocess Dataset and load graph data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#define-model">Define Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#training-and-evaluation">Training and Evaluation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config_interface/index.html">Configuration Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python_api/index.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export_and_inference/index.html">Model Export and Inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developer_guide/index.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Debugging and FAQ</a></li>
 </ul>
 
@@ -82,7 +100,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Quick Start</li>
+      <li>Getting Started</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,8 +110,307 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="quick-start">
-<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h1>
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
+<section id="build-and-install">
+<h2>Build and Install<a class="headerlink" href="#build-and-install" title="Permalink to this headline"></a></h2>
+<section id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>CUDA &gt;= 10.1</p></li>
+<li><p>CuDNN &gt;= 7</p></li>
+<li><p>pytorch &gt;= 1.8</p></li>
+<li><p>python &gt;= 3.6</p></li>
+<li><p>GCC &gt;= 7 (On Linux) or Clang 12.0 (On MacOS)</p></li>
+<li><p>cmake &gt;= 3.12</p></li>
+<li><p>make &gt;= 3.8</p></li>
+</ul>
+</section>
+<section id="pip-installation">
+<h3>Pip installation<a class="headerlink" href="#pip-installation" title="Permalink to this headline"></a></h3>
+<p>First check that the required software is installed (see above).</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/marius-team/marius.git
+pip3 install .
+</pre></div>
+</div>
+</div></blockquote>
+<p>The Python API can be accessed with <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">marius</span></code>.</p>
+<p>The following commands will be installed:
+- marius_train
+- marius_eval
+- marius_preprocess
+- marius_predict</p>
+</section>
+<section id="cmake-build-no-python-api">
+<h3>CMake build (No Python API)<a class="headerlink" href="#cmake-build-no-python-api" title="Permalink to this headline"></a></h3>
+<p>This does not build the Python API, but only the C++ sources and marius_train executable.</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/marius-team/marius.git
+
+<span class="c1"># installs only marius.tools</span>
+<span class="nv">MARIUS_NO_BINDINGS</span><span class="o">=</span><span class="m">1</span> pip3 install .
+
+mkdir build
+<span class="nb">cd</span> build
+cmake ../ -DUSE_CUDA<span class="o">=</span><span class="m">1</span>
+make marius_train -j
+<span class="nb">cd</span> ..
+
+<span class="c1"># run with build/marius_train config.yaml</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+</section>
+<section id="configuration-interface">
+<h2>Configuration Interface<a class="headerlink" href="#configuration-interface" title="Permalink to this headline"></a></h2>
+<p>See Configuration examples (LINK) for detailed examples and the configuration schema (LINK) for all options.</p>
+<section id="preprocess-configuration">
+<h3>Preprocess &amp; Configuration<a class="headerlink" href="#preprocess-configuration" title="Permalink to this headline"></a></h3>
+<p>Preprocess dataset: this downloads and preprocesses the dataset into the arxiv_example/ directory</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_preprocess --dataset ogbn_arxiv --output_dir arxiv_example/
+</pre></div>
+</div>
+</div></blockquote>
+<p>Define configuration file: 1-layer GraphSage GNN</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE_CLASSIFICATION</span>
+  <span class="nt">encoder</span><span class="p">:</span>
+    <span class="nt">train_neighbor_sampling</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
+    <span class="nt">layers</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FEATURE</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
+          <span class="nt">options</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
+            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
+          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span>
+  <span class="nt">decoder</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE</span>
+  <span class="nt">loss</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">CROSS_ENTROPY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
+  <span class="nt">dense_optimizer</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAM</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cuda</span>
+  <span class="nt">dataset</span><span class="p">:</span>
+    <span class="nt">base_directory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">arxiv_example/</span>
+    <span class="nt">num_edges</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1166243</span>
+    <span class="nt">num_train</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">90941</span>
+    <span class="nt">num_nodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">169343</span>
+    <span class="nt">num_relations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">num_valid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">29799</span>
+    <span class="nt">num_test</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">48603</span>
+    <span class="nt">node_feature_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+    <span class="nt">num_classes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span>
+  <span class="nt">edges</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">int</span>
+  <span class="nt">features</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">float</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="training">
+<h3>Training<a class="headerlink" href="#training" title="Permalink to this headline"></a></h3>
+<blockquote>
+<div><p>Train the model described in the configuration file for 10 epochs.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_train arxiv_config.yaml
+</pre></div>
+</div>
+<p>The output will look similar to:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[04/08/22 01:12:10.693] ################ Starting training epoch 1 ################
+[04/08/22 01:12:10.721] Nodes processed: [10000/90941], 11.00%
+[04/08/22 01:12:10.741] Nodes processed: [20000/90941], 21.99%
+[04/08/22 01:12:10.762] Nodes processed: [30000/90941], 32.99%
+[04/08/22 01:12:10.800] Nodes processed: [40000/90941], 43.98%
+[04/08/22 01:12:10.820] Nodes processed: [50000/90941], 54.98%
+[04/08/22 01:12:10.840] Nodes processed: [60000/90941], 65.98%
+[04/08/22 01:12:10.863] Nodes processed: [70000/90941], 76.97%
+[04/08/22 01:12:10.883] Nodes processed: [80000/90941], 87.97%
+[04/08/22 01:12:10.916] Nodes processed: [90000/90941], 98.97%
+[04/08/22 01:12:10.918] Nodes processed: [90941/90941], 100.00%
+[04/08/22 01:12:10.918] ################ Finished training epoch 1 ################
+[04/08/22 01:12:10.918] Epoch Runtime: 224ms
+[04/08/22 01:12:10.918] Nodes per Second: 405986.6
+[04/08/22 01:12:10.918] Evaluating validation set
+[04/08/22 01:12:11.005]
+=================================
+Node Classification: 29799 nodes evaluated
+Accuracy: 58.669754%
+=================================
+[04/08/22 01:12:11.005] Evaluating test set
+[04/08/22 01:12:11.133]
+=================================
+Node Classification: 48603 nodes evaluated
+Accuracy: 57.936753%
+=================================
+...
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="inference">
+<h3>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h3>
+<blockquote>
+<div><p>Evaluate the test set for the dataset after 10 epochs have completed.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_eval arxiv_config.yaml
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[04/08/22 02:06:25.330] Evaluating test set
+[04/08/22 02:06:25.585]
+=================================
+Node Classification: 48603 nodes evaluated
+Accuracy: 64.963068%
+=================================
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+</section>
+<section id="python-api">
+<h2>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline"></a></h2>
+<p>See Python Examples (LINK) and API docs (LINK) for more details.</p>
+<section id="preprocess-dataset-and-load-graph-data">
+<h3>Preprocess Dataset and load graph data<a class="headerlink" href="#preprocess-dataset-and-load-graph-data" title="Permalink to this headline"></a></h3>
+<p>Import marius and preprocess ogbn_arxiv for node classifcation.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">marius</span> <span class="k">as</span> <span class="nn">m</span>
+<span class="kn">from</span> <span class="nn">marius.tools.preprocess.datasets.ogbn_arxiv</span> <span class="kn">import</span> <span class="n">OGBNArxiv</span>
+
+<span class="c1"># initialize and preprocess dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">OGBNArxiv</span><span class="p">(</span><span class="s2">&quot;arvix_example/&quot;</span><span class="p">)</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+<span class="n">dataset_stats</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">preprocess</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Load dataset tensors into GPU memory</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+<span class="n">edges</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">edge_list_file</span><span class="p">,</span>
+                                   <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_edges</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                   <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+                                   <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="n">train_nodes</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">train_nodes_file</span><span class="p">,</span>
+                                         <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_train</span><span class="p">],</span>
+                                         <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+                                         <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="n">test_nodes</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">test_nodes_file</span><span class="p">,</span>
+                                        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_test</span><span class="p">],</span>
+                                        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+                                        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">node_features_file</span><span class="p">,</span>
+                                      <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_nodes</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                                      <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">node_labels_file</span><span class="p">,</span>
+                                    <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_nodes</span><span class="p">],</span>
+                                    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+                                    <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="define-model">
+<h3>Define Model<a class="headerlink" href="#define-model" title="Permalink to this headline"></a></h3>
+<p>Define single layer graph sage model</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">feature_dim</span> <span class="o">=</span> <span class="n">dataset_stats</span><span class="o">.</span><span class="n">node_feature_dim</span>
+<span class="n">num_classes</span> <span class="o">=</span> <span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_classes</span>
+
+<span class="n">feature_layer</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">FeatureLayer</span><span class="p">(</span><span class="n">dimension</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span>
+                                         <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">graph_sage_layer</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">GraphSageLayer</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span>
+                                              <span class="n">output_dim</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span>
+                                              <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">encoder</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">encoders</span><span class="o">.</span><span class="n">GeneralEncoder</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[[</span><span class="n">feature_layer</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="n">graph_sage_layer</span><span class="p">]])</span>
+
+<span class="n">decoder</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">decoders</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">NoOpNodeDecoder</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+
+<span class="n">reporter</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">NodeClassificationReporter</span><span class="p">()</span>
+<span class="n">reporter</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">CategoricalAccuracy</span><span class="p">())</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">reporter</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">optimizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">.01</span><span class="p">)]</span>
+
+<span class="n">nbr_sampler</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">LayeredNeighborSampler</span><span class="p">(</span><span class="n">num_neighbors</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="training-and-evaluation">
+<h3>Training and Evaluation<a class="headerlink" href="#training-and-evaluation" title="Permalink to this headline"></a></h3>
+<p>Setup training and evaluation dataloaders</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">train_loader</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span>
+                                 <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span>
+                                 <span class="n">nodes</span><span class="o">=</span><span class="n">train_nodes</span><span class="p">,</span>
+                                 <span class="n">nbr_sampler</span><span class="o">=</span><span class="n">nbr_sampler</span><span class="p">,</span>
+                                 <span class="n">learning_task</span><span class="o">=</span><span class="s2">&quot;nc&quot;</span><span class="p">)</span>
+
+<span class="n">eval_loader</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span>
+                                <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span>
+                                <span class="n">nodes</span><span class="o">=</span><span class="n">test_nodes</span><span class="p">,</span>
+                                <span class="n">nbr_sampler</span><span class="o">=</span><span class="n">nbr_sampler</span><span class="p">,</span>
+                                <span class="n">learning_task</span><span class="o">=</span><span class="s2">&quot;nc)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Train 10 epochs</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">)</span>
+
+    <span class="n">train_loader</span><span class="o">.</span><span class="n">initializeBatches</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">train_loader</span><span class="o">.</span><span class="n">hasNextBatch</span><span class="p">():</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">train_loader</span><span class="o">.</span><span class="n">getBatch</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">train_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Evaluate Test Set</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">eval_loader</span><span class="o">.</span><span class="n">initializeBatches</span><span class="p">()</span>
+<span class="k">while</span> <span class="n">eval_loader</span><span class="o">.</span><span class="n">hasNextBatch</span><span class="p">():</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="n">eval_loader</span><span class="o">.</span><span class="n">getBatch</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">evaluate_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+</section>
 </section>
 
 
@@ -101,7 +418,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="build.html" class="btn btn-neutral float-right" title="Build and Install" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="examples/index.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

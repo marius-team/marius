@@ -19,7 +19,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="IO Helpers" href="io.html" />
+    <link rel="next" title="Storage" href="storage.html" />
     <link rel="prev" title="marius.storage" href="index.html" /> 
 </head>
 
@@ -41,8 +41,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../build.html">Build and Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../config_interface/index.html">Configuration Interface</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Python API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../configuration/index.html">marius.config</a></li>
@@ -53,7 +53,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../reporting/index.html">marius.report</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">marius.storage</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">GraphStorage</a></li>
-<li class="toctree-l3"><a class="reference internal" href="io.html">IO Helpers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="storage.html">Storage</a></li>
 </ul>
 </li>
@@ -62,9 +61,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../developer_guide/index.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
 </ul>
 
@@ -111,6 +108,261 @@
              
   <section id="graphstorage">
 <h1>GraphStorage<a class="headerlink" href="#graphstorage" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.storage.</span></span><span class="sig-name descname"><span class="pre">GraphModelStorage</span></span><a class="headerlink" href="#marius.storage.GraphModelStorage" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.storage.GraphModelStorage.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: marius._storage.GraphModelStorage, storage_ptrs: marius._storage.GraphModelStoragePtrs, storage_config: marius._config.StorageConfig) -&gt; None</p></li>
+<li><p>__init__(self: marius._storage.GraphModelStorage, edges: marius._storage.Storage, nodes: marius._storage.Storage = None, node_features: marius._storage.Storage = None, node_embeddings: marius._storage.Storage = None, node_optim_state: marius._storage.Storage = None, node_labels: marius._storage.Storage = None, filter_edges: List[marius._storage.Storage] = [], train: bool = False, prefetch: bool = False) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.active_edges">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">active_edges</span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.active_edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.active_nodes">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">active_nodes</span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.active_nodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.addFilterEdges">
+<span class="sig-name descname"><span class="pre">addFilterEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="storage.html#marius.storage.Storage" title="marius._storage.Storage"><span class="pre">marius._storage.Storage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.addFilterEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.current_subgraph_state">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">current_subgraph_state</span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.current_subgraph_state" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.embeddingsOffDevice">
+<span class="sig-name descname"><span class="pre">embeddingsOffDevice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.embeddingsOffDevice" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.full_graph_evaluation">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">full_graph_evaluation</span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.full_graph_evaluation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeEmbeddingState">
+<span class="sig-name descname"><span class="pre">getNodeEmbeddingState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeEmbeddingState" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeEmbeddingStateRange">
+<span class="sig-name descname"><span class="pre">getNodeEmbeddingStateRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeEmbeddingStateRange" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeEmbeddings">
+<span class="sig-name descname"><span class="pre">getNodeEmbeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeEmbeddings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeEmbeddingsRange">
+<span class="sig-name descname"><span class="pre">getNodeEmbeddingsRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeEmbeddingsRange" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeFeatures">
+<span class="sig-name descname"><span class="pre">getNodeFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeFeatures" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeFeaturesRange">
+<span class="sig-name descname"><span class="pre">getNodeFeaturesRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeFeaturesRange" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeIdsRange">
+<span class="sig-name descname"><span class="pre">getNodeIdsRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeIdsRange" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeLabels">
+<span class="sig-name descname"><span class="pre">getNodeLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeLabels" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNodeLabelsRange">
+<span class="sig-name descname"><span class="pre">getNodeLabelsRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNodeLabelsRange" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNumActiveEdges">
+<span class="sig-name descname"><span class="pre">getNumActiveEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNumActiveEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNumActiveNodes">
+<span class="sig-name descname"><span class="pre">getNumActiveNodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNumActiveNodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNumEdges">
+<span class="sig-name descname"><span class="pre">getNumEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNumEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNumNodes">
+<span class="sig-name descname"><span class="pre">getNumNodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNumNodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNumNodesInMemory">
+<span class="sig-name descname"><span class="pre">getNumNodesInMemory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNumNodesInMemory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getNumPartitions">
+<span class="sig-name descname"><span class="pre">getNumPartitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getNumPartitions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.getRandomNodeIds">
+<span class="sig-name descname"><span class="pre">getRandomNodeIds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.getRandomNodeIds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.get_edges">
+<span class="sig-name descname"><span class="pre">get_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.get_edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.get_edges_range">
+<span class="sig-name descname"><span class="pre">get_edges_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.get_edges_range" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.hasSwap">
+<span class="sig-name descname"><span class="pre">hasSwap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.hasSwap" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.init_subgraph">
+<span class="sig-name descname"><span class="pre">init_subgraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">buffer_state:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.init_subgraph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.load" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.next_subgraph_state">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">next_subgraph_state</span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.next_subgraph_state" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.performSwap">
+<span class="sig-name descname"><span class="pre">performSwap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.performSwap" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.setActiveEdges">
+<span class="sig-name descname"><span class="pre">setActiveEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">active_edges:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.setActiveEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.setActiveNodes">
+<span class="sig-name descname"><span class="pre">setActiveNodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">node_ids:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.setActiveNodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.setBufferOrdering">
+<span class="sig-name descname"><span class="pre">setBufferOrdering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage,</span> <span class="pre">buffer_states:</span> <span class="pre">List[at::Tensor]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.setBufferOrdering" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.setFilterEdges">
+<span class="sig-name descname"><span class="pre">setFilterEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="storage.html#marius.storage.Storage" title="marius._storage.Storage"><span class="pre">marius._storage.Storage</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.setFilterEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.setTestSet">
+<span class="sig-name descname"><span class="pre">setTestSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.setTestSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.setTrainSet">
+<span class="sig-name descname"><span class="pre">setTrainSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.setTrainSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.setValidationSet">
+<span class="sig-name descname"><span class="pre">setValidationSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.setValidationSet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.set_edge_storage">
+<span class="sig-name descname"><span class="pre">set_edge_storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_storage</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="storage.html#marius.storage.Storage" title="marius._storage.Storage"><span class="pre">marius._storage.Storage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.set_edge_storage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.set_node_storage">
+<span class="sig-name descname"><span class="pre">set_node_storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_storage</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="storage.html#marius.storage.Storage" title="marius._storage.Storage"><span class="pre">marius._storage.Storage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.set_node_storage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.shuffleEdges">
+<span class="sig-name descname"><span class="pre">shuffleEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.shuffleEdges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.sort_all_edges">
+<span class="sig-name descname"><span class="pre">sort_all_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.sort_all_edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.storage_ptrs">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">storage_ptrs</span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.storage_ptrs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.unload">
+<span class="sig-name descname"><span class="pre">unload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">write</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.unload" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.updateAddNodeEmbeddingState">
+<span class="sig-name descname"><span class="pre">updateAddNodeEmbeddingState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em>, <em class="sig-param"><span class="pre">values:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.updateAddNodeEmbeddingState" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.updateAddNodeEmbeddings">
+<span class="sig-name descname"><span class="pre">updateAddNodeEmbeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em>, <em class="sig-param"><span class="pre">values:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.updateAddNodeEmbeddings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.updatePutNodeEmbeddingState">
+<span class="sig-name descname"><span class="pre">updatePutNodeEmbeddingState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em>, <em class="sig-param"><span class="pre">state:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.updatePutNodeEmbeddingState" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.updatePutNodeEmbeddings">
+<span class="sig-name descname"><span class="pre">updatePutNodeEmbeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._storage.GraphModelStorage</span></em>, <em class="sig-param"><span class="pre">indices:</span> <span class="pre">at::Tensor</span></em>, <em class="sig-param"><span class="pre">embeddings:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.updatePutNodeEmbeddings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.update_subgraph">
+<span class="sig-name descname"><span class="pre">update_subgraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.update_subgraph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.storage.GraphModelStorage.useInMemorySubGraph">
+<span class="sig-name descname"><span class="pre">useInMemorySubGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.storage.GraphModelStorage" title="marius._storage.GraphModelStorage"><span class="pre">marius._storage.GraphModelStorage</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#marius.storage.GraphModelStorage.useInMemorySubGraph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -118,7 +370,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="marius.storage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="io.html" class="btn btn-neutral float-right" title="IO Helpers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="storage.html" class="btn btn-neutral float-right" title="Storage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

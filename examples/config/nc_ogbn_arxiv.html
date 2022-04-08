@@ -19,7 +19,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Large Scale Node Classification (OGBN-Papers100M)" href="nc_ogbn_papers100m.html" />
+    <link rel="next" title="Custom Dataset Node Classification" href="nc_custom.html" />
     <link rel="prev" title="Custom Dataset Link Prediction" href="lp_custom.html" /> 
 </head>
 
@@ -41,16 +41,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../build.html">Build and Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../config_interface/index.html">Configuration Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../python_api/index.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Configuration Examples</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="lp_fb15k237.html">Small Scale Link Prediction (FB15K-237)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="lp_ogb_wikikg90mv2.html">Large Scale Link Prediction (OGB-WikiKG90Mv2)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lp_paleobiology.html">Paleobiology Dataset Link Prediction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lp_custom.html">Custom Dataset Link Prediction</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Small Scale Node Classification (OGBN-Arxiv)</a><ul>
@@ -60,15 +54,17 @@
 <li class="toctree-l4"><a class="reference internal" href="#inference">4. Inference</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="nc_ogbn_papers100m.html">Large Scale Node Classification (OGBN-Papers100M)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nc_custom.html">Custom Dataset Node Classification</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../python/index.html">Python Examples</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_api/index.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../developer_guide/index.html">Developer Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
 </ul>
 
@@ -198,105 +194,105 @@ initialized: <span class="nb">false</span>
 <div class="line">Further note that the output of the encoder is the output label vector for a given node. Therefore, the <code class="docutils literal notranslate"><span class="pre">output_dim</span></code> of the last layer is 40, which is the same as the <code class="docutils literal notranslate"><span class="pre">num_classes</span></code> in <code class="docutils literal notranslate"><span class="pre">dataset.yaml</span></code>. (E.g. For node classification with 5 classes, the output label vector from the encoder might look like this: [.05, .2, .8, .01, .03]. In this case, an argmax will return a class label of 2 for the node.) The rest of the configurations can be fine-tuned by the user.</div>
 </div>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NODE_CLASSIFICATION</span><span class="w"></span>
-<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">train_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FEATURE</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
-<span class="w">            </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
-<span class="w">            </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
-<span class="w">            </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NODE</span><span class="w"></span>
-<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CROSS_ENTROPY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
-<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
-<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE_CLASSIFICATION</span>
+  <span class="nt">encoder</span><span class="p">:</span>
+    <span class="nt">train_neighbor_sampling</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
+    <span class="nt">layers</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FEATURE</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
+          <span class="nt">options</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
+            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
+          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
+          <span class="nt">options</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
+            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
+          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
+          <span class="nt">options</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
+            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
+          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">decoder</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE</span>
+  <span class="nt">loss</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">CROSS_ENTROPY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
+  <span class="nt">dense_optimizer</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAM</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="c1"># omit</span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
 <li><p>Next, we set the <strong>storage</strong> and <strong>dataset</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">dataset</span></code>. Here, the <code class="docutils literal notranslate"><span class="pre">base_directory</span></code> is set to <code class="docutils literal notranslate"><span class="pre">datasets/ogbn_arxiv_example/</span></code>, which is the preprocessing output directory. To populate the <code class="docutils literal notranslate"><span class="pre">num_edges</span></code>, <code class="docutils literal notranslate"><span class="pre">num_train</span></code>,…, <code class="docutils literal notranslate"><span class="pre">num_test</span></code> fields, we use the same input dataset statistics obtained from <code class="docutils literal notranslate"><span class="pre">datasets/ogbn_arxiv_example/dataset.yaml</span></code>. Note two additional dataset parameters than a link prediction model: <code class="docutils literal notranslate"><span class="pre">num_classes</span></code> is required for node classification and <code class="docutils literal notranslate"><span class="pre">node_feature_dim</span></code> is required if a <code class="docutils literal notranslate"><span class="pre">FEATURE</span></code> type layer exists.</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
-<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">base_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">datasets/ogbn_arxiv_example/</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1166243</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90941</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">169343</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_relations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_valid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">29799</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">48603</span><span class="w"></span>
-<span class="w">    </span><span class="nt">node_feature_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_classes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w"></span>
-<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
-<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
-<span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cuda</span>
+  <span class="nt">dataset</span><span class="p">:</span>
+    <span class="nt">base_directory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">datasets/ogbn_arxiv_example/</span>
+    <span class="nt">num_edges</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1166243</span>
+    <span class="nt">num_train</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">90941</span>
+    <span class="nt">num_nodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">169343</span>
+    <span class="nt">num_relations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">num_valid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">29799</span>
+    <span class="nt">num_test</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">48603</span>
+    <span class="nt">node_feature_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+    <span class="nt">num_classes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span>
+  <span class="nt">edges</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">int</span>
+  <span class="nt">features</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">float</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="c1"># omit</span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
 <li><p>Lastly, we configure <strong>training</strong> and <strong>evaluation</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">num_epochs</span></code>. We set <code class="docutils literal notranslate"><span class="pre">num_epochs=10</span></code> (10 epochs to train) to demonstrate this example.</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -403,7 +399,7 @@ edges/
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="lp_custom.html" class="btn btn-neutral float-left" title="Custom Dataset Link Prediction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="nc_ogbn_papers100m.html" class="btn btn-neutral float-right" title="Large Scale Node Classification (OGBN-Papers100M)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="nc_custom.html" class="btn btn-neutral float-right" title="Custom Dataset Node Classification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

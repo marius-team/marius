@@ -9,12 +9,10 @@ Marius
 
     introduction
     quickstart
-    build
+    examples/index
     config_interface/index
     python_api/index
     preprocess_datasets/index
     export_and_inference/index
-    examples/index
     graph_learning/index
-    developer_guide/index
     faq

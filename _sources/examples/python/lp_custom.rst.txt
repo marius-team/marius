@@ -216,7 +216,7 @@ For training all we need is the following function::
         while dataloader.hasNextBatch():
             batch = dataloader.getBatch()
             model.train_batch(batch)
-            dataloader.updateEmbeddingsForBatch(batch, gpu=False)
+            dataloader.updateEmbeddings(batch)
 
 All we are doing in this function is as follows:
 
