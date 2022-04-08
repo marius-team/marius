@@ -15,4 +15,3 @@ Marius
     preprocess_datasets/index
     export_and_inference/index
     graph_learning/index
-    faq

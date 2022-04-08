@@ -135,11 +135,11 @@ Additional Python Tools
 Upcoming Features
 ##############################
 
-* Configuration file optimizer (in testing)
+* Configuration file optimizer and generator (in testing)
 * SQL database to graph conversion tool (in testing)
-* KNN inference module (in testing)
 * Multi-GPU training (in progress)
 * Model checkpointing (in progress)
+* KNN inference module
 * marius_preprocess parquet file support
 * Remote storage for graph data and embeddings
 * Additional encoder layers and decoder layers
