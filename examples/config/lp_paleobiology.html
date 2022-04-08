@@ -155,7 +155,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">marius</span><span class="o">-</span><span class="n">examples</span><span class="o">/</span><span class="n">link</span><span class="o">-</span><span class="n">predict</span><span class="o">-</span><span class="n">example</span>
 </pre></div>
 </div>
-<p>This contains our paleobiology dataset, located in <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>, along with a sample configuration file <code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code> and link prediction Python script predict.py.</p>
+<p>This contains our paleobiology dataset, located in <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>, along with a sample configuration file <code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code>.</p>
 </section>
 <section id="train-model-with-marius">
 <h2>2. Train Model with Marius<a class="headerlink" href="#train-model-with-marius" title="Permalink to this headline"></a></h2>
@@ -256,7 +256,7 @@
 </div>
 <p>After this has finished, our output will be in our <code class="docutils literal notranslate"><span class="pre">[base_directory]</span></code> (using the provided config, this will be <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>.</p>
 <p>Here are the files that were created in training:
-Let’s check again what was added in the <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/</span></code> directory. For clarity, we only list the files that were created in training. Notice that several files have been created, including the trained model, the embedding table, a full configuration file, and output logs:</p>
+Here is what was added in the <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/</span></code> directory. For clarity, we only list the files that were created in training. Notice that several files have been created, including the trained model, the embedding table, a full configuration file, and output logs:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls datasets/custom_lp_example/
 model.pt                           <span class="c1"># contains the dense model parameters, embeddings of the edge-types</span>
 model_state.pt                     <span class="c1"># optimizer state of the trained model parameters</span>
