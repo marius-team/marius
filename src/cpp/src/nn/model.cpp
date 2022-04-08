@@ -56,7 +56,10 @@ Model::Model(shared_ptr<GeneralEncoder> encoder,
     }
 }
 
-void Model::zero_grad() {
+void Model::zero_grad(bool set_to_none) {
+
+    // Currently unimplemented
+    (void) set_to_none;
 
     #pragma omp parallel for
     for (int i = 0; i < optimizers_.size(); i++) {

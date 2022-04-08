@@ -39,7 +39,9 @@ class CMakeBuild(build_ext):
             raise RuntimeError("Unsupported on Windows")
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j16']
+
+            num_threads = os.cpu_count()
+            build_args += ['--', '-j{}'.format(num_threads)]
 
         cmake_args += ["-DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE"]
         cmake_args += ["-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE"]
