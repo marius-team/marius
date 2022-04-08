@@ -193,7 +193,7 @@ class TestModel(unittest.TestCase):
 
         model_nc.train_batch(batch, True)
 
-    def test_zero_grad(self):
+    def test_clear_grad(self):
         model = get_test_model_nc()
 
         model.optimizers = [SGDOptimizer(model.named_parameters(), .1)]
@@ -202,7 +202,7 @@ class TestModel(unittest.TestCase):
         model.parameters()[0].grad = grad
 
         assert torch.all(torch.eq(model.parameters()[0].grad, grad)).item() is True
-        model.zero_grad()
+        model.clear_grad()
         assert model.parameters()[0].grad is None
 
     def test_step(self):

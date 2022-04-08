@@ -41,7 +41,7 @@ void Optimizer::save(torch::serialize::OutputArchive &output_archive) {
     }
 }
 
-void Optimizer::zero_grad() {
+void Optimizer::clear_grad() {
 
     auto param_items = param_dict_.items();
     #pragma omp parallel for

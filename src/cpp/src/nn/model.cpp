@@ -56,20 +56,17 @@ Model::Model(shared_ptr<GeneralEncoder> encoder,
     }
 }
 
-void Model::zero_grad(bool set_to_none) {
-
-    // Currently unimplemented
-    (void) set_to_none;
+void Model::clear_grad() {
 
     #pragma omp parallel for
     for (int i = 0; i < optimizers_.size(); i++) {
-        optimizers_[i]->zero_grad();
+        optimizers_[i]->clear_grad();
     }
 }
 
-void Model::zero_grad_all() {
+void Model::clear_grad_all() {
     for (int i = 0; i < device_models_.size(); i++) {
-        device_models_[i]->zero_grad();
+        device_models_[i]->clear_grad();
     }
 }
 
@@ -164,7 +161,7 @@ void Model::all_reduce() {
     }
 
     step_all();
-    zero_grad_all();
+    clear_grad_all();
 }
 
 void Model::setup_optimizers(shared_ptr<ModelConfig> model_config) {
@@ -306,7 +303,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Model::fo
 void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
 
     if (call_step) {
-        zero_grad();
+        clear_grad();
     }
 
     if (batch->node_embeddings_.defined()) {

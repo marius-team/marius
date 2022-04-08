@@ -23,7 +23,7 @@ public:
 
     void load(torch::serialize::InputArchive &input_archive);
 
-    void zero_grad();
+    void clear_grad();
 
     virtual void reset_state() = 0;
 

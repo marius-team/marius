@@ -45,9 +45,9 @@ class Model : public torch::nn::Module {
 
     void evaluate_batch(shared_ptr<Batch> batch);
 
-    void zero_grad(bool set_to_none=false) override;
+    void clear_grad();
 
-    void zero_grad_all();
+    void clear_grad_all();
 
     void step();
 

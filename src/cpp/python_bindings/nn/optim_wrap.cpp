@@ -26,7 +26,7 @@ void init_optim(py::module &m) {
                     // TODO need to provide bindings for torch::serialize::InputArchive and torch::serialize::OutputArchive
 //        .def("save", &Optimizer::save, py::arg("output_archive"))
 //        .def("load", &Optimizer::load, py::arg("input_archive"))
-            .def("zero_grad", &Optimizer::zero_grad)
+            .def("clear_grad", &Optimizer::clear_grad)
             .def("reset_state", &Optimizer::reset_state)
             .def("step", &Optimizer::step);
 
