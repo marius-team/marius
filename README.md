@@ -2,7 +2,7 @@
 
 Marius is a system for training graph neural networks and embeddings for large-scale graphs on a single machine.
 
-Marius ([OSDI '21 Paper](https://arxiv.org/abs/2101.08358)) is designed to mitigate/reduce data movement overheads using:
+Marius ([OSDI '21 Paper](https://www.usenix.org/conference/osdi21/presentation/mohoney)) is designed to mitigate/reduce data movement overheads using:
 - Pipelined training and IO
 - Partition caching and buffer-aware data orderings
 
@@ -22,7 +22,7 @@ We scale graph neural network training ([preprint](https://arxiv.org/abs/2202.02
 * cmake >= 3.12
 * make >= 3.8
 
-### Pip installation ###
+### Pip Installation ###
 
 ```
 git clone https://github.com/marius-team/marius.git
@@ -39,7 +39,7 @@ The following commands will be installed:
 - marius_preprocess: Built-in dataset downloading and preprocessing
 - marius_predict: Batch inference tool for link prediction or node classification
 
-## Command line training ##
+## Command Line Training ##
 
 First make sure marius is installed with `pip3 install .` 
 

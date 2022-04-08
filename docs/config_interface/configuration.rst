@@ -84,7 +84,7 @@ This example assumes that marius has been installed with :doc:`pip <../build>` t
 |     decoder:                              |                                               |
 |       type: DISTMULT                      |                                               |
 |     loss:                                 |                                               |
-|       type: SOFTMAX_CE                       |                                               |
+|       type: SOFTMAX_CE                    |                                               |
 |       options:                            |                                               |
 |         reduction: SUM                    |                                               |
 |     dense_optimizer:                      |                                               |

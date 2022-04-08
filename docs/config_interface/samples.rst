@@ -24,7 +24,7 @@ DistMult
 |     decoder:                                  |                                             |
 |       type: DISTMULT                          |                                             |
 |     loss:                                     |                                             |
-|       type: SOFTMAX_CE                           |                                             |
+|       type: SOFTMAX_CE                        |                                             |
 |       options:                                |                                             |
 |         reduction: SUM                        |                                             |
 |     dense_optimizer:                          |                                             |
@@ -92,7 +92,7 @@ Graph Sage (3-layer)
 |     decoder:                           |                                      |
 |       type: DISTMULT                   |                                      |
 |     loss:                              |                                      |
-|       type: SOFTMAX_CE                    |                                      |
+|       type: SOFTMAX_CE                 |                                      |
 |       options:                         |                                      |
 |         reduction: SUM                 |                                      |
 |     dense_optimizer:                   |                                      |
