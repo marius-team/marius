@@ -173,76 +173,55 @@
 <p><code class="docutils literal notranslate"><span class="pre">storage.device_type</span></code> : We assume training on GPU. If using CPU only, switch from <code class="docutils literal notranslate"><span class="pre">cuda</span></code> to <code class="docutils literal notranslate"><span class="pre">CPU</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">training.num_epochs</span></code>: The number of epochs to train for. Adjust higher or lower based on the desired accuracy of the embeddings. Our default is <code class="docutils literal notranslate"><span class="pre">100</span></code> epochs.</p>
 <p><code class="docutils literal notranslate"><span class="pre">storage.dataset.base_directory</span></code>: We assume we are in the link prediction example directory <code class="docutils literal notranslate"><span class="pre">~/marius-examples/link-predict-example/</span></code> when running the training process, so our default relative path is <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>. Change if running from another directory.</p>
-<p><code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code>
-.. code-block:: yaml</p>
-<blockquote>
-<div><dl>
-<dt>model:</dt><dd><p>learning_task: LINK_PREDICTION
-encoder:</p>
-<blockquote>
-<div><p>layers:
-- - type: EMBEDDING</p>
-<blockquote>
-<div><p>output_dim: 50</p>
-</div></blockquote>
-</div></blockquote>
-<dl class="simple">
-<dt>decoder:</dt><dd><p>type: COMPLEX</p>
-</dd>
-<dt>loss:</dt><dd><p>type: SOFTMAX</p>
-</dd>
-<dt>sparse_optimizer:</dt><dd><p>type: ADAGRAD
-options:
-learning_rate: 0.1</p>
-</dd>
-</dl>
-</dd>
-<dt>storage:</dt><dd><p>device_type: cuda
-dataset:</p>
-<blockquote>
-<div><p>base_directory: dataset/
-num_edges: 96522
-num_train: 96522
-num_nodes: 14752
-num_relations: 5
-num_valid: 5362
-num_test: 5363</p>
-</div></blockquote>
-<dl class="simple">
-<dt>edges:</dt><dd><p>type: DEVICE_MEMORY</p>
-</dd>
-<dt>embeddings:</dt><dd><p>type: DEVICE_MEMORY</p>
-</dd>
-</dl>
-<p>save_model: true</p>
-</dd>
-<dt>training:</dt><dd><p>batch_size: 1000
-negative_sampling:</p>
-<blockquote>
-<div><p>num_chunks: 100
-negatives_per_positive: 512
-degree_fraction: 0.0
-filtered: false</p>
-</div></blockquote>
-<p>num_epochs: 100
-pipeline:</p>
-<blockquote>
-<div><p>sync: true</p>
-</div></blockquote>
-<p>epochs_per_shuffle: 1</p>
-</dd>
-<dt>evaluation:</dt><dd><p>batch_size: 1000
-negative_sampling:</p>
-<blockquote>
-<div><p>filtered: true</p>
-</div></blockquote>
-<dl class="simple">
-<dt>pipeline:</dt><dd><p>sync: true</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span><span class="w"></span>
+<span class="w">    </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
+<span class="w">            </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">    </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COMPLEX</span><span class="w"></span>
+<span class="w">    </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sparse_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">        </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">base_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dataset/</span><span class="w"></span>
+<span class="w">        </span><span class="nt">num_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96522</span><span class="w"></span>
+<span class="w">        </span><span class="nt">num_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96522</span><span class="w"></span>
+<span class="w">        </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14752</span><span class="w"></span>
+<span class="w">        </span><span class="nt">num_relations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">        </span><span class="nt">num_valid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5362</span><span class="w"></span>
+<span class="w">        </span><span class="nt">num_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5363</span><span class="w"></span>
+<span class="w">    </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
+<span class="w">        </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512</span><span class="w"></span>
+<span class="w">        </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">        </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
+<span class="w">    </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">epochs_per_shuffle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Step 2: Run Marius</strong></p>
 <p>Now that we have a configuration file and dataset ready, we simply need to run the training executable with our config file as the argument.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">marius_train</span> <span class="n">paleo_config</span><span class="o">.</span><span class="n">yaml</span>
@@ -308,8 +287,7 @@ edges/
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">marius_predict</span> <span class="o">--</span><span class="n">config</span> <span class="n">paleo_config</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">output_dir</span> <span class="n">results</span><span class="o">/</span> <span class="o">--</span><span class="n">metrics</span> <span class="n">mrr</span> <span class="n">mean_rank</span> <span class="n">hits1</span> <span class="n">hits10</span> <span class="n">hits50</span> <span class="o">--</span><span class="n">save_scores</span> <span class="o">--</span><span class="n">save_ranks</span>
 </pre></div>
 </div>
-<p>This tool takes our config, an output directory, and our desired metrics as input, and perform link prediction evaluation over the test set of edges provided in the config file. Metrics are saved to <code class="docutils literal notranslate"><span class="pre">results/metrics.txt</span></code> and scores and ranks for each test edge are saved to <code class="docutils literal notranslate"><span class="pre">results/scores.csv</span></code>.
-.. [TODO: CHANGE FROM PREDICT.PY TO  <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code>]</p>
+<p>This tool takes our config, an output directory, and our desired metrics as input, and perform link prediction evaluation over the test set of edges provided in the config file. Metrics are saved to <code class="docutils literal notranslate"><span class="pre">results/metrics.txt</span></code> and scores and ranks for each test edge are saved to <code class="docutils literal notranslate"><span class="pre">results/scores.csv</span></code>.</p>
 </section>
 </section>
 

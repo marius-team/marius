@@ -75,53 +75,55 @@ Before we can run Marius we need to specify our model hyperparameters and path t
 ``storage.dataset.base_directory``: We assume we are in the link prediction example directory ``~/marius-examples/link-predict-example/`` when running the training process, so our default relative path is ``dataset/``. Change if running from another directory.
 
 ``paleo_config.yaml``
+
 .. code-block:: yaml
-    model:
-        learning_task: LINK_PREDICTION
-        encoder:
-            layers:
-            - - type: EMBEDDING
-                output_dim: 50
-        decoder:
-            type: COMPLEX
-        loss:
-            type: SOFTMAX
-        sparse_optimizer:
-            type: ADAGRAD
-            options:
-            learning_rate: 0.1
-    storage:
-        device_type: cuda
-        dataset:
-            base_directory: dataset/
-            num_edges: 96522
-            num_train: 96522
-            num_nodes: 14752
-            num_relations: 5
-            num_valid: 5362
-            num_test: 5363
-        edges:
-            type: DEVICE_MEMORY
-        embeddings:
-            type: DEVICE_MEMORY
-        save_model: true
-    training:
-        batch_size: 1000
-        negative_sampling:
-            num_chunks: 100
-            negatives_per_positive: 512
-            degree_fraction: 0.0
-            filtered: false
-        num_epochs: 100
-        pipeline:
-            sync: true
-        epochs_per_shuffle: 1
-    evaluation:
-        batch_size: 1000
-        negative_sampling:
-            filtered: true
-        pipeline:
-            sync: true
+
+        model:
+            learning_task: LINK_PREDICTION
+            encoder:
+                layers:
+                - - type: EMBEDDING
+                    output_dim: 50
+            decoder:
+                type: COMPLEX
+            loss:
+                type: SOFTMAX
+            sparse_optimizer:
+                type: ADAGRAD
+                options:
+                learning_rate: 0.1
+        storage:
+            device_type: cuda
+            dataset:
+                base_directory: dataset/
+                num_edges: 96522
+                num_train: 96522
+                num_nodes: 14752
+                num_relations: 5
+                num_valid: 5362
+                num_test: 5363
+            edges:
+                type: DEVICE_MEMORY
+            embeddings:
+                type: DEVICE_MEMORY
+            save_model: true
+        training:
+            batch_size: 1000
+            negative_sampling:
+                num_chunks: 100
+                negatives_per_positive: 512
+                degree_fraction: 0.0
+                filtered: false
+            num_epochs: 100
+            pipeline:
+                sync: true
+            epochs_per_shuffle: 1
+        evaluation:
+            batch_size: 1000
+            negative_sampling:
+                filtered: true
+            pipeline:
+                sync: true
 
 **Step 2: Run Marius**
 
@@ -198,6 +200,7 @@ We will use the Marius inference tool ``marius_infer`` to do this. In ``~marius-
     marius_predict --config paleo_config.yaml --output_dir results/ --metrics mrr mean_rank hits1 hits10 hits50 --save_scores --save_ranks
 
 This tool takes our config, an output directory, and our desired metrics as input, and perform link prediction evaluation over the test set of edges provided in the config file. Metrics are saved to ``results/metrics.txt`` and scores and ranks for each test edge are saved to ``results/scores.csv``.
+
 .. [TODO: CHANGE FROM PREDICT.PY TO  ``marius_predict``]
 
 .. Our output should appear similar to the following
