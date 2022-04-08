@@ -154,7 +154,72 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is a sample end-to-end configuration file for link prediction on <cite>fb15_237</cite> dataset. The model consists of an embedding layer
+in the encoder phase which is directly fed to the <cite>DISTMULT</cite> decoder. Both embeddings and edges are stored in <cite>cpu</cite> memory.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span><span class="w"></span>
+<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
+<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">          </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISTMULT</span><span class="w"></span>
+<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sparse_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">full_graph_evaluation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">base_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/home/data/datasets/fb15k_237/</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">272115</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">272115</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14541</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_relations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">237</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_valid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">17535</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20466</span><span class="w"></span>
+<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
+<span class="w">  </span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">epochs_per_shuffle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">logs_per_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resume_training</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">epochs_per_eval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</pre></div>
+</div>
 <section id="model-configuration">
 <h2>Model Configuration<a class="headerlink" href="#model-configuration" title="Permalink to this headline"></a></h2>
 <table class="colwidths-given docutils align-default" id="id2">
@@ -180,39 +245,78 @@
 </tr>
 <tr class="row-odd"><td><p>learning_task</p></td>
 <td><p>String</p></td>
-<td><p>Learning task for which the model is used. Valid values are [“LINK_PREDICTION”, “NODE_CLASSIFICATION”] (case insensitive). “LP” and “NC” can be used for shorthand. See TODO_REF_LEARNING_TASKS.</p></td>
+<td><p>Learning task for which the model is used. Valid values are [“LINK_PREDICTION”, “NODE_CLASSIFICATION”] (case insensitive). “LP” and “NC” can be used for shorthand.</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td><p>encoder</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#encoder-conf-section"><span class="std std-ref">encoder</span></a></p></td>
 <td><p>EncoderConfig</p></td>
-<td><p>Defines the architecture of the encoder and configuration of neighbor samplers. See TODO_REF_ENCODER_CONFIG.</p></td>
+<td><p>Defines the architecture of the encoder and configuration of neighbor samplers.</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-odd"><td><p>decoder</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#decoder-conf-section"><span class="std std-ref">decoder</span></a></p></td>
 <td><p>DecoderConfig</p></td>
-<td><p>Denotes the decoder to apply to the output of the encoder. The decoder is learning task specific. See TODO_REF_DECODER_CONFIG.</p></td>
+<td><p>Denotes the decoder to apply to the output of the encoder. The decoder is learning task specific.</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td><p>loss</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#loss-conf-section"><span class="std std-ref">loss</span></a></p></td>
 <td><p>LossConfig</p></td>
-<td><p>Loss function to apply over the output of the decoder. See TODO_REF_LOSS_CONFIG.</p></td>
+<td><p>Loss function to apply over the output of the decoder.</p></td>
 <td><p>Required for training</p></td>
 </tr>
 <tr class="row-odd"><td><p>dense_optimizer</p></td>
-<td><p>OptimizerConfig</p></td>
-<td><p>Optimizer to use for dense model parameters. Where dense model parameters refer to all parameters besides the node embeddings. Where node embeddings are handled by the sparse_optimizer. See TODO_REF_OPTIMIZER_CONFIG for details.</p></td>
+<td><p><a class="reference internal" href="#optimizer-conf-section"><span class="std std-ref">OptimizerConfig</span></a></p></td>
+<td><p>Optimizer to use for dense model parameters. Where dense model parameters refer to all parameters besides the node embeddings. Where node embeddings are handled by the sparse_optimizer.</p></td>
 <td><p>Required for training</p></td>
 </tr>
 <tr class="row-even"><td><p>sparse_optimizer</p></td>
-<td><p>OptimizerConfig</p></td>
-<td><p>Optimizer to use for the node embedding parameters. Currently only ADAGRAD is supported. See TODO_REF_OPTIMIZER_CONFIG for details.</p></td>
+<td><p><a class="reference internal" href="#optimizer-conf-section"><span class="std std-ref">OptimizerConfig</span></a></p></td>
+<td><p>Optimizer to use for the node embedding parameters. Currently only ADAGRAD is supported.</p></td>
 <td><p>No</p></td>
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is a full view of the <cite>model</cite> attribute and the corresponding parameters that can be set in the model configuration. It consists
+of an embedding layer in the encoder phase and a <cite>DISTMULT</cite> decoder.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">random_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">456356765463</span><span class="w"></span>
+<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span><span class="w"></span>
+<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
+<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">          </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+<span class="w">          </span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEFAULT</span><span class="w"></span>
+<span class="w">            </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISTMULT</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">inverse_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">use_relation_features</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">      </span><span class="nt">edge_decoder_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CORRUPT_NODE</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sparse_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+</pre></div>
+</div>
 <section id="encoder-configuration">
-<h3>Encoder Configuration<a class="headerlink" href="#encoder-configuration" title="Permalink to this headline"></a></h3>
+<span id="encoder-conf-section"></span><h3>Encoder Configuration<a class="headerlink" href="#encoder-configuration" title="Permalink to this headline"></a></h3>
 <table class="colwidths-given docutils align-default" id="id3">
 <caption><span class="caption-text">EncoderConfig</span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -231,23 +335,67 @@
 <tbody>
 <tr class="row-even"><td><p>layers</p></td>
 <td><p>List[List[LayerConfig]]</p></td>
-<td><p>Defines architecture of the encoder. Layers of the encoder are grouped into stages, where the layers within a stage are executed in parallel and the output of stage is the input to the successive stage. See TODO_REF_ENCODER_DEFINITION for details on defining encoder architectures.</p></td>
+<td><p>Defines architecture of the encoder. Layers of the encoder are grouped into stages, where the layers within a stage are executed in parallel and the output of stage is the input to the successive stage.</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td><p>train_neighbor_sampling</p></td>
-<td><p>List[NeighborSamplingConfig]</p></td>
-<td><p>Sets the neighbor sampling configuration for each GNN layer for training (and evaluation if eval_neighbor_sampling is not set). Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder. See TODO_REF_NEIGHBOR_SAMPLING_CONFIG.</p></td>
+<td><p>List[<a class="reference internal" href="#neighbor-sampling-conf-section"><span class="std std-ref">NeighborSamplingConfig</span></a>]</p></td>
+<td><p>Sets the neighbor sampling configuration for each GNN layer for training (and evaluation if eval_neighbor_sampling is not set). Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder.</p></td>
 <td><p>Only for GNNs</p></td>
 </tr>
 <tr class="row-even"><td><p>eval_neighbor_sampling</p></td>
-<td><p>List[NeighborSamplingConfig]</p></td>
-<td><p>Sets the neighbor sampling configuration for each GNN layer for evaluation. Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder. If this field is not set then the sampling configuration used for training will be used for evaluation. See TODO_REF_NEIGHBOR_SAMPLING_CONFIG.</p></td>
+<td><p>List[<a class="reference internal" href="#neighbor-sampling-conf-section"><span class="std std-ref">NeighborSamplingConfig</span></a>]</p></td>
+<td><p>Sets the neighbor sampling configuration for each GNN layer for evaluation. Defined as a list of neighbor sampling configurations, where the size of the list must match the number of GNN layers in the encoder. If this field is not set then the sampling configuration used for training will be used for evaluation.</p></td>
 <td><p>No</p></td>
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
-<table class="colwidths-given docutils align-default" id="id4">
+<p>The below example depicts a configuration where there is one embedding layer, followed by three GNN layers.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">train_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">  </span><span class="nt">eval_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">  </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
+<span class="w">        </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
+<span class="w">        </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GAT</span><span class="w"></span>
+<span class="w">        </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
+<span class="w">        </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GAT</span><span class="w"></span>
+<span class="w">        </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
+<span class="w">        </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GAT</span><span class="w"></span>
+<span class="w">        </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">        </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+</pre></div>
+</div>
+<span id="neighbor-sampling-conf-section"></span><table class="colwidths-given docutils align-default" id="id4">
 <caption><span class="caption-text">NeighborSamplingConfig</span><a class="headerlink" href="#id4" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 17%" />
@@ -275,7 +423,14 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>In the following configuration snippet, the GNN layer samples all neighbors for a given node during training. All neighbors with incoming
+edges to the given node are sampled while the outgoing edges are ignored.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">train_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">    </span><span class="nt">use_incoming_nbrs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">use_outgoing_nbrs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+</pre></div>
+</div>
 <table class="colwidths-given docutils align-default" id="id5">
 <caption><span class="caption-text">UniformSamplingOptions[NeighborSamplingOptions]</span><a class="headerlink" href="#id5" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -292,14 +447,24 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>num_neighbors</p></td>
+<tr class="row-even"><td><p>max_neighbors</p></td>
 <td><p>Int</p></td>
 <td><p>Number of neighbors to sample in a given uniform sampling layer.</p></td>
 <td><p>Yes</p></td>
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>The below configuration might work for a graph configuration where there are 2 GNN layers. The configuration specifies that at most
+10 neighboring nodes will be samples for any given node embedding during training.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">train_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UNIFORM</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">max_neighbors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UNIFORM</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">max_neighbors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+</pre></div>
+</div>
 <table class="colwidths-given docutils align-default" id="id6">
 <caption><span class="caption-text">DropoutSamplingOptions[NeighborSamplingOptions]</span><a class="headerlink" href="#id6" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -323,7 +488,13 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p><cite>DROPOUT</cite> mode neighbor sampling randomly drops <cite>rate * 100</cite> percent neighbors during sampling.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">train_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DROPOUT</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span><span class="w"></span>
+</pre></div>
+</div>
 <section id="layer-configuration">
 <h4>Layer Configuration<a class="headerlink" href="#layer-configuration" title="Permalink to this headline"></a></h4>
 <table class="colwidths-given docutils align-default" id="id7">
@@ -363,8 +534,8 @@
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-even"><td><p>init</p></td>
-<td><p>InitConfig</p></td>
-<td><p>Initialization method for the layer parameters. (Default GLOROT_UNIFORM (TODO_REF_INITIALIZATION)).</p></td>
+<td><p><a class="reference internal" href="#init-conf-section"><span class="std std-ref">InitConfig</span></a></p></td>
+<td><p>Initialization method for the layer parameters. (Default GLOROT_UNIFORM).</p></td>
 <td><p>No</p></td>
 </tr>
 <tr class="row-odd"><td><p>optimizer</p></td>
@@ -378,23 +549,65 @@
 <td><p>No</p></td>
 </tr>
 <tr class="row-odd"><td><p>bias_init</p></td>
-<td><p>InitConfig</p></td>
-<td><p>Initialization method for the bias. The default initialization is zeroes (TODO_REF_INITIALIZATION).</p></td>
+<td><p><a class="reference internal" href="#init-conf-section"><span class="std std-ref">InitConfig</span></a></p></td>
+<td><p>Initialization method for the bias. The default initialization is zeroes.</p></td>
 <td><p>No</p></td>
 </tr>
-<tr class="row-even"><td><p>bias</p></td>
-<td><p>Bool</p></td>
-<td><p>Enable a bias to be applied to the output of the layer. (Default False)</p></td>
-<td><p>No</p></td>
-</tr>
-<tr class="row-odd"><td><p>activation</p></td>
+<tr class="row-even"><td><p>activation</p></td>
 <td><p>String</p></td>
 <td><p>Activation function to apply to the output of the layer. Options [“RELU”, “SIGMOID”, “NONE”]. (Default “NONE”)</p></td>
 <td><p>No</p></td>
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is a configuration for creating and embedding layer with output dimension 50. It is initialized with zeros and has no activation
+set.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
+<span class="w">    </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">    </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEFAULT</span><span class="w"></span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bias_init</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ZEROS</span><span class="w"></span>
+<span class="w">    </span><span class="nt">activation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NONE</span><span class="w"></span>
+</pre></div>
+</div>
+<p>A GNN layer of type GAT (Graph Attention) with input and output dimension of 50 is as follows.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GAT</span><span class="w"></span>
+<span class="w">    </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">    </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+</pre></div>
+</div>
+<p>A Reduction layer of type Linear, with input dimension of 100 and output dimension of 50 is as follows.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDUCTION</span><span class="w"></span>
+<span class="w">    </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ouptut_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINEAR</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Below is a simple Feature layer with output dimension of 50. The input dimension is set to -1 by default since both Feature and
+Embedding layers do not have any input.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FEATURE</span><span class="w"></span>
+<span class="w">    </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="layer-options">
 <h4>Layer Options<a class="headerlink" href="#layer-options" title="Permalink to this headline"></a></h4>
@@ -427,7 +640,13 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>A GNN layer of type <cite>GRAPH_SAGE</cite> with aggregator set to <cite>MEAN</cite>. Another possbile option is <cite>GCN</cite> (Graph Convolution).</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
+<span class="w">      </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
+</pre></div>
+</div>
 <table class="colwidths-given docutils align-default" id="id9">
 <caption><span class="caption-text">GATLayerOptions[LayerOptions]</span><a class="headerlink" href="#id9" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -476,7 +695,16 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>A GNN layer of type <cite>GAT</cite> (Graph Attention) with 50 attention heads. <cite>input_dropout</cite> is set to 0.1 implying that 10 percent of the
+input tensor values will be randomly dropped.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GAT</span><span class="w"></span>
+<span class="w">      </span><span class="nt">num_heads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">      </span><span class="nt">average_heads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">      </span><span class="nt">input_dropout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Reduction Layer Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id10">
 <caption><span class="caption-text">ReductionLayerOptions[LayerOptions]</span><a class="headerlink" href="#id10" title="Permalink to this table"></a></caption>
@@ -501,10 +729,15 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>A reduction layer of type <cite>LINEAR</cite>. Another possible type for the reduction layer is <cite>CONCAT</cite>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REDUCTION</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINEAR</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="initialization-configuration">
-<h4>Initialization Configuration<a class="headerlink" href="#initialization-configuration" title="Permalink to this headline"></a></h4>
+<span id="init-conf-section"></span><h4>Initialization Configuration<a class="headerlink" href="#initialization-configuration" title="Permalink to this headline"></a></h4>
 <table class="colwidths-given docutils align-default" id="id11">
 <caption><span class="caption-text">InitConfig</span><a class="headerlink" href="#id11" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -533,7 +766,11 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Uniform Init Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id12">
 <caption><span class="caption-text">UniformInitOptions[InitOptions]</span><a class="headerlink" href="#id12" title="Permalink to this table"></a></caption>
@@ -558,7 +795,13 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>The below configuration is used to initialize a layer with a uniform distribution of values ranging between [-scale_factor, +scale_factor]</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UNIFORM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">scale_factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Normal Init Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id13">
 <caption><span class="caption-text">NormalInitOptions[InitOptions]</span><a class="headerlink" href="#id13" title="Permalink to this table"></a></caption>
@@ -588,7 +831,15 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>The below configuration is used to initialize a layer with values belonging to a noraml distribution, with mean 0.5 and standard
+deviation 0.1.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NORMAL</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"></span>
+<span class="w">    </span><span class="nt">std</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Constant Init Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id14">
 <caption><span class="caption-text">ConstantInitOptions[InitOptions]</span><a class="headerlink" href="#id14" title="Permalink to this table"></a></caption>
@@ -613,11 +864,17 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p><cite>CONSTANT</cite> initialization mode initializes all parameters of the layer to the specified constant value.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CONSTANT</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">constant</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="decoder-configuration">
-<h3>Decoder Configuration<a class="headerlink" href="#decoder-configuration" title="Permalink to this headline"></a></h3>
+<span id="decoder-conf-section"></span><h3>Decoder Configuration<a class="headerlink" href="#decoder-configuration" title="Permalink to this headline"></a></h3>
 <table class="colwidths-given docutils align-default" id="id15">
 <caption><span class="caption-text">DecoderConfig</span><a class="headerlink" href="#id15" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -651,7 +908,17 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is a <cite>DISTMULT</cite> decoder with Adagrad Optimizer, that optimizes the loss function over edges as well as their inverses (dest-&gt;rel-&gt;src).</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISTMULT</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">inverse_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+</pre></div>
+</div>
 <section id="decoder-options">
 <h4>Decoder Options<a class="headerlink" href="#decoder-options" title="Permalink to this headline"></a></h4>
 <p><strong>Edge Decoder Options</strong></p>
@@ -683,11 +950,17 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISTMULT</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">inverse_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">edge_decoder_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CORRUPT_NODE</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="loss-configuration">
-<h3>Loss Configuration<a class="headerlink" href="#loss-configuration" title="Permalink to this headline"></a></h3>
+<span id="loss-conf-section"></span><h3>Loss Configuration<a class="headerlink" href="#loss-configuration" title="Permalink to this headline"></a></h3>
 <table class="colwidths-given docutils align-default" id="id17">
 <caption><span class="caption-text">LossConfig</span><a class="headerlink" href="#id17" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -706,7 +979,7 @@
 <tbody>
 <tr class="row-even"><td><p>type</p></td>
 <td><p>String</p></td>
-<td><p>Denotes the type of the loss function. Options: [“SOFTMAX”, “RANKING”, “CROSS_ENTROPY”, “BCE_AFTER_SIGMOID”, “BCE_WITH_LOGITS”, “MSE”, “SOFTPLUS”]. SEE TODO_REF_LOSS_FUNCTIONS for details on each loss function.</p></td>
+<td><p>Denotes the type of the loss function. Options: [“SOFTMAX”, “RANKING”, “CROSS_ENTROPY”, “BCE_AFTER_SIGMOID”, “BCE_WITH_LOGITS”, “MSE”, “SOFTPLUS”].</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td><p>options</p></td>
@@ -716,7 +989,13 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is the configuration for a <cite>SOFTMAX</cite> loss function with <cite>SUM</cite> as the reduction method.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Loss Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id18">
 <caption><span class="caption-text">LossOptions</span><a class="headerlink" href="#id18" title="Permalink to this table"></a></caption>
@@ -741,7 +1020,13 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is the configuration for a <cite>SOFTMAX</cite> loss function with <cite>MEAN</cite> as the reduction method.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
+</pre></div>
+</div>
 <table class="colwidths-given docutils align-default" id="id19">
 <caption><span class="caption-text">RankingLossOptions[LossOptions]</span><a class="headerlink" href="#id19" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -770,10 +1055,17 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is the configuration for a <cite>RANKING</cite> loss function with <cite>margin</cite> set to 1.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RANKING</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+<span class="w">    </span><span class="nt">margin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="optimizer-configuration">
-<h3>Optimizer Configuration<a class="headerlink" href="#optimizer-configuration" title="Permalink to this headline"></a></h3>
+<span id="optimizer-conf-section"></span><h3>Optimizer Configuration<a class="headerlink" href="#optimizer-configuration" title="Permalink to this headline"></a></h3>
 <table class="colwidths-given docutils align-default" id="id20">
 <caption><span class="caption-text">OptimizerConfig</span><a class="headerlink" href="#id20" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -792,7 +1084,7 @@
 <tbody>
 <tr class="row-even"><td><p>type</p></td>
 <td><p>String</p></td>
-<td><p>Denotes the type of the optimizer. Options: [“SGD”, “ADAM”, “ADAGRAD”]. See TODO_REF_OPTIMIZERS for details on each optimizer.</p></td>
+<td><p>Denotes the type of the optimizer. Options: [“SGD”, “ADAM”, “ADAGRAD”].</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td><p>options</p></td>
@@ -802,7 +1094,13 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>The configuration for an <cite>ADAGRAD</cite> optimizer with learning rate of 0.1 is as follows</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>SGD Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id21">
 <caption><span class="caption-text">SGDOptions[OptimizerOptions]</span><a class="headerlink" href="#id21" title="Permalink to this table"></a></caption>
@@ -827,7 +1125,12 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SGD</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Adagrad Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id22">
 <caption><span class="caption-text">AdagradOptions[OptimizerOptions]</span><a class="headerlink" href="#id22" title="Permalink to this table"></a></caption>
@@ -872,7 +1175,17 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>The below configuration shows the options that can be set for <cite>ADAGRAD</cite> optimizer.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">eps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0e-10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">init_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">lr_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+</pre></div>
+</div>
 <p><strong>Adam Options</strong></p>
 <table class="colwidths-given docutils align-default" id="id23">
 <caption><span class="caption-text">AdamOptions[OptimizerOptions]</span><a class="headerlink" href="#id23" title="Permalink to this table"></a></caption>
@@ -922,7 +1235,18 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>The below configuration shows the options that can be set for <cite>ADAM</cite> optimizer.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="w">    </span><span class="nt">amsgrad</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">    </span><span class="nt">beta_1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.9</span><span class="w"></span>
+<span class="w">    </span><span class="nt">beta_2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.999</span><span class="w"></span>
+<span class="w">    </span><span class="nt">eps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0e-08</span><span class="w"></span>
+<span class="w">    </span><span class="nt">weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="storage-configuration">
@@ -980,7 +1304,39 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is a storage configuration that contains the path to the pre-processed data and specifies storage backends to be used for edges, features
+and embeddings.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">base_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/home/data/datasets/fb15k_237/</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">272115</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14541</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_relations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">237</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">272115</span><span class="w"></span>
+<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
+<span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
+<span class="w">  </span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
+<span class="w">  </span><span class="nt">prefetch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">shuffle_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">full_graph_evaluation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">export_encoded_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">log_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">info</span><span class="w"></span>
+</pre></div>
+</div>
 <section id="dataset-configuration">
 <h3>Dataset Configuration<a class="headerlink" href="#dataset-configuration" title="Permalink to this headline"></a></h3>
 <table class="colwidths-given docutils align-default" id="id25">
@@ -1046,7 +1402,23 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>For Marius in-built datasets, the below numbers can be retirieved from output of <cite>marius_preprocess</cite>. For custom user datasets, the
+numbers are expected to match against the processed dataset values. Below is the cofiguration for the <cite>fb15k_237</cite> dataset.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">base_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/home/data/datasets/fb15k_237/</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">272115</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14541</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_relations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">237</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">272115</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_valid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">17535</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20466</span><span class="w"></span>
+<span class="w">    </span><span class="nt">node_feature_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">rel_feature_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_classes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">initialized</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="storage-backend-configuration">
 <h3>Storage Backend Configuration<a class="headerlink" href="#storage-backend-configuration" title="Permalink to this headline"></a></h3>
@@ -1078,7 +1450,13 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below configuration specifies that the edges be stored in <cite>DEVICE_MEMORY</cite>, i.e CPU/GPU memory based on <cite>device_type</cite>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
+</pre></div>
+</div>
 <section id="storage-backend-options">
 <h4>Storage Backend Options<a class="headerlink" href="#storage-backend-options" title="Permalink to this headline"></a></h4>
 <table class="colwidths-given docutils align-default" id="id27">
@@ -1104,7 +1482,12 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>A configuration defining the datatype of the input edges as <cite>int</cite>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
+</pre></div>
+</div>
 <table class="colwidths-given docutils align-default" id="id28">
 <caption><span class="caption-text">PartitionBufferOptions[StorageOptions]</span><a class="headerlink" href="#id28" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -1143,7 +1526,17 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>Below is a disk-based storage configuration, where at max of <cite>buffer_capacity</cite> embeddings buckets are stored in memory at any given time.
+The dataset must be partitioned using <cite>marius_preprocess</cite> with <cite>–num_partitions</cite> set accordingly.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PARTITION_BUFFER</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_partitions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">buffer_capacity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">    </span><span class="nt">prefetching</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 </section>
 </section>
@@ -1207,7 +1600,25 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>A training configuration with batchsize of 1000 and a total of 10 epochs is as follows. <cite>pipeline</cite> is set to true, which ensures that
+the training is synchronous and doesn’t allow staleness. Marius groups edges into chunks and reuses negative samples within the chunk.
+<cite>num_chunks`*`negatives_per_positive</cite> negative edges are sampled for each positive edge.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">epochs_per_shuffle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">logs_per_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">save_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resume_training</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="evaluation-configuration">
 <h2>Evaluation Configuration<a class="headerlink" href="#evaluation-configuration" title="Permalink to this headline"></a></h2>
@@ -1249,7 +1660,20 @@
 </tr>
 </tbody>
 </table>
-<p><em>YAML Sample</em></p>
+<p>An evaluation configuration with batchsize of 1000 is as follows. <cite>num_chunks`*`negatives_per_positive</cite> negative edges are sampled
+for each positive edge.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">    </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">epochs_per_eval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 </section>
 

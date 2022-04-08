@@ -61,7 +61,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="nc_ogbn_arxiv.html">Small Scale Node Classification (OGBN-Arxiv)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nc_ogbn_papers100m.html">Large Scale Node Classification (OGBN-Papers100M)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nc_custom.html">Large Scale Node Classification (OGBN-Papers100M)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nc_custom.html">Custom Dataset Node Classification</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../python/index.html">Python Examples</a></li>
@@ -115,25 +115,304 @@
              
   <section id="custom-dataset-link-prediction">
 <h1>Custom Dataset Link Prediction<a class="headerlink" href="#custom-dataset-link-prediction" title="Permalink to this headline"></a></h1>
+<p>In this tutorial, we use the <strong>OGBN_Arxiv dataset</strong> as an example to demonstrate a step-by-step walkthrough from preprocessing a <strong>custom dataset</strong> to defining the configuration file and to training <strong>a link prediction model with the DistMult algorithm</strong>.</p>
 <section id="preprocess-dataset">
 <h2>1. Preprocess Dataset<a class="headerlink" href="#preprocess-dataset" title="Permalink to this headline"></a></h2>
-<section id="command-line">
-<h3>1.1 Command Line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h3>
-</section>
-<section id="python-dataset-class">
-<h3>1.2 Python Dataset Class<a class="headerlink" href="#python-dataset-class" title="Permalink to this headline"></a></h3>
-</section>
+<p>Preprocessing a custom dataset is straightforward with the <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> command. This command comes with <code class="docutils literal notranslate"><span class="pre">marius</span></code> when <code class="docutils literal notranslate"><span class="pre">marius</span></code> is installed. See (TODO link) for installation information.</p>
+<p>Let’s start by downloading and extracting the OGBN_Arxiv dataset we will use in this example if it has not been downloaded (assuming we are in the <code class="docutils literal notranslate"><span class="pre">marius</span></code> root directory):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ wget http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip      <span class="c1"># download original dataset</span>
+$ unzip arxiv.zip -d datasets/custom_lp_example/                     <span class="c1"># extract downloaded dataset</span>
+$ gzip -dr datasets/custom_lp_example/arxiv/raw/                     <span class="c1"># extract raw dataset files</span>
+$ gzip -dr datasets/custom_lp_example/arxiv/split/time/              <span class="c1"># extract raw split files</span>
+</pre></div>
+</div>
+<p>After the previous step, we should have the directory <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/arxiv/raw/</span></code> created containing the following raw files downloaded and extracted from the OGBN_Arxiv dataset:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls -1 datasets/custom_lp_example/arxiv/raw/
+ edge.csv                        <span class="c1"># raw edge list</span>
+ node-feat.csv                   <span class="c1"># raw node features</span>
+ node-label.csv                  <span class="c1"># raw node lables</span>
+ node_year.csv
+ num-edge-list.csv
+ num-node-list.csv
+$ head -5 arxiv/raw/edge.csv
+ <span class="m">104447</span>,13091
+ <span class="m">15858</span>,47283
+ <span class="m">107156</span>,69161
+ <span class="m">107156</span>,136440
+ <span class="m">107156</span>,107366
+</pre></div>
+</div>
+<p>Assuming <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> has been built, we preprocess the OGBN_Arxiv dataset by running the following command (assuming we are in the <code class="docutils literal notranslate"><span class="pre">marius</span></code> root directory):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess --output_dir datasets/custom_lp_example/
+                     --edges datasets/custom_lp_example/arxiv/raw/edge.csv
+                     --dataset_split <span class="m">0</span>.8 <span class="m">0</span>.1 <span class="m">0</span>.1 --delim<span class="o">=</span><span class="s2">&quot;,&quot;</span> --columns <span class="m">0</span> <span class="m">1</span>
+ Preprocess custom dataset
+ Reading edges
+ Remapping Edges
+ Node mapping written to: datasets/custom_lp/nodes/node_mapping.txt
+ Dataset statistics written to: datasets/custom_lp/dataset.yaml
+</pre></div>
+</div>
+<p>In the above command, we set <code class="docutils literal notranslate"><span class="pre">dataset_split</span></code> to a list of <code class="docutils literal notranslate"><span class="pre">0.8</span> <span class="pre">0.1</span> <span class="pre">0.1</span></code>. Under the hood, this splits <code class="docutils literal notranslate"><span class="pre">edge.csv</span></code> into <code class="docutils literal notranslate"><span class="pre">edges/train_edges.bin</span></code>, <code class="docutils literal notranslate"><span class="pre">edges/validation_edges.bin</span></code> and <code class="docutils literal notranslate"><span class="pre">edges/test_edges.bin</span></code> based on the given list of fractions.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">edge.csv</span></code> contains two columns delimited by comma, so we set <code class="docutils literal notranslate"><span class="pre">--columns</span> <span class="pre">0,1</span></code> and <code class="docutils literal notranslate"><span class="pre">--delim=&quot;,&quot;</span></code>.</p>
+<p>The  <code class="docutils literal notranslate"><span class="pre">--edges</span></code> flag specifies the raw edge list file that <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> will preprocess (and train later).</p>
+<p>The  <code class="docutils literal notranslate"><span class="pre">--output_directory</span></code> flag specifies where the preprocessed graph will be output and is set by the user. In this example, assume we have not created the datasets/fb15k_237_example repository. <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> will create it for us.</p>
+<p>For detailed usages of  <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code>, please refer to <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">-h</span></code>.</p>
+<p>Let’s check again what was created inside the <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/</span></code> directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls -1 datasets/fb15k_237_example/
+dataset.yaml                       <span class="c1"># input dataset statistics</span>
+nodes/
+  node_mapping.txt                 <span class="c1"># mapping of raw node ids to integer uuids</span>
+edges/
+  test_edges.bin                   <span class="c1"># preprocessed testing edge list</span>
+  train_edges.bin                  <span class="c1"># preprocessed training edge list</span>
+  validation_edges.bin             <span class="c1"># preprocessed validation edge list</span>
+arxiv/                             <span class="c1"># existing arxiv dir</span>
+  ...
+</pre></div>
+</div>
+<p>Let’s check what is inside the generated <code class="docutils literal notranslate"><span class="pre">dataset.yaml</span></code> file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ cat datasets/custom_lp_example/dataset.yaml
+ base_directory: /marius-internal/datasets/custom_lp_example/
+ num_edges: <span class="m">932994</span>
+ num_nodes: <span class="m">169343</span>
+ num_relations: <span class="m">1</span>
+ num_train: <span class="m">932994</span>
+ num_valid: <span class="m">116624</span>
+ num_test: <span class="m">116625</span>
+ node_feature_dim: -1
+ rel_feature_dim: -1
+ num_classes: -1
+ initialized: <span class="nb">false</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the above <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> command fails due to any missing directory errors, please create the <code class="docutils literal notranslate"><span class="pre">&lt;output_directory&gt;/edges</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;output_directory&gt;/nodes</span></code> directories as a workaround.</p>
+</div>
 </section>
 <section id="define-configuration-file">
 <h2>2. Define Configuration File<a class="headerlink" href="#define-configuration-file" title="Permalink to this headline"></a></h2>
+<p>To train a model, we need to define a YAML configuration file based on information created from marius_preprocess.</p>
+<p>The configuration file contains information including but not limited to the inputs to the model, training procedure, and hyperparameters to optimize. Given a configuration file, marius assembles a model depending on the given parameters. The configuration file is grouped up into four sections:</p>
+<ul class="simple">
+<li><p>Model: Defines the architecture of the model, neighbor sampling configuration, loss, and optimizer(s)</p></li>
+<li><p>Storage: Specifies the input dataset and how to store the graph, features, and embeddings.</p></li>
+<li><p>Training: Sets options for the training procedure and hyperparameters. E.g. batch size, negative sampling.</p></li>
+<li><p>Evaluation: Sets options for the evaluation procedure (if any). The options here are similar to those in the training section.</p></li>
+</ul>
+<p>For the full configuration schema, please refer to <code class="docutils literal notranslate"><span class="pre">docs/config_interface</span></code>.</p>
+<p>An example YAML configuration file for the OGBN_Arxiv dataset (link prediction model with DistMult) is given in <code class="docutils literal notranslate"><span class="pre">examples/configuration/custom_lp.yaml</span></code>. Note that the <code class="docutils literal notranslate"><span class="pre">base_directory</span></code> is set to the preprocessing output directory, in our example, <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/</span></code>.</p>
+<p>Let’s create the same YAML configuration file for the OGBN_Arxiv dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs.</p>
+<ol class="arabic">
+<li><p>First, we define the <strong>model</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">learning_task</span></code>, <code class="docutils literal notranslate"><span class="pre">encoder</span></code>, <code class="docutils literal notranslate"><span class="pre">decoder</span></code>, and <code class="docutils literal notranslate"><span class="pre">loss</span></code>. Since we are training a link prediction model, set the <code class="docutils literal notranslate"><span class="pre">learning_task</span></code> to <code class="docutils literal notranslate"><span class="pre">LINK_PREDICTION</span></code>. Since we are training a model with DistMult, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> of <code class="docutils literal notranslate"><span class="pre">decoder</span></code> to <code class="docutils literal notranslate"><span class="pre">DISTMULT</span></code>. We set the <code class="docutils literal notranslate"><span class="pre">encoder</span></code> to be an <code class="docutils literal notranslate"><span class="pre">EMBEDDING</span></code> table with 50-dimensional embeddings. The rest of the configurations can be fine-tuned by the user.</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span><span class="w"></span>
+<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
+<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISTMULT</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"> </span><span class="c1"># optimizer to use for dense model parameters. In this case these are the DistMult relation (edge-type) embeddings</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sparse_optimizer</span><span class="p">:</span><span class="w"> </span><span class="c1"># optimizer to use for node embedding table</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Next, we set the <strong>storage</strong> and <strong>dataset</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">dataset</span></code>. Here, the <code class="docutils literal notranslate"><span class="pre">base_directory</span></code> is set to <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/</span></code>, which is the preprocessing output directory. To populate the <code class="docutils literal notranslate"><span class="pre">num_edges</span></code>, <code class="docutils literal notranslate"><span class="pre">num_train</span></code>,…, <code class="docutils literal notranslate"><span class="pre">num_test</span></code> fields, we use the same input dataset statistics obtained from <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/dataset.yaml</span></code>.</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">base_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/marius-internal/datasets/custom_lp_example/</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">932994</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">169343</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_relations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">932994</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_valid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">116624</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">116625</span><span class="w"></span>
+<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">  </span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">  </span><span class="nt">save_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Lastly, we configure <strong>training</strong> and <strong>evaluation</strong>. We begin by setting all required parameters. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">num_epochs</span></code> and <code class="docutils literal notranslate"><span class="pre">negative_sampling</span></code>. We set <code class="docutils literal notranslate"><span class="pre">num_epochs=10</span></code> (10 epochs to train) to demonstrate this example. Note that <code class="docutils literal notranslate"><span class="pre">negative_sampling</span></code> is required for link prediction.</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w"></span>
+<span class="w">    </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">epochs_per_shuffle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
 </section>
 <section id="train-model">
 <h2>3. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
+<p>After defining our configuration file, training is run with <code class="docutils literal notranslate"><span class="pre">marius_train</span> <span class="pre">&lt;your_config.yaml&gt;</span></code>.</p>
+<p>We can now train our example using the configuration file we just created by running the following command (assuming we are in the <code class="docutils literal notranslate"><span class="pre">marius</span></code> root directory):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_train datasets/custom_lp_example/custom_lp.yaml
+ <span class="o">[</span><span class="m">2022</span>-04-04 <span class="m">17</span>:11:53.029<span class="o">]</span> <span class="o">[</span>info<span class="o">]</span> <span class="o">[</span>marius.cpp:45<span class="o">]</span> Start initialization
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:57.581<span class="o">]</span> Initialization Complete: <span class="m">4</span>.552s
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:57.650<span class="o">]</span> <span class="c1">################ Starting training epoch 1 ################</span>
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:57.824<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">94000</span>/932994<span class="o">]</span>, <span class="m">10</span>.08%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:57.988<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">188000</span>/932994<span class="o">]</span>, <span class="m">20</span>.15%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:58.153<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">282000</span>/932994<span class="o">]</span>, <span class="m">30</span>.23%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:58.317<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">376000</span>/932994<span class="o">]</span>, <span class="m">40</span>.30%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:58.484<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">470000</span>/932994<span class="o">]</span>, <span class="m">50</span>.38%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:58.650<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">564000</span>/932994<span class="o">]</span>, <span class="m">60</span>.45%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:58.817<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">658000</span>/932994<span class="o">]</span>, <span class="m">70</span>.53%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:59.008<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">752000</span>/932994<span class="o">]</span>, <span class="m">80</span>.60%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:59.200<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">846000</span>/932994<span class="o">]</span>, <span class="m">90</span>.68%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:59.408<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">932994</span>/932994<span class="o">]</span>, <span class="m">100</span>.00%
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:59.408<span class="o">]</span> <span class="c1">################ Finished training epoch 1 ################</span>
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:59.408<span class="o">]</span> Epoch Runtime: 1758ms
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:59.408<span class="o">]</span> Edges per Second: <span class="m">530713</span>.3
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:11:59.408<span class="o">]</span> Evaluating validation <span class="nb">set</span>
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:00.444<span class="o">]</span>
+ <span class="o">=================================</span>
+ Link Prediction: <span class="m">116624</span> edges evaluated
+ Mean Rank: <span class="m">10927</span>.984317
+ MRR: <span class="m">0</span>.088246
+ Hits@1: <span class="m">0</span>.043936
+ Hits@3: <span class="m">0</span>.091285
+ Hits@5: <span class="m">0</span>.123697
+ Hits@10: <span class="m">0</span>.176499
+ Hits@50: <span class="m">0</span>.337538
+ Hits@100: <span class="m">0</span>.414872
+ <span class="o">=================================</span>
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:00.444<span class="o">]</span> Evaluating <span class="nb">test</span> <span class="nb">set</span>
+ <span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:01.470<span class="o">]</span>
+ <span class="o">=================================</span>
+ Link Prediction: <span class="m">116625</span> edges evaluated
+ Mean Rank: <span class="m">10928</span>.291687
+ MRR: <span class="m">0</span>.088237
+ Hits@1: <span class="m">0</span>.043798
+ Hits@3: <span class="m">0</span>.091670
+ Hits@5: <span class="m">0</span>.123190
+ Hits@10: <span class="m">0</span>.176377
+ Hits@50: <span class="m">0</span>.337749
+ Hits@100: <span class="m">0</span>.414697
+ <span class="o">=================================</span>
+</pre></div>
+</div>
+<p>After running this configuration for 10 epochs, we should see a result similar to below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">=================================</span>
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:32.312<span class="o">]</span> <span class="c1">################ Starting training epoch 10 ################</span>
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:32.475<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">94000</span>/932994<span class="o">]</span>, <span class="m">10</span>.08%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:32.638<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">188000</span>/932994<span class="o">]</span>, <span class="m">20</span>.15%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:32.800<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">282000</span>/932994<span class="o">]</span>, <span class="m">30</span>.23%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:32.963<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">376000</span>/932994<span class="o">]</span>, <span class="m">40</span>.30%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.126<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">470000</span>/932994<span class="o">]</span>, <span class="m">50</span>.38%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.313<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">564000</span>/932994<span class="o">]</span>, <span class="m">60</span>.45%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.500<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">658000</span>/932994<span class="o">]</span>, <span class="m">70</span>.53%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.666<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">752000</span>/932994<span class="o">]</span>, <span class="m">80</span>.60%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.835<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">846000</span>/932994<span class="o">]</span>, <span class="m">90</span>.68%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.988<span class="o">]</span> Edges processed: <span class="o">[</span><span class="m">932994</span>/932994<span class="o">]</span>, <span class="m">100</span>.00%
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.988<span class="o">]</span> <span class="c1">################ Finished training epoch 10 ################</span>
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.988<span class="o">]</span> Epoch Runtime: 1676ms
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.988<span class="o">]</span> Edges per Second: <span class="m">556679</span>
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:33.988<span class="o">]</span> Evaluating validation <span class="nb">set</span>
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:35.010<span class="o">]</span>
+<span class="o">=================================</span>
+Link Prediction: <span class="m">116624</span> edges evaluated
+Mean Rank: <span class="m">5765</span>.685716
+MRR: <span class="m">0</span>.132049
+Hits@1: <span class="m">0</span>.048926
+Hits@3: <span class="m">0</span>.149883
+Hits@5: <span class="m">0</span>.210797
+Hits@10: <span class="m">0</span>.304637
+Hits@50: <span class="m">0</span>.536768
+Hits@100: <span class="m">0</span>.626072
+<span class="o">=================================</span>
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:35.011<span class="o">]</span> Evaluating <span class="nb">test</span> <span class="nb">set</span>
+<span class="o">[</span><span class="m">04</span>/04/22 <span class="m">17</span>:12:36.034<span class="o">]</span>
+<span class="o">=================================</span>
+Link Prediction: <span class="m">116625</span> edges evaluated
+Mean Rank: <span class="m">5797</span>.073741
+MRR: <span class="m">0</span>.132749
+Hits@1: <span class="m">0</span>.049406
+Hits@3: <span class="m">0</span>.151588
+Hits@5: <span class="m">0</span>.211944
+Hits@10: <span class="m">0</span>.304437
+Hits@50: <span class="m">0</span>.536549
+Hits@100: <span class="m">0</span>.626006
+<span class="o">=================================</span>
+</pre></div>
+</div>
+<p>Let’s check again what was added in the <code class="docutils literal notranslate"><span class="pre">datasets/custom_lp_example/</span></code> directory. For clarity, we only list the files that were created in training. Notice that several files have been created, including the trained model, the embedding table, a full configuration file, and output logs:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls datasets/custom_lp_example/
+model.pt                           <span class="c1"># contains the dense model parameters, embeddings of the edge-types</span>
+model_state.pt                     <span class="c1"># optimizer state of the trained model parameters</span>
+full_config.yaml                   <span class="c1"># detailed config generated based on user-defined config</span>
+metadata.csv                       <span class="c1"># information about metadata</span>
+logs/                              <span class="c1"># logs containing output, error, debug information, and etc.</span>
+nodes/
+  embeddings.bin                   <span class="c1"># trained node embeddings of the graph</span>
+  embeddings_state.bin             <span class="c1"># node embedding optimizer state</span>
+  ...
+edges/
+  ...
+...
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">model.pt</span></code> contains the dense model parameters. For DistMult, this is the embeddings of the edge-types. For GNN encoders, this file will include the GNN parameters.</p>
+</div>
 </section>
 <section id="inference">
 <h2>4. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
-<section id="id1">
-<h3>4.1 Command Line<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<section id="command-line">
+<h3>4.1 Command Line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h3>
 </section>
 <section id="load-into-python">
 <h3>4.2 Load Into Python<a class="headerlink" href="#load-into-python" title="Permalink to this headline"></a></h3>

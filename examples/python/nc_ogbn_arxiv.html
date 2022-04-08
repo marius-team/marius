@@ -55,10 +55,11 @@
 <li class="toctree-l3"><a class="reference internal" href="lp_custom.html">Custom Dataset Link Prediction</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Small Scale Node Classification (OGBN-Arxiv)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#create-dataset-class">1. Create Dataset Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#create-dataloader-and-model">2. Create Dataloader and Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#train-model">3. Train Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference">4. Inference</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#save-model">5. Save Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-model">2. Create Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-dataloader">1. Create Dataloader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-model">4. Train Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inference">5. Inference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#save-model">6. Save Model</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="nc_ogbn_papers100m.html">Large Scale Node Classification (OGBN-Papers100M)</a></li>
@@ -115,20 +116,200 @@
              
   <section id="small-scale-node-classification-ogbn-arxiv">
 <h1>Small Scale Node Classification (OGBN-Arxiv)<a class="headerlink" href="#small-scale-node-classification-ogbn-arxiv" title="Permalink to this headline"></a></h1>
+<p>OGBN-Arxiv is a built in dataset in Marius for node classification. In this example
+we will use the dataset class for OGBN-Arxiv (already defined in Marius) and the
+python APIs to make a node classification example. This example will use GraphSage
+and will have two layer encoder. First layer will be the FEATURE layer and the second
+will be the GNN layer.</p>
+<p><em>Example file location: examples/python/ogbn_arxiv_nc.py</em></p>
+<p>By going through the example we aim you will understand following things:</p>
+<ul class="simple">
+<li><p>How to use Marius’ internally defined in dataset to do preprocessing</p></li>
+<li><p>How to define a GraphSage based node classification model using python APIs for
+node classification</p></li>
+<li><p>How to add reporting metrics for you task</p></li>
+<li><p>How to initialize data loading objects for training and evaluation</p></li>
+<li><p>And lastly how to do training and evaluation</p></li>
+</ul>
+<p>Note: This is a GPU example and we are setting the device to GPU at the start of the main using the line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to run CPU based training please change <em>cuda</em> to <em>cpu</em>.</p>
 <section id="create-dataset-class">
 <h2>1. Create Dataset Class<a class="headerlink" href="#create-dataset-class" title="Permalink to this headline"></a></h2>
+<p>The dataset in this example is OGBN-Arxiv. For this dataset we already have a preprocessing
+dataset class defined in Marius. So we can use that class directly. This will help us
+avoid writing a new custom dataset class. To use the dataset class you need to import
+it using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">marius.tools.preprocess.datasets.ogbn_arxiv</span> <span class="kn">import</span> <span class="n">OGBNArxiv</span>
+</pre></div>
+</div>
+<p>Once the dataset class is imported you can easily do the preprocessing by calling the
+download and the preprocess methods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;ogbn_arxiv_nc_dataset/&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">OGBNArxiv</span><span class="p">(</span><span class="n">base_directory</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">base_directory</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;edges/train_edges.bin&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">preprocess</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will return all the necessary data in properly formated .bin files which can
+now be used in Marius for training.</p>
 </section>
-<section id="create-dataloader-and-model">
-<h2>2. Create Dataloader and Model<a class="headerlink" href="#create-dataloader-and-model" title="Permalink to this headline"></a></h2>
+<section id="create-model">
+<h2>2. Create Model<a class="headerlink" href="#create-model" title="Permalink to this headline"></a></h2>
+<p>In this example we are going to create a four layer model using GraphSage. While
+defining a model you need to define three things. First is the encoder, second is
+a decoder and lastly we need to define the loss function. This will setup the model.
+Additionally to get the accuracy metrics we also need to set a reporter. In this
+section we will discuss all this things.</p>
+<p><strong>Encoder:</strong></p>
+<p>For node classification we are going to define a four layer encoder. The first layer
+will be a FEATURE layer. For the feature layer we do not need to define anything
+complicated so we can easily define the feature layer as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">feature_layer</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">FeatureLayer</span><span class="p">(</span><span class="n">dimension</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The rest three layers are GraphSage layers. There can also be defined simply using
+the following code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">graph_sage_layer1</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">GraphSageLayer</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span>
+                                               <span class="n">output_dim</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span>
+                                               <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                                               <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">graph_sage_layer2</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">GraphSageLayer</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span>
+                                               <span class="n">output_dim</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span>
+                                               <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                                               <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">graph_sage_layer3</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">GraphSageLayer</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="n">feature_dim</span><span class="p">,</span>
+                                               <span class="n">output_dim</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span>
+                                               <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                                               <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notice that the last layer has different activation function then other 2. There are
+other options available for the activation function, please refer to documentation for
+more details.</p>
+<p>Once we have setup both this layers we can call the encoder method to set up the encoder.
+Note that in the code below we are setting the feature layer first then the GraphSage layers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">encoder</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">encoders</span><span class="o">.</span><span class="n">GeneralEncoder</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[[</span><span class="n">feature_layer</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="n">graph_sage_layer1</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="n">graph_sage_layer2</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="n">graph_sage_layer3</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p><strong>Decoder</strong></p>
+<p>Setting up the decoder in this example is simple. All we are doing is setting up
+the No Op Node Decoder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">decoder</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">decoders</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">NoOpNodeDecoder</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Loss Function</strong></p>
+<p>For the loss function we are using <em>Cross Entropy</em> with reduction as <em>SUM</em>. We are
+setting it as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loss</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Reporter</strong></p>
+<p>Lastly we need to set the reporter for getting the results. In this example we are
+going to use <code class="docutils literal notranslate"><span class="pre">CategoricalMetric</span></code> as our metric:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reporter</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">NodeClassificationReporter</span><span class="p">()</span>
+<span class="n">reporter</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">CategoricalAccuracy</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><strong>Defining the Model</strong></p>
+<p>Once all this details are set up properly all we need to do is call the <code class="docutils literal notranslate"><span class="pre">Model</span></code>
+method to initialize the model:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">reporter</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Lastly we are also adding a optimizer to the model and after that we are done with
+model creation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">optimizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">.01</span><span class="p">)]</span>
+</pre></div>
+</div>
+</section>
+<section id="create-dataloader">
+<h2>1. Create Dataloader<a class="headerlink" href="#create-dataloader" title="Permalink to this headline"></a></h2>
+<p>The dataloader object is used for setting up the storage layer. We are going to use
+<code class="docutils literal notranslate"><span class="pre">tensor_to_file()</span></code> method for defining the dataloader. This method stores all the data
+in memory.</p>
+<p>In this example for training dataloader we first need to setup the storage for
+four files which are: <code class="docutils literal notranslate"><span class="pre">edges_all</span></code>, <code class="docutils literal notranslate"><span class="pre">train_nodes</span></code>, <code class="docutils literal notranslate"><span class="pre">features</span></code> and <code class="docutils literal notranslate"><span class="pre">labels</span></code>. All
+four can be done easily using the following API calls:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">edges_all</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">edge_list_file</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_edges</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="n">train_nodes</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">train_nodes_file</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_train</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">node_features_file</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_nodes</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">node_labels_file</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_nodes</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the examples above we are passing the file which we got from the preprocessor with proper shape.
+The details for shape can be fetched from the yaml file retruned from the preprocessor.</p>
+<p>In this example we are setting up a 3-hop neighbour sampler and we define this next:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nbr_sampler_3_hop</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">LayeredNeighborSampler</span><span class="p">(</span><span class="n">num_neighbors</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>After defining the 3-hop sampler we can define the dataloader class as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">train_nodes</span><span class="p">,</span>
+                                     <span class="n">edges</span><span class="o">=</span><span class="n">edges_all</span><span class="p">,</span>
+                                     <span class="n">node_features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+                                     <span class="n">node_labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                                     <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                                     <span class="n">nbr_sampler</span><span class="o">=</span><span class="n">nbr_sampler_3_hop</span><span class="p">,</span>
+                                     <span class="n">learning_task</span><span class="o">=</span><span class="s2">&quot;nc&quot;</span><span class="p">,</span>
+                                     <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The things that we need to pass into the dataloader definition is all the file objects
+that we defined, the batch size and the neighbour sampler that we want to use.</p>
+<p>Similar to the <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code>, we also define the <code class="docutils literal notranslate"><span class="pre">eval_dataloader</span></code>. please
+refer to the example for more details. <code class="docutils literal notranslate"><span class="pre">eval_dataloader</span></code> definition is similar to the
+train.</p>
 </section>
 <section id="train-model">
-<h2>3. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
+<h2>4. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
+<p>Now we have defined both the model and the dataloaders so we can start with the training
+task. To train an epoch all we need to do is call the following function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">):</span>
+    <span class="n">dataloader</span><span class="o">.</span><span class="n">initializeBatches</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">hasNextBatch</span><span class="p">():</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">getBatch</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">train_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This function does the following:</p>
+<ul class="simple">
+<li><p>Initialize the batches for training.</p></li>
+<li><p>Load the next batch (if it is there)</p></li>
+<li><p>Train the model</p></li>
+</ul>
 </section>
 <section id="inference">
-<h2>4. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<h2>5. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<p>Similar to the training we can do the evaluation using the following function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">eval_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="n">dataloader</span><span class="o">.</span><span class="n">initializeBatches</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">hasNextBatch</span><span class="p">():</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">getBatch</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">evaluate_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here all we are doing is as follows:</p>
+<ul class="simple">
+<li><p>Initialize the batches for evaluation</p></li>
+<li><p>Load the next batch (if it is there)</p></li>
+<li><p>Evalutate the batch</p></li>
+<li><p>Call the report function on the model to get the metrics</p></li>
+</ul>
 </section>
 <section id="save-model">
-<h2>5. Save Model<a class="headerlink" href="#save-model" title="Permalink to this headline"></a></h2>
+<h2>6. Save Model<a class="headerlink" href="#save-model" title="Permalink to this headline"></a></h2>
+<p>Work in progress - More details later</p>
 </section>
 </section>
 

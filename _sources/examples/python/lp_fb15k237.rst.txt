@@ -1,17 +1,194 @@
 Small Scale Link Prediction (FB15K-237)
 ---------------------------------------------
+This example will demonstrate how to use Marius Python API to do a Link 
+Prediction task on a small scale graph. In this example we will use FB15K-237
+graph. FB15K-237 is a graph that is supported by Marius already so you won't
+need to write your own custom dataset class for preprocessing. If you want to 
+use a custom dataset which is not supported by marius please refer to lp_custom
+example.
+
+*Example file location: examples/python/fb15k_237_gpu.py*
+
+By going through the example we aim you will understand following things:
+
+- How to use Marius' internally supported in dataset to do preprocessing
+- How to define a model using the Python APIs and configure it as needed
+- How to add different reporting metrics for the accuracy
+- How to initialize data loading objects for training and evaluation
+- And lastly how to do training and evaluation
+
+Note: This is a GPU example and we are setting the device to GPU at the start of the
+main using the line::
+
+    device = torch.device("cuda")
+
+If you want to run CPU based training please change *cuda* to *cpu*.
 
 1. Create Dataset Class
 ^^^^^^^^^^^^^^^^^^^^^^^
+In this example we are going to use a built in dataset class to do preprocessing
+for FB15K-237 graph. Marius already has support for few graphs and you can use their
+dataset classes directly to preprocess the data.
 
-2. Create Dataloader and Model
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To use a built in class you need to import it which is done using the following line::
+    
+    from marius.tools.preprocess.datasets.fb15k_237 import FB15K237
 
-3. Train Model
+Once you imported the class all you need to do is instansiate the base directory
+where you will store all the dataset and preprocessed files. And call the download
+and preprocess on the objects. As shown in the code.::
+
+    base_directory = Path("fb15k_dataset/")
+    dataset = FB15K237(base_directory)
+    if not (base_directory / Path("edges/train_edges.bin")).exists():
+        dataset.download()
+        dataset.preprocess()
+
+Lastly, note that dataset preprocessing will return a ``dataset.yaml`` file which
+is needed for further tasks, so we read it in the example code.
+
+2. Create Model
+^^^^^^^^^^^^^^^
+Next step is to define a model for the task. In this example we are going to make
+a model with *DistMult*. The model is defined in the function ``init_model``. 
+There are three steps to defining a model:
+
+1. Defining an encoder: In this example we are defining a single layer encoder.
+The layer is an embedding layer::
+
+   embedding_layer = m.nn.layers.EmbeddingLayer(dimension=embedding_dim, 
+                                                device=device)
+ 
+To define a model all you need to do is call the ``GeneralEncoder(..)`` method with all
+the layers as shown below::
+
+    encoder = m.encoders.GeneralEncoder(layers=[[embedding_layer]])
+
+In this example we are only having a single layer in the encoder but you can have
+more than one layer also. (See the node classification example for refer on how to
+pass more than one layer to ``GeneralEncoder(..)`` method)
+
+2. Defining a decoder: In this example we are using *DistMult* as our decoder so
+we are calling the following method::
+
+    decoder = m.nn.decoders.edge.DistMult(num_relations=num_relations,
+                                          embedding_dim=embedding_dim,
+                                          use_inverse_relations=True,
+                                          device=device,
+                                          dtype=dtype,
+                                          decoder_method="corrupt_node")
+
+Notice that we are using decoder_method as ``corrupt_node`` but there are other
+options available. Please refer to API documentation for more details. 
+
+3. Defining a loss function: We are using *SoftMax* in this example. And defining
+it is just doing a function call::
+
+    loss = m.nn.SoftMax(reduction="sum")
+
+There are many other options available for encoder, decoder and loss functions.
+Please refer to the API documentation for more details.
+
+In addition to doing the above three tasks, which defines the model, we also need
+to provide details regarding which metrics we want to be reported. This is done through
+following code::
+
+    reporter = m.report.LinkPredictionReporter()
+    reporter.add_metric(m.report.MeanReciprocalRank())
+    reporter.add_metric(m.report.MeanRank())
+    reporter.add_metric(m.report.Hitsk(1))
+    reporter.add_metric(m.report.Hitsk(10))
+
+Notice that you can add multiple metrics.
+
+Once we have defined the encoder, decoder, loss function and the reporter, we can
+create a model object using the following method::
+
+    m.nn.Model(encoder, decoder, loss, reporter)
+
+And now this model can be passed to during training and evaluation.
+
+Lastly if you want to add an optimizer to the function you can do it as follows::
+
+    model.optimizers = [m.nn.AdamOptimizer(model.named_parameters(), lr=.1)]
+
+3. Create Dataloader
+^^^^^^^^^^^^^^^^^^^^
+After defining the model we need to define two dataloader objects, one for training
+and the other for evaluation. Dataloader objects are used to handle all the data
+movement required for training. Marius supported different types of storage backends
+like complete InMemory, Partition Buffers, Flat_File, etc. Please refer to documentation
+and the original paper for more details.
+
+In this example we are using an InMemory storage backend where all the data will reside
+in memory. This can be defined using the method ``tensor_to_file()``. Do define 
+a dataloader object we need to do 3 things:
+
+- First is a simple method call to define which objects need to be read::
+
+    train_edges = m.storage.tensor_from_file(filename=dataset.train_edges_file, shape=[dataset_stats.num_train, -1], dtype=torch.int32, device=device)
+    
+- Second for this example we want to use a negative edge sampler so we define it
+  as follows::
+    
+    train_neg_sampler = m.data.samplers.CorruptNodeNegativeSampler(num_chunks=10, num_negatives=500, degree_fraction=0.0, filtered=False)
+
+- And last is to make the data loader object itself which will be used during training
+  to fetch the data and process batches::
+
+    train_dataloader = m.data.DataLoader(edges=train_edges,
+                                         node_embeddings=embeddings,
+                                         batch_size=1000,
+                                         neg_sampler=train_neg_sampler,
+                                         learning_task="lp",
+                                         train=True)
+
+Once done with this we have defined the dataloader for training task. Similarly in the
+example we also define a dataloader for evaluation.
+
+4. Train Model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Now we have everything available to start the training. For training we run multiple
+epochs of training and evaluation in this example.
 
-4. Inference
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+For training all we need is the following function::
+    
+    def train_epoch(model, dataloader):
+        dataloader.initializeBatches()
 
-5. Save Model
+        while dataloader.hasNextBatch():
+            batch = dataloader.getBatch()
+            model.train_batch(batch)
+            dataloader.updateEmbeddingsForBatch(batch, gpu=False)
+
+All we are doing in this function is as follows:
+
+- Initializing the batches before the start of the epoch
+- If there is a next batch available we fetch the next batch
+- We train the model on the fetched batch
+- And we update the embeddings
+
+5. Inference
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Similar to training the evaluation is also pretty simple can be concluded easily
+using the following function::
+
+    def eval_epoch(model, dataloader):
+        dataloader.initializeBatches()
+
+        while dataloader.hasNextBatch():
+            batch = dataloader.getBatch()
+            model.evaluate_batch(batch)
+        
+        model.reporter.report()
+
+The function does the following:
+
+- Initialize the batches before the start of every epoch
+- Load if there is a next batch of data available
+- Evaluate the batch
+- Once all batches are done report the metrics we defined earlier in reporter
+
+6. Save Model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Work in progress - More details will be added soon

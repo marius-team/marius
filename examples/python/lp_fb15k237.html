@@ -52,10 +52,11 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Python Examples</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Small Scale Link Prediction (FB15K-237)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#create-dataset-class">1. Create Dataset Class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#create-dataloader-and-model">2. Create Dataloader and Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#train-model">3. Train Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference">4. Inference</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#save-model">5. Save Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-model">2. Create Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-dataloader">3. Create Dataloader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-model">4. Train Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inference">5. Inference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#save-model">6. Save Model</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="lp_ogb_wikikg90mv2.html">Large Scale Link Prediction (OGB-WikiKG90Mv2)</a></li>
@@ -115,20 +116,193 @@
              
   <section id="small-scale-link-prediction-fb15k-237">
 <h1>Small Scale Link Prediction (FB15K-237)<a class="headerlink" href="#small-scale-link-prediction-fb15k-237" title="Permalink to this headline"></a></h1>
+<p>This example will demonstrate how to use Marius Python API to do a Link
+Prediction task on a small scale graph. In this example we will use FB15K-237
+graph. FB15K-237 is a graph that is supported by Marius already so you won’t
+need to write your own custom dataset class for preprocessing. If you want to
+use a custom dataset which is not supported by marius please refer to lp_custom
+example.</p>
+<p><em>Example file location: examples/python/fb15k_237_gpu.py</em></p>
+<p>By going through the example we aim you will understand following things:</p>
+<ul class="simple">
+<li><p>How to use Marius’ internally supported in dataset to do preprocessing</p></li>
+<li><p>How to define a model using the Python APIs and configure it as needed</p></li>
+<li><p>How to add different reporting metrics for the accuracy</p></li>
+<li><p>How to initialize data loading objects for training and evaluation</p></li>
+<li><p>And lastly how to do training and evaluation</p></li>
+</ul>
+<p>Note: This is a GPU example and we are setting the device to GPU at the start of the
+main using the line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to run CPU based training please change <em>cuda</em> to <em>cpu</em>.</p>
 <section id="create-dataset-class">
 <h2>1. Create Dataset Class<a class="headerlink" href="#create-dataset-class" title="Permalink to this headline"></a></h2>
+<p>In this example we are going to use a built in dataset class to do preprocessing
+for FB15K-237 graph. Marius already has support for few graphs and you can use their
+dataset classes directly to preprocess the data.</p>
+<p>To use a built in class you need to import it which is done using the following line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">marius.tools.preprocess.datasets.fb15k_237</span> <span class="kn">import</span> <span class="n">FB15K237</span>
+</pre></div>
+</div>
+<p>Once you imported the class all you need to do is instansiate the base directory
+where you will store all the dataset and preprocessed files. And call the download
+and preprocess on the objects. As shown in the code.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;fb15k_dataset/&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">FB15K237</span><span class="p">(</span><span class="n">base_directory</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">base_directory</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;edges/train_edges.bin&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">preprocess</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Lastly, note that dataset preprocessing will return a <code class="docutils literal notranslate"><span class="pre">dataset.yaml</span></code> file which
+is needed for further tasks, so we read it in the example code.</p>
 </section>
-<section id="create-dataloader-and-model">
-<h2>2. Create Dataloader and Model<a class="headerlink" href="#create-dataloader-and-model" title="Permalink to this headline"></a></h2>
+<section id="create-model">
+<h2>2. Create Model<a class="headerlink" href="#create-model" title="Permalink to this headline"></a></h2>
+<p>Next step is to define a model for the task. In this example we are going to make
+a model with <em>DistMult</em>. The model is defined in the function <code class="docutils literal notranslate"><span class="pre">init_model</span></code>.
+There are three steps to defining a model:</p>
+<p>1. Defining an encoder: In this example we are defining a single layer encoder.
+The layer is an embedding layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">embedding_layer</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">EmbeddingLayer</span><span class="p">(</span><span class="n">dimension</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+                                             <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To define a model all you need to do is call the <code class="docutils literal notranslate"><span class="pre">GeneralEncoder(..)</span></code> method with all
+the layers as shown below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">encoder</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">encoders</span><span class="o">.</span><span class="n">GeneralEncoder</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[[</span><span class="n">embedding_layer</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>In this example we are only having a single layer in the encoder but you can have
+more than one layer also. (See the node classification example for refer on how to
+pass more than one layer to <code class="docutils literal notranslate"><span class="pre">GeneralEncoder(..)</span></code> method)</p>
+<p>2. Defining a decoder: In this example we are using <em>DistMult</em> as our decoder so
+we are calling the following method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">decoder</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">decoders</span><span class="o">.</span><span class="n">edge</span><span class="o">.</span><span class="n">DistMult</span><span class="p">(</span><span class="n">num_relations</span><span class="o">=</span><span class="n">num_relations</span><span class="p">,</span>
+                                      <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+                                      <span class="n">use_inverse_relations</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                      <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                                      <span class="n">decoder_method</span><span class="o">=</span><span class="s2">&quot;corrupt_node&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notice that we are using decoder_method as <code class="docutils literal notranslate"><span class="pre">corrupt_node</span></code> but there are other
+options available. Please refer to API documentation for more details.</p>
+<p>3. Defining a loss function: We are using <em>SoftMax</em> in this example. And defining
+it is just doing a function call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loss</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">SoftMax</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There are many other options available for encoder, decoder and loss functions.
+Please refer to the API documentation for more details.</p>
+<p>In addition to doing the above three tasks, which defines the model, we also need
+to provide details regarding which metrics we want to be reported. This is done through
+following code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reporter</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">LinkPredictionReporter</span><span class="p">()</span>
+<span class="n">reporter</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">MeanReciprocalRank</span><span class="p">())</span>
+<span class="n">reporter</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">MeanRank</span><span class="p">())</span>
+<span class="n">reporter</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">Hitsk</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">reporter</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">Hitsk</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Notice that you can add multiple metrics.</p>
+<p>Once we have defined the encoder, decoder, loss function and the reporter, we can
+create a model object using the following method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">reporter</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And now this model can be passed to during training and evaluation.</p>
+<p>Lastly if you want to add an optimizer to the function you can do it as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">optimizers</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">.1</span><span class="p">)]</span>
+</pre></div>
+</div>
+</section>
+<section id="create-dataloader">
+<h2>3. Create Dataloader<a class="headerlink" href="#create-dataloader" title="Permalink to this headline"></a></h2>
+<p>After defining the model we need to define two dataloader objects, one for training
+and the other for evaluation. Dataloader objects are used to handle all the data
+movement required for training. Marius supported different types of storage backends
+like complete InMemory, Partition Buffers, Flat_File, etc. Please refer to documentation
+and the original paper for more details.</p>
+<p>In this example we are using an InMemory storage backend where all the data will reside
+in memory. This can be defined using the method <code class="docutils literal notranslate"><span class="pre">tensor_to_file()</span></code>. Do define
+a dataloader object we need to do 3 things:</p>
+<ul>
+<li><p>First is a simple method call to define which objects need to be read:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">train_edges</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">tensor_from_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">train_edges_file</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">dataset_stats</span><span class="o">.</span><span class="n">num_train</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Second for this example we want to use a negative edge sampler so we define it
+as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">train_neg_sampler</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">CorruptNodeNegativeSampler</span><span class="p">(</span><span class="n">num_chunks</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_negatives</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">degree_fraction</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">filtered</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>And last is to make the data loader object itself which will be used during training
+to fetch the data and process batches:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">train_edges</span><span class="p">,</span>
+                                     <span class="n">node_embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">,</span>
+                                     <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                                     <span class="n">neg_sampler</span><span class="o">=</span><span class="n">train_neg_sampler</span><span class="p">,</span>
+                                     <span class="n">learning_task</span><span class="o">=</span><span class="s2">&quot;lp&quot;</span><span class="p">,</span>
+                                     <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Once done with this we have defined the dataloader for training task. Similarly in the
+example we also define a dataloader for evaluation.</p>
 </section>
 <section id="train-model">
-<h2>3. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
+<h2>4. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
+<p>Now we have everything available to start the training. For training we run multiple
+epochs of training and evaluation in this example.</p>
+<p>For training all we need is the following function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">):</span>
+    <span class="n">dataloader</span><span class="o">.</span><span class="n">initializeBatches</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">hasNextBatch</span><span class="p">():</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">getBatch</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">train_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">dataloader</span><span class="o">.</span><span class="n">updateEmbeddingsForBatch</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">gpu</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All we are doing in this function is as follows:</p>
+<ul class="simple">
+<li><p>Initializing the batches before the start of the epoch</p></li>
+<li><p>If there is a next batch available we fetch the next batch</p></li>
+<li><p>We train the model on the fetched batch</p></li>
+<li><p>And we update the embeddings</p></li>
+</ul>
 </section>
 <section id="inference">
-<h2>4. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<h2>5. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<p>Similar to training the evaluation is also pretty simple can be concluded easily
+using the following function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">eval_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">):</span>
+    <span class="n">dataloader</span><span class="o">.</span><span class="n">initializeBatches</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">hasNextBatch</span><span class="p">():</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">dataloader</span><span class="o">.</span><span class="n">getBatch</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">evaluate_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The function does the following:</p>
+<ul class="simple">
+<li><p>Initialize the batches before the start of every epoch</p></li>
+<li><p>Load if there is a next batch of data available</p></li>
+<li><p>Evaluate the batch</p></li>
+<li><p>Once all batches are done report the metrics we defined earlier in reporter</p></li>
+</ul>
 </section>
 <section id="save-model">
-<h2>5. Save Model<a class="headerlink" href="#save-model" title="Permalink to this headline"></a></h2>
+<h2>6. Save Model<a class="headerlink" href="#save-model" title="Permalink to this headline"></a></h2>
+<p>Work in progress - More details will be added soon</p>
 </section>
 </section>
 
