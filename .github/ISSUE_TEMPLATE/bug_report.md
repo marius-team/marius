@@ -21,7 +21,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Environment**
-List your operating system, and dependency versions
+List your operating system, and dependency versions. You can obtain this by running `marius_env_info` from the command line.
 
 **Additional context**
 Add any other context about the problem here.
