@@ -79,7 +79,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -146,7 +145,7 @@
   <span class="nt">decoder</span><span class="p">:</span>
     <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
   <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
     <span class="nt">options</span><span class="p">:</span>
       <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
   <span class="nt">dense_optimizer</span><span class="p">:</span>
@@ -165,7 +164,7 @@
 </tr>
 </tbody>
 </table>
-<p>The above configuration has a simple embedding layer whose output is fed to the decoder layer, which uses a Softmax loss function to
+<p>The above configuration has a simple embedding layer whose output is fed to the decoder layer, which uses a SoftmaxCrossEntropy loss function to
 optimize the loss value. An Adagrad sparse optimizer is used for the node embeddings and Adam Optimizer for all other model parameters.</p>
 </section>
 <section id="graph-sage-3-layer">
@@ -219,7 +218,7 @@ optimize the loss value. An Adagrad sparse optimizer is used for the node embedd
   <span class="nt">decoder</span><span class="p">:</span>
     <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
   <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
     <span class="nt">options</span><span class="p">:</span>
       <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
   <span class="nt">dense_optimizer</span><span class="p">:</span>
@@ -283,7 +282,7 @@ The number of training/evaluation neighbor sampling layers is equal to the GNN s
   <span class="nt">decoder</span><span class="p">:</span>
     <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
   <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
     <span class="nt">options</span><span class="p">:</span>
       <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
   <span class="nt">dense_optimizer</span><span class="p">:</span>

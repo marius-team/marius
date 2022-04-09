@@ -87,7 +87,7 @@ Before we can run Marius we need to specify our model hyperparameters and path t
             decoder:
                 type: COMPLEX
             loss:
-                type: SOFTMAX
+                type: SOFTMAX_CE
             sparse_optimizer:
                 type: ADAGRAD
                 options:
@@ -186,16 +186,16 @@ Let's check again what was added in the ``datasets/custom_lp_example/`` director
 3. Inference with Python: Using Embeddings for Link Prediction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now that we have generated our embeddings for the dataset, we can perform link prediction to infer new edges in the graph. As previously mentioned, we can fix a target node and relation type and predict potential source nodes.
+.. Now that we have generated our embeddings for the dataset, we can perform link prediction to infer new edges in the graph. As previously mentioned, we can fix a target node and relation type and predict potential source nodes.
 
-Let's use our prediction tool that uses the embeddings to predict the top K most likely destination nodes for a given source and relation. For this example, we will set the source node to ``29741_taxon`` and the relation to ``collected_from``.
+.. Let's use our prediction tool that uses the embeddings to predict the top K most likely destination nodes for a given source and relation. For this example, we will set the source node to ``29741_taxon`` and the relation to ``collected_from``.
 
-``<29741_taxon, collected_from, ?>``
+.. ``<29741_taxon, collected_from, ?>``
 
-Semantically, we are predicting where Taxon #29741, which represents the fossil Whitfieldella (a type of extint mollusk) could be collected from. If our embeddings are accurate, we should not only find existing edges in our output but also new ones, leading to the discovery of possible new places to search for these fossils.
+.. Semantically, we are predicting where Taxon #29741, which represents the fossil Whitfieldella (a type of extint mollusk) could be collected from. If our embeddings are accurate, we should not only find existing edges in our output but also new ones, leading to the discovery of possible new places to search for these fossils.
 
 .. change from here once marius_infer updated
-We will use the Marius inference tool ``marius_infer`` to do this. In ``~marius-examples/link-predict-example/``, run::
+We will use the Marius inference tool ``marius_infer`` to perform link prediction with our trained model. In ``~marius-examples/link-predict-example/``, run::
 
     marius_predict --config paleo_config.yaml --output_dir results/ --metrics mrr mean_rank hits1 hits10 hits50 --save_scores --save_ranks
 

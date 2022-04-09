@@ -126,7 +126,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
             options:
               input_dim: 50
           loss:
-            type: SOFTMAX
+            type: SOFTMAX_CE
             options:
               reduction: SUM
           dense_optimizer: # optimizer to use for dense model parameters. In this case these are the DistMult relation (edge-type) embeddings

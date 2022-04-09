@@ -29,10 +29,10 @@ First check that the required software is installed (see above).
 The Python API can be accessed with ``import marius``.
 
 The following commands will be installed:
-- marius_train
-- marius_eval
-- marius_preprocess
-- marius_predict
+- marius_train: Train models using configuration files and the command line
+- marius_eval: Command line model evaluation
+- marius_preprocess: Built-in dataset downloading and preprocessing
+- marius_predict: Batch inference tool for link prediction or node classification
 
 
 CMake build (No Python API)
@@ -44,7 +44,7 @@ This does not build the Python API, but only the C++ sources and marius_train ex
 
         git clone https://github.com/marius-team/marius.git
 
-        # installs only marius.tools
+        # installs only marius.tools (required)
         MARIUS_NO_BINDINGS=1 pip3 install .
 
         mkdir build
@@ -59,8 +59,10 @@ This does not build the Python API, but only the C++ sources and marius_train ex
 Configuration Interface
 ##############################
 
-See Configuration examples (LINK) for detailed examples and the configuration schema (LINK) for all options.
+.. _config_examples_link: http://marius-project.org/marius/examples/config/index.html
+.. _schema_link: http://marius-project.org/marius/config_interface/full_schema.html
 
+See configuration `examples <config_examples_link_>`_ for detailed examples and the `configuration schema <schema_link_>`_ for all options.
 
 Preprocess & Configuration
 ****************************
@@ -204,7 +206,12 @@ Inference
 Python API
 ##############################
 
-See Python Examples (LINK) and API docs (LINK) for more details.
+
+.. _python_examples_link: http://marius-project.org/marius/examples/python/index.html
+
+.. _python_api_link: http://marius-project.org/marius/python_api/index.html
+
+See the `Python examples <python_examples_link_>`_ and `API docs <python_api_link_>`_ (under construction) for more details.
 
 Preprocess Dataset and load graph data
 **************************************

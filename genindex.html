@@ -45,7 +45,6 @@
 <li class="toctree-l1"><a class="reference internal" href="preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -208,7 +207,7 @@
 </li>
         <li><a href="python_api/nn/optim.html#marius.nn.SGDOptimizer.__init__">(marius.nn.SGDOptimizer method)</a>
 </li>
-        <li><a href="python_api/nn/loss.html#marius.nn.SoftMax.__init__">(marius.nn.SoftMax method)</a>
+        <li><a href="python_api/nn/loss.html#marius.nn.SoftmaxCrossEntropy.__init__">(marius.nn.SoftmaxCrossEntropy method)</a>
 </li>
         <li><a href="python_api/nn/loss.html#marius.nn.SoftPlusLoss.__init__">(marius.nn.SoftPlusLoss method)</a>
 </li>
@@ -273,8 +272,6 @@
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.__init__">(marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv method)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.__init__">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag method)</a>
-</li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.__init__">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M method)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.__init__">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts method)</a>
 </li>
@@ -525,6 +522,14 @@
         <li><a href="python_api/reporting/reporters.html#marius.report.ProgressReporter.clear">(marius.report.ProgressReporter method)</a>
 </li>
       </ul></li>
+      <li><a href="python_api/nn/model.html#marius.nn.Model.clear_grad">clear_grad() (marius.nn.Model method)</a>
+
+      <ul>
+        <li><a href="python_api/nn/optim.html#marius.nn.Optimizer.clear_grad">(marius.nn.Optimizer method)</a>
+</li>
+      </ul></li>
+      <li><a href="python_api/nn/model.html#marius.nn.Model.clear_grad_all">clear_grad_all() (marius.nn.Model method)</a>
+</li>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.clearBatches">clearBatches() (marius.data.DataLoader method)</a>
 </li>
       <li><a href="python_api/nn/decoders/edge/comparators.html#marius.nn.decoders.edge.Comparator">Comparator (class in marius.nn.decoders.edge)</a>
@@ -541,12 +546,12 @@
 </li>
       <li><a href="python_api/nn/decoders/node/noop_node_decoder.html#marius.nn.decoders.node.NoOpNodeDecoder.compute_labels">compute_labels() (marius.nn.decoders.node.NoOpNodeDecoder method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/reporting/reporters.html#marius.report.LinkPredictionReporter.compute_ranks">compute_ranks() (marius.report.LinkPredictionReporter method)</a>
 </li>
       <li><a href="python_api/nn/decoders/edge/edge_decoder.html#marius.nn.decoders.edge.EdgeDecoder.compute_scores">compute_scores() (marius.nn.decoders.edge.EdgeDecoder method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/configuration/index.html#marius.config.PipelineConfig.compute_threads">compute_threads (marius.config.PipelineConfig property)</a>
 
       <ul>
@@ -648,8 +653,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.dataset_name">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_name">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.dataset_name">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.dataset_name">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -682,8 +685,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.dataset_url">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_url">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.dataset_url">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.dataset_url">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -703,12 +704,6 @@
         <li><a href="python_api/nn/model.html#marius.nn.Model.decoder">(marius.nn.Model property)</a>
 </li>
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.ModelConfig.decoder">(marius.tools.configuration.marius_config.ModelConfig attribute)</a>
-</li>
-      </ul></li>
-      <li><a href="python_api/configuration/index.html#marius.config.EdgeDecoderOptions.decoder_method">decoder_method (marius.config.EdgeDecoderOptions property)</a>
-
-      <ul>
-        <li><a href="python_api/nn/decoders/edge/edge_decoder.html#marius.nn.decoders.edge.EdgeDecoder.decoder_method">(marius.nn.decoders.edge.EdgeDecoder property)</a>
 </li>
       </ul></li>
       <li><a href="python_api/configuration/index.html#marius.config.DecoderConfig">DecoderConfig (class in marius.config)</a>
@@ -830,8 +825,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.download">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag method)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.download">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M method)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.download">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts method)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.download">(marius.tools.preprocess.datasets.twitter.Twitter method)</a>
@@ -906,8 +899,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.edge_features_file">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_features_file">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.edge_features_file">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.edge_features_file">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -942,8 +933,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.edge_list_file">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_list_file">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.edge_list_file">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.edge_list_file">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -971,10 +960,10 @@
         <li><a href="python_api/tools/configuration/marius_config.html#marius.tools.configuration.marius_config.StorageConfig.edges">(marius.tools.configuration.marius_config.StorageConfig attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/tools/configuration/constants.html#marius.tools.configuration.constants.PathConstants.edges_directory">edges_directory (marius.tools.configuration.constants.PathConstants attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/data/dataloader.html#marius.data.DataLoader.edgeSample">edgeSample() (marius.data.DataLoader method)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.LayerType.EMBEDDING">EMBEDDING (marius.config.LayerType attribute)</a>
@@ -1813,6 +1802,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="python_api/reporting/reporters.html#marius.report.Reporter.metrics">metrics (marius.report.Reporter property)</a>
 </li>
+      <li><a href="python_api/configuration/index.html#marius.config.EdgeDecoderOptions.mode">mode (marius.config.EdgeDecoderOptions property)</a>
+
+      <ul>
+        <li><a href="python_api/nn/decoders/edge/edge_decoder.html#marius.nn.decoders.edge.EdgeDecoder.mode">(marius.nn.decoders.edge.EdgeDecoder property)</a>
+</li>
+      </ul></li>
       <li><a href="python_api/nn/model.html#marius.nn.Model">Model (class in marius.nn)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.MariusConfig.model">model (marius.config.MariusConfig property)</a>
@@ -2001,8 +1996,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.node_features_file">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_features_file">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_features_file">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.node_features_file">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -2049,8 +2042,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.node_mapping_file">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_mapping_file">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_mapping_file">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.node_mapping_file">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -2096,8 +2087,6 @@
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.node_type_file">(marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.node_type_file">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
-</li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_type_file">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_type_file">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
@@ -2254,8 +2243,6 @@
 </li>
       <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag">OGBNMag (class in marius.tools.preprocess.datasets.ogbn_mag)</a>
 </li>
-      <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M">OGBNPapers100M (class in marius.tools.preprocess.datasets.ogbn_papers100m)</a>
-</li>
       <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts">OGBNProducts (class in marius.tools.preprocess.datasets.ogbn_products)</a>
 </li>
       <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2">OGBWikiKG90Mv2 (class in marius.tools.preprocess.datasets.ogb_wikikg90mv2)</a>
@@ -2379,8 +2366,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.output_directory">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.output_directory">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.output_directory">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.output_directory">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -2478,8 +2463,6 @@
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.preprocess">(marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv method)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.preprocess">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag method)</a>
-</li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.preprocess">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M method)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.preprocess">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts method)</a>
 </li>
@@ -2581,8 +2564,6 @@
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.relation_features_file">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
 </li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_features_file">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
-</li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.relation_features_file">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.twitter.Twitter.relation_features_file">(marius.tools.preprocess.datasets.twitter.Twitter attribute)</a>
@@ -2618,8 +2599,6 @@
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.relation_mapping_file">(marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.relation_mapping_file">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
-</li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_mapping_file">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.relation_mapping_file">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
@@ -2808,9 +2787,9 @@
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.ActivationFunction.SIGMOID">SIGMOID (marius.config.ActivationFunction attribute)</a>
 </li>
-      <li><a href="python_api/nn/loss.html#marius.nn.SoftMax">SoftMax (class in marius.nn)</a>
+      <li><a href="python_api/configuration/index.html#marius.config.LossFunctionType.SOFTMAX_CE">SOFTMAX_CE (marius.config.LossFunctionType attribute)</a>
 </li>
-      <li><a href="python_api/configuration/index.html#marius.config.LossFunctionType.SOFTMAX">SOFTMAX (marius.config.LossFunctionType attribute)</a>
+      <li><a href="python_api/nn/loss.html#marius.nn.SoftmaxCrossEntropy">SoftmaxCrossEntropy (class in marius.nn)</a>
 </li>
       <li><a href="python_api/configuration/index.html#marius.config.LossFunctionType.SOFTPLUS">SOFTPLUS (marius.config.LossFunctionType attribute)</a>
 </li>
@@ -2846,8 +2825,6 @@
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.spark">(marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.spark">(marius.tools.preprocess.datasets.ogbn_mag.OGBNMag attribute)</a>
-</li>
-        <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.spark">(marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M attribute)</a>
 </li>
         <li><a href="python_api/tools/preprocess/datasets/index.html#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.spark">(marius.tools.preprocess.datasets.ogbn_products.OGBNProducts attribute)</a>
 </li>
@@ -3244,16 +3221,6 @@
 <h2 id="Z">Z</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python_api/nn/model.html#marius.nn.Model.zero_grad">zero_grad() (marius.nn.Model method)</a>
-
-      <ul>
-        <li><a href="python_api/nn/optim.html#marius.nn.Optimizer.zero_grad">(marius.nn.Optimizer method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="python_api/nn/model.html#marius.nn.Model.zero_grad_all">zero_grad_all() (marius.nn.Model method)</a>
-</li>
       <li><a href="python_api/configuration/index.html#marius.config.InitDistribution.ZEROS">ZEROS (marius.config.InitDistribution attribute)</a>
 </li>
   </ul></td>

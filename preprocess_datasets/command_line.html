@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; Marius 0.0.2 documentation</title>
+  <title>Command Line Preprocessing &mdash; Marius 0.0.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/marius_theme.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
@@ -18,7 +18,9 @@
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="python.html" />
+    <link rel="prev" title="Datasets and Preprocessing" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -37,16 +39,23 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config_interface/index.html">Configuration Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../python_api/index.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Datasets and Preprocessing</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Command Line Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#built-in-datasets">Built-in datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-datasets">Custom datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -78,7 +87,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>&lt;no title&gt;</li>
+          <li><a href="index.html">Datasets and Preprocessing</a> &raquo;</li>
+      <li>Command Line Preprocessing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/preprocess_datasets/command_line.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -88,48 +98,106 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>The marius_preprocess command can be used to download and preprocess built-in datasets for link prediction and node classification. Custom link prediction datasets can also be preprocessed with this command.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">marius_preprocess</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">output_directory</span> <span class="n">output_directory</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">edges</span> <span class="n">edges</span> <span class="p">[</span><span class="n">edges</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">dataset</span> <span class="n">dataset</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">num_partitions</span> <span class="n">num_partitions</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">partitioned_eval</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">delim</span> <span class="n">delim</span><span class="p">]</span>
-                  <span class="p">[</span><span class="o">--</span><span class="n">dataset_split</span> <span class="n">dataset_split</span> <span class="p">[</span><span class="n">dataset_split</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">overwrite</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">spark</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">no_remap_ids</span><span class="p">]</span>
-
-<span class="n">Preprocess</span> <span class="n">built</span><span class="o">-</span><span class="ow">in</span> <span class="n">datasets</span> <span class="ow">and</span> <span class="n">custom</span> <span class="n">link</span> <span class="n">prediction</span> <span class="n">datasets</span>
-
-<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
-  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
-  <span class="o">--</span><span class="n">output_directory</span> <span class="n">output_directory</span>
-                        <span class="n">Directory</span> <span class="n">to</span> <span class="n">put</span> <span class="n">graph</span> <span class="n">data</span>
-  <span class="o">--</span><span class="n">edges</span> <span class="n">edges</span> <span class="p">[</span><span class="n">edges</span> <span class="o">...</span><span class="p">]</span>
-                        <span class="n">File</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">edge</span> <span class="nb">list</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="n">custom</span> <span class="n">dataset</span>
-  <span class="o">--</span><span class="n">dataset</span> <span class="n">dataset</span>     <span class="n">Name</span> <span class="n">of</span> <span class="n">dataset</span> <span class="n">to</span> <span class="n">preprocess</span>
-  <span class="o">--</span><span class="n">num_partitions</span> <span class="n">num_partitions</span>
-                        <span class="n">Number</span> <span class="n">of</span> <span class="n">node</span> <span class="n">partitions</span>
-  <span class="o">--</span><span class="n">partitioned_eval</span>    <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">the</span> <span class="n">validation</span> <span class="ow">and</span><span class="o">/</span><span class="ow">or</span> <span class="n">the</span> <span class="n">test</span> <span class="nb">set</span> <span class="n">will</span> <span class="n">be</span> <span class="n">partitioned</span><span class="o">.</span>
-  <span class="o">--</span><span class="n">delim</span> <span class="n">delim</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">delim</span>
-                        <span class="n">Delimiter</span> <span class="n">to</span> <span class="n">use</span> <span class="k">for</span> <span class="n">delimited</span> <span class="n">file</span> <span class="n">inputs</span>
-  <span class="o">--</span><span class="n">dataset_split</span> <span class="n">dataset_split</span> <span class="p">[</span><span class="n">dataset_split</span> <span class="o">...</span><span class="p">],</span> <span class="o">-</span><span class="n">ds</span> <span class="n">dataset_split</span> <span class="p">[</span><span class="n">dataset_split</span> <span class="o">...</span><span class="p">]</span>
-                        <span class="n">Split</span> <span class="n">dataset</span> <span class="n">into</span> <span class="n">specified</span> <span class="n">fractions</span>
-  <span class="o">--</span><span class="n">overwrite</span>           <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">the</span> <span class="n">preprocessed</span> <span class="n">dataset</span> <span class="n">will</span> <span class="n">be</span> <span class="n">overwritten</span> <span class="k">if</span> <span class="n">it</span> <span class="n">already</span> <span class="n">exists</span>
-  <span class="o">--</span><span class="n">spark</span>               <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">pyspark</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span> <span class="n">to</span> <span class="n">perform</span> <span class="n">the</span> <span class="n">preprocessing</span>
-  <span class="o">--</span><span class="n">no_remap_ids</span>        <span class="n">If</span> <span class="n">true</span><span class="p">,</span> <span class="n">the</span> <span class="n">node</span> <span class="n">ids</span> <span class="n">of</span> <span class="n">the</span> <span class="nb">input</span> <span class="n">dataset</span> <span class="n">will</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">remapped</span> <span class="n">to</span> <span class="n">random</span> <span class="n">integer</span> <span class="n">ids</span><span class="o">.</span>
+  <section id="command-line-preprocessing">
+<h1>Command Line Preprocessing<a class="headerlink" href="#command-line-preprocessing" title="Permalink to this headline"></a></h1>
+<p>The preprocessing procedure takes datasets in their raw format and converts them to the input format required by Marius.</p>
+<section id="built-in-datasets">
+<h2>Built-in datasets<a class="headerlink" href="#built-in-datasets" title="Permalink to this headline"></a></h2>
+<p>Preprocessing the FB15K-237 knowledge graph</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess --dataset fb15k_237 --output_directory datasets/fb15k_237_example/
+Downloading FB15K-237.2.zip to datasets/fb15k_237_example/FB15K-237.2.zip
+Reading edges
+Remapping Edges
+Node mapping written to: datasets/fb15k_237_example/nodes/node_mapping.txt
+Relation mapping written to: datasets/fb15k_237_example/edges/relation_mapping.txt
+Dataset statistics written to: datasets/fb15k_237_example/dataset.yaml
 </pre></div>
 </div>
-<p>Preprocessing Built-in Datasets</p>
-<p>Preprocess the FB15K-237 knowledge graph
-<code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">--dataset</span> <span class="pre">fb15k_237</span> <span class="pre">--output_directory</span> <span class="pre">example_dir/</span></code></p>
-<p>Preprocess the ogbn_arxiv graph for node classification
-<code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">--dataset</span> <span class="pre">ogbn_arxiv</span> <span class="pre">--output_directory</span> <span class="pre">example_dir/</span></code></p>
-<p>Preprocessing custom edge lists for link prediction tasks</p>
-<p>Assume we have some input edge list in CSV form</p>
-<dl class="simple">
-<dt>::</dt><dd><p>src,rel,dst</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">--dataset</span> <span class="pre">ogbn_arxiv</span> <span class="pre">--output_directory</span> <span class="pre">example_dir/</span></code></p>
+<p>The  <code class="docutils literal notranslate"><span class="pre">--dataset</span></code> flag specifies which of the built-in datasets <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> will preprocess and download.</p>
+<p>The  <code class="docutils literal notranslate"><span class="pre">--output_directory</span></code> flag specifies where the preprocessed graph will be output and is set by the user. In this example, assume we have not created the datasets/fb15k_237_example repository. <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> will create it for us.</p>
+<p>See <a class="reference internal" href="#usage">Usage</a> for detailed options.</p>
+<p>Here are the contents of the output directory after preprocessing</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls -l datasets/fb15k_237_example/
+dataset.yaml                       <span class="c1"># input dataset statistics</span>
+nodes/
+  node_mapping.txt                 <span class="c1"># mapping of raw node ids to integer uuids</span>
+edges/
+  relation_mapping.txt             <span class="c1"># mapping of raw edge(relation) ids to integer uuids</span>
+  test_edges.bin                   <span class="c1"># preprocessed testing edge list</span>
+  train_edges.bin                  <span class="c1"># preprocessed training edge list</span>
+  validation_edges.bin             <span class="c1"># preprocessed validation edge list</span>
+train.txt                          <span class="c1"># raw training edge list</span>
+test.txt                           <span class="c1"># raw testing edge list</span>
+valid.txt                          <span class="c1"># raw validation edge list</span>
+text_cvsc.txt                      <span class="c1"># relation triples as used in Toutanova and Chen CVSM-2015</span>
+text_emnlp.txt                     <span class="c1"># relation triples as used inToutanova et al. EMNLP-2015</span>
+README.txt                         <span class="c1"># README of the downloaded FB15K-237 dataset</span>
+</pre></div>
+</div>
+<p>List of built-in datasets</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># node classification
+ogbn_arxiv
+ogbn_products
+ogbn_papers100m
+ogb_mag240m
+
+# link prediction
+fb15k
+fb15k_237
+livejournal
+twitter
+freebase86m
+ogbl_wikikg2
+ogbl_citation2
+ogbl_ppa
+ogb_wikikg90mv2
+</pre></div>
+</div>
+</section>
+<section id="custom-datasets">
+<h2>Custom datasets<a class="headerlink" href="#custom-datasets" title="Permalink to this headline"></a></h2>
+<p>Datasets in delimited file formats such as CSVs can be preprocessed with <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code></p>
+<p>See this <a class="reference external" href="http://marius-project.org/marius/examples/config/lp_custom.html#preprocess-dataset">example</a>.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: marius_preprocess [-h] [--output_directory output_directory] [--edges edges [edges ...]] [--dataset dataset] [--num_partitions num_partitions] [--partitioned_eval] [--delim delim]
+                  [--dataset_split dataset_split [dataset_split ...]] [--overwrite] [--spark] [--no_remap_ids]
+
+Preprocess built-in datasets and custom link prediction datasets
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --output_directory output_directory
+                        Directory to put graph data
+  --edges edges [edges ...]
+                        File(s) containing the edge list(s) for a custom dataset
+  --dataset dataset     Name of dataset to preprocess
+  --num_partitions num_partitions
+                        Number of node partitions
+  --partitioned_eval    If true, the validation and/or the test set will be partitioned.
+  --delim delim, -d delim
+                        Delimiter to use for delimited file inputs
+  --dataset_split dataset_split [dataset_split ...], -ds dataset_split [dataset_split ...]
+                        Split dataset into specified fractions
+  --overwrite           If true, the preprocessed dataset will be overwritten if it already exists
+  --spark               If true, pyspark will be used to perform the preprocessing
+  --no_remap_ids        If true, the node ids of the input dataset will not be remapped to random integer ids.
+  --columns [columns [columns ...]]
+                        List of column ids of input delimited files which
+                        denote the src node, edge-type, and dst node of edges.
+</pre></div>
+</div>
+</section>
+</section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Datasets and Preprocessing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="python.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

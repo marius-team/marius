@@ -24,7 +24,7 @@ DistMult
 |     decoder:                                  |                                             |
 |       type: DISTMULT                          |                                             |
 |     loss:                                     |                                             |
-|       type: SOFTMAX                           |                                             |
+|       type: SOFTMAX_CE                        |                                             |
 |       options:                                |                                             |
 |         reduction: SUM                        |                                             |
 |     dense_optimizer:                          |                                             |
@@ -39,7 +39,7 @@ DistMult
 +-----------------------------------------------+---------------------------------------------+
 
 
-The above configuration has a simple embedding layer whose output is fed to the decoder layer, which uses a Softmax loss function to 
+The above configuration has a simple embedding layer whose output is fed to the decoder layer, which uses a SoftmaxCrossEntropy loss function to
 optimize the loss value. An Adagrad sparse optimizer is used for the node embeddings and Adam Optimizer for all other model parameters.
 
 Graph Sage (3-layer)
@@ -92,7 +92,7 @@ Graph Sage (3-layer)
 |     decoder:                           |                                      |
 |       type: DISTMULT                   |                                      |
 |     loss:                              |                                      |
-|       type: SOFTMAX                    |                                      |
+|       type: SOFTMAX_CE                 |                                      |
 |       options:                         |                                      |
 |         reduction: SUM                 |                                      |
 |     dense_optimizer:                   |                                      |
@@ -155,7 +155,7 @@ GAT (3-layer)
      decoder:
        type: DISTMULT
      loss:
-       type: SOFTMAX
+       type: SOFTMAX_CE
        options:
          reduction: SUM
      dense_optimizer:

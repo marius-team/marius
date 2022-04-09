@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -194,7 +193,7 @@
   <span class="nt">decoder</span><span class="p">:</span>
     <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
   <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
     <span class="nt">options</span><span class="p">:</span>
       <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
   <span class="nt">dense_optimizer</span><span class="p">:</span>
@@ -216,7 +215,7 @@
 <p>The above model configuration has 5 stages in the encoder section, each stage separated by a <cite>–</cite>. The first stage has 2 layers, one embedding layer with output
 dimension 50 and another feature layer with output dimension of 50. The reduction layer in stage 2 takes input the combined vector of dimension
 100 and outputs a 50 dimensional vector. It is followed by 3 stages of GNN layers. The output from the encoder is fed to the decoder of type DISMULT.
-The loss function being used is Softmax with sum as the reduction method. The dense optimizer is for all model parameters except the node embeddings.
+The loss function being used is SoftmaxCrossEntropy with sum as the reduction method. The dense optimizer is for all model parameters except the node embeddings.
 Node embedings are optimized by the sparse optimizer.</p>
 </section>
 <section id="set-storage-and-dataset">

@@ -56,7 +56,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="nc_ogbn_arxiv.html">Small Scale Node Classification (OGBN-Arxiv)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nc_custom.html">Custom Dataset Node Classification</a></li>
 </ul>
 </li>
 </ul>
@@ -66,7 +65,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -239,14 +237,12 @@ we are calling the following method:</p>
                                       <span class="n">use_inverse_relations</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                       <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
                                       <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
-                                      <span class="n">decoder_method</span><span class="o">=</span><span class="s2">&quot;corrupt_node&quot;</span><span class="p">)</span>
+                                      <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Notice that we are using decoder_method as <code class="docutils literal notranslate"><span class="pre">corrupt_node</span></code> but there are other
-options available. Please refer to API documentation for more details.</p>
-<p>3. Defining a loss function: We are using <em>SoftMax</em> in this example. And defining
+<p>3. Defining a loss function: We are using <em>SoftmaxCrossEntropy</em> in this example. And defining
 it is just doing a function call:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loss</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">SoftMax</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loss</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">SoftmaxCrossEntropy</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>There are many other options available for encoder, decoder and loss functions.

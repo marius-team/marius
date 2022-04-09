@@ -76,15 +76,15 @@ we are calling the following method::
                                           use_inverse_relations=True,
                                           device=device,
                                           dtype=dtype,
-                                          decoder_method="corrupt_node")
+                                          mode="train")
 
-Notice that we are using decoder_method as ``corrupt_node`` but there are other
+Notice that we are using mode as ``train`` but there are other
 options available. Please refer to API documentation for more details. 
 
-3. Defining a loss function: We are using *SoftMax* in this example. And defining
+3. Defining a loss function: We are using *SoftmaxCrossEntropy* in this example. And defining
 it is just doing a function call::
 
-    loss = m.nn.SoftMax(reduction="sum")
+    loss = m.nn.SoftmaxCrossEntropy(reduction="sum")
 
 There are many other options available for encoder, decoder and loss functions.
 Please refer to the API documentation for more details.

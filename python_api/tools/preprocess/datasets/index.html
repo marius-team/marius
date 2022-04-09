@@ -69,7 +69,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -1257,94 +1256,6 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.spark">
 <span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_mag.OGBNMag.spark" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogbn_papers100m.</span></span><span class="sig-name descname"><span class="pre">OGBNPapers100M</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
-<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.__init__" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_name">
-<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_name" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_url">
-<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_url" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.download">
-<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.download" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.preprocess" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_list_file">
-<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_list_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_features_file">
-<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_features_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_mapping_file">
-<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_mapping_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_features_file">
-<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_features_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_mapping_file">
-<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_mapping_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_features_file">
-<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_features_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_type_file">
-<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_type_file" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.output_directory">
-<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.output_directory" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.spark">
-<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.spark" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

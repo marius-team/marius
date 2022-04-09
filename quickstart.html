@@ -68,7 +68,6 @@
 <li class="toctree-l1"><a class="reference internal" href="preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -137,10 +136,10 @@ pip3 install .
 </div></blockquote>
 <p>The Python API can be accessed with <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">marius</span></code>.</p>
 <p>The following commands will be installed:
-- marius_train
-- marius_eval
-- marius_preprocess
-- marius_predict</p>
+- marius_train: Train models using configuration files and the command line
+- marius_eval: Command line model evaluation
+- marius_preprocess: Built-in dataset downloading and preprocessing
+- marius_predict: Batch inference tool for link prediction or node classification</p>
 </section>
 <section id="cmake-build-no-python-api">
 <h3>CMake build (No Python API)<a class="headerlink" href="#cmake-build-no-python-api" title="Permalink to this headline"></a></h3>
@@ -148,7 +147,7 @@ pip3 install .
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/marius-team/marius.git
 
-<span class="c1"># installs only marius.tools</span>
+<span class="c1"># installs only marius.tools (required)</span>
 <span class="nv">MARIUS_NO_BINDINGS</span><span class="o">=</span><span class="m">1</span> pip3 install .
 
 mkdir build
@@ -165,7 +164,7 @@ make marius_train -j
 </section>
 <section id="configuration-interface">
 <h2>Configuration Interface<a class="headerlink" href="#configuration-interface" title="Permalink to this headline"></a></h2>
-<p>See Configuration examples (LINK) for detailed examples and the configuration schema (LINK) for all options.</p>
+<p>See configuration <a class="reference external" href="http://marius-project.org/marius/examples/config/index.html">examples</a> for detailed examples and the <a class="reference external" href="http://marius-project.org/marius/config_interface/full_schema.html">configuration schema</a> for all options.</p>
 <section id="preprocess-configuration">
 <h3>Preprocess &amp; Configuration<a class="headerlink" href="#preprocess-configuration" title="Permalink to this headline"></a></h3>
 <p>Preprocess dataset: this downloads and preprocesses the dataset into the arxiv_example/ directory</p>
@@ -293,7 +292,7 @@ Accuracy: 64.963068%
 </section>
 <section id="python-api">
 <h2>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline"></a></h2>
-<p>See Python Examples (LINK) and API docs (LINK) for more details.</p>
+<p>See the <a class="reference external" href="http://marius-project.org/marius/examples/python/index.html">Python examples</a> and <a class="reference external" href="http://marius-project.org/marius/python_api/index.html">API docs</a> (under construction) for more details.</p>
 <section id="preprocess-dataset-and-load-graph-data">
 <h3>Preprocess Dataset and load graph data<a class="headerlink" href="#preprocess-dataset-and-load-graph-data" title="Permalink to this headline"></a></h3>
 <p>Import marius and preprocess ogbn_arxiv for node classifcation.</p>

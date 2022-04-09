@@ -102,7 +102,7 @@ Preprocessing
 """"""""""""""""""""
 
 * Performant dataset preprocessing of raw datasets in CSV format
-* 14 built-in datasets for link prediction or node classification
+* 13 built-in datasets for link prediction or node classification
 * Custom dataset support
 
 Training & Evaluation
@@ -126,20 +126,14 @@ Supported Models
 * GNN layers: GraphSage, GCN, RGCN, GAT
 * Link prediction decoders: ComplEx, DistMult, TransE
 
-Additional Python Tools
-"""""""""""""""""""""""
-
-* Prediction module
-* Configuration Generation
-
 Upcoming Features
 ##############################
 
-* Configuration file optimizer (in testing)
+* Configuration file optimizer and generator (in testing)
 * SQL database to graph conversion tool (in testing)
-* KNN inference module (in testing)
 * Multi-GPU training (in progress)
 * Model checkpointing (in progress)
+* KNN inference module
 * marius_preprocess parquet file support
 * Remote storage for graph data and embeddings
 * Additional encoder layers and decoder layers

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Batch Inference (marius_predict) &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Graph Learning" href="../graph_learning/index.html" />
+    <link rel="prev" title="Model Export and Inference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python_api/index.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Model Export and Inference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Batch Inference (marius_predict)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#link-prediction">Link Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#input">Input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#output">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-output">Example output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#input-a-new-test-set">Input a new test set</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#node-classification">Node Classification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Example Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-arguments">Command line arguments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Model Export and Inference</a> &raquo;</li>
+      <li>Batch Inference (marius_predict)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/export_and_inference/marius_predict.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="batch-inference-marius-predict">
+<h1>Batch Inference (marius_predict)<a class="headerlink" href="#batch-inference-marius-predict" title="Permalink to this headline"></a></h1>
+<p>This document contains an overview of the inference module for link prediction and node classification models trained using the configuration API. The module supports both in memory and disk-based inference.</p>
+<p>The input test set can be be preprocessed, or can be in the raw input format and then preprocessed (partitioned, remapped and converted to binary format) before input to evaluation.</p>
+<section id="link-prediction">
+<h2>Link Prediction<a class="headerlink" href="#link-prediction" title="Permalink to this headline"></a></h2>
+<section id="input">
+<h3>Input<a class="headerlink" href="#input" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>A configuration file for a previously trained link prediction model</p></li>
+<li><p>A set of test edges (preprocessed or unpreprocessed)</p></li>
+<li><p>A list of metrics to compute (optional)</p></li>
+<li><p>Negative sampling configuration (optional)</p></li>
+</ul>
+</section>
+<section id="output">
+<h3>Output<a class="headerlink" href="#output" title="Permalink to this headline"></a></h3>
+<p>Text file containing a summary of metrics for the evaluation set: <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/metrics.txt</span></code> (optional)</p>
+<p>CSV file where each row denotes an edge, and it’s corresponding score and link prediction rank <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/scores.csv</span></code> (optional)</p>
+</section>
+<section id="example-usage">
+<h3>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline"></a></h3>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_predict --config configs/fb15k237.yaml --metrics mrr mr hits3 hits5 hits10 hits50 hits100 hits2129 --save_ranks --save_scores --output_dir results/<span class="sb">`</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>This command takes in a trained configuration file, <code class="docutils literal notranslate"><span class="pre">configs/fb15k237.yaml</span></code>, which defines a model that has been previous trained.</p>
+<p>The list of metrics over the training set will be computed and output to results/metrics.txt. The ranks and scores for each edge are output to <code class="docutils literal notranslate"><span class="pre">results/scores.csv</span></code>.</p>
+<p>Contents of <code class="docutils literal notranslate"><span class="pre">configs/fb15k237.yaml</span></code>. The test set here has been created during preprocessing and is stored in <code class="docutils literal notranslate"><span class="pre">&lt;storage.dataset.base_directory&gt;/edges/test_edges.bin</span></code></p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span>
+  <span class="nt">encoder</span><span class="p">:</span>
+    <span class="nt">layers</span><span class="p">:</span>
+
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+          <span class="nt">init</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span>
+
+  <span class="nt">decoder</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
+  <span class="nt">loss</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
+  <span class="nt">dense_optimizer</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAM</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
+  <span class="nt">sparse_optimizer</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
+
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cpu</span>
+  <span class="nt">dataset</span><span class="p">:</span>
+    <span class="nt">base_directory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./fb15k_237_example/</span>
+    <span class="nt">num_edges</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">272115</span>
+    <span class="nt">num_nodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">14541</span>
+    <span class="nt">num_relations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">237</span>
+    <span class="nt">num_train</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">272115</span>
+    <span class="nt">num_valid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">17535</span>
+    <span class="nt">num_test</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20466</span>
+  <span class="nt">edges</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HOST_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">int</span>
+  <span class="nt">embeddings</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HOST_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">float</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">negative_sampling</span><span class="p">:</span>
+    <span class="nt">num_chunks</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+    <span class="nt">negatives_per_positive</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+    <span class="nt">degree_fraction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+    <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">negative_sampling</span><span class="p">:</span>
+    <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="example-output">
+<h3>Example output<a class="headerlink" href="#example-output" title="Permalink to this headline"></a></h3>
+<p>Two files are output by the above command:</p>
+<dl>
+<dt>metrics.txt</dt><dd><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Link Prediction: 40932 edges evaluated
+MRR: 0.125147
+Mean Rank: 426.079766
+Hits@3: 0.156259
+Hits@5: 0.207148
+Hits@10: 0.285229
+Hits@50: 0.510383
+Hits@100: 0.598725
+Hits@2129: 0.947987
+</pre></div>
+</div>
+</dd>
+<dt>scores.csv</dt><dd><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>src,rel,dst,rank,score
+14469,149,11486,26,32.206722
+8558,74,7904,2789,5.628761
+3160,73,8048,282,7.548909
+7240,168,4510,149,1.634745
+2393,211,10586,2,96.834641
+12773,198,5262,3136,9.098152
+11469,88,8946,18,15.922592
+2045,166,3344,289,0.407495
+</pre></div>
+</div>
+</dd>
+</dl>
+</section>
+<section id="input-a-new-test-set">
+<h3>Input a new test set<a class="headerlink" href="#input-a-new-test-set" title="Permalink to this headline"></a></h3>
+<p>If the dataset does not have a predefined test set. (e.g. <code class="docutils literal notranslate"><span class="pre">storage.dataset.num_test</span> <span class="pre">==</span> <span class="pre">0</span></code>). Then users can specify a separate test set with the <code class="docutils literal notranslate"><span class="pre">--input_file</span> <span class="pre">&lt;path_to_test_set&gt;</span></code>. This test set can either be preprocessed and in binary format, or unpreprocessed.</p>
+<p>Preprocessed input_test set usage:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_predict --config configs/fb15k237.yaml --input_file test_edges.bin --metrics mrr --save_ranks --save_scores --output_dir results/
+</pre></div>
+</div>
+</div></blockquote>
+<p>Unpreprocessed input_test set usage:</p>
+<p>If the input test set is unpreprocessed and in some raw input format. Then the <code class="docutils literal notranslate"><span class="pre">--preprocess_input</span></code> flag can be given. Users will need to specify the format of their input with <code class="docutils literal notranslate"><span class="pre">--input_format</span> <span class="pre">&lt;format&gt;</span></code>. Currently delimited formats are only supported.</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_predict --config configs/fb15k237.yaml --input_file test_edges.csv --preprocess_input --input_format CSV --metrics mrr --save_ranks --save_scores --output_dir results/
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+</section>
+<section id="node-classification">
+<h2>Node Classification<a class="headerlink" href="#node-classification" title="Permalink to this headline"></a></h2>
+<section id="id1">
+<h3>Input<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<p>A configuration file for a previously trained node classification model</p>
+<p>A set of test nodes (preprocessed or unpreprocessed)</p>
+<p>A list of metrics to compute (optional)</p>
+</section>
+<section id="id2">
+<h3>Output<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<p>Text file containing a summary of metrics for the evaluation set: <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/metrics.txt</span></code> (optional)</p>
+<p>CSV file where each row denotes an node, and it’s corresponding node classification label <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/labels.csv</span></code> (optional)</p>
+</section>
+<section id="id3">
+<h3>Example Usage<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_predict --config configs/arxiv.yaml --metrics accuracy --save_labels --output_dir results/
+</pre></div>
+</div>
+</div></blockquote>
+<p>This command takes in a trained configuration file, <code class="docutils literal notranslate"><span class="pre">configs/arxiv.yaml</span></code>, which defines the previously trained model.</p>
+<p>The list of metrics over the training set will be computed and output to <code class="docutils literal notranslate"><span class="pre">results/metrics.txt</span></code>. The ranks and scores for each node are output to <code class="docutils literal notranslate"><span class="pre">results/labels.csv</span></code>.</p>
+</section>
+</section>
+<section id="command-line-arguments">
+<h2>Command line arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline"></a></h2>
+<p>Below is the help message for the tool, containing an overview of the tools arguments and usage.</p>
+<blockquote>
+<div><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ marius_predict --help
+usage: predict [-h] --config config [--output_dir output_dir] [--metrics [metrics ...]] [--save_labels] [--save_scores] [--save_ranks] [--batch_size batch_size] [--num_nbrs num_nbrs]
+               [--num_negs num_negs] [--num_chunks num_chunks] [--deg_frac deg_frac] [--filtered filtered] [--input_file input_file] [--input_format input_format] [--preprocess_input preprocess_input]
+               [--columns columns] [--header_length header_length] [--delim delim] [--dtype dtype]
+
+Tool for performing link prediction or node classification inference with trained models.
+
+Link prediction example usage:
+marius_predict &lt;trained_config&gt; --output_dir results/ --metrics mrr mean_rank hits1 hits10 hits50 --save_scores --save_ranks
+Assuming &lt;trained_config&gt; contains a link prediction model, this command will perform link prediction evaluation over the test set of edges provided in the config file. Metrics are saved to results/metrics.csv and scores and ranks for each test edge are saved to results/scores.csv
+
+Node classification example usage:
+marius_predict &lt;trained_config&gt; --output_dir results/ --metrics accuracy --save_labels
+This command will perform node classification evaluation over the test set of nodes provided in the config file. Metrics are saved to results/metrics.csv and labels for each test node are saved to results/labels.csv
+
+Custom inputs:
+The test set can be directly specified setting --input_file &lt;test_set_file&gt;. If the test set has not been preprocessed, then --preprocess_input should be enabled. The default format is a binary file, but additional formats can be specified with --input_format.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --config config       Configuration file for trained model
+  --output_dir output_dir
+                        Path to output directory
+  --metrics [metrics ...]
+                        List of metrics to report.
+  --save_labels         (Node Classification) If true, the node classification labels of each test node will be saved to &lt;output_dir&gt;/labels.csv
+  --save_scores         (Link Prediction) If true, the link prediction scores of each test edge will be saved to &lt;output_dir&gt;/scores.csv
+  --save_ranks          (Link Prediction) If true, the link prediction ranks of each test edge will be saved to &lt;output_dir&gt;/scores.csv
+  --batch_size batch_size
+                        Number of examples to evaluate at a time.
+  --num_nbrs num_nbrs   Number of neighbors to sample for each GNN layer. If not provided, then the module will check if the output of the encoder has been saved after training (see
+                        storage.export_encoded_nodes). If the encoder outputs exist, the the module will skip the encode step (incl. neighbor sampling) and only perform the decode over the saved
+                        inputs. If encoder outputs are not saved, model.encoder.eval_neighbor_sampling will be used for the neighbor sampling configuration. If model.encoder.eval_neighbor_sampling does
+                        not exist, then model.encoder.train_neighbor_sampling will be used.If none of the above are given, then the model is assumed to not require neighbor sampling.
+  --num_negs num_negs   (Link Prediction) Number of negatives to compare per positive edge for link prediction. If -1, then all nodes are used as negatives. Otherwise, num_neg*num_chunks nodes will be
+                        sampled and used as negatives. If not provided, the evaluation.negative_sampling configuration will be used.if evaluation.negative_sampling is not provided, then negative
+                        sampling will not occur and only the scores for the input edges will be computed, this means that any ranking metrics cannot be calculated.
+  --num_chunks num_chunks
+                        (Link Prediction) Specifies the amount of reuse of negative samples. A given set of num_neg sampled nodes will be reused to corrupt (batch_size // num_chunks) edges.
+  --deg_frac deg_frac   (Link Prediction) Specifies the fraction of the num_neg nodes sampled as negatives that should be sampled according to their degree. This sampling procedure approximates degree
+                        based sampling by sampling nodes that appear in the current batch of edges.
+  --filtered filtered   (Link Prediction) If true, then false negative samples will be filtered out. This is only supported when evaluating with all nodes.
+  --input_file input_file
+                        Path to input file containing the test set, if not provided then the test set described in the configuration file will be used.
+  --input_format input_format
+                        Format of the input file to test. Options are [BINARY, CSV, TSV, DELIMITED] files. If DELIMITED, then --delim must be specified.
+  --preprocess_input preprocess_input
+                        If true, the input file (if provided) will be preprocessed before evaluation.
+  --columns columns     List of column ids of input delimited file which denote the src node, edge-type, and dst node of edges.E.g. columns=[0, 2, 1] means that the source nodes are found in the first
+                        column of the file, the edge-types are found in the third column, and the destination nodes are found in the second column.For graphs without edge types, only the location node
+                        columns need to be provided. E.g. [0, 1]If the input file contains node ids rather than edges, then only a single id is needed. E.g. [2]
+  --header_length header_length
+                        Length of the header for input delimited file
+  --delim delim         Delimiter for input file
+  --dtype dtype         Datatype of input file elements. Defaults to the dataset specified in the configuration file.
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Model Export and Inference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../graph_learning/index.html" class="btn btn-neutral float-right" title="Graph Learning" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

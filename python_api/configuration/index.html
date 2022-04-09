@@ -58,7 +58,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -490,11 +489,6 @@
 <dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">EdgeDecoderOptions</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions" title="Permalink to this definition"></a></dt>
 <dd><dl class="py property">
-<dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions.decoder_method">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">decoder_method</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions.decoder_method" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions.input_dim">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">input_dim</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions.input_dim" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -502,6 +496,11 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions.inverse_edges">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">inverse_edges</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions.inverse_edges" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.config.EdgeDecoderOptions.mode">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#marius.config.EdgeDecoderOptions.mode" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -928,7 +927,7 @@
 <dt class="sig sig-object py" id="marius.config.LossFunctionType">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.config.</span></span><span class="sig-name descname"><span class="pre">LossFunctionType</span></span><a class="headerlink" href="#marius.config.LossFunctionType" title="Permalink to this definition"></a></dt>
 <dd><p>Members:</p>
-<p>SOFTMAX</p>
+<p>SOFTMAX_CE</p>
 <p>RANKING</p>
 <p>BCE_AFTER_SIGMOID</p>
 <p>BCE_WITH_LOGITS</p>
@@ -955,8 +954,8 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="marius.config.LossFunctionType.SOFTMAX">
-<span class="sig-name descname"><span class="pre">SOFTMAX</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;LossFunctionType.SOFTMAX:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.SOFTMAX" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="marius.config.LossFunctionType.SOFTMAX_CE">
+<span class="sig-name descname"><span class="pre">SOFTMAX_CE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;LossFunctionType.SOFTMAX_CE:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#marius.config.LossFunctionType.SOFTMAX_CE" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

@@ -68,7 +68,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -135,6 +134,16 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="marius.nn.Model.broadcast">
 <span class="sig-name descname"><span class="pre">broadcast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.Model,</span> <span class="pre">devices:</span> <span class="pre">List[at::Device]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.Model.broadcast" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.Model.clear_grad">
+<span class="sig-name descname"><span class="pre">clear_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.Model.clear_grad" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.Model.clear_grad_all">
+<span class="sig-name descname"><span class="pre">clear_grad_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.Model.clear_grad_all" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -220,16 +229,6 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="marius.nn.Model.train_batch">
 <span class="sig-name descname"><span class="pre">train_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../data/batch.html#marius.data.Batch" title="marius._data.Batch"><span class="pre">marius._data.Batch</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_step</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.Model.train_batch" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.Model.zero_grad">
-<span class="sig-name descname"><span class="pre">zero_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.Model.zero_grad" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.Model.zero_grad_all">
-<span class="sig-name descname"><span class="pre">zero_grad_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.Model.zero_grad_all" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

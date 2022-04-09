@@ -69,7 +69,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../export_and_inference/index.html">Model Export and Inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">Debugging and FAQ</a></li>
 </ul>
 
 
@@ -166,7 +165,7 @@ in the encoder phase which is directly fed to the <cite>DISTMULT</cite> decoder.
   <span class="nt">decoder</span><span class="p">:</span>
     <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
   <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
     <span class="nt">options</span><span class="p">:</span>
       <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
   <span class="nt">dense_optimizer</span><span class="p">:</span>
@@ -246,18 +245,33 @@ in the encoder phase which is directly fed to the <cite>DISTMULT</cite> decoder.
 <td><p>Learning task for which the model is used. Valid values are [“LINK_PREDICTION”, “NODE_CLASSIFICATION”] (case insensitive). “LP” and “NC” can be used for shorthand.</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#encoder-conf-section"><span class="std std-ref">encoder</span></a></p></td>
-<td><p>EncoderConfig</p></td>
+<tr class="row-even"><td><dl class="field-list simple">
+<dt class="field-odd">ref</dt>
+<dd class="field-odd"><p>encoder</p>
+</dd>
+</dl>
+</td>
+<td><p><a class="reference internal" href="#encoder-conf-section"><span class="std std-ref">EncoderConfig</span></a></p></td>
 <td><p>Defines the architecture of the encoder and configuration of neighbor samplers.</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#decoder-conf-section"><span class="std std-ref">decoder</span></a></p></td>
-<td><p>DecoderConfig</p></td>
+<tr class="row-odd"><td><dl class="field-list simple">
+<dt class="field-odd">ref</dt>
+<dd class="field-odd"><p>decoder</p>
+</dd>
+</dl>
+</td>
+<td><p><a class="reference internal" href="#decoder-conf-section"><span class="std std-ref">DecoderConfig</span></a></p></td>
 <td><p>Denotes the decoder to apply to the output of the encoder. The decoder is learning task specific.</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#loss-conf-section"><span class="std std-ref">loss</span></a></p></td>
-<td><p>LossConfig</p></td>
+<tr class="row-even"><td><dl class="field-list simple">
+<dt class="field-odd">ref</dt>
+<dd class="field-odd"><p>loss</p>
+</dd>
+</dl>
+</td>
+<td><p><a class="reference internal" href="#loss-conf-section"><span class="std std-ref">LossConfig</span></a></p></td>
 <td><p>Loss function to apply over the output of the decoder.</p></td>
 <td><p>Required for training</p></td>
 </tr>
@@ -300,7 +314,7 @@ of an embedding layer in the encoder phase and a <cite>DISTMULT</cite> decoder.<
       <span class="nt">options</span><span class="p">:</span>
         <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
   <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
     <span class="nt">options</span><span class="p">:</span>
       <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
   <span class="nt">dense_optimizer</span><span class="p">:</span>
@@ -332,7 +346,7 @@ of an embedding layer in the encoder phase and a <cite>DISTMULT</cite> decoder.<
 </thead>
 <tbody>
 <tr class="row-even"><td><p>layers</p></td>
-<td><p>List[List[LayerConfig]]</p></td>
+<td><p>List[List[<a class="reference internal" href="#layer-conf-section"><span class="std std-ref">LayerConfig</span></a>]]</p></td>
 <td><p>Defines architecture of the encoder. Layers of the encoder are grouped into stages, where the layers within a stage are executed in parallel and the output of stage is the input to the successive stage.</p></td>
 <td><p>Yes</p></td>
 </tr>
@@ -494,7 +508,7 @@ edges to the given node are sampled while the outgoing edges are ignored.</p>
 </pre></div>
 </div>
 <section id="layer-configuration">
-<h4>Layer Configuration<a class="headerlink" href="#layer-configuration" title="Permalink to this headline"></a></h4>
+<span id="layer-conf-section"></span><h4>Layer Configuration<a class="headerlink" href="#layer-configuration" title="Permalink to this headline"></a></h4>
 <table class="colwidths-given docutils align-default" id="id7">
 <caption><span class="caption-text">LayerConfig</span><a class="headerlink" href="#id7" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -943,7 +957,7 @@ deviation 0.1.</p>
 </tr>
 <tr class="row-odd"><td><p>edge_decoder_method</p></td>
 <td><p>String</p></td>
-<td><p>Specifies how to apply the decoder to a given set of edges, and negatives. Options are [“ONLY_POS”, “CORRUPT_NODE”]. (Default “CORRUPT_NODE”)</p></td>
+<td><p>Specifies how to apply the decoder to a given set of edges, and negatives. Options are [“infer”, “train”]. (Default “train”)</p></td>
 <td><p>No</p></td>
 </tr>
 </tbody>
@@ -977,7 +991,7 @@ deviation 0.1.</p>
 <tbody>
 <tr class="row-even"><td><p>type</p></td>
 <td><p>String</p></td>
-<td><p>Denotes the type of the loss function. Options: [“SOFTMAX”, “RANKING”, “CROSS_ENTROPY”, “BCE_AFTER_SIGMOID”, “BCE_WITH_LOGITS”, “MSE”, “SOFTPLUS”].</p></td>
+<td><p>Denotes the type of the loss function. Options: [“SOFTMAX_CE”, “RANKING”, “CROSS_ENTROPY”, “BCE_AFTER_SIGMOID”, “BCE_WITH_LOGITS”, “MSE”, “SOFTPLUS”].</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td><p>options</p></td>
@@ -987,9 +1001,9 @@ deviation 0.1.</p>
 </tr>
 </tbody>
 </table>
-<p>Below is the configuration for a <cite>SOFTMAX</cite> loss function with <cite>SUM</cite> as the reduction method.</p>
+<p>Below is the configuration for a <cite>SOFTMAX_CE</cite> loss function with <cite>SUM</cite> as the reduction method.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">loss</span><span class="p">:</span>
-  <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+  <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
 </pre></div>
@@ -1018,9 +1032,9 @@ deviation 0.1.</p>
 </tr>
 </tbody>
 </table>
-<p>Below is the configuration for a <cite>SOFTMAX</cite> loss function with <cite>MEAN</cite> as the reduction method.</p>
+<p>Below is the configuration for a <cite>SOFTMAX_CE</cite> loss function with <cite>MEAN</cite> as the reduction method.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">loss</span><span class="p">:</span>
-  <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
+  <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
 </pre></div>
