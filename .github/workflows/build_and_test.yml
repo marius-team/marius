@@ -44,3 +44,9 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: bash
       run: pip3 install . --verbose
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: MARIUS_TEST_HOME=test/ python3 -m pytest test/python
+

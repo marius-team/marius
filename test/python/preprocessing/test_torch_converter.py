@@ -62,7 +62,7 @@ def validate_output_dir(output_dir: Path, expected_stats: DatasetConfig, dtype=n
 
     dataset_stats = OmegaConf.load(output_dir / Path("dataset.yaml"))
 
-    assert dataset_stats.base_directory.rstrip("/") == expected_stats.base_directory
+    assert Path(dataset_stats.base_directory).absolute().__str__() == Path(expected_stats.base_directory).absolute().__str__()
     assert dataset_stats.num_edges == expected_stats.num_edges
     assert dataset_stats.num_relations == expected_stats.num_relations
     assert dataset_stats.num_nodes == expected_stats.num_nodes

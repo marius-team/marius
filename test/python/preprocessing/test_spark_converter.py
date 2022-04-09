@@ -1,5 +1,6 @@
 import shutil
 import unittest
+import pytest
 from pathlib import Path
 from test.python.preprocessing.test_torch_converter import validate_partitioned_output_dir, validate_output_dir
 from test.python.constants import TMP_TEST_DIR, TESTING_DATA_DIR
@@ -9,11 +10,13 @@ from marius.tools.configuration.constants import PathConstants
 from omegaconf import OmegaConf, MISSING
 import numpy as np
 import torch
-import os
+import subprocess
 import pandas as pd
 
 test_files = ["train_edges.txt", "valid_edges.txt", "test_edges.txt"]
 
+
+@pytest.mark.skip("Need to add a check for if java is installed")
 class TestSparkConverter(unittest.TestCase):
 
     @classmethod
