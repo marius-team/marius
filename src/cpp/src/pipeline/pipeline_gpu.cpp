@@ -334,6 +334,7 @@ void PipelineGPU::flushQueues() {
 void PipelineGPU::setQueueExpectingData(bool expecting_data) {
     if (train_) {
         loaded_batches_->expecting_data_ = expecting_data;
+        loaded_batches_->cv_->notify_all();
         for (auto d : device_loaded_batches_) {
             d->expecting_data_ = expecting_data;
             d->cv_->notify_all();
@@ -352,6 +353,7 @@ void PipelineGPU::setQueueExpectingData(bool expecting_data) {
         }
     } else {
         loaded_batches_->expecting_data_ = expecting_data;
+        loaded_batches_->cv_->notify_all();
         for (auto d : device_loaded_batches_) {
             d->expecting_data_ = expecting_data;
             d->cv_->notify_all();
