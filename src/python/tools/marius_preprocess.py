@@ -25,24 +25,6 @@ def set_args():
                         type=str,
                         help='File(s) containing the edge list(s) for a custom dataset')
 
-    parser.add_argument('--nodes',
-                        metavar='nodes',
-                        nargs='+',
-                        type=str,
-                        help='File(s) containing the node ids for a custom dataset')
-
-    parser.add_argument('--features',
-                        metavar='features',
-                        nargs='+',
-                        type=str,
-                        help='File(s) containing node features for a custom dataset')
-
-    parser.add_argument('--labels',
-                        metavar='labels',
-                        nargs='+',
-                        type=str,
-                        help='File(s) containing node labels for a custom node classification dataset')
-
     parser.add_argument('--dataset',
                         metavar='dataset',
                         type=str,
@@ -128,7 +110,6 @@ def main():
         "OGBL_PPA": ogbl_ppa.OGBLPpa,
         "OGBN_ARXIV": ogbn_arxiv.OGBNArxiv,
         "OGBN_PRODUCTS": ogbn_products.OGBNProducts,
-        "OGBN_MAG": ogbn_mag.OGBNMag,
         "OGBN_PAPERS100M": ogbn_papers100m.OGBNPapers100M,
         "OGB_WIKIKG90MV2": ogb_wikikg90mv2.OGBWikiKG90Mv2,
         "OGB_MAG240M": ogb_mag240m.OGBMag240M

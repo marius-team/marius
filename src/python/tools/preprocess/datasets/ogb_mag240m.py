@@ -5,7 +5,7 @@ import numpy as np
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.datasets.ogb_helpers import remap_ogbn
+from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
 import torch
 import os
 
@@ -81,7 +81,7 @@ class OGBMag240M(NodeClassificationDataset):
 
         if remap_ids:
             node_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.node_mapping_path), delimiter=",")
-            train_nodes, valid_nodes, test_nodes, features, labels = remap_ogbn(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
+            train_nodes, valid_nodes, test_nodes, features, labels = remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
 
         # convert to float32 in chunks, tested on ~500 GB RAM, need at least ~375GB minimum for float32 features
         num_nodes = features.shape[0]

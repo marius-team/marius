@@ -102,7 +102,7 @@ Preprocessing
 """"""""""""""""""""
 
 * Performant dataset preprocessing of raw datasets in CSV format
-* 14 built-in datasets for link prediction or node classification
+* 13 built-in datasets for link prediction or node classification
 * Custom dataset support
 
 Training & Evaluation
@@ -111,6 +111,7 @@ Training & Evaluation
 * CPU-GPU pipeline to mitigate data movement overheads
 * Optimized neighborhood sampling and datastructures for GNN aggregation
 * Scale beyond CPU memory with a partition buffer
+* Batch inference tool
 
 Supported Input Graphs
 """""""""""""""""""""""
@@ -125,12 +126,6 @@ Supported Models
 * Tasks: Link prediction, node classification
 * GNN layers: GraphSage, GCN, RGCN, GAT
 * Link prediction decoders: ComplEx, DistMult, TransE
-
-Additional Python Tools
-"""""""""""""""""""""""
-
-* Prediction module
-* Configuration Generation
 
 Upcoming Features
 ##############################

@@ -6,7 +6,7 @@ import pandas as pd
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.datasets.ogb_helpers import remap_ogbn
+from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
 from omegaconf import OmegaConf
 
 
@@ -85,7 +85,7 @@ class OGBNProducts(NodeClassificationDataset):
 
         if remap_ids:
             node_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.node_mapping_path), delimiter=",")
-            train_nodes, valid_nodes, test_nodes, features, labels = remap_ogbn(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
+            train_nodes, valid_nodes, test_nodes, features, labels = remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
 
         with open(self.train_nodes_file, "wb") as f:
             f.write(bytes(train_nodes))

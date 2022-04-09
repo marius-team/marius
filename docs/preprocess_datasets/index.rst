@@ -7,5 +7,6 @@ Datasets and Preprocessing
     :maxdepth: 2
     :caption: Contents
 
-    introduction
+    command_line
+    python
 

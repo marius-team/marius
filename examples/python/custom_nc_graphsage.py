@@ -12,7 +12,7 @@ from marius.tools.preprocess.utils import download_url, extract_file
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.datasets.ogb_helpers import remap_ogbn
+from marius.tools.preprocess.datasets.ogb_helpers import remap_nodes
 
 def switch_to_num(row):
     names = ['Neural_Networks', 'Rule_Learning', 'Reinforcement_Learning', 'Probabilistic_Methods',\
@@ -124,7 +124,7 @@ class MYDATASET(NodeClassificationDataset):
         # remap rest of the *.csv files. We are doing that here
         if remap_ids:
             node_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.node_mapping_path), delimiter=",")
-            train_nodes, valid_nodes, test_nodes, features, labels = remap_ogbn(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
+            train_nodes, valid_nodes, test_nodes, features, labels = remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
 
         # Writing the remapped files as bin files
         with open(self.train_nodes_file, "wb") as f:

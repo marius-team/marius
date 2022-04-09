@@ -1,3 +1,5 @@
+.. _config_schema
+
 Configuration Schema
 =========================
 
@@ -115,16 +117,16 @@ Model Configuration
      - String
      - Learning task for which the model is used. Valid values are ["LINK_PREDICTION", "NODE_CLASSIFICATION"] (case insensitive). "LP" and "NC" can be used for shorthand.
      - Yes
-   * - :ref:`encoder<encoder-conf-section>`
-     - EncoderConfig
+   * - :ref: encoder
+     - :ref:`EncoderConfig<encoder-conf-section>`
      - Defines the architecture of the encoder and configuration of neighbor samplers.
      - Yes
-   * - :ref:`decoder<decoder-conf-section>`
-     - DecoderConfig
+   * - :ref: decoder
+     - :ref:`DecoderConfig<decoder-conf-section>`
      - Denotes the decoder to apply to the output of the encoder. The decoder is learning task specific.
      - Yes
-   * - :ref:`loss<loss-conf-section>`
-     - LossConfig
+   * - :ref: loss
+     - :ref:`LossConfig<loss-conf-section>`
      - Loss function to apply over the output of the decoder.
      - Required for training
    * - dense_optimizer
@@ -192,7 +194,7 @@ Encoder Configuration
      - Description
      - Required
    * - layers
-     - List[List[LayerConfig]]
+     - List[List[:ref:`LayerConfig<layer-conf-section>`]]
      - Defines architecture of the encoder. Layers of the encoder are grouped into stages, where the layers within a stage are executed in parallel and the output of stage is the input to the successive stage.
      - Yes
    * - train_neighbor_sampling
@@ -331,6 +333,8 @@ The below configuration might work for a graph configuration where there are 2 G
        options:
          rate: 0.05
 
+
+.. _layer-conf-section:
 
 Layer Configuration
 """""""""""""""""""

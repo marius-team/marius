@@ -59,8 +59,10 @@ This does not build the Python API, but only the C++ sources and marius_train ex
 Configuration Interface
 ##############################
 
-See Configuration examples (LINK) for detailed examples and the configuration schema (LINK) for all options.
+.. _config_examples_link: http://marius-project.org/marius/examples/config/index.html
+.. _schema_link: http://marius-project.org/marius/config_interface/full_schema.html
 
+See configuration `examples <config_examples_link_>`_ for detailed examples and the `configuration schema <schema_link_>`_ for all options.
 
 Preprocess & Configuration
 ****************************
@@ -204,7 +206,12 @@ Inference
 Python API
 ##############################
 
-See Python Examples (LINK) and API docs (LINK) for more details.
+
+.. _python_examples_link: http://marius-project.org/marius/examples/python/index.html
+
+.. _python_api_link: http://marius-project.org/marius/python_api/index.html
+
+See the `Python examples <python_examples_link_>`_ and `API docs <python_api_link_>`_ (under construction) for more details.
 
 Preprocess Dataset and load graph data
 **************************************

@@ -26,7 +26,7 @@ Output
 
 Text file containing a summary of metrics for the evaluation set: ``<output_dir>/metrics.txt`` (optional)
 
-CSV file where each row denotes an edge, and it’s corresponding score and link prediction rank <output_dir>/scores.csv (optional)
+CSV file where each row denotes an edge, and it’s corresponding score and link prediction rank ``<output_dir>/scores.csv`` (optional)
 
 Example Usage
 ****************************
@@ -196,7 +196,7 @@ Command line arguments
 Below is the help message for the tool, containing an overview of the tools arguments and usage.
 
 
-    .. code-block:: bash
+    .. code-block:: text
 
         $ marius_predict --help
         usage: predict [-h] --config config [--output_dir output_dir] [--metrics [metrics ...]] [--save_labels] [--save_scores] [--save_ranks] [--batch_size batch_size] [--num_nbrs num_nbrs]

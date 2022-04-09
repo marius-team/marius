@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def remap_ogbn(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels):
+def remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels):
 
     num_nodes = node_mapping.shape[0]
 
