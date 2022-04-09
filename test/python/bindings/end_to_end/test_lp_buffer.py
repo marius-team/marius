@@ -25,6 +25,7 @@ def run_configs(directory, partitioned_eval=False):
             m.manager.marius_train(config)
 
 
+@pytest.mark.skip("Buffer tests currently flakey with python API")
 class TestLPBuffer(unittest.TestCase):
 
     output_dir = TMP_TEST_DIR / Path("buffer")
@@ -190,6 +191,7 @@ class TestLPBuffer(unittest.TestCase):
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
 
+@pytest.mark.skip("Buffer tests currently flakey with python API")
 class TestLPBufferNoRelations(unittest.TestCase):
 
     output_dir = TMP_TEST_DIR / Path("buffer_no_relations")

@@ -28,9 +28,9 @@ def infer_lp(model: m.nn.Model,
                 raise RuntimeError("Ranking metrics require the negative sampling configuration to be provided.")
 
         # Set the decoder to only compute scores for the positives
-        model.decoder.decoder_method = m.config.EdgeDecoderMethod.ONLY_POS
+        model.decoder.mode = m.config.EdgeDecoderMethod.ONLY_POS
     else:
-        model.decoder.decoder_method = m.config.EdgeDecoderMethod.CORRUPT_NODE
+        model.decoder.mode = m.config.EdgeDecoderMethod.CORRUPT_NODE
         neg_sampler = m.samplers.CorruptNodeNegativeSampler(num_chunks,
                                                             num_negs,
                                                             deg_frac,

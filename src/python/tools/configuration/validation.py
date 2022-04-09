@@ -108,6 +108,9 @@ def validate_storage_config(output_config):
     storage_config = output_config.storage
     dataset_config = storage_config.dataset
 
+    if dataset_config.initialized is False:
+        return
+
     if storage_config.embeddings.type != "PARTITION_BUFFER" and storage_config.features.type != "PARTITION_BUFFER":
         return 
     

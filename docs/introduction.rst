@@ -111,7 +111,6 @@ Training & Evaluation
 * CPU-GPU pipeline to mitigate data movement overheads
 * Optimized neighborhood sampling and datastructures for GNN aggregation
 * Scale beyond CPU memory with a partition buffer
-* Batch inference tool
 
 Supported Input Graphs
 """""""""""""""""""""""

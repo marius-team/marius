@@ -54,7 +54,7 @@ def get_test_model_lp():
                        use_inverse_relations=False,
                        device=device,
                        dtype=dtype,
-                       decoder_method="infer")
+                       mode="infer")
 
     loss = SoftmaxCrossEntropy(reduction="sum")
 

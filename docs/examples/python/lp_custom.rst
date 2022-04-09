@@ -135,8 +135,6 @@ we are calling the following method::
                                           dtype=dtype,
                                           mode="train")
 
-Notice that we are using decoder_method as ``corrupt_node`` but there are other
-options available. Please refer to API documentation for more details. 
 
 3. Defining a loss function: We are using *SoftmaxCrossEntropy* in this example. And defining
 it is just doing a function call::
