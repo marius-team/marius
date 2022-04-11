@@ -1,0 +1,154 @@
+@import url("theme.css");
+
+.wy-nav-content {
+    max-width: 50vw;
+}
+
+:root {
+    /*--marius_purple: #180A5B;*/
+    /*--marius_offwhite: #FFFDF3;*/
+    --marius_offwhite: #FFFDFB;
+    --marius_lightblue: #7175a2;
+    --marius_lighterblue: #999ecd;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Avenir;
+    font-weight: 800;
+}
+
+.rst-content table.docutils caption, .rst-content table.field-list caption, .wy-table caption {
+    font-style: normal;
+    font-weight: 400;
+    color: black;
+}
+
+.wy-body-for-nav {
+    font-family: FreightSans, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    color: black;
+}
+
+.rst-footer-buttons {
+    display: none;
+}
+
+.wy-side-nav-search, .wy-nav-top {
+    /*background: var(--marius_purple);*/
+    background: var(--marius_lightblue);
+}
+
+.wy-nav-side {
+    /* background: var(--marius_offwhite); */
+    background: var(--marius_lighterblue);
+    border-right: 1px solid #e1e4e5;
+    color: black;
+}
+
+.wy-menu-vertical a {
+    color: black;
+}
+
+.wy-menu-vertical li.current a {
+    border-right: None;
+    font-weight: 400;
+    color: var(--marius_offwhite);
+}
+
+.wy-menu-vertical li.current>a, .wy-menu-vertical li.on a {
+    /* background: var(--marius_offwhite); */
+    background: var(--marius_lighterblue);
+}
+
+.wy-nav-content {
+    background: var(--marius_offwhite);
+}
+
+.wy-nav-content-wrap {
+    background: var(--marius_offwhite);
+}
+
+.wy-table-responsive table td, .wy-table-responsive table th {
+    white-space: normal;
+}
+
+/*hide nested bullet points from toclist*/
+.rst-content .section ul li, .rst-content .toctree-wrapper ul li, .rst-content section ul li, .wy-plain-list-disc li, article ul li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
+}
+
+/*hide nested bullet points from toclist*/
+.rst-content .section ul li li, .rst-content .toctree-wrapper ul li li, .rst-content section ul li li, .wy-plain-list-disc li li, article ul li li {
+    list-style: none;
+    margin-left: 24px;
+    padding: 0;
+    font-weight: normal;
+}
+
+.wy-menu-vertical a:hover {
+    background: none;
+}
+
+.wy-menu-vertical li.current {
+    background: none;
+
+}
+
+.wy-menu-vertical li.current:hover {
+    background: none;
+}
+
+.wy-menu-vertical li.toctree-l2.current>a, .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a {
+    background: none;
+}
+
+.wy-menu-vertical li.toctree-l2.current>a:hover, .wy-menu-vertical li.toctree-l2.current li.toctree-l3>a:hover {
+    background: none;
+}
+
+.wy-menu-vertical li.current a:hover {
+    background: none;
+}
+
+.wy-menu-vertical li.toctree-l3.current>a, .wy-menu-vertical li.toctree-l3.current li.toctree-l4>a {
+    background: none;
+}
+
+.wy-menu-vertical li.toctree-l3.current>a:hover, .wy-menu-vertical li.toctree-l3.current li.toctree-l4>a:hover {
+    background: none;
+}
+
+
+.wy-menu-vertical li.toctree-l1.current>a {
+    border-top: none;
+    border-bottom: none;
+}
+
+.wy-menu-vertical li.toctree-l1.current>a:hover {
+    background: none;
+}
+
+.wy-menu-vertical li.current>a {
+    border-top: none;
+    border-bottom: none;
+}
+
+html.writer-html4 .rst-content dl:not(.docutils) .property, html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.simple) .property {
+    display: inline;
+    padding-right: 8px;
+    max-width: 100%;
+}
+
+div.leftside {
+    width: 60%;
+    padding: 0px 10px 0px 0px;
+    float: left;
+}
+
+div.rightside {
+    margin-left: 10%;
+    /* float: right; */
+}

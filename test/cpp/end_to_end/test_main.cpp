@@ -10,8 +10,8 @@
 /**
  * Runs marius training on a default test configuration
  */
-TEST(TestMain, TestDefaultConfig) {
-    std::string conf_str = std::string(MARIUS_TEST_DIRECTORY) + "/test_configs/default.ini";
+TEST(TestMain, TestLinkPred) {
+    std::string conf_str = std::string(MARIUS_TEST_DIRECTORY) + "/test_configs/fb15k_237_e2e.yaml";
     const char* conf = conf_str.c_str();
     int num_args = 2;
     const char* n_argv[] = {"marius_train", conf};

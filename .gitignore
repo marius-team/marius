@@ -10,6 +10,7 @@ CTestTestfile.cmake
 .idea/
 cmake-*/
 logs/
+test/test_data/generated/
 *.dylib
 
 # Created by https://www.toptal.com/developers/gitignore/api/python

@@ -1,0 +1,4 @@
+batch_size: 10
+num_epochs: 2
+pipeline:
+  sync: false

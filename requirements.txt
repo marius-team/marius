@@ -1,6 +1,0 @@
-sphinx_rtd_theme
-breathe
-numpy
-pandas
-tox
-pytest

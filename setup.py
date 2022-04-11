@@ -39,7 +39,9 @@ class CMakeBuild(build_ext):
             raise RuntimeError("Unsupported on Windows")
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2']
+
+            num_threads = os.cpu_count()
+            build_args += ['--', '-j{}'.format(num_threads)]
 
         cmake_args += ["-DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE"]
         cmake_args += ["-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE"]
@@ -48,6 +50,7 @@ class CMakeBuild(build_ext):
             import torch
             if torch.cuda.is_available():
                 cmake_args += ["-DUSE_CUDA=TRUE"]
+                cmake_args += ["-DUSE_OMP=TRUE"]
         except ImportError:
             raise ImportError("Pytorch not found. Please install pytorch first.")
 
@@ -68,16 +71,22 @@ class CMakeBuild(build_ext):
 
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args,
                               cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args,
+        subprocess.check_call(['cmake', '--build', '.', '--target', 'bindings'] + build_args,
                               cwd=self.build_temp)
         print()  # Add an empty line for cleaner output
 
 
-only_python = os.environ.get("MARIUS_ONLY_PYTHON", None)
+only_python = os.environ.get("MARIUS_NO_BINDINGS", None)
 if only_python:
     setup()
 else:
     setup(
-        ext_modules=[CMakeExtension('marius._pymarius')],
+        ext_modules=[CMakeExtension('marius._config'),
+                     CMakeExtension('marius._data'),
+                     CMakeExtension('marius._manager'),
+                     CMakeExtension('marius._nn'),
+                     CMakeExtension('marius._pipeline'),
+                     CMakeExtension('marius._report'),
+                     CMakeExtension('marius._storage')],
         cmdclass=dict(build_ext=CMakeBuild),
     )

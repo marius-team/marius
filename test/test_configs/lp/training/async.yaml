@@ -1,0 +1,9 @@
+batch_size: 100
+num_epochs: 2
+negative_sampling:
+  num_chunks: 5
+  negatives_per_positive: 20
+  degree_fraction: 0.0
+  filtered: false
+pipeline:
+  sync: false

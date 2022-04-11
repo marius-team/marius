@@ -1,0 +1,37 @@
+learning_task: LINK_PREDICTION
+encoder:
+  layers:
+
+    - - type: EMBEDDING
+        output_dim: 10
+        bias: true
+        init:
+          type: GLOROT_NORMAL
+
+      - type: FEATURE
+        output_dim: 10
+        bias: true
+        init:
+          type: GLOROT_NORMAL
+
+    - - type: REDUCTION
+        input_dim: 100
+        ouptut_dim: 10
+        bias: true
+        options:
+          type: LINEAR
+
+decoder:
+  type: DISTMULT
+loss:
+  type: SOFTMAX_CE
+  options:
+    reduction: SUM
+dense_optimizer:
+  type: ADAM
+  options:
+    learning_rate: 0.01
+sparse_optimizer:
+  type: ADAGRAD
+  options:
+    learning_rate: 0.1

@@ -1,149 +1,221 @@
 
 #include "marius.h"
 
-#include "config.h"
-#include "evaluator.h"
-#include "io.h"
-#include "logger.h"
-#include "model.h"
-#include "trainer.h"
-#include "util.h"
+#include "common/util.h"
+#include "configuration/util.h"
+#include "pipeline/evaluator.h"
+#include "pipeline/graph_encoder.h"
+#include "pipeline/trainer.h"
+#include "reporting/logger.h"
+#include "storage/checkpointer.h"
+#include "storage/io.h"
 
-using std::get;
+void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<MariusConfig> marius_config) {
+    shared_ptr<GraphEncoder> graph_encoder;
+    if (marius_config->evaluation->pipeline->sync) {
+        graph_encoder = std::make_shared<SynchronousGraphEncoder>(dataloader, model);
+    } else {
+        graph_encoder = std::make_shared<PipelineGraphEncoder>(dataloader, model, marius_config->evaluation->pipeline);
+    }
+
+    string filename = marius_config->storage->dataset->base_directory
+                      + PathConstants::nodes_directory
+                      + PathConstants::encoded_nodes_file
+                      + PathConstants::file_ext;
+
+    if (fileExists(filename)) {
+        remove(filename.c_str());
+    }
+
+    int64_t num_nodes = marius_config->storage->dataset->num_nodes;
+
+    int last_stage = marius_config->model->encoder->layers.size() - 1;
+    int last_layer = marius_config->model->encoder->layers[last_stage].size() - 1;
+    int64_t dim = marius_config->model->encoder->layers[last_stage][last_layer]->output_dim;
+
+    dataloader->graph_storage_->storage_ptrs_.encoded_nodes = std::make_shared<FlatFile>(filename, num_nodes, dim, torch::kFloat32, true);
+
+    graph_encoder->encode();
+}
+
+std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoader> > marius_init(shared_ptr<MariusConfig> marius_config, bool train) {
+
+    Timer initialization_timer = Timer(false);
+    initialization_timer.start();
+    SPDLOG_INFO("Start initialization");
+
+    MariusLogger marius_logger = MariusLogger(marius_config->storage->dataset->base_directory);
+    spdlog::set_default_logger(marius_logger.main_logger_);
+    marius_logger.setConsoleLogLevel(marius_config->storage->log_level);
+
+    torch::manual_seed(marius_config->model->random_seed);
+    srand(marius_config->model->random_seed);
+
+    std::vector<torch::Device> devices = devices_from_config(marius_config->storage);
+
+    shared_ptr<Model> model;
+    shared_ptr<GraphModelStorage> graph_model_storage;
+
+    int epochs_processed = 0;
+
+    if (train) {
+        // initialize new model
+        if (!marius_config->training->resume_training && marius_config->training->resume_from_checkpoint.empty()) {
+            model = initModelFromConfig(marius_config->model,
+                                        devices,
+                                        marius_config->storage->dataset->num_relations,
+                                        true);
+            graph_model_storage = initializeStorage(model,
+                                                    marius_config->storage,
+                                                    !marius_config->training->resume_training,
+                                                    true);
+        } else {
+            auto checkpoint_loader = std::make_shared<Checkpointer>();
+
+            string checkpoint_dir = marius_config->storage->dataset->base_directory;
+            if (!marius_config->training->resume_from_checkpoint.empty()) {
+                checkpoint_dir = marius_config->training->resume_from_checkpoint;
+            }
+
+            auto tup = checkpoint_loader->load(checkpoint_dir, marius_config, true);
+            model = std::get<0>(tup);
+            graph_model_storage = std::get<1>(tup);
+
+            CheckpointMeta checkpoint_meta = std::get<2>(tup);
+            epochs_processed = checkpoint_meta.num_epochs;
+        }
+    } else {
+        auto checkpoint_loader = std::make_shared<Checkpointer>();
+
+        string checkpoint_dir = marius_config->storage->dataset->base_directory;
+        if (!marius_config->evaluation->checkpoint_dir.empty()) {
+            checkpoint_dir = marius_config->evaluation->checkpoint_dir;
+        }
+        auto tup = checkpoint_loader->load(checkpoint_dir, marius_config, false);
+        model = std::get<0>(tup);
+        graph_model_storage = std::get<1>(tup);
+
+        CheckpointMeta checkpoint_meta = std::get<2>(tup);
+        epochs_processed = checkpoint_meta.num_epochs;
+    }
+
+    shared_ptr<DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage,
+                                                                     model->learning_task_,
+                                                                     marius_config->training,
+                                                                     marius_config->evaluation,
+                                                                     marius_config->model->encoder);
+
+    dataloader->epochs_processed_ = epochs_processed;
+
+    initialization_timer.stop();
+    int64_t initialization_time = initialization_timer.getDuration();
+
+    SPDLOG_INFO("Initialization Complete: {}s", (double) initialization_time / 1000);
+
+    return std::forward_as_tuple(model, graph_model_storage, dataloader);
+
+}
+
+void marius_train(shared_ptr<MariusConfig> marius_config) {
+
+    auto tup = marius_init(marius_config, true);
+    auto model = std::get<0>(tup);
+    auto graph_model_storage = std::get<1>(tup);
+    auto dataloader = std::get<2>(tup);
+
+    shared_ptr<Trainer> trainer;
+    shared_ptr<Evaluator> evaluator;
+
+    shared_ptr<Checkpointer> model_saver;
+    CheckpointMeta metadata;
+    if (marius_config->training->save_model) {
+        model_saver = std::make_shared<Checkpointer>(model, graph_model_storage, nullptr);
+        metadata.has_state = true;
+        metadata.has_encoded = marius_config->storage->export_encoded_nodes;
+        metadata.has_model = true;
+        metadata.has_edges = true;
+    }
+
+    if (marius_config->training->pipeline->sync) {
+        trainer = std::make_shared<SynchronousTrainer>(dataloader, model, marius_config->training->logs_per_epoch);
+    } else {
+        trainer = std::make_shared<PipelineTrainer>(dataloader, model, marius_config->training->pipeline, marius_config->training->logs_per_epoch);
+    }
+
+    if (marius_config->evaluation->pipeline->sync) {
+        evaluator = std::make_shared<SynchronousEvaluator>(dataloader, model);
+    } else {
+        evaluator = std::make_shared<PipelineEvaluator>(dataloader, model, marius_config->evaluation->pipeline);
+    }
+
+    for (int epoch = 0; epoch < marius_config->training->num_epochs; epoch++) {
+        if ((epoch + 1) % marius_config->evaluation->epochs_per_eval != 0) {
+            trainer->train(1);
+        } else {
+            trainer->train(1);
+
+            if (marius_config->storage->dataset->num_valid != -1) {
+                evaluator->evaluate(true);
+            }
+
+            if (marius_config->storage->dataset->num_test != -1) {
+                evaluator->evaluate(false);
+            }
+        }
+    }
+
+    metadata.num_epochs = dataloader->epochs_processed_;
+
+    if (marius_config->training->save_model) {
+        model_saver->save(marius_config->storage->dataset->base_directory, metadata);
+
+        if (marius_config->storage->export_encoded_nodes) {
+            encode_and_export(dataloader, model, marius_config);
+        }
+    }
+}
+
+void marius_eval(shared_ptr<MariusConfig> marius_config) {
+
+    auto tup = marius_init(marius_config, false);
+    auto model = std::get<0>(tup);
+    auto graph_model_storage = std::get<1>(tup);
+    auto dataloader = std::get<2>(tup);
+
+    shared_ptr<Evaluator> evaluator;
+
+    if (marius_config->evaluation->epochs_per_eval > 0) {
+        if (marius_config->evaluation->pipeline->sync) {
+            evaluator = std::make_shared<SynchronousEvaluator>(dataloader, model);
+        } else {
+            evaluator = std::make_shared<PipelineEvaluator>(dataloader, model, marius_config->evaluation->pipeline);
+        }
+        evaluator->evaluate(false);
+    }
+
+    if (marius_config->storage->export_encoded_nodes) {
+        encode_and_export(dataloader, model, marius_config);
+    }
+}
 
 void marius(int argc, char *argv[]) {
-    marius_options = parseConfig(argc, argv);
 
-    std::string log_file = marius_options.general.experiment_name;
-    MariusLogger marius_logger = MariusLogger(log_file);
-    spdlog::set_default_logger(marius_logger.main_logger_);
-    marius_logger.setConsoleLogLevel(marius_options.reporting.log_level);
+    (void) argc;
 
     bool train = true;
-    string path = string(argv[0]);
-    string base_filename = path.substr(path.find_last_of("/\\") + 1);
-    if (strcmp(base_filename.c_str(), "marius_eval") == 0) {
+    string command_path = string(argv[0]);
+    string config_path = string(argv[1]);
+    string command_name = command_path.substr(command_path.find_last_of("/\\") + 1);
+    if (strcmp(command_name.c_str(), "marius_eval") == 0) {
         train = false;
     }
 
-    if (!train) {
-        marius_options.storage.reinitialize_edges = false;
-        marius_options.storage.reinitialize_embeddings = false;
-    }
-
-    bool gpu = false;
-    if (marius_options.general.device == torch::kCUDA) {
-        gpu = true;
-    }
-
-    Timer preprocessing_timer = Timer(gpu);
-    preprocessing_timer.start();
-    SPDLOG_INFO("Start preprocessing");
-
-    DataSet *train_set;
-    DataSet *eval_set;
-
-    Model *model = initializeModel(marius_options.model.encoder_model, marius_options.model.decoder_model);
+    shared_ptr<MariusConfig> marius_config = loadConfig(config_path, true);
 
     if (train) {
-        tuple<Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *, Storage *> storage_ptrs = initializeTrain();
-        Storage *train_edges = get<0>(storage_ptrs);
-        Storage *eval_edges = get<1>(storage_ptrs);
-        Storage *test_edges = get<2>(storage_ptrs);
-
-        Storage *embeddings = get<3>(storage_ptrs);
-        Storage *emb_state = get<4>(storage_ptrs);
-
-        Storage *src_rel = get<5>(storage_ptrs);
-        Storage *src_rel_state = get<6>(storage_ptrs);
-        Storage *dst_rel = get<7>(storage_ptrs);
-        Storage *dst_rel_state = get<8>(storage_ptrs);
-
-        bool will_evaluate = !(marius_options.path.validation_edges.empty() && marius_options.path.test_edges.empty());
-
-        train_set = new DataSet(train_edges, embeddings, emb_state, src_rel, src_rel_state, dst_rel, dst_rel_state);
-        SPDLOG_INFO("Training set initialized");
-        if (will_evaluate) {
-            eval_set = new DataSet(train_edges, eval_edges, test_edges, embeddings, src_rel, dst_rel);
-            SPDLOG_INFO("Evaluation set initialized");
-        }
-
-        preprocessing_timer.stop();
-        int64_t preprocessing_time = preprocessing_timer.getDuration();
-
-        SPDLOG_INFO("Preprocessing Complete: {}s", (double) preprocessing_time / 1000);
-
-        Trainer *trainer;
-        Evaluator *evaluator;
-
-        if (marius_options.training.synchronous) {
-            trainer = new SynchronousTrainer(train_set, model);
-        } else {
-            trainer = new PipelineTrainer(train_set, model);
-        }
-
-        if (will_evaluate) {
-            if (marius_options.evaluation.synchronous) {
-                evaluator = new SynchronousEvaluator(eval_set, model);
-            } else {
-                evaluator = new PipelineEvaluator(eval_set, model);
-            }
-        }
-
-        for (int epoch = 0; epoch < marius_options.training.num_epochs; epoch += marius_options.evaluation.epochs_per_eval) {
-            int num_epochs = marius_options.evaluation.epochs_per_eval;
-            if (marius_options.training.num_epochs < num_epochs) {
-                num_epochs = marius_options.training.num_epochs;
-                trainer->train(num_epochs);
-            } else {
-                trainer->train(num_epochs);
-                if (will_evaluate) {
-                    evaluator->evaluate(epoch + marius_options.evaluation.epochs_per_eval < marius_options.training.num_epochs);
-                }
-            }
-        }
-        embeddings->unload(true);
-        src_rel->unload(true);
-        dst_rel->unload(true);
-
-
-        // garbage collect
-        delete trainer;
-        delete train_set;
-        if (will_evaluate) {
-            delete evaluator;
-            delete eval_set;
-        }
-
-        freeTrainStorage(train_edges, eval_edges, test_edges, embeddings, emb_state, src_rel, src_rel_state, dst_rel, dst_rel_state);
-
+        marius_train(marius_config);
     } else {
-        tuple<Storage *, Storage *, Storage *, Storage *> storage_ptrs = initializeEval();
-        Storage *test_edges = get<0>(storage_ptrs);
-        Storage *embeddings = get<1>(storage_ptrs);
-        Storage *src_rel = get<2>(storage_ptrs);
-        Storage *dst_rel = get<3>(storage_ptrs);
-
-        eval_set = new DataSet(test_edges, embeddings, src_rel, dst_rel);
-
-        preprocessing_timer.stop();
-        int64_t preprocessing_time = preprocessing_timer.getDuration();
-
-        SPDLOG_INFO("Preprocessing Complete: {}s", (double) preprocessing_time / 1000);
-
-        Evaluator *evaluator;
-
-        if (marius_options.evaluation.synchronous) {
-            evaluator = new SynchronousEvaluator(eval_set, model);
-        } else {
-            evaluator = new PipelineEvaluator(eval_set, model);
-        }
-        evaluator->evaluate(false);
-
-        delete eval_set;
-        delete evaluator;
-
-        freeEvalStorage(test_edges, embeddings, src_rel, dst_rel);
+        marius_eval(marius_config);
     }
 }
 

@@ -1,0 +1,54 @@
+model:
+  learning_task: LINK_PREDICTION
+  encoder:
+    layers:
+      - - type: EMBEDDING
+          output_dim: 50
+  decoder:
+    type: DISTMULT
+    options:
+      input_dim: 50
+  loss:
+    type: SOFTMAX_CE
+    options:
+      reduction: SUM
+  dense_optimizer:
+      type: ADAM
+      options:
+        learning_rate: 0.1
+  sparse_optimizer:
+      type: ADAGRAD
+      options:
+        learning_rate: 0.1
+storage:
+  device_type: cuda
+  dataset:
+    base_directory: /marius-internal/datasets/custom_lp_example/
+    num_edges: 932994
+    num_nodes: 169343
+    num_relations: 1
+    num_train: 932994
+    num_valid: 116624
+    num_test: 116625
+  edges:
+    type: DEVICE_MEMORY
+  embeddings:
+    type: DEVICE_MEMORY
+  save_model: true
+training:
+  batch_size: 1000
+  negative_sampling:
+    num_chunks: 10
+    negatives_per_positive: 500
+    degree_fraction: 0.0
+    filtered: false
+  num_epochs: 10
+  pipeline:
+    sync: true
+  epochs_per_shuffle: 1
+evaluation:
+  batch_size: 1000
+  negative_sampling:
+    filtered: true
+  pipeline:
+    sync: true

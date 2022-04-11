@@ -1,88 +1,266 @@
 import argparse
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import itertools
+import os
 
-def partition_edges(edges, num_partitions, num_nodes):
-    partition_size = int(np.ceil(num_nodes / num_partitions))
-    src_partitions = edges[:, 0] // partition_size
-    dst_partitions = edges[:, 2] // partition_size
-    dst_args = np.argsort(dst_partitions, kind="stable")
-    # edges = edges[dst_args]
-    src_args = np.argsort(src_partitions[dst_args], kind="stable")
-    edges = edges[dst_args[src_args]]
-    offsets = [len(list(y)) for x, y in itertools.groupby(dst_partitions[dst_args[src_args]])]
+import torch
 
-    return edges, offsets
+import sys
 
+from omegaconf import OmegaConf
+from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter, split_edges
+from marius.tools.configuration.constants import PathConstants
 
-def main():
-    parser = argparse.ArgumentParser(description='Generate Datasets.')
-    parser.add_argument('num_nodes', metavar='nodes', type=int, help='Number of nodes')
-    parser.add_argument('num_rels', metavar='relations', type=int, help='Number of Relations')
-    parser.add_argument('num_train_edges', metavar='train', type=int, help='Number of Training Edges')
-    parser.add_argument('num_valid_edges', metavar='valid', type=int, help='Number of Validation Edges')
-    parser.add_argument('num_test_edges', metavar='test', type=int, help='Number of Test Edges')
-    parser.add_argument('--num_partitions', metavar='num_partitions', required=False, type=int, default=1,
-                        help='Number of partitions to split the edges into')
-    args = parser.parse_args()
-
-    num_nodes = args.num_nodes
-    num_rels = args.num_rels
-    num_train_edges = args.num_train_edges
-    num_valid_edges = args.num_valid_edges
-    num_test_edges = args.num_test_edges
-    num_partitions = args.num_partitions
-
-    edge_ids = np.arange(num_nodes * num_nodes)
-    np.random.shuffle(edge_ids)
-    train_edge_ids = edge_ids[:num_train_edges]
-    valid_edge_ids = edge_ids[num_train_edges:num_train_edges + num_valid_edges]
-    test_edge_ids = edge_ids[num_train_edges + num_valid_edges : num_train_edges + num_valid_edges + num_test_edges]
-
-    src_train_id = np.floor_divide(train_edge_ids, num_nodes)
-    dst_train_id = np.remainder(train_edge_ids, num_nodes)
-    rel_train_id = np.random.randint(0, num_rels, len(src_train_id))
-
-    src_valid_id = np.floor_divide(valid_edge_ids, num_nodes)
-    dst_valid_id = np.remainder(valid_edge_ids, num_nodes)
-    rel_valid_id = np.random.randint(0, num_rels, len(src_valid_id))
-
-    src_test_id = np.floor_divide(test_edge_ids, num_nodes)
-    dst_test_id = np.remainder(test_edge_ids, num_nodes)
-    rel_test_id = np.random.randint(0, num_rels, len(src_test_id))
-
-    train_edges_np = np.stack([src_train_id, rel_train_id, dst_train_id]).T.astype(np.int32)
-    valid_edges_np = np.stack([src_valid_id, rel_valid_id, dst_valid_id]).T.astype(np.int32)
-    test_edges_np = np.stack([src_test_id, rel_test_id, dst_test_id]).T.astype(np.int32)
-
-    train_edges_df = pd.DataFrame(data=train_edges_np)
-    valid_edges_df = pd.DataFrame(data=valid_edges_np)
-    test_edges_df = pd.DataFrame(data=test_edges_np)
-
-    # write to csv
-    train_edges_df.to_csv("train_edges.txt", " ", header=False, index=False)
-    valid_edges_df.to_csv("valid_edges.txt", " ", header=False, index=False)
-    test_edges_df.to_csv("test_edges.txt", " ", header=False, index=False)
-
-    # convert to tensor blob
-    with open("train_edges.pt", "wb") as f:
-        f.write(bytes(train_edges_np))
-
-        if num_partitions > 1:
-            f.seek(0)
-            edges = np.fromfile("train_edges.pt", dtype=np.int32).reshape(-1, 3)
-            edges, offsets = partition_edges(edges, num_partitions, num_nodes)
-            f.write(bytes(edges))
-            with open("train_edges_partitions.txt", "w") as g:
-                g.writelines([str(o) + "\n" for o in offsets])
-    with open("valid_edges.pt", "wb") as f:
-        f.write(bytes(valid_edges_np))
-    with open("test_edges.pt", "wb") as f:
-        f.write(bytes(test_edges_np))
+from test.python.constants import TESTING_DATA_DIR
+from test.test_configs.generate_test_configs import generate_configs_for_dataset
 
 
+def get_random_graph(num_nodes, num_edges, num_rels=1):
+    src_nodes = np.random.randint(0, num_nodes, size=[num_edges])
+    dst_nodes = np.random.randint(0, num_nodes, size=[num_edges])
+
+    if num_rels > 1:
+        rels = np.random.randint(0, num_rels, size=[num_edges])
+        edges = np.stack([src_nodes, rels, dst_nodes], axis=1)
+    else:
+        edges = np.stack([src_nodes, dst_nodes], axis=1)
+
+    return edges
 
 
-if __name__ == '__main__':
-    main()
+def generate_features(num_nodes, feature_dim):
+    return np.random.randn(num_nodes, feature_dim).astype(np.float32)
+
+
+def generate_labels(num_nodes, num_classes):
+    return np.random.randint(0, num_classes - 1, size=[num_nodes]).astype(np.int32)
+
+
+def shuffle_with_map(values, node_mapping):
+    random_map = node_mapping[:, 1].astype(values.dtype)
+    random_map_argsort = np.argsort(random_map)
+    return values[random_map_argsort]
+
+
+def apply_mapping(values, node_mapping):
+    random_map = node_mapping[:, 1].astype(values.dtype)
+    return random_map[values]
+
+
+def remap_nc(output_dir,
+             train_nodes,
+             labels,
+             num_nodes,
+             valid_nodes=None,
+             test_nodes=None,
+             features=None):
+    node_mapping = np.genfromtxt(output_dir / Path(PathConstants.node_mapping_path), delimiter=",")
+
+    train_nodes = apply_mapping(train_nodes, node_mapping)
+
+    if valid_nodes is not None:
+        valid_nodes = apply_mapping(valid_nodes, node_mapping)
+
+    if test_nodes is not None:
+        test_nodes = apply_mapping(test_nodes, node_mapping)
+
+    if features is not None:
+        features = shuffle_with_map(features, node_mapping)
+
+    if labels.shape[0] != num_nodes:
+        labels = np.concatenate((labels, -np.ones([num_nodes - labels.shape[0]], dtype=np.int32)))
+
+    labels = shuffle_with_map(labels, node_mapping)
+
+    return train_nodes, labels, valid_nodes, test_nodes, features
+
+
+def remap_lp(output_dir,
+             features=None):
+    node_mapping = np.genfromtxt(output_dir / Path(PathConstants.node_mapping_path), delimiter=",")
+    features = shuffle_with_map(features, node_mapping)
+
+    return features
+
+
+def generate_random_dataset_nc(output_dir,
+                               num_nodes,
+                               num_edges,
+                               num_rels=1,
+                               splits=None,
+                               num_partitions=1,
+                               partitioned_eval=False,
+                               sequential_train_nodes=False,
+                               remap_ids=True,
+                               feature_dim=-1,
+                               num_classes=10):
+    edges = get_random_graph(num_nodes, num_edges, num_rels)
+    edges_df = pd.DataFrame(data=edges)
+
+    if edges.shape[1] == 3:
+        columns = [0, 1, 2]
+    else:
+        columns = [0, 1]
+
+    raw_edges_filename = output_dir / Path("raw_edges.csv")
+    edges_df.to_csv(raw_edges_filename, ",", header=False, index=False)
+
+    all_nodes = np.arange(0, num_nodes, dtype=np.int32)
+    train_nodes = all_nodes
+
+    valid_nodes = None
+    test_nodes = None
+    if splits is not None:
+        train_nodes, valid_nodes, test_nodes = split_edges(all_nodes, splits)
+
+    converter = TorchEdgeListConverter(output_dir,
+                                       train_edges=Path(raw_edges_filename),
+                                       delim=",",
+                                       remap_ids=remap_ids,
+                                       num_partitions=num_partitions,
+                                       columns=columns,
+                                       partitioned_evaluation=partitioned_eval,
+                                       sequential_train_nodes=sequential_train_nodes,
+                                       known_node_ids=[train_nodes, valid_nodes, test_nodes],
+                                       format="CSV")
+
+    dataset_stats = converter.convert()
+
+    features = None
+    if feature_dim != -1:
+        features = generate_features(num_nodes, feature_dim)
+
+    labels = generate_labels(num_nodes, num_classes)
+
+    train_nodes, labels, valid_nodes, test_nodes, features = remap_nc(output_dir,
+                                                                      train_nodes,
+                                                                      labels,
+                                                                      num_nodes,
+                                                                      valid_nodes,
+                                                                      test_nodes,
+                                                                      features)
+
+    if features is not None:
+        node_features_file = output_dir / Path(PathConstants.node_features_path)
+        with open(node_features_file, "wb") as f:
+            f.write(bytes(features))
+
+    labels_file = output_dir / Path(PathConstants.labels_path)
+    with open(labels_file, "wb") as f:
+        f.write(bytes(labels))
+
+    if train_nodes is not None:
+        train_nodes_file = output_dir / Path(PathConstants.train_nodes_path)
+        with open(train_nodes_file, "wb") as f:
+            f.write(bytes(train_nodes))
+
+    if valid_nodes is not None:
+        valid_nodes_file = output_dir / Path(PathConstants.valid_nodes_path)
+        with open(valid_nodes_file, "wb") as f:
+            f.write(bytes(valid_nodes))
+
+    if test_nodes is not None:
+        test_nodes_file = output_dir / Path(PathConstants.test_nodes_path)
+        with open(test_nodes_file, "wb") as f:
+            f.write(bytes(test_nodes))
+
+    # update dataset yaml
+    dataset_stats.num_train = train_nodes.shape[0]
+
+    if valid_nodes is not None:
+        dataset_stats.num_valid = valid_nodes.shape[0]
+    else:
+        dataset_stats.num_valid = -1
+
+    if test_nodes is not None:
+        dataset_stats.num_test = test_nodes.shape[0]
+    else:
+        dataset_stats.num_test = -1
+
+    if features is not None:
+        dataset_stats.node_feature_dim = features.shape[1]
+    else:
+        dataset_stats.node_feature_dim = -1
+
+    dataset_stats.num_classes = num_classes
+
+    dataset_stats.num_nodes = num_nodes
+
+    with open(output_dir / Path("dataset.yaml"), "w") as f:
+        yaml_file = OmegaConf.to_yaml(dataset_stats)
+        f.writelines(yaml_file)
+
+
+def generate_random_dataset_lp(output_dir,
+                               num_nodes,
+                               num_edges,
+                               num_rels=1,
+                               splits=None,
+                               num_partitions=1,
+                               partitioned_eval=False,
+                               sequential_train_nodes=False,
+                               remap_ids=True,
+                               feature_dim=-1):
+    edges = get_random_graph(num_nodes, num_edges, num_rels)
+    edges_df = pd.DataFrame(data=edges)
+
+    if edges.shape[1] == 3:
+        columns = [0, 1, 2]
+    else:
+        columns = [0, 1]
+
+    raw_edges_filename = output_dir / Path("raw_edges.csv")
+
+    edges_df.to_csv(raw_edges_filename, ",", header=False, index=False)
+
+    converter = TorchEdgeListConverter(output_dir,
+                                       train_edges=raw_edges_filename,
+                                       delim=",",
+                                       splits=splits,
+                                       num_partitions=num_partitions,
+                                       remap_ids=remap_ids,
+                                       columns=columns,
+                                       partitioned_evaluation=partitioned_eval,
+                                       sequential_train_nodes=sequential_train_nodes,
+                                       format="CSV")
+
+    dataset_stats = converter.convert()
+
+    if feature_dim != -1:
+        features = generate_features(num_nodes, feature_dim)
+
+        if remap_ids:
+            features = remap_lp(output_dir, features)
+
+        node_features_file = output_dir / Path(PathConstants.node_features_path)
+        with open(node_features_file, "wb") as f:
+            f.write(bytes(features))
+
+        dataset_stats.node_feature_dim = feature_dim
+        with open(output_dir / Path("dataset.yaml"), "w") as f:
+            yaml_file = OmegaConf.to_yaml(dataset_stats)
+            f.writelines(yaml_file)
+
+
+def generate_random_dataset(output_dir,
+                            num_nodes,
+                            num_edges,
+                            num_rels=1,
+                            splits=None,
+                            num_partitions=1,
+                            partitioned_eval=False,
+                            sequential_train_nodes=False,
+                            remap_ids=True,
+                            feature_dim=-1,
+                            num_classes=10,
+                            task="lp"):
+    os.makedirs(output_dir, exist_ok=True)
+
+    if task == "lp":
+        generate_random_dataset_lp(output_dir, num_nodes, num_edges, num_rels, splits, num_partitions, partitioned_eval, sequential_train_nodes, remap_ids, feature_dim)
+    elif task == "nc":
+        generate_random_dataset_nc(output_dir, num_nodes, num_edges, num_rels, splits, num_partitions, partitioned_eval, sequential_train_nodes, remap_ids, feature_dim, num_classes)
+    else:
+        raise RuntimeError("Unsupported dataset type for generator.")

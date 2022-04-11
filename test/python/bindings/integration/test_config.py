@@ -1,0 +1,134 @@
+import shutil
+import os
+import unittest
+from pathlib import Path
+
+import marius.tools.configuration.marius_config
+import pytest
+
+from test.python.constants import TMP_TEST_DIR, TESTING_CONFIG_DIR
+from test.test_configs.generate_test_configs import get_config
+from omegaconf import OmegaConf
+
+from marius.config import loadConfig
+from test.test_configs.generate_test_configs import generate_configs_for_dataset
+
+
+class TestConfig(unittest.TestCase):
+    """
+    Basic tests for loadConfig and the returned MariusConfig object.
+    """
+
+    output_dir = TMP_TEST_DIR / Path("config")
+
+    ds_config = marius.tools.configuration.marius_config.DatasetConfig()
+    ds_config.base_directory = output_dir.__str__()
+    ds_config.num_edges = 1000
+    ds_config.num_nodes = 100
+    ds_config.num_relations = 1
+    ds_config.num_train = 100
+    ds_config.num_valid = 10
+    ds_config.num_test = 10
+    ds_config.initialized = False
+
+    @classmethod
+    def setUp(self):
+        if not self.output_dir.exists():
+            os.makedirs(self.output_dir)
+
+        OmegaConf.save(self.ds_config, self.output_dir / Path("dataset.yaml"))
+
+    @classmethod
+    def tearDown(self):
+        if self.output_dir.exists():
+            shutil.rmtree(self.output_dir)
+
+    def test_missing_config(self):
+        try:
+            loadConfig("foo.yaml")
+            raise RuntimeError("Exception not thrown")
+        except Exception as e:
+            assert "Cannot find primary config" in e.__str__()
+
+    def test_load_config(self):
+
+        generate_configs_for_dataset(self.output_dir,
+                                     model_names=["distmult, gs_1_layer, gs_3_layer, gat_1_layer, gat_3_layer"],
+                                     storage_names=["in_memory, part_buffer"],
+                                     training_names=["sync"],
+                                     evaluation_names=["sync"],
+                                     task="lp")
+
+        # check that each generated config can be parsed and it's members accessed.
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("M-"):
+                config_file = self.output_dir / Path(filename)
+
+                config = loadConfig(config_file.__str__(), save=True)
+                loaded_full_config = loadConfig((self.output_dir / Path("full_config.yaml")).__str__())
+                assert loaded_full_config.model.random_seed == config.model.random_seed
+
+                assert config.model is not None
+                assert config.storage is not None
+                assert config.training is not None
+                assert config.evaluation is not None
+
+                assert config.model.encoder is not None
+                assert config.model.decoder is not None
+
+                assert config.storage.dataset.base_directory.rstrip("/") == self.output_dir.__str__()
+                assert config.storage.dataset.num_edges == 1000
+                assert config.storage.dataset.num_nodes == 100
+                assert config.storage.dataset.num_relations == 1
+                assert config.storage.dataset.num_train == 100
+                assert config.storage.dataset.num_valid == 10
+                assert config.storage.dataset.num_test == 10
+
+                assert config.training is not None
+                assert config.evaluation is not None
+
+                config.model.random_seed = 0
+                assert config.model.random_seed == 0
+
+        # reset directory
+        shutil.rmtree(self.output_dir)
+        os.makedirs(self.output_dir)
+        OmegaConf.save(self.ds_config, self.output_dir / Path("dataset.yaml"))
+
+        generate_configs_for_dataset(self.output_dir,
+                                     model_names=["gs_1_layer", "gs_3_layer", "gat_1_layer", "gat_3_layer"],
+                                     storage_names=["in_memory", "part_buffer"],
+                                     training_names=["sync"],
+                                     evaluation_names=["sync"],
+                                     task="nc")
+
+        # check that each generated config can be parsed and it's members accessed.
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("M-"):
+                config_file = self.output_dir / Path(filename)
+
+                config = loadConfig(config_file.__str__(), save=True)
+                loaded_full_config = loadConfig((self.output_dir / Path("full_config.yaml")).__str__())
+                assert loaded_full_config.model.random_seed == config.model.random_seed
+
+                assert config.model is not None
+                assert config.storage is not None
+                assert config.training is not None
+                assert config.evaluation is not None
+
+                assert config.model.encoder is not None
+                assert config.model.decoder is not None
+
+                assert config.storage.dataset.base_directory.rstrip("/") == self.output_dir.__str__()
+                assert config.storage.dataset.num_edges == 1000
+                assert config.storage.dataset.num_nodes == 100
+                assert config.storage.dataset.num_relations == 1
+                assert config.storage.dataset.num_train == 100
+                assert config.storage.dataset.num_valid == 10
+                assert config.storage.dataset.num_test == 10
+
+                assert config.training is not None
+                assert config.evaluation is not None
+
+                config.model.random_seed = 0
+                assert config.model.random_seed == 0
