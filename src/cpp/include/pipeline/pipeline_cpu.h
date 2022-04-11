@@ -8,38 +8,25 @@
 #include "pipeline.h"
 #include "queue.h"
 
-class ComputeWorkerCPU : protected Worker {
+class ComputeWorkerCPU : public Worker {
 public:
-    ComputeWorkerCPU(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {}
+    ComputeWorkerCPU(Pipeline *pipeline) : Worker{pipeline} {}
 
     void run() override;
 };
 
-class EncodeNodesWorkerCPU : protected Worker {
+class EncodeNodesWorkerCPU : public Worker {
 public:
     int gpu_id_;
 
-    EncodeNodesWorkerCPU(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {}
-
-    void run() override;
-};
-
-class AccumulateGradientsWorker : protected Worker {
-public:
-    AccumulateGradientsWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    EncodeNodesWorkerCPU(Pipeline *pipeline) : Worker{pipeline} {}
 
     void run() override;
 };
 
 class PipelineCPU : public Pipeline {
 public:
-    vector<std::thread> *pool_[CPU_NUM_WORKER_TYPES];
-    vector<bool *> *pool_paused_[CPU_NUM_WORKER_TYPES];
-    vector<ThreadStatus *> *pool_status_[CPU_NUM_WORKER_TYPES];
-
-//    shared_ptr<Queue<shared_ptr<Batch>>> loaded_batches_;
-    shared_ptr<Queue<shared_ptr<Batch>>> unaccumulated_batches_;
-//    shared_ptr<Queue<shared_ptr<Batch>>> update_batches_;
+    vector<shared_ptr<Worker>> pool_[CPU_NUM_WORKER_TYPES];
 
     PipelineCPU(shared_ptr<DataLoader> dataloader,
                 shared_ptr<Model> model,
@@ -56,7 +43,7 @@ public:
 
     void start() override;
 
-    void stopAndFlush() override;
+    void pauseAndFlush() override;
 
     void flushQueues() override;
 

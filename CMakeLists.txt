@@ -183,10 +183,16 @@ if (EXISTS ${project_SOURCE_DIR})
     target_include_directories(${PROJECT_NAME} PRIVATE ${project_SOURCE_DIR})
 endif ()
 
+IF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_TSAN)
+    message("Using address sanitizer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
+    set(CMAKE_MODULE_LINKER_FLAGS "{$CMAKE_MODULE_LINKER_FLAGS} -fsanitize=thread")
+ENDIF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_TSAN)
+
 IF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_ASAN)
-    message("Using ASAN")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address  -fsanitize=leak")
-    set(CMAKE_MODULE_LINKER_FLAGS "{$CMAKE_MODULE_LINKER_FLAGS}  -fsanitize=address -fsanitize=leak")
+    message("Using thread sanitizer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak")
+    set(CMAKE_MODULE_LINKER_FLAGS "{$CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address -fsanitize=leak")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_ASAN)
 
 

@@ -45,7 +45,7 @@ void PipelineTrainer::train(int num_epochs) {
         SPDLOG_INFO("################ Starting training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
         pipeline_->start();
         pipeline_->waitComplete();
-        pipeline_->stopAndFlush();
+        pipeline_->pauseAndFlush();
         SPDLOG_INFO("################ Finished training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
 
         if (pipeline_->model_->device_models_.size() > 1) {

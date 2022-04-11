@@ -8,20 +8,19 @@
 // CPU Pipeline worker IDs
 #define LOAD_BATCH_ID 0
 #define CPU_COMPUTE_ID 1
-#define CPU_ACCUMULATE_ID 2
-#define UPDATE_BATCH_ID 3
+#define UPDATE_BATCH_ID 2
 
 // GPU Pipeline worker IDs
-#define H2D_TRANSFER_ID 4
-#define GPU_COMPUTE_ID 5
-#define D2H_TRANSFER_ID 6
+#define H2D_TRANSFER_ID 3
+#define GPU_COMPUTE_ID 4
+#define D2H_TRANSFER_ID 5
 
 // Encode Pipeline worker IDs
-#define CPU_ENCODE_ID 7
-#define GPU_ENCODE_ID 8
-#define NODE_WRITE_ID 9
+#define CPU_ENCODE_ID 6
+#define GPU_ENCODE_ID 7
+#define NODE_WRITE_ID 8
 
-#define CPU_NUM_WORKER_TYPES 4
+#define CPU_NUM_WORKER_TYPES 3
 #define GPU_NUM_WORKER_TYPES 5
 
 #define WAIT_TIME 100000 // 100 micro seconds

@@ -57,7 +57,7 @@ Contents of ``configs/fb15k237.yaml``. The test set here has been created during
           decoder:
             type: DISTMULT
           loss:
-            type: SOFTMAX
+            type: SOFTMAX_CE
             options:
               reduction: SUM
           dense_optimizer:

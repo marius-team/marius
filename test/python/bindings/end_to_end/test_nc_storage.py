@@ -132,8 +132,7 @@ class TestNCStorage(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
-    @pytest.mark.skip("Buffer tests currently flakey with python API")
+    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_no_valid_buffer(self):
         num_nodes = 500
         num_rels = 10
@@ -159,8 +158,7 @@ class TestNCStorage(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
-    @pytest.mark.skip("Buffer tests currently flakey with python API")
+    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_only_train_buffer(self):
         num_nodes = 500
         num_rels = 10
@@ -184,8 +182,7 @@ class TestNCStorage(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
-    @pytest.mark.skip("Buffer tests currently flakey with python API")
+    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_no_valid_buffer_no_relations(self):
         num_nodes = 500
         num_rels = 1
@@ -211,8 +208,7 @@ class TestNCStorage(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
-    @pytest.mark.skip("Buffer tests currently flakey with python API")
+    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_only_train_buffer_no_relations(self):
         num_nodes = 500
         num_rels = 1

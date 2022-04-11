@@ -31,7 +31,7 @@ void PipelineGraphEncoder::encode(bool separate_layers) {
 
     pipeline_->start();
     pipeline_->waitComplete();
-    pipeline_->stopAndFlush();
+    pipeline_->pauseAndFlush();
     progress_reporter_->clear();
 
     timer.stop();

@@ -7,36 +7,9 @@
 #include "reporting/logger.h"
 #include "pipeline/queue.h"
 
-void AccumulateGradientsWorker::run() {
-    while (*status_ != ThreadStatus::Done) {
-        while (!*paused_) {
-            shared_ptr<Queue<shared_ptr<Batch>>> pop_queue = ((PipelineCPU *) pipeline_)->unaccumulated_batches_;
-            *status_ = ThreadStatus::WaitPop;
-            auto tup = pop_queue->blocking_pop();
-            bool popped = std::get<0>(tup);
-            shared_ptr<Batch> batch = std::get<1>(tup);
-            if (!popped) {
-                break;
-            }
-
-            *status_ = ThreadStatus::Running;
-
-            // # TODO deprecate this worker
-//            batch->accumulateGradients(pipeline_->model_->sparse_lr_);
-
-            shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *) pipeline_)->update_batches_;
-            *status_ = ThreadStatus::WaitPush;
-            push_queue->blocking_push(batch);
-        }
-        *status_ = ThreadStatus::Paused;
-        nanosleep(&sleep_time_, NULL);
-    }
-}
-
 void ComputeWorkerCPU::run() {
-    while (*status_ != ThreadStatus::Done) {
-        while (!*paused_) {
-            *status_ = ThreadStatus::WaitPop;
+    while (!done_) {
+        while (!paused_) {
             shared_ptr<Queue<shared_ptr<Batch>>> pop_queue = ((PipelineCPU *) pipeline_)->loaded_batches_;
             auto tup = pop_queue->blocking_pop();
             bool popped = std::get<0>(tup);
@@ -44,8 +17,6 @@ void ComputeWorkerCPU::run() {
             if (!popped) {
                 break;
             }
-
-            *status_ = ThreadStatus::Running;
             if (pipeline_->isTrain()) {
 
                 if (batch->node_embeddings_.defined()) {
@@ -56,8 +27,8 @@ void ComputeWorkerCPU::run() {
 
                 pipeline_->model_->train_batch(batch);
                 batch->status_ = BatchStatus::ComputedGradients;
-                shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *) pipeline_)->unaccumulated_batches_;
-                *status_ = ThreadStatus::WaitPush;
+                shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *) pipeline_)->update_batches_;
+
                 push_queue->blocking_push(batch);
             } else {
                 batch->dense_graph_.performMap();
@@ -68,15 +39,13 @@ void ComputeWorkerCPU::run() {
                 batch->clear();
             }
         }
-        *status_ = ThreadStatus::Paused;
         nanosleep(&sleep_time_, NULL);
     }
 }
 
 void EncodeNodesWorkerCPU::run() {
-    while (*status_ != ThreadStatus::Done) {
-        while (!*paused_) {
-            *status_ = ThreadStatus::WaitPop;
+    while (!done_) {
+        while (!paused_) {
             shared_ptr<Queue<shared_ptr<Batch>>> pop_queue = ((PipelineCPU *) pipeline_)->loaded_batches_;
             auto tup = pop_queue->blocking_pop();
             bool popped = std::get<0>(tup);
@@ -85,18 +54,14 @@ void EncodeNodesWorkerCPU::run() {
                 break;
             }
 
-            *status_ = ThreadStatus::Running;
-
             batch->dense_graph_.performMap();
             torch::Tensor encoded = pipeline_->model_->encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, false);
             batch->clear();
             batch->encoded_uniques_ = encoded.contiguous();
 
             shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *) pipeline_)->update_batches_;
-            *status_ = ThreadStatus::WaitPush;
             push_queue->blocking_push(batch);
         }
-        *status_ = ThreadStatus::Paused;
         nanosleep(&sleep_time_, NULL);
     }
 }
@@ -119,16 +84,9 @@ PipelineCPU::PipelineCPU(shared_ptr<DataLoader> dataloader,
 
     if (train_) {
         loaded_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
-        unaccumulated_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
         update_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->gradients_host_queue_size);
     } else {
         loaded_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
-    }
-
-    for (int i = 0; i < CPU_NUM_WORKER_TYPES; i++) {
-        pool_paused_[i] = new vector<bool *>;
-        pool_status_[i] = new vector<ThreadStatus *>;
-        pool_[i] = new vector<std::thread>;
     }
 
     staleness_bound_ = pipeline_options_->staleness_bound;
@@ -145,16 +103,15 @@ PipelineCPU::PipelineCPU(shared_ptr<DataLoader> dataloader,
 PipelineCPU::~PipelineCPU() {
 
     for (int i = 0; i < CPU_NUM_WORKER_TYPES; i++) {
-        auto threads = pool_[i];
-        for (int j = 0; j < threads->size(); j++) {
-            *(*pool_status_[i])[j] = ThreadStatus::Done;
-            (*threads)[j].join();
+        for (int j = 0; j < pool_[i].size(); j++) {
+            pool_[i][j]->stop();
         }
     }
 
+    pool_->clear();
+
     if (train_) {
         loaded_batches_ = nullptr;
-        unaccumulated_batches_ = nullptr;
         update_batches_  = nullptr;
     } else {
         loaded_batches_  = nullptr;
@@ -183,15 +140,8 @@ void Pipeline::waitComplete() {
 }
 
 void PipelineCPU::addWorkersToPool(int pool_id, int worker_type, int num_workers, int gpu_id) {
-    bool *paused;
-    ThreadStatus *status;
-
     for (int i = 0; i < num_workers; i++) {
-        paused = new bool(true);
-        status = new ThreadStatus(ThreadStatus::Paused);
-        pool_paused_[pool_id]->emplace_back(paused);
-        pool_status_[pool_id]->emplace_back(status);
-        pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status));
+        pool_[pool_id].emplace_back(initWorkerOfType(worker_type, gpu_id));
     }
 }
 
@@ -205,8 +155,7 @@ void PipelineCPU::initialize() {
         if (train_) {
             addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
             addWorkersToPool(1, CPU_COMPUTE_ID, pipeline_options_->compute_threads);
-            addWorkersToPool(2, CPU_ACCUMULATE_ID, pipeline_options_->gradient_update_threads);
-            addWorkersToPool(3, UPDATE_BATCH_ID, pipeline_options_->gradient_update_threads);
+            addWorkersToPool(2, UPDATE_BATCH_ID, pipeline_options_->gradient_update_threads);
         } else {
             addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
             addWorkersToPool(1, CPU_COMPUTE_ID, pipeline_options_->compute_threads);
@@ -219,21 +168,22 @@ void PipelineCPU::start() {
     admitted_batches_ = 0;
     assign_id_ = 0;
     setQueueExpectingData(true);
+
     for (int i = 0; i < CPU_NUM_WORKER_TYPES; i++) {
-        for (int j = 0; j < pool_paused_[i]->size(); j++) {
-            *pool_paused_[i]->at(j) = false;
+        for (int j = 0; j < pool_[i].size(); j++) {
+            pool_[i][j]->start();
         }
     }
 }
 
-void PipelineCPU::stopAndFlush() {
+void PipelineCPU::pauseAndFlush() {
 
     waitComplete();
     setQueueExpectingData(false);
 
     for (int i = 0; i < CPU_NUM_WORKER_TYPES; i++) {
-        for (int j = 0; j < pool_paused_[i]->size(); j++) {
-            *pool_paused_[i]->at(j) = true;
+        for (int j = 0; j < pool_[i].size(); j++) {
+            pool_[i][j]->pause();
         }
     }
 
@@ -245,7 +195,6 @@ void PipelineCPU::stopAndFlush() {
 void PipelineCPU::flushQueues() {
     if (train_) {
         loaded_batches_->flush();
-        unaccumulated_batches_->flush();
         update_batches_->flush();
     } else {
         loaded_batches_->flush();
@@ -256,8 +205,6 @@ void PipelineCPU::setQueueExpectingData(bool expecting_data) {
     if (train_) {
         loaded_batches_->expecting_data_ = expecting_data;
         loaded_batches_->cv_->notify_all();
-        unaccumulated_batches_->expecting_data_ = expecting_data;
-        unaccumulated_batches_->cv_->notify_all();
         update_batches_->expecting_data_ = expecting_data;
         update_batches_->cv_->notify_all();
     } else {

@@ -8,50 +8,46 @@
 #include "pipeline.h"
 #include "queue.h"
 
-class BatchToDeviceWorker : protected Worker {
+class BatchToDeviceWorker : public Worker {
 public:
-    BatchToDeviceWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    BatchToDeviceWorker(Pipeline *pipeline) : Worker{pipeline} {};
 
     void run() override;
 };
 
-class ComputeWorkerGPU : protected Worker {
+class ComputeWorkerGPU : public Worker {
 public:
     int gpu_id_;
 
-    ComputeWorkerGPU(Pipeline *pipeline, bool *paused, ThreadStatus *status, int gpu_id) : Worker{pipeline, paused, status}, gpu_id_{gpu_id} {}
+    ComputeWorkerGPU(Pipeline *pipeline, int gpu_id) : Worker{pipeline}, gpu_id_{gpu_id} {}
 
     void run() override;
 };
 
-class EncodeNodesWorkerGPU : protected Worker {
+class EncodeNodesWorkerGPU : public Worker {
 public:
     int gpu_id_;
 
-    EncodeNodesWorkerGPU(Pipeline *pipeline, bool *paused, ThreadStatus *status, int gpu_id) : Worker{pipeline, paused, status}, gpu_id_{gpu_id} {}
+    EncodeNodesWorkerGPU(Pipeline *pipeline, int gpu_id) : Worker{pipeline}, gpu_id_{gpu_id} {}
 
     void run() override;
 };
 
-class BatchToHostWorker : protected Worker {
+class BatchToHostWorker : public Worker {
 public:
     int gpu_id_;
 
-    BatchToHostWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int gpu_id) : Worker{pipeline, paused, status}, gpu_id_{gpu_id} {};
+    BatchToHostWorker(Pipeline *pipeline, int gpu_id) : Worker{pipeline}, gpu_id_{gpu_id} {};
 
     void run() override;
 };
 
 class PipelineGPU : public Pipeline {
 public:
-    vector<std::thread> *pool_[GPU_NUM_WORKER_TYPES];
-    vector<bool *> *pool_paused_[GPU_NUM_WORKER_TYPES];
-    vector<ThreadStatus *> *pool_status_[GPU_NUM_WORKER_TYPES];
+    vector<shared_ptr<Worker>> pool_[GPU_NUM_WORKER_TYPES];
 
-//    shared_ptr<Queue<shared_ptr<Batch>>> loaded_batches_;                     // defined in pipeline.h
     std::vector<shared_ptr<Queue<shared_ptr<Batch>>>> device_loaded_batches_;   // one queue per GPU
     std::vector<shared_ptr<Queue<shared_ptr<Batch>>>> device_update_batches_;   // one queue per GPU
-//    shared_ptr<Queue<shared_ptr<Batch>>> update_batches_;                     // defined in pipeline.h
 
     // these variables should only be accessed/updated when the model->lock is acquired
     std::mutex *gpu_sync_lock_;
@@ -74,7 +70,7 @@ public:
 
     void start() override;
 
-    void stopAndFlush() override;
+    void pauseAndFlush() override;
 
     void flushQueues() override;
 

@@ -29,7 +29,6 @@ def run_configs(directory, partitioned_eval=False, sequential_train_nodes=False)
             m.manager.marius_train(config)
 
 
-@pytest.mark.skip("Buffer tests currently flakey with python API")
 class TestNCBuffer(unittest.TestCase):
 
     output_dir = TMP_TEST_DIR / Path("buffer")
@@ -154,7 +153,8 @@ class TestNCBuffer(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Sequential ordering tests currently flakey at small scale")
     def test_sequential(self):
         num_nodes = 500
         num_rels = 10
@@ -183,7 +183,6 @@ class TestNCBuffer(unittest.TestCase):
         run_configs(self.output_dir / Path(name), partitioned_eval=False, sequential_train_nodes=True)
 
 
-@pytest.mark.skip("Buffer tests currently flakey with python API")
 class TestNCBufferNoRelations(unittest.TestCase):
 
     output_dir = TMP_TEST_DIR / Path("buffer_no_relations")
@@ -308,7 +307,8 @@ class TestNCBufferNoRelations(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Sequential ordering tests currently flakey at small scale")
     def test_sequential(self):
         num_nodes = 500
         num_rels = 1

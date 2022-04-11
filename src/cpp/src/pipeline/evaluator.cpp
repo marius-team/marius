@@ -43,7 +43,7 @@ void PipelineEvaluator::evaluate(bool validation) {
     timer.start();
     pipeline_->start();
     pipeline_->waitComplete();
-    pipeline_->stopAndFlush();
+    pipeline_->pauseAndFlush();
     pipeline_->model_->reporter_->report();
     timer.stop();
 

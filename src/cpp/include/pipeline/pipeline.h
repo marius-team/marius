@@ -15,44 +15,59 @@
 
 class Pipeline;
 
-enum class ThreadStatus {
-    Running,
-    WaitPush,
-    WaitPop,
-    Paused,
-    Done
-};
-
 class Worker {
 protected:
     Pipeline *pipeline_;
     struct timespec sleep_time_;
-    bool *paused_;
-    ThreadStatus *status_;
+    std::atomic<bool> paused_;
+    std::atomic<bool> done_;
+
+    std::thread thread_;
 
 public:
-    Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status);
+    explicit Worker(Pipeline *pipeline);
 
     virtual void run() = 0;
+
+    void spawn() {
+        thread_ = std::thread(&Worker::run, this);
+    }
+
+    void start() {
+        paused_ = false;
+    }
+
+    void pause() {
+        paused_ = true;
+    }
+
+    void stop() {
+        paused_ = true;
+        done_ = true;
+
+        if (thread_.joinable()) {
+            thread_.join();
+        }
+    }
 };
 
-class LoadBatchWorker : protected Worker {
+class LoadBatchWorker : public Worker {
 public:
-    LoadBatchWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    LoadBatchWorker(Pipeline *pipeline) : Worker{pipeline} {};
 
     void run() override;
 };
 
-class UpdateBatchWorker : protected Worker {
+class UpdateBatchWorker : public Worker {
 public:
-    UpdateBatchWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    UpdateBatchWorker(Pipeline *pipeline) : Worker{pipeline} {};
 
     void run() override;
 };
 
-class WriteNodesWorker : protected Worker {
+class WriteNodesWorker : public Worker {
 public:
-    WriteNodesWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {}
+    WriteNodesWorker(Pipeline *pipeline) : Worker{pipeline} {}
 
     void run() override;
 };
@@ -87,7 +102,7 @@ class Pipeline {
 
     ~Pipeline();
 
-    std::thread initThreadOfType(int worker_type, bool *paused, ThreadStatus *status, int gpu_id = 0);
+    shared_ptr<Worker> initWorkerOfType(int worker_type, int gpu_id = 0);
 
     virtual void addWorkersToPool(int pool_id, int worker_type, int num_workers, int num_gpus = 1) = 0;
 
@@ -103,7 +118,7 @@ class Pipeline {
 
     virtual void start() = 0;
 
-    virtual void stopAndFlush() = 0;
+    virtual void pauseAndFlush() = 0;
 
     virtual void flushQueues() = 0;
 

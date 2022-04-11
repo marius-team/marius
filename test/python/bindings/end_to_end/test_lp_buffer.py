@@ -25,7 +25,7 @@ def run_configs(directory, partitioned_eval=False):
             m.manager.marius_train(config)
 
 
-@pytest.mark.skip("Buffer tests currently flakey with python API")
+# @pytest.mark.skip("Buffer tests currently flakey with python API")
 class TestLPBuffer(unittest.TestCase):
 
     output_dir = TMP_TEST_DIR / Path("buffer")
@@ -48,15 +48,15 @@ class TestLPBuffer(unittest.TestCase):
                                 splits=[.9, .05, .05],
                                 task="lp")
 
-    @classmethod
-    def tearDown(self):
-        if self.output_dir.exists():
-            shutil.rmtree(self.output_dir)
+    # @classmethod
+    # def tearDown(self):
+    #     if self.output_dir.exists():
+    #         shutil.rmtree(self.output_dir)
 
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_dm(self):
         name = "basic_dm"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult"],
@@ -70,7 +70,7 @@ class TestLPBuffer(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_gs(self):
         name = "basic_gs"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["gs_1_layer", "gs_3_layer"],
@@ -84,7 +84,7 @@ class TestLPBuffer(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_gs_uniform(self):
         name = "basic_gs_uniform"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["gs_1_layer_uniform", "gs_3_layer_uniform"],
@@ -98,7 +98,7 @@ class TestLPBuffer(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
     def test_gat(self):
         name = "basic_gat"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["gat_1_layer", "gat_3_layer"],
@@ -112,7 +112,7 @@ class TestLPBuffer(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_sync_training(self):
         name = "sync_training"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
@@ -126,7 +126,7 @@ class TestLPBuffer(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_async_training(self):
         name = "async_training"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
@@ -140,7 +140,7 @@ class TestLPBuffer(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_sync_eval(self):
         name = "sync_eval"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
@@ -154,7 +154,7 @@ class TestLPBuffer(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_async_eval(self):
         name = "async_eval"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
@@ -191,7 +191,6 @@ class TestLPBuffer(unittest.TestCase):
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
 
-@pytest.mark.skip("Buffer tests currently flakey with python API")
 class TestLPBufferNoRelations(unittest.TestCase):
 
     output_dir = TMP_TEST_DIR / Path("buffer_no_relations")
@@ -222,7 +221,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_dm(self):
         name = "dm"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult"],
@@ -236,7 +235,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_gs(self):
         name = "gs"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["gs_1_layer", "gs_3_layer"],
@@ -250,7 +249,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_gs_uniform(self):
         name = "gs_uniform"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["gs_1_layer_uniform", "gs_3_layer_uniform"],
@@ -264,7 +263,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
     def test_gat(self):
         name = "gat"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["gat_1_layer", "gat_3_layer"],
@@ -278,7 +277,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_sync_training(self):
         name = "sync_training"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
@@ -292,7 +291,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_async_training(self):
         name = "async_training"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
@@ -306,7 +305,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_sync_eval(self):
         name = "sync_eval"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
@@ -320,7 +319,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_async_eval(self):
         name = "async_eval"
-        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
+        shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name), dirs_exist_ok=True)
 
         generate_configs_for_dataset(self.output_dir / Path(name),
                                      model_names=["distmult", "gs_1_layer"],
