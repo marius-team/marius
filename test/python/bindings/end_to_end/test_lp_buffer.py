@@ -95,7 +95,8 @@ class TestLPBuffer(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
+    @pytest.mark.skip("GAT only supported for GPU")
     def test_gat(self):
         name = "basic_gat"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
@@ -260,7 +261,8 @@ class TestLPBufferNoRelations(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
+    @pytest.mark.skip("GAT only supported for GPU")
     def test_gat(self):
         name = "gat"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
