@@ -23,7 +23,11 @@ The  ``--dataset`` flag specifies which of the pre-set datasets ``marius_preproc
 
 The  ``--output_directory`` flag specifies where the preprocessed graph will be output and is set by the user. In this example, assume we have not created the ``datasets/ogbn_arxiv_example/`` repository, ``marius_preprocess`` will create it for us. 
 
-For detailed usages of  ``marius_preprocess``, please refer to ``marius_preprocess -h``.
+For detailed usages of  ``marius_preprocess``, please execute the following command:
+
+.. code-block:: bash
+
+   $ marius_preprocess -h
 
 Let's check what is inside the created directory:
 
@@ -95,20 +99,27 @@ An example YAML configuration file for the OGBN_Arxiv dataset is given in ``exam
 
 Let's create the same YAML configuration file for the OGBN_Arxiv dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs. 
 
-#. | First, we define the **model**. We begin by setting all required parameters. This includes ``learning_task``, ``encoder``, ``decoder``, and ``loss``. Since we are training a node classification model, set the ``learning_task`` to ``NODE_CLASSIFICATION``. Since we are training a 3-layer GraphSage model, define 3 ``layers`` of ``GNN`` of type ``GRAPH_SAGE``. The ``OGBN_Arvix`` dataset has ``node_feature_dim=128`` according to ``dataset/ogbn_arvix_example/dataset.yaml``, so set the ``input_dim`` and ``output_dim`` to 128 for each layer of the GNN except for the last layer. 
-   | Further note that the output of the encoder is the output label vector for a given node. Therefore, the ``output_dim`` of the last layer is 40, which is the same as the ``num_classes`` in ``dataset.yaml``. (E.g. For node classification with 5 classes, the output label vector from the encoder might look like this: [.05, .2, .8, .01, .03]. In this case, an argmax will return a class label of 2 for the node.) The rest of the configurations can be fine-tuned by the user.
+#. | First, we define the **model**. We begin by setting all required parameters. This includes ``learning_task``, ``encoder``, ``decoder``, and ``loss``.
+   | Note that the output of the encoder is the output label vector for a given node. (E.g. For node classification with 5 classes, the output label vector from the encoder might look like this: [.05, .2, .8, .01, .03]. In this case, an argmax will return a class label of 2 for the node.) The rest of the configurations can be fine-tuned by the user.
 
     .. code-block:: yaml
     
         model:
-          learning_task: NODE_CLASSIFICATION
+          learning_task: NODE_CLASSIFICATION # set to "NODE_CLASSIFICATION" since we train a node classification model
           encoder:
             train_neighbor_sampling:
               - type: ALL
               - type: ALL
               - type: ALL
-            layers:
+            layers: # define three "layers" of "GNN" of type "GRAPH_SAGE" since we train a 3-layer GraphSage model
               - - type: FEATURE
+                  output_dim: 128 # set to 128 (to match "node_feature_dim=128" in "dataset.yaml") for each layer except for the last
+                  bias: true
+              - - type: GNN
+                  options:
+                    type: GRAPH_SAGE
+                    aggregator: MEAN
+                  input_dim: 128 # set to 128 (to match "node_feature_dim=128" in "dataset.yaml") for each layer except for the last
                   output_dim: 128
                   bias: true
               - - type: GNN
@@ -123,14 +134,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
                     type: GRAPH_SAGE
                     aggregator: MEAN
                   input_dim: 128
-                  output_dim: 128
-                  bias: true
-              - - type: GNN
-                  options:
-                    type: GRAPH_SAGE
-                    aggregator: MEAN
-                  input_dim: 128
-                  output_dim: 40
+                  output_dim: 40 # set "output_dim" to 40 (to match "num_classes=40") in "dataset.yaml" for the last layer
                   bias: true
           decoder:
             type: NODE
@@ -149,7 +153,8 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
         evaluation:
           # omit
       
-#. Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``base_directory`` is set to ``datasets/ogbn_arxiv_example/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we use the same input dataset statistics obtained from ``datasets/ogbn_arxiv_example/dataset.yaml``. Note two additional dataset parameters than a link prediction model: ``num_classes`` is required for node classification and ``node_feature_dim`` is required if a ``FEATURE`` type layer exists.
+#. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``base_directory`` is set to ``datasets/ogbn_arxiv_example/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we simply copy the input dataset statistics obtained from ``datasets/ogbn_arxiv_example/dataset.yaml`` and fill in each of their values. 
+   | Note two additional dataset parameters than a link prediction model: ``num_classes`` is required for node classification and ``node_feature_dim`` is required if a ``FEATURE`` type layer exists.
 
     .. code-block:: yaml
     
@@ -157,7 +162,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
           # omit
         storage:
           device_type: cuda
-          dataset: 
+          dataset: # copy values from "datasets/ogbn_arxiv_example/dataset.yaml"
             base_directory: datasets/ogbn_arxiv_example/
             num_edges: 1166243
             num_train: 90941
