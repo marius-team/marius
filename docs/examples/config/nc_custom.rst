@@ -25,7 +25,7 @@ Let's borrow the provided ``examples/python/custom_nc_graphsage.py`` and modify 
     from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
     from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
     from marius.tools.configuration.constants import PathConstants
-    from marius.tools.preprocess.datasets.ogb_helpers import remap_nodes
+    from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
 
     def switch_to_num(row):
         names = ['Neural_Networks', 'Rule_Learning', 'Reinforcement_Learning', 'Probabilistic_Methods',\
