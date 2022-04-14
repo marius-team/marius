@@ -133,7 +133,7 @@ Let's borrow the provided ``examples/python/custom_nc_graphsage.py`` and modify 
 
             if remap_ids:
                 node_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.node_mapping_path), delimiter=",")
-                train_nodes, valid_nodes, test_nodes, features, labels = remap_ogbn(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
+                train_nodes, valid_nodes, test_nodes, features, labels = remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
 
             with open(self.train_nodes_file, "wb") as f:
                 f.write(bytes(train_nodes))
