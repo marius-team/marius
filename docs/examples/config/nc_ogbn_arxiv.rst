@@ -105,13 +105,13 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
     .. code-block:: yaml
     
         model:
-          learning_task: NODE_CLASSIFICATION # set to "NODE_CLASSIFICATION" since we train a node classification model
+          learning_task: NODE_CLASSIFICATION # set the learning task to node classification
           encoder:
             train_neighbor_sampling:
               - type: ALL
               - type: ALL
               - type: ALL
-            layers: # define three "layers" of "GNN" of type "GRAPH_SAGE" since we train a 3-layer GraphSage model
+            layers: # define three layers of GNN of type GRAPH_SAGE
               - - type: FEATURE
                   output_dim: 128 # set to 128 (to match "node_feature_dim=128" in "dataset.yaml") for each layer except for the last
                   bias: true

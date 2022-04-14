@@ -115,22 +115,25 @@ An example YAML configuration file for the OGBN_Arxiv dataset (link prediction m
 
 Let's create the same YAML configuration file for the OGBN_Arxiv dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs. 
 
+.. note:: 
+   String values in the configuration file are case insensitive but we use capital letters for convention.
+
 #. First, we define the **model**. We begin by setting all required parameters. This includes ``learning_task``, ``encoder``, ``decoder``, and ``loss``. The rest of the configurations can be fine-tuned by the user.
 
     .. code-block:: yaml
     
         model:
-          learning_task: LINK_PREDICTION # set to "LINK_PREDICTION" since we train a link prediction model
+          learning_task: LINK_PREDICTION # set the learning task to link prediction
           encoder:
             layers:
-              - - type: EMBEDDING # set ``encoder`` to be an ``EMBEDDING`` table with 50-dimensional embeddings
+              - - type: EMBEDDING # set the encoder to be an embedding table with 50-dimensional embeddings
                   output_dim: 50
           decoder:
-            type: DISTMULT # set "type" of "decoder" to "DISTMULT" since we train the model with DistMult, 
+            type: DISTMULT # set the decoder to DistMult
             options:
               input_dim: 50
           loss:
-            type: SOFTMAX
+            type: SOFTMAX_CE
             options:
               reduction: SUM
           dense_optimizer: # optimizer to use for dense model parameters. In this case these are the DistMult relation (edge-type) embeddings
