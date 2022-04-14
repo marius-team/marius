@@ -12,6 +12,11 @@ from omegaconf import OmegaConf
 
 
 class OGBNPapers100M(NodeClassificationDataset):
+    """
+    Open Graph Benchmark: ogbn-papers100m
+
+    Directed citation graph of 111 million papers indexed by MAG. Its graph structure and node features are constructed in the same way as ogbn-arxiv. Among its node set, approximately 1.5 million of them are arXiv papers, each of which is manually labeled with one of arXiv’s subject areas. 
+    """
 
     def __init__(self, output_directory: Path, spark=False):
 

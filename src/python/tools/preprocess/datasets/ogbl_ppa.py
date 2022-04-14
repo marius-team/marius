@@ -9,6 +9,11 @@ import os
 
 
 class OGBLPpa(LinkPredictionDataset):
+    """
+    Open Graph Benchmark: ppa
+
+    The ogbl-ppa dataset is an undirected, unweighted graph. Nodes represent proteins from 58 different species, and edges indicate biologically meaningful associations between proteins, e.g., physical interactions, co-expression, homology or genomic neighborhood. Each node contains a 58-dimensional one-hot feature vector that indicates the species that the corresponding protein comes from.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
 

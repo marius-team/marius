@@ -6,6 +6,11 @@ from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConv
 
 
 class FB15K237(LinkPredictionDataset):
+    """
+    Freebase 15k 237
+
+    The FB15k dataset contains knowledge base relation triples and textual mentions of Freebase entity pairs. It has a total of 592,213 triplets with 14,951 entities and 1,345 relationships. FB15K-237 is a variant of the original dataset where inverse relations are removed, since it was found that a large number of test triplets could be obtained by inverting triplets in the training set.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
 

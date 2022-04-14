@@ -6,6 +6,11 @@ from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConv
 
 
 class Freebase86m(LinkPredictionDataset):
+    """
+    Freebase
+
+    The full Freebase dataset. 86054151 nodes, 338586276 edges, 14824 relations.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
         super().__init__(output_directory, spark)

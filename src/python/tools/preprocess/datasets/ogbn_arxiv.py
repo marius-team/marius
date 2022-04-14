@@ -11,7 +11,12 @@ from omegaconf import OmegaConf
 
 
 class OGBNArxiv(NodeClassificationDataset):
+    """
+    Open Graph Benchmark: arxiv
 
+    The ogbn-arxiv dataset is a directed graph, representing the citation network between all Computer Science (CS) arXiv papers indexed by MAG. Each node is an arXiv paper and each directed edge indicates that one paper cites another one. Each paper comes with a 128-dimensional feature vector obtained by averaging the embeddings of words in its title and abstract. The embeddings of individual words are computed by running the skip-gram model over the MAG corpus. We also provide the mapping from MAG paper IDs into the raw texts of titles and abstracts here. In addition, all papers are also associated with the year that the corresponding paper was published.
+    """
+    
     def __init__(self, output_directory: Path, spark=False):
 
         super().__init__(output_directory, spark)

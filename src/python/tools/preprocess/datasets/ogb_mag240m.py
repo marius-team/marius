@@ -13,6 +13,11 @@ from omegaconf import OmegaConf
 
 
 class OGBMag240M(NodeClassificationDataset):
+    """
+    Open Graph Benchmark: mag
+
+    The ogbn-mag dataset is a heterogeneous network composed of a subset of the Microsoft Academic Graph (MAG). It contains four types of entities—papers, authors, institutions, and fields of study—as well as four types of directed relations connecting two types of entities—an author is “affiliated with” an institution, an author “writes” a paper, a paper “cites” a paper, and a paper “has a topic of” a field of study. Similar to ogbn-arxiv, each paper is associated with a 128-dimensional word2vec feature vector, and all the other types of entities are not associated with input node features.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
 

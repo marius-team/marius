@@ -4,7 +4,9 @@ GraphEncoder
 .. autoclass:: marius.pipeline.GraphEncoder
     :members:
     :undoc-members:
-    :special-members: __init__
+    :exclude-members: __init__
+
+    .. method:: __init__()
 
 .. autoclass:: marius.pipeline.SynchronousEncoder
     :members:

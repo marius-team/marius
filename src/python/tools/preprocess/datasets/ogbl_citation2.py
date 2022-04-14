@@ -9,6 +9,11 @@ import os
 
 
 class OGBLCitation2(LinkPredictionDataset):
+    """
+    Open Graph Benchmark: citation2
+
+    The ogbl-citation2 dataset is a directed graph, representing the citation network between a subset of papers extracted from MAG. Each node is a paper with 128-dimensional word2vec features that summarizes its title and abstract, and each directed edge indicates that one paper cites another. All nodes also come with meta-information indicating the year the corresponding paper was published.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
 

@@ -1,4 +1,4 @@
-.. _marius_predict
+.. _marius_predict:
 
 Batch Inference (marius_predict)
 ==================================================

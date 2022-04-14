@@ -8,6 +8,11 @@ import torch
 
 
 class OGBLWikiKG2(LinkPredictionDataset):
+    """
+    Open Graph Benchmark: wikikg2
+
+    The ogbl-wikikg2 dataset is a Knowledge Graph (KG) extracted from the Wikidata knowledge base. It contains a set of triplet edges (head, relation, tail), capturing the different types of relations between entities in the world, e.g., (Canada, citizen, Hinton). We retrieve all the relational statements in Wikidata and filter out rare entities. Our KG contains 2,500,604 entities and 535 relation types.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
 

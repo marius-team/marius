@@ -8,6 +8,11 @@ from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConv
 
 
 class Friendster(LinkPredictionDataset):
+    """
+    Friendster
+
+    Friendster is an on-line gaming network. Before re-launching as a game website, Friendster was a social networking site where users can form friendship edge each other. Friendster social network also allows users form a group which other members can then join. We consider such user-defined groups as ground-truth communities. For the social network, we take the induced subgraph of the nodes that either belong to at least one community or are connected to other nodes that belong to at least one community. 65,608,366 nodes, 1,806,067,135 edges.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
         super().__init__(output_directory, spark)

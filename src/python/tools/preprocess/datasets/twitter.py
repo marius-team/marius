@@ -6,6 +6,11 @@ from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConv
 
 
 class Twitter(LinkPredictionDataset):
+    """
+    Twitter
+
+    467 million Twitter posts from 20 million users covering a 7 month period from June 1 2009 to December 31 2009. Estimated 20-30% of all public tweets published on Twitter during the particular time frame. For each public tweet the following information is available: Author, Time, Content
+    """
 
     def __init__(self, output_directory: Path, spark=False):
         super().__init__(output_directory, spark)

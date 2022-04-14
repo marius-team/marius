@@ -6,6 +6,11 @@ from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConv
 
 
 class Livejournal(LinkPredictionDataset):
+    """
+    Livejournal
+
+    LiveJournal is a free on-line community with almost 10 million members; a significant fraction of these members are highly active. (For example, roughly 300,000 update their content in any given 24-hour period.) LiveJournal allows members to maintain journals, individual and group blogs, and it allows people to declare which other members are their friends they belong. 4,847,571 nodes, 68,993,773 edges.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
         super().__init__(output_directory, spark)
