@@ -449,6 +449,7 @@ class StorageConfig:
     shuffle_input: bool = True
     full_graph_evaluation: bool = True
     export_encoded_nodes: bool = False
+    params_output_dir: str = MISSING
     log_level: str = "info"
 
     SUPPORTED_EMBEDDING_BACKENDS = ["PARTITION_BUFFER", "DEVICE_MEMORY", "HOST_MEMORY"]
@@ -480,6 +481,11 @@ class StorageConfig:
 
         if "dataset" in input_config.keys():
             self.dataset.merge(input_config.dataset)
+        
+        if "params_output_dir" in input_config.keys():
+            self.params_output_dir = input_config.params_output_dir
+        else:
+            self.params_output_dir = self.dataset.base_directory + "/model"
 
         if "edges" in input_config.keys():
             self.edges.merge(input_config.edges)
@@ -781,6 +787,13 @@ def type_safe_merge(base_config: MariusConfig, input_config: DictConfig):
 
     return base_config
 
+def create_model_output_path(params_output_dir):
+    params_output_path = Path(params_output_dir)
+    params_output_path.mkdir(parents=True, exist_ok=True)
+
+    for subdir in ["nodes", "edges"]:
+        subdir_path = params_output_path / Path(subdir)
+        subdir_path.mkdir(exist_ok=True)
 
 cs = ConfigStore.instance()
 cs.store(name="base_config", node=MariusConfig)
@@ -811,6 +824,11 @@ def load_config(input_config_path, save=False):
 
     if output_config.storage.dataset.base_directory[-1] != "/":
         output_config.storage.dataset.base_directory = output_config.storage.dataset.base_directory + "/"
+
+    if output_config.storage.params_output_dir[-1] != "/":
+        output_config.storage.params_output_dir += "/"
+
+    create_model_output_path(output_config.storage.params_output_dir)
 
     if save:
         OmegaConf.save(output_config,

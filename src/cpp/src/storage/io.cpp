@@ -157,11 +157,11 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeEmbeddings(s
                                                                                bool train,
                                                                                shared_ptr<InitConfig> init_config) {
 
-    string node_embedding_filename = storage_config->dataset->base_directory
+    string node_embedding_filename = storage_config->params_output_dir
                                      + PathConstants::nodes_directory
                                      + PathConstants::embeddings_file
                                      + PathConstants::file_ext;
-    string optimizer_state_filename = storage_config->dataset->base_directory
+    string optimizer_state_filename = storage_config->params_output_dir
                                       + PathConstants::nodes_directory
                                       + PathConstants::embeddings_state_file
                                       + PathConstants::file_ext;
@@ -338,7 +338,7 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > initi
 
 shared_ptr<Storage> initializeRelationFeatures(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config) {
 
-    string rel_features_file = storage_config->dataset->base_directory
+    string rel_features_file = storage_config->params_output_dir
                                + PathConstants::edges_directory
                                + PathConstants::features_file
                                + PathConstants::file_ext;
