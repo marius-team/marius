@@ -456,7 +456,7 @@ shared_ptr<StorageConfig> initStorageConfig(pyobj python_config) {
     ret_config->dataset = initDatasetConfig(python_config.attr("dataset"));
     ret_config->prefetch = cast_helper<bool>(python_config.attr("prefetch"));
     ret_config->shuffle_input = cast_helper<bool>(python_config.attr("shuffle_input"));
-    ret_config->params_output_dir = cast_helper<string>(python_config.attr("params_output_dir"));
+    ret_config->model_dir = cast_helper<string>(python_config.attr("model_dir"));
 
     pybind11::list device_ids_pylist = cast_helper<pybind11::list>(python_config.attr("device_ids"));
 

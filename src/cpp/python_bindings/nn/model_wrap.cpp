@@ -63,7 +63,7 @@ void init_model(py::module &m) {
         auto config = loadConfig(config_path, false);
         auto devices = devices_from_config(config->storage);
         auto model = initModelFromConfig(config->model, devices, config->storage->dataset->num_relations, train);
-        model->load(config->storage->params_output_dir, train);
+        model->load(config->storage->model_dir, train);
         return model;
     }, py::arg("config_path"), py::arg("train"), py::return_value_policy::move);
 }
