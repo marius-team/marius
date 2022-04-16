@@ -48,10 +48,10 @@ class TestLPBuffer(unittest.TestCase):
                                 splits=[.9, .05, .05],
                                 task="lp")
 
-    # @classmethod
-    # def tearDown(self):
-    #     if self.output_dir.exists():
-    #         shutil.rmtree(self.output_dir)
+    @classmethod
+    def tearDown(self):
+        if self.output_dir.exists():
+            shutil.rmtree(self.output_dir)
 
     @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     def test_dm(self):
