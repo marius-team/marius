@@ -48,7 +48,8 @@ GraphModelStorage::GraphModelStorage(GraphModelStoragePtrs storage_ptrs,
 
         if (storage_ptrs_.node_features != nullptr) {
             if (instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_features)) {
-                string node_feature_filename = storage_config->model_dir
+                string node_feature_filename = storage_config->dataset->base_directory
+                                               + PathConstants::nodes_directory
                                                + PathConstants::features_file
                                                + PathConstants::file_ext;
 
