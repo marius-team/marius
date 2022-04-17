@@ -1000,6 +1000,10 @@ Storage Configuration
      - Bool
      - If true and the nodes/features storage configuration uses a partition buffer, evaluation will be performed with the full graph in memory (if there is enough memory). This is useful for fair comparisons across different storage configurations. (Default False)
      - No
+   * - model_dir
+     - String
+     - Saves the model parameters in the given directory. If not specified, stores in `model_x` directory within the `base_directory` where x changes incrementally.
+     - No
 
 Below is a storage configuration that contains the path to the pre-processed data and specifies storage backends to be used for edges, features 
 and embeddings.
