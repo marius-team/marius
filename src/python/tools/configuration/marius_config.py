@@ -24,9 +24,9 @@ def get_model_dir_path(base_directory):
         model_dir = "{}/model_{}".format(base_directory, i)
         model_dir_path = Path(model_dir)
         if not model_dir_path.exists():
-            return model_dir
+            return str(model_dir_path)
     
-    return model_dir
+    return str(model_dir_path)
 
 @dataclass
 class NeighborSamplingConfig:
@@ -843,10 +843,10 @@ def load_config(input_config_path, save=False):
     if output_config.storage.model_dir[-1] != "/":
         output_config.storage.model_dir += "/"
 
-    Path(output_config.storage.model_dir).mkdir(parents=True, exist_ok=True)
-    initialize_model_dir(output_config)
-
     if save:
+        Path(output_config.storage.model_dir).mkdir(parents=True, exist_ok=True)
+        initialize_model_dir(output_config)
+        
         OmegaConf.save(output_config,
                        output_config.storage.model_dir + PathConstants.saved_full_config_file_name)
 

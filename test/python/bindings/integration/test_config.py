@@ -65,7 +65,7 @@ class TestConfig(unittest.TestCase):
                 config_file = self.output_dir / Path(filename)
 
                 config = loadConfig(config_file.__str__(), save=True)
-                loaded_full_config = loadConfig((self.output_dir / Path("full_config.yaml")).__str__())
+                loaded_full_config = loadConfig((config.storage.model_dir / Path("full_config.yaml")).__str__())
                 assert loaded_full_config.model.random_seed == config.model.random_seed
 
                 assert config.model is not None
@@ -108,7 +108,7 @@ class TestConfig(unittest.TestCase):
                 config_file = self.output_dir / Path(filename)
 
                 config = loadConfig(config_file.__str__(), save=True)
-                loaded_full_config = loadConfig((self.output_dir / Path("full_config.yaml")).__str__())
+                loaded_full_config = loadConfig((config.storage.model_dir / Path("full_config.yaml")).__str__())
                 assert loaded_full_config.model.random_seed == config.model.random_seed
 
                 assert config.model is not None
