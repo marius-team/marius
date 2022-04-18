@@ -9,12 +9,24 @@ from dataclasses import field
 import os
 
 from pathlib import Path
+import shutil
 
 from omegaconf import MISSING, OmegaConf, DictConfig
 
 import hydra
 from hydra.core.config_store import ConfigStore
 
+def get_model_dir_path(base_directory):
+
+    # will support storing upto 11 different model params when model_dir is not specified. 
+    # post that, it will overwrite in <base_directory>/model_10 directory. 
+    for i in range(11):
+        model_dir = "{}/model_{}".format(base_directory, i)
+        model_dir_path = Path(model_dir)
+        if not model_dir_path.exists():
+            return str(model_dir_path)
+    
+    return str(model_dir_path)
 
 @dataclass
 class NeighborSamplingConfig:
@@ -449,6 +461,7 @@ class StorageConfig:
     shuffle_input: bool = True
     full_graph_evaluation: bool = True
     export_encoded_nodes: bool = False
+    model_dir: str = MISSING
     log_level: str = "info"
 
     SUPPORTED_EMBEDDING_BACKENDS = ["PARTITION_BUFFER", "DEVICE_MEMORY", "HOST_MEMORY"]
@@ -480,6 +493,11 @@ class StorageConfig:
 
         if "dataset" in input_config.keys():
             self.dataset.merge(input_config.dataset)
+        
+        if "model_dir" in input_config.keys():
+            self.model_dir = input_config.model_dir
+        else:
+            self.model_dir = get_model_dir_path(self.dataset.base_directory)
 
         if "edges" in input_config.keys():
             self.edges.merge(input_config.edges)
@@ -781,6 +799,16 @@ def type_safe_merge(base_config: MariusConfig, input_config: DictConfig):
 
     return base_config
 
+def initialize_model_dir(output_config):
+    
+    relation_mapping_filepath = Path(output_config.storage.dataset.base_directory) / Path("edges") / Path("relation_mapping.txt")
+    if relation_mapping_filepath.exists():
+        shutil.copy(str(relation_mapping_filepath), "{}/{}".format(output_config.storage.model_dir, "relation_mapping.txt"))
+
+    node_mapping_filepath = Path(output_config.storage.dataset.base_directory) / Path("nodes") / Path("node_mapping.txt")
+    if node_mapping_filepath.exists():
+        shutil.copy(str(node_mapping_filepath), "{}/{}".format(output_config.storage.model_dir, "node_mapping.txt"))
+    
 
 cs = ConfigStore.instance()
 cs.store(name="base_config", node=MariusConfig)
@@ -812,9 +840,15 @@ def load_config(input_config_path, save=False):
     if output_config.storage.dataset.base_directory[-1] != "/":
         output_config.storage.dataset.base_directory = output_config.storage.dataset.base_directory + "/"
 
+    if output_config.storage.model_dir[-1] != "/":
+        output_config.storage.model_dir += "/"
+
     if save:
+        Path(output_config.storage.model_dir).mkdir(parents=True, exist_ok=True)
+        initialize_model_dir(output_config)
+        
         OmegaConf.save(output_config,
-                       output_config.storage.dataset.base_directory + PathConstants.saved_full_config_file_name)
+                       output_config.storage.model_dir + PathConstants.saved_full_config_file_name)
 
     # we can then perform validation, and optimization over the fully specified configuration file here before returning
     validate_dataset_config(output_config)

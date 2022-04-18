@@ -17,7 +17,7 @@ void init_io(py::module &m) {
                                                       devices,
                                                       marius_config->storage->dataset->num_relations,
                                                       train);
-        model->load(marius_config->storage->dataset->base_directory, train);
+        model->load(marius_config->storage->model_dir, train);
 
         return model;
     }, py::arg("filename"), py::arg("train"));

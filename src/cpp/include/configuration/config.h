@@ -137,6 +137,7 @@ struct StorageConfig {
     bool shuffle_input;
     bool full_graph_evaluation;
     bool export_encoded_nodes;
+    std::string model_dir;
     spdlog::level::level_enum log_level;
 };
 

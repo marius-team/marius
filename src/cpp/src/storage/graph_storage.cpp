@@ -34,8 +34,7 @@ GraphModelStorage::GraphModelStorage(GraphModelStoragePtrs storage_ptrs,
     if (full_graph_evaluation_) {
         if (storage_ptrs_.node_embeddings != nullptr) {
             if (instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
-                string node_embedding_filename = storage_config->dataset->base_directory
-                                                 + PathConstants::nodes_directory
+                string node_embedding_filename = storage_config->model_dir
                                                  + PathConstants::embeddings_file
                                                  + PathConstants::file_ext;
 

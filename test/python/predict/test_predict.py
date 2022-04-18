@@ -97,6 +97,7 @@ def validate_labels(config, num_nodes, output_dir=None):
 
 
 class TestPredictLP(unittest.TestCase):
+    config_file = None
 
     @classmethod
     def setUp(self):
@@ -125,21 +126,18 @@ class TestPredictLP(unittest.TestCase):
                                      evaluation_names=["sync"],
                                      task="lp")
 
-        config_file = None
         for filename in os.listdir(base_dir / Path(name)):
             if filename.startswith("M-"):
-                config_file = filename
-
-        self.config_file = base_dir / Path(name) / Path(config_file)
+                self.config_file = base_dir / Path(name) / Path(filename)
 
         config = m.config.loadConfig(self.config_file.__str__(), True)
+        self.config_file = Path(config.storage.model_dir) / Path("full_config.yaml")
         m.manager.marius_train(config)
 
     @classmethod
     def tearDown(self):
-        pass
-        # if Path(TMP_TEST_DIR).exists():
-        #     shutil.rmtree(Path(TMP_TEST_DIR))
+        if Path(TMP_TEST_DIR).exists():
+            shutil.rmtree(Path(TMP_TEST_DIR))
 
     def test_basic_lp(self):
         parser = set_args()
