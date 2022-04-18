@@ -1002,7 +1002,7 @@ Storage Configuration
      - No
    * - model_dir
      - String
-     - Saves the model parameters in the given directory. If not specified, stores in `model_x` directory within the `base_directory` where x changes incrementally.
+     - Saves the model parameters in the given directory. If not specified, stores in `model_x` directory within the `base_directory` where x changes incrementally from 0 - 10. A maximum of 11 models are stored when `model_dir` is not specified, post which the contents in `model_10/` directory are overwritten with the latest parameters.
      - No
 
 Below is a storage configuration that contains the path to the pre-processed data and specifies storage backends to be used for edges, features 
