@@ -45,11 +45,11 @@ First make sure marius is installed with `pip3 install .`
 
 Preprocess dataset the FB15K_237 dataset with `marius_preprocess --dataset fb15k_237 --output_dir datasets/fb15k_237_example/`
 
-Train example configuration file (assuming we are in the repo root directory) `marius_train examples/fb15k_237.yaml`
+Train example configuration file (assuming we are in the repo root directory) `marius_train examples/configuration/fb15k_237.yaml`
 
 After running this configuration, the MRR output by the system should be about .25 after 10 epochs.
 
-Perform batch inference on the test set with `marius_predict --config examples/fb15k_237.yaml --metrics mrr --save_scores --save_ranks`
+Perform batch inference on the test set with `marius_predict --config examples/configuration/fb15k_237.yaml --metrics mrr --save_scores --save_ranks`
 
 See the [full example](http://marius-project.org/marius/examples/config/lp_fb15k237.html#small-scale-link-prediction-fb15k-237) for details.
 
