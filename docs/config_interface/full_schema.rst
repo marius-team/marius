@@ -61,12 +61,6 @@ in the encoder phase which is directly fed to the `DISTMULT` decoder. Both embed
      device_type: cpu
      dataset:
        dataset_dir: /home/data/datasets/fb15k_237/
-       num_edges: 272115
-       num_train: 272115
-       num_nodes: 14541
-       num_relations: 237
-       num_valid: 17535
-       num_test: 20466
      edges:
        type: DEVICE_MEMORY
        options:
@@ -1014,10 +1008,6 @@ and embeddings.
      device_type: cpu
      dataset:
        dataset_dir: /home/data/datasets/fb15k_237/
-       num_edges: 272115
-       num_nodes: 14541
-       num_relations: 237
-       num_train: 272115
      edges:
        type: DEVICE_MEMORY
        options:
@@ -1059,11 +1049,11 @@ Dataset Configuration
    * - num_edges
      - Int
      - Number of edges in the input graph. If link prediction, this should be set to the number of training edges.
-     - Yes
+     - No
    * - num_nodes
      - Int
      - Number of nodes in the input graph.
-     - Yes
+     - No
    * - num_relations
      - Int
      - Number of relations (edge-types) in the input graph. (Default 1)
@@ -1071,7 +1061,7 @@ Dataset Configuration
    * - num_train
      - Int
      - Number of training examples. In link prediction the examples are edges, in node classification they are nodes.
-     - Yes
+     - No
    * - num_valid
      - Int
      - Number of validation examples. If not given, no validation will be performed
@@ -1079,7 +1069,7 @@ Dataset Configuration
    * - num_test
      - Int
      - Number of test examples. If not given, only training will occur.
-     - Evaluation
+     - No (Evaluation)
    * - node_feature_dim
      - Int
      - Dimension of the node features, if any.
@@ -1087,26 +1077,16 @@ Dataset Configuration
    * - num_classes
      - Int
      - Number of class labels.
-     - Node classification
+     - No (Node classification)
 
-For Marius in-built datasets, the below numbers can be retirieved from output of `marius_preprocess`. For custom user datasets, the 
-numbers are expected to match against the processed dataset values. Below is the cofiguration for the `fb15k_237` dataset. 
+For Marius in-built datasets, the below numbers are retrieved from output of `marius_preprocess`. For custom user datasets, a 
+file with the dataset statistics mentioned above should be present in the `dataset_dir`. Below is the cofiguration for the `fb15k_237` dataset. 
 
 .. code-block:: yaml 
 
    storage:
      dataset:
        dataset_dir: /home/data/datasets/fb15k_237/
-       num_edges: 272115
-       num_nodes: 14541
-       num_relations: 237
-       num_train: 272115
-       num_valid: 17535
-       num_test: 20466
-       node_feature_dim: -1
-       rel_feature_dim: -1
-       num_classes: -1
-       initialized: true
 
 
 Storage Backend Configuration

@@ -73,12 +73,6 @@ Contents of ``configs/fb15k237.yaml``. The test set here has been created during
           device_type: cpu
           dataset:
             dataset_dir: ./fb15k_237_example/
-            num_edges: 272115
-            num_nodes: 14541
-            num_relations: 237
-            num_train: 272115
-            num_valid: 17535
-            num_test: 20466
           edges:
             type: HOST_MEMORY
             options:

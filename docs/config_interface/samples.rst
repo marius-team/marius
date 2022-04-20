@@ -187,10 +187,6 @@ GPU Memory
      device_type: cuda
      dataset:
        dataset_dir: /home/data/datasets/fb15k_237/
-       num_edges: 272115
-       num_train: 272115
-       num_nodes: 14541
-       num_relations: 237
      edges:
        type: DEVICE_MEMORY
        options:
@@ -211,10 +207,6 @@ Mixed CPU-GPU
      device_type: cuda
      dataset:
        dataset_dir: /home/data/datasets/fb15k_237/
-       num_edges: 272115
-       num_train: 272115
-       num_nodes: 14541
-       num_relations: 237
      edges:
        type: HOST_MEMORY
        options:
@@ -235,10 +227,6 @@ Disk-Based
      device_type: cuda
      dataset:
        dataset_dir: /home/data/datasets/fb15k_237/
-       num_edges: 272115
-       num_train: 272115
-       num_nodes: 14541
-       num_relations: 237
      edges:
        type: FLAT_FILE
        options:
@@ -261,10 +249,6 @@ as follows
      device_type: cuda
      dataset:
        dataset_dir: /home/data/datasets/fb15k_237_partitioned/
-       num_edges: 272115
-       num_train: 272115
-       num_nodes: 14541
-       num_relations: 237
      edges:
        type: FLAT_FILE
        options:

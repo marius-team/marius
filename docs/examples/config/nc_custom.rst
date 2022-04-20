@@ -311,14 +311,6 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
           device_type: cuda
           dataset: # copy values from "datasets/custom_nc_example/cora/dataset.yaml"
             dataset_dir: datasets/custom_nc_example/cora/
-            num_edges: 5429
-            num_nodes: 2708
-            num_relations: 1
-            num_train: 2166
-            num_valid: 270
-            num_test: 272
-            node_feature_dim: 1433
-            num_classes: 40
           edges:
             type: DEVICE_MEMORY
             options:

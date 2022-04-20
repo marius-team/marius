@@ -96,12 +96,6 @@ Before we can run Marius we need to specify our model hyperparameters and path t
             device_type: cuda
             dataset:
                 dataset_dir: dataset/
-                num_edges: 96522
-                num_train: 96522
-                num_nodes: 14752
-                num_relations: 5
-                num_valid: 5362
-                num_test: 5363
             edges:
                 type: DEVICE_MEMORY
             embeddings:

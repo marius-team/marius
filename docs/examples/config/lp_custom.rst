@@ -161,12 +161,6 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
           device_type: cuda
           dataset: # copy values from "datasets/custom_lp_example/dataset.yaml"
             dataset_dir: /marius-internal/datasets/custom_lp_example/
-            num_edges: 932994
-            num_nodes: 169343
-            num_relations: 1
-            num_train: 932994
-            num_valid: 116624
-            num_test: 116625
           edges:
             type: DEVICE_MEMORY
           embeddings:
