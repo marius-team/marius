@@ -43,7 +43,7 @@ model:
 storage:
   device_type: cuda
   dataset: 
-    base_directory: datasets/ogbn_arxiv_example/
+    dataset_dir: datasets/ogbn_arxiv_example/
     num_edges: 1166243
     num_train: 90941
     num_nodes: 169343

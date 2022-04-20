@@ -112,7 +112,7 @@ Node embedings are optimized by the sparse optimizer.
    storage:
      device_type: cpu
      dataset:
-       base_directory: /home/data/datasets/fb15k_237/
+       dataset_dir: /home/data/datasets/fb15k_237/
        num_edges: 272115
        num_train: 272115
        num_nodes: 14541
@@ -228,7 +228,7 @@ classification. The loss function being used is Cross Entropy with sum as the re
    storage:
      device_type: cuda
      dataset:
-       base_directory: /home/data/datasets/ogbn_arxiv/
+       dataset_dir: /home/data/datasets/ogbn_arxiv/
        num_edges: 1166243
        num_nodes: 169343
        num_relations: 1

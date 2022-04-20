@@ -12,17 +12,17 @@
 
 std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config, LearningTask learning_task) {
 
-    string train_filename = storage_config->dataset->base_directory
+    string train_filename = storage_config->dataset->dataset_dir
                             + PathConstants::edges_directory
                             + PathConstants::training
                             + PathConstants::edges_file
                             + PathConstants::file_ext;
-    string valid_filename = storage_config->dataset->base_directory
+    string valid_filename = storage_config->dataset->dataset_dir
                             + PathConstants::edges_directory
                             + PathConstants::validation
                             + PathConstants::edges_file
                             + PathConstants::file_ext;
-    string test_filename = storage_config->dataset->base_directory
+    string test_filename = storage_config->dataset->dataset_dir
                            + PathConstants::edges_directory
                            + PathConstants::test
                            + PathConstants::edges_file
@@ -108,17 +108,17 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initia
     }
 
     if (use_buffer) {
-        string train_edges_partitions = storage_config->dataset->base_directory
+        string train_edges_partitions = storage_config->dataset->dataset_dir
                                         + PathConstants::edges_directory
                                         + PathConstants::training
                                         + PathConstants::edge_partition_offsets_file;
 
-        string validation_edges_partitions = storage_config->dataset->base_directory
+        string validation_edges_partitions = storage_config->dataset->dataset_dir
                                              + PathConstants::edges_directory
                                              + PathConstants::validation
                                              + PathConstants::edge_partition_offsets_file;
 
-        string test_edges_partitions = storage_config->dataset->base_directory
+        string test_edges_partitions = storage_config->dataset->dataset_dir
                                        + PathConstants::edges_directory
                                        + PathConstants::test
                                        + PathConstants::edge_partition_offsets_file;
@@ -256,17 +256,17 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeEmbeddings(s
 
 std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeIds(shared_ptr<StorageConfig> storage_config) {
 
-    string train_filename = storage_config->dataset->base_directory
+    string train_filename = storage_config->dataset->dataset_dir
                             + PathConstants::nodes_directory
                             + PathConstants::training
                             + PathConstants::nodes_file
                             + PathConstants::file_ext;
-    string valid_filename = storage_config->dataset->base_directory
+    string valid_filename = storage_config->dataset->dataset_dir
                             + PathConstants::nodes_directory
                             + PathConstants::validation
                             + PathConstants::nodes_file
                             + PathConstants::file_ext;
-    string test_filename = storage_config->dataset->base_directory
+    string test_filename = storage_config->dataset->dataset_dir
                            + PathConstants::nodes_directory
                            + PathConstants::test
                            + PathConstants::nodes_file
@@ -355,7 +355,7 @@ shared_ptr<Storage> initializeRelationFeatures(shared_ptr<Model> model, shared_p
 
 shared_ptr<Storage> initializeNodeFeatures(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config) {
 
-    string node_features_file = storage_config->dataset->base_directory
+    string node_features_file = storage_config->dataset->dataset_dir
                                 + PathConstants::nodes_directory
                                 + PathConstants::features_file
                                 + PathConstants::file_ext;
@@ -397,7 +397,7 @@ shared_ptr<Storage> initializeNodeFeatures(shared_ptr<Model> model, shared_ptr<S
 
 shared_ptr<Storage> initializeNodeLabels(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config) {
 
-    string node_labels_file = storage_config->dataset->base_directory
+    string node_labels_file = storage_config->dataset->dataset_dir
                               + PathConstants::nodes_directory
                               + PathConstants::labels_file
                               + PathConstants::file_ext;

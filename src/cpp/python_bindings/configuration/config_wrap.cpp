@@ -58,7 +58,7 @@ void init_config(py::module &m) {
 
     py::class_<DatasetConfig, std::shared_ptr<DatasetConfig>>(m, "DatasetConfig")
         .def(py::init<>())
-        .def_readwrite("base_directory", &DatasetConfig::base_directory)
+        .def_readwrite("dataset_dir", &DatasetConfig::dataset_dir)
         .def_readwrite("num_edges", &DatasetConfig::num_edges)
         .def_readwrite("num_nodes", &DatasetConfig::num_nodes)
         .def_readwrite("num_relations", &DatasetConfig::num_relations)

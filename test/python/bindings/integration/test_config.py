@@ -22,7 +22,7 @@ class TestConfig(unittest.TestCase):
     output_dir = TMP_TEST_DIR / Path("config")
 
     ds_config = marius.tools.configuration.marius_config.DatasetConfig()
-    ds_config.base_directory = output_dir.__str__()
+    ds_config.dataset_dir = output_dir.__str__()
     ds_config.num_edges = 1000
     ds_config.num_nodes = 100
     ds_config.num_relations = 1
@@ -76,7 +76,7 @@ class TestConfig(unittest.TestCase):
                 assert config.model.encoder is not None
                 assert config.model.decoder is not None
 
-                assert config.storage.dataset.base_directory.rstrip("/") == self.output_dir.__str__()
+                assert config.storage.dataset.dataset_dir.rstrip("/") == self.output_dir.__str__()
                 assert config.storage.dataset.num_edges == 1000
                 assert config.storage.dataset.num_nodes == 100
                 assert config.storage.dataset.num_relations == 1
@@ -119,7 +119,7 @@ class TestConfig(unittest.TestCase):
                 assert config.model.encoder is not None
                 assert config.model.decoder is not None
 
-                assert config.storage.dataset.base_directory.rstrip("/") == self.output_dir.__str__()
+                assert config.storage.dataset.dataset_dir.rstrip("/") == self.output_dir.__str__()
                 assert config.storage.dataset.num_edges == 1000
                 assert config.storage.dataset.num_nodes == 100
                 assert config.storage.dataset.num_relations == 1

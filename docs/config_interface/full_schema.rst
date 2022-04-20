@@ -60,7 +60,7 @@ in the encoder phase which is directly fed to the `DISTMULT` decoder. Both embed
      full_graph_evaluation: true
      device_type: cpu
      dataset:
-       base_directory: /home/data/datasets/fb15k_237/
+       dataset_dir: /home/data/datasets/fb15k_237/
        num_edges: 272115
        num_train: 272115
        num_nodes: 14541
@@ -1002,7 +1002,7 @@ Storage Configuration
      - No
    * - model_dir
      - String
-     - Saves the model parameters in the given directory. If not specified, stores in `model_x` directory within the `base_directory` where x changes incrementally from 0 - 10. A maximum of 11 models are stored when `model_dir` is not specified, post which the contents in `model_10/` directory are overwritten with the latest parameters.
+     - Saves the model parameters in the given directory. If not specified, stores in `model_x` directory within the `dataset_dir` where x changes incrementally from 0 - 10. A maximum of 11 models are stored when `model_dir` is not specified, post which the contents in `model_10/` directory are overwritten with the latest parameters.
      - No
 
 Below is a storage configuration that contains the path to the pre-processed data and specifies storage backends to be used for edges, features 
@@ -1013,7 +1013,7 @@ and embeddings.
    storage:
      device_type: cpu
      dataset:
-       base_directory: /home/data/datasets/fb15k_237/
+       dataset_dir: /home/data/datasets/fb15k_237/
        num_edges: 272115
        num_nodes: 14541
        num_relations: 237
@@ -1052,7 +1052,7 @@ Dataset Configuration
      - Type
      - Description
      - Required
-   * - base_directory
+   * - dataset_dir
      - String
      - Directory containing the prepreprocessed dataset. Also used to store model parameters and embedding table.
      - Yes
@@ -1096,7 +1096,7 @@ numbers are expected to match against the processed dataset values. Below is the
 
    storage:
      dataset:
-       base_directory: /home/data/datasets/fb15k_237/
+       dataset_dir: /home/data/datasets/fb15k_237/
        num_edges: 272115
        num_nodes: 14541
        num_relations: 237

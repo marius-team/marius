@@ -39,7 +39,7 @@ This command takes in a trained configuration file, ``configs/fb15k237.yaml``, w
 
 The list of metrics over the training set will be computed and output to results/metrics.txt. The ranks and scores for each edge are output to ``results/scores.csv``.
 
-Contents of ``configs/fb15k237.yaml``. The test set here has been created during preprocessing and is stored in ``<storage.dataset.base_directory>/edges/test_edges.bin``
+Contents of ``configs/fb15k237.yaml``. The test set here has been created during preprocessing and is stored in ``<storage.dataset.dataset_dir>/edges/test_edges.bin``
 
     .. code-block:: yaml
 
@@ -72,7 +72,7 @@ Contents of ``configs/fb15k237.yaml``. The test set here has been created during
         storage:
           device_type: cpu
           dataset:
-            base_directory: ./fb15k_237_example/
+            dataset_dir: ./fb15k_237_example/
             num_edges: 272115
             num_nodes: 14541
             num_relations: 237

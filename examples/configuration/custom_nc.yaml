@@ -43,7 +43,7 @@ model:
 storage:
   device_type: cuda
   dataset: 
-    base_directory: datasets/custom_nc_example/cora/
+    dataset_dir: datasets/custom_nc_example/cora/
     num_edges: 5429
     num_nodes: 2708
     num_relations: 1

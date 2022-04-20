@@ -65,7 +65,7 @@ Let's check what is inside the generated ``dataset.yaml`` file:
 .. code-block:: bash
 
    $ cat datasets/ogbn_arxiv_example/dataset.yaml
-   base_directory: /marius-internal/datasets/ogbn_arxiv_example/
+   dataset_dir: /marius-internal/datasets/ogbn_arxiv_example/
    num_edges: 1166243
    num_nodes: 169343
    num_relations: 1
@@ -95,7 +95,7 @@ The configuration file contains information including but not limited to the inp
 
 For the full configuration schema, please refer to ``docs/config_interface``.
 
-An example YAML configuration file for the OGBN_Arxiv dataset is given in ``examples/configuration/ogbn_arxiv.yaml``. Note that the ``base_directory`` is set to the preprocessing output directory, in our example, ``datasets/ogbn_arxiv_example/``.
+An example YAML configuration file for the OGBN_Arxiv dataset is given in ``examples/configuration/ogbn_arxiv.yaml``. Note that the ``dataset_dir`` is set to the preprocessing output directory, in our example, ``datasets/ogbn_arxiv_example/``.
 
 Let's create the same YAML configuration file for the OGBN_Arxiv dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs. 
 
@@ -153,7 +153,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
         evaluation:
           # omit
       
-#. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``base_directory`` is set to ``datasets/ogbn_arxiv_example/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we simply copy the input dataset statistics obtained from ``datasets/ogbn_arxiv_example/dataset.yaml`` and fill in each of their values. 
+#. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/ogbn_arxiv_example/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we simply copy the input dataset statistics obtained from ``datasets/ogbn_arxiv_example/dataset.yaml`` and fill in each of their values. 
    | Note two additional dataset parameters than a link prediction model: ``num_classes`` is required for node classification and ``node_feature_dim`` is required if a ``FEATURE`` type layer exists.
 
     .. code-block:: yaml
@@ -163,7 +163,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
         storage:
           device_type: cuda
           dataset: # copy values from "datasets/ogbn_arxiv_example/dataset.yaml"
-            base_directory: datasets/ogbn_arxiv_example/
+            dataset_dir: datasets/ogbn_arxiv_example/
             num_edges: 1166243
             num_train: 90941
             num_nodes: 169343

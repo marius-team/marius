@@ -23,7 +23,7 @@ model:
 storage:
   device_type: cuda
   dataset:
-    base_directory: /marius-internal/datasets/custom_lp_example/
+    dataset_dir: /marius-internal/datasets/custom_lp_example/
     num_edges: 932994
     num_nodes: 169343
     num_relations: 1

@@ -92,9 +92,9 @@ Once you have defined the class all you need to do is instansiate the base direc
 where you will store all the dataset and preprocessed files. And call the download
 and preprocess on the objects. As shown in the code.::
 
-    base_directory = Path("ogbn_arxiv_dataset/")
-    dataset = MYDATASET(base_directory)
-    if not (base_directory / Path("edges/train_edges.bin")).exists():
+    dataset_dir = Path("ogbn_arxiv_dataset/")
+    dataset = MYDATASET(dataset_dir)
+    if not (dataset_dir / Path("edges/train_edges.bin")).exists():
         dataset.download()
         dataset.preprocess()
 

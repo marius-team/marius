@@ -21,11 +21,11 @@ def run_configs(directory, model_dir=None, partitioned_eval=False, sequential_tr
 
             if model_dir is not None:
                 config.storage.model_dir = model_dir + "/"
-                relation_mapping_filepath = Path(config.storage.dataset.base_directory) / Path("edges") / Path("relation_mapping.txt")
+                relation_mapping_filepath = Path(config.storage.dataset.dataset_dir) / Path("edges") / Path("relation_mapping.txt")
                 if relation_mapping_filepath.exists():
                     shutil.copy(str(relation_mapping_filepath), "{}/{}".format(config.storage.model_dir, "relation_mapping.txt"))
 
-                node_mapping_filepath = Path(config.storage.dataset.base_directory) / Path("nodes") / Path("node_mapping.txt")
+                node_mapping_filepath = Path(config.storage.dataset.dataset_dir) / Path("nodes") / Path("node_mapping.txt")
                 if node_mapping_filepath.exists():
                     shutil.copy(str(node_mapping_filepath), "{}/{}".format(config.storage.model_dir, "node_mapping.txt"))
             
