@@ -50,6 +50,46 @@ class TestConfig(unittest.TestCase):
         except Exception as e:
             assert "Cannot find primary config" in e.__str__()
 
+    def test_missing_dataset_yaml(self):
+        generate_configs_for_dataset(self.output_dir,
+                                     model_names=["distmult"],
+                                     storage_names=["in_memory"],
+                                     training_names=["sync"],
+                                     evaluation_names=["sync"],
+                                     task="lp")
+        
+        os.system("rm {}".format(self.output_dir / Path("dataset.yaml"))) 
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("M-"):
+                try:
+                    config_file = self.output_dir / Path(filename)
+                    config = loadConfig(config_file.__str__(), save=True)
+                    raise RuntimeError("Exception not thrown")
+                except Exception as e:
+                    assert "expected to see dataset.yaml file" in e.__str__()
+        
+
+        shutil.rmtree(self.output_dir)
+        os.makedirs(self.output_dir)
+        OmegaConf.save(self.ds_config, self.output_dir / Path("dataset.yaml"))
+
+        generate_configs_for_dataset(self.output_dir,
+                                     model_names=["gs_1_layer"],
+                                     storage_names=["part_buffer"],
+                                     training_names=["sync"],
+                                     evaluation_names=["sync"],
+                                     task="nc")
+        
+        os.system("rm {}".format(self.output_dir / Path("dataset.yaml")))
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("M-"):
+                try:
+                    config_file = self.output_dir / Path(filename)
+                    config = loadConfig(config_file.__str__(), save=True)
+                    raise RuntimeError("Exception not thrown")
+                except Exception as e:
+                    assert "expected to see dataset.yaml file" in e.__str__()
+
     def test_load_config(self):
 
         generate_configs_for_dataset(self.output_dir,

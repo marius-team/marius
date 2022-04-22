@@ -22,6 +22,16 @@ def get_config(model_config_path, storage_config_path, train_config_path, eval_c
 def set_dataset_config(base_config, dataset_dir):
     dataset_config_path = dataset_dir / Path("dataset.yaml")
     dataset_config = OmegaConf.load(dataset_config_path)
+    
+    # the below attributes need not be manually set as they will be automatically retrieved from dataset_config_path
+    dataset_config.num_edges = -1
+    dataset_config.num_nodes = -1
+    dataset_config.num_relations = -1
+    dataset_config.num_train = -1
+    dataset_config.num_valid = -1
+    dataset_config.num_test = -1
+    dataset_config.initialized = False
+    
     base_config.storage.dataset = dataset_config
 
 
