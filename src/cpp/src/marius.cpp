@@ -18,8 +18,7 @@ void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mode
         graph_encoder = std::make_shared<PipelineGraphEncoder>(dataloader, model, marius_config->evaluation->pipeline);
     }
 
-    string filename = marius_config->storage->dataset->base_directory
-                      + PathConstants::nodes_directory
+    string filename = marius_config->storage->model_dir
                       + PathConstants::encoded_nodes_file
                       + PathConstants::file_ext;
 
@@ -44,7 +43,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     initialization_timer.start();
     SPDLOG_INFO("Start initialization");
 
-    MariusLogger marius_logger = MariusLogger(marius_config->storage->dataset->base_directory);
+    MariusLogger marius_logger = MariusLogger(marius_config->storage->model_dir);
     spdlog::set_default_logger(marius_logger.main_logger_);
     marius_logger.setConsoleLogLevel(marius_config->storage->log_level);
 
@@ -72,7 +71,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
         } else {
             auto checkpoint_loader = std::make_shared<Checkpointer>();
 
-            string checkpoint_dir = marius_config->storage->dataset->base_directory;
+            string checkpoint_dir = marius_config->storage->model_dir;
             if (!marius_config->training->resume_from_checkpoint.empty()) {
                 checkpoint_dir = marius_config->training->resume_from_checkpoint;
             }
@@ -87,7 +86,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     } else {
         auto checkpoint_loader = std::make_shared<Checkpointer>();
 
-        string checkpoint_dir = marius_config->storage->dataset->base_directory;
+        string checkpoint_dir = marius_config->storage->model_dir;
         if (!marius_config->evaluation->checkpoint_dir.empty()) {
             checkpoint_dir = marius_config->evaluation->checkpoint_dir;
         }
@@ -167,7 +166,7 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
     metadata.num_epochs = dataloader->epochs_processed_;
 
     if (marius_config->training->save_model) {
-        model_saver->save(marius_config->storage->dataset->base_directory, metadata);
+        model_saver->save(marius_config->storage->model_dir, metadata);
 
         if (marius_config->storage->export_encoded_nodes) {
             encode_and_export(dataloader, model, marius_config);

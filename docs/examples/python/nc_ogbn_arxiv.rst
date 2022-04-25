@@ -35,9 +35,9 @@ it using::
 Once the dataset class is imported you can easily do the preprocessing by calling the
 download and the preprocess methods::
 
-    base_directory = Path("ogbn_arxiv_nc_dataset/")
-    dataset = OGBNArxiv(base_directory)
-    if not (base_directory / Path("edges/train_edges.bin")).exists():
+    dataset_dir = Path("ogbn_arxiv_nc_dataset/")
+    dataset = OGBNArxiv(dataset_dir)
+    if not (dataset_dir / Path("edges/train_edges.bin")).exists():
         dataset.download()
         dataset.preprocess()
 

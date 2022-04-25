@@ -23,13 +23,7 @@ model:
 storage:
   device_type: cuda
   dataset:
-    base_directory: ./datasets/fb15k_237_example/
-    num_edges: 272115
-    num_train: 272115
-    num_nodes: 14541
-    num_relations: 237
-    num_valid: 17535
-    num_test: 20466
+    dataset_dir: ./datasets/fb15k_237_example/
   edges:
     type: DEVICE_MEMORY
   embeddings:

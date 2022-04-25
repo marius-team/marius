@@ -14,7 +14,7 @@ import marius as m
 def validate_metrics(config, metrics, num_items, output_dir=None):
 
     if output_dir is None:
-        metrics_file = Path(config.storage.dataset.base_directory) / Path("metrics.txt")
+        metrics_file = Path(config.storage.model_dir) / Path("metrics.txt")
 
     else:
         metrics_file = Path(output_dir) / Path("metrics.txt")
@@ -57,7 +57,7 @@ def validate_metrics(config, metrics, num_items, output_dir=None):
 def validate_scores(config, num_edges, save_scores, save_ranks, output_dir=None):
 
     if output_dir is None:
-        scores_file = Path(config.storage.dataset.base_directory) / Path("scores.csv")
+        scores_file = Path(config.storage.model_dir) / Path("scores.csv")
     else:
         scores_file = Path(output_dir) / Path("scores.csv")
 
@@ -83,7 +83,7 @@ def validate_scores(config, num_edges, save_scores, save_ranks, output_dir=None)
 def validate_labels(config, num_nodes, output_dir=None):
 
     if output_dir is None:
-        labels_file = Path(config.storage.dataset.base_directory) / Path("labels.csv")
+        labels_file = Path(config.storage.model_dir) / Path("labels.csv")
     else:
         labels_file = Path(output_dir) / Path("labels.csv")
 
@@ -97,6 +97,7 @@ def validate_labels(config, num_nodes, output_dir=None):
 
 
 class TestPredictLP(unittest.TestCase):
+    config_file = None
 
     @classmethod
     def setUp(self):
@@ -125,21 +126,18 @@ class TestPredictLP(unittest.TestCase):
                                      evaluation_names=["sync"],
                                      task="lp")
 
-        config_file = None
         for filename in os.listdir(base_dir / Path(name)):
             if filename.startswith("M-"):
-                config_file = filename
-
-        self.config_file = base_dir / Path(name) / Path(config_file)
+                self.config_file = base_dir / Path(name) / Path(filename)
 
         config = m.config.loadConfig(self.config_file.__str__(), True)
+        self.config_file = Path(config.storage.model_dir) / Path("full_config.yaml")
         m.manager.marius_train(config)
 
     @classmethod
     def tearDown(self):
-        pass
-        # if Path(TMP_TEST_DIR).exists():
-        #     shutil.rmtree(Path(TMP_TEST_DIR))
+        if Path(TMP_TEST_DIR).exists():
+            shutil.rmtree(Path(TMP_TEST_DIR))
 
     def test_basic_lp(self):
         parser = set_args()

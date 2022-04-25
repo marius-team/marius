@@ -23,7 +23,7 @@ class TorchWriter(object):
                         test_edges_offsets=None):
 
         dataset_stats = DatasetConfig()
-        dataset_stats.base_directory = Path(self.output_dir).absolute().__str__() + "/"
+        dataset_stats.dataset_dir = Path(self.output_dir).absolute().__str__() + "/"
 
         dataset_stats.num_edges = train_edges_tens.size(0)
         dataset_stats.num_train = train_edges_tens.size(0)

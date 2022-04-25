@@ -26,30 +26,30 @@ class MariusLogger {
   public:
     shared_ptr<spdlog::logger> main_logger_;
 
-    MariusLogger(string base_directory) {
+    MariusLogger(string model_dir) {
         spdlog::drop_all();
 
         console_sink_ = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         console_sink_->set_level(spdlog::level::info);
         console_sink_->set_pattern("[%x %T.%e] %v");
 
-        trace_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", base_directory, "trace"), true);
+        trace_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", model_dir, "trace"), true);
         trace_sink_->set_level(spdlog::level::trace);
         trace_sink_->set_pattern("[%l] [%x %T.%e] [PID:%P TID:%t] [%s:%!:%#] %v");
 
-        debug_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", base_directory, "debug"), true);
+        debug_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", model_dir, "debug"), true);
         debug_sink_->set_level(spdlog::level::debug);
         debug_sink_->set_pattern("[%l] [%x %T.%e] [PID:%P TID:%t] [%s:%!:%#] %v");
 
-        info_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", base_directory, "info"), true);
+        info_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", model_dir, "info"), true);
         info_sink_->set_level(spdlog::level::info);
         info_sink_->set_pattern("[%l] [%x %T.%e] [PID:%P TID:%t] [%s:%!:%#] %v");
 
-        warn_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", base_directory, "warn"), true);
+        warn_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", model_dir, "warn"), true);
         warn_sink_->set_level(spdlog::level::warn);
         warn_sink_->set_pattern("[%l] [%x %T.%e] [PID:%P TID:%t] [%s:%!:%#] %v");
 
-        error_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", base_directory, "error"), true);
+        error_sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fmt::format("{}/logs/{}.log", model_dir, "error"), true);
         error_sink_->set_level(spdlog::level::err);
         error_sink_->set_pattern("[%l] [%x %T.%e] [PID:%P TID:%t] [%g:%s:%!:%#] %v");
 

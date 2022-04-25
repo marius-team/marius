@@ -56,7 +56,11 @@ The  ``--edges`` flag specifies the raw edge list file that ``marius_preprocess`
 
 The  ``--output_directory`` flag specifies where the preprocessed graph will be output and is set by the user. In this example, assume we have not created the datasets/fb15k_237_example repository. ``marius_preprocess`` will create it for us. 
 
-For detailed usages of  ``marius_preprocess``, please refer to ``marius_preprocess -h``.
+For detailed usages of  ``marius_preprocess``, please execute the following command:
+
+.. code-block:: bash
+
+   $ marius_preprocess -h
 
 Let's check again what was created inside the ``datasets/custom_lp_example/`` directory:
 
@@ -78,7 +82,7 @@ Let's check what is inside the generated ``dataset.yaml`` file:
 .. code-block:: bash
 
    $ cat datasets/custom_lp_example/dataset.yaml
-    base_directory: /marius-internal/datasets/custom_lp_example/
+    dataset_dir: /marius-internal/datasets/custom_lp_example/
     num_edges: 932994
     num_nodes: 169343
     num_relations: 1
@@ -107,22 +111,25 @@ The configuration file contains information including but not limited to the inp
 
 For the full configuration schema, please refer to ``docs/config_interface``. 
 
-An example YAML configuration file for the OGBN_Arxiv dataset (link prediction model with DistMult) is given in ``examples/configuration/custom_lp.yaml``. Note that the ``base_directory`` is set to the preprocessing output directory, in our example, ``datasets/custom_lp_example/``.
+An example YAML configuration file for the OGBN_Arxiv dataset (link prediction model with DistMult) is given in ``examples/configuration/custom_lp.yaml``. Note that the ``dataset_dir`` is set to the preprocessing output directory, in our example, ``datasets/custom_lp_example/``.
 
 Let's create the same YAML configuration file for the OGBN_Arxiv dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs. 
 
-#. First, we define the **model**. We begin by setting all required parameters. This includes ``learning_task``, ``encoder``, ``decoder``, and ``loss``. Since we are training a link prediction model, set the ``learning_task`` to ``LINK_PREDICTION``. Since we are training a model with DistMult, set the ``type`` of ``decoder`` to ``DISTMULT``. We set the ``encoder`` to be an ``EMBEDDING`` table with 50-dimensional embeddings. The rest of the configurations can be fine-tuned by the user.
+.. note:: 
+   String values in the configuration file are case insensitive but we use capital letters for convention.
+
+#. First, we define the **model**. We begin by setting all required parameters. This includes ``learning_task``, ``encoder``, ``decoder``, and ``loss``. The rest of the configurations can be fine-tuned by the user.
 
     .. code-block:: yaml
     
         model:
-          learning_task: LINK_PREDICTION
+          learning_task: LINK_PREDICTION # set the learning task to link prediction
           encoder:
             layers:
-              - - type: EMBEDDING
+              - - type: EMBEDDING # set the encoder to be an embedding table with 50-dimensional embeddings
                   output_dim: 50
           decoder:
-            type: DISTMULT
+            type: DISTMULT # set the decoder to DistMult
             options:
               input_dim: 50
           loss:
@@ -144,7 +151,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
         evaluation:
           # omit
       
-#. Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``base_directory`` is set to ``datasets/custom_lp_example/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we use the same input dataset statistics obtained from ``datasets/custom_lp_example/dataset.yaml``.
+#. Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/custom_lp_example/``, which is the preprocessing output directory.
 
     .. code-block:: yaml
     
@@ -153,13 +160,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
         storage:
           device_type: cuda
           dataset:
-            base_directory: /marius-internal/datasets/custom_lp_example/
-            num_edges: 932994
-            num_nodes: 169343
-            num_relations: 1
-            num_train: 932994
-            num_valid: 116624
-            num_test: 116625
+            dataset_dir: /marius-internal/datasets/custom_lp_example/
           edges:
             type: DEVICE_MEMORY
           embeddings:

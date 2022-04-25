@@ -34,8 +34,7 @@ GraphModelStorage::GraphModelStorage(GraphModelStoragePtrs storage_ptrs,
     if (full_graph_evaluation_) {
         if (storage_ptrs_.node_embeddings != nullptr) {
             if (instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
-                string node_embedding_filename = storage_config->dataset->base_directory
-                                                 + PathConstants::nodes_directory
+                string node_embedding_filename = storage_config->model_dir
                                                  + PathConstants::embeddings_file
                                                  + PathConstants::file_ext;
 
@@ -49,7 +48,7 @@ GraphModelStorage::GraphModelStorage(GraphModelStoragePtrs storage_ptrs,
 
         if (storage_ptrs_.node_features != nullptr) {
             if (instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_features)) {
-                string node_feature_filename = storage_config->dataset->base_directory
+                string node_feature_filename = storage_config->dataset->dataset_dir
                                                + PathConstants::nodes_directory
                                                + PathConstants::features_file
                                                + PathConstants::file_ext;

@@ -70,7 +70,7 @@ struct StorageBackendConfig {
 };
 
 struct DatasetConfig {
-    string base_directory;
+    string dataset_dir;
     int64_t num_edges;
     int64_t num_nodes;
     int64_t num_relations;
@@ -137,6 +137,7 @@ struct StorageConfig {
     bool shuffle_input;
     bool full_graph_evaluation;
     bool export_encoded_nodes;
+    std::string model_dir;
     spdlog::level::level_enum log_level;
 };
 

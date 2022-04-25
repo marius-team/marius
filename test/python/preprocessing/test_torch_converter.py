@@ -62,7 +62,7 @@ def validate_output_dir(output_dir: Path, expected_stats: DatasetConfig, dtype=n
 
     dataset_stats = OmegaConf.load(output_dir / Path("dataset.yaml"))
 
-    assert Path(dataset_stats.base_directory).absolute().__str__() == Path(expected_stats.base_directory).absolute().__str__()
+    assert Path(dataset_stats.dataset_dir).absolute().__str__() == Path(expected_stats.dataset_dir).absolute().__str__()
     assert dataset_stats.num_edges == expected_stats.num_edges
     assert dataset_stats.num_relations == expected_stats.num_relations
     assert dataset_stats.num_nodes == expected_stats.num_nodes
@@ -153,7 +153,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -186,7 +186,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -214,7 +214,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -242,7 +242,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -267,7 +267,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 900
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -294,7 +294,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
@@ -323,7 +323,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -351,7 +351,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -377,7 +377,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -402,7 +402,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -444,7 +444,7 @@ class TestTorchConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10

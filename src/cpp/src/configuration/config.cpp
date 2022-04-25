@@ -132,7 +132,7 @@ shared_ptr<OptimizerConfig> initOptimizerConfig(pyobj python_config) {
 shared_ptr<DatasetConfig> initDatasetConfig(pyobj python_config) {
     shared_ptr<DatasetConfig> ret_config = std::make_shared<DatasetConfig>();
 
-    ret_config->base_directory = cast_helper<string>(python_config.attr("base_directory"));
+    ret_config->dataset_dir = cast_helper<string>(python_config.attr("dataset_dir"));
     ret_config->num_train = cast_helper<int64_t>(python_config.attr("num_train"));
     ret_config->num_valid = cast_helper<int64_t>(python_config.attr("num_valid"));
     ret_config->num_test = cast_helper<int64_t>(python_config.attr("num_test"));
@@ -456,6 +456,7 @@ shared_ptr<StorageConfig> initStorageConfig(pyobj python_config) {
     ret_config->dataset = initDatasetConfig(python_config.attr("dataset"));
     ret_config->prefetch = cast_helper<bool>(python_config.attr("prefetch"));
     ret_config->shuffle_input = cast_helper<bool>(python_config.attr("shuffle_input"));
+    ret_config->model_dir = cast_helper<string>(python_config.attr("model_dir"));
 
     pybind11::list device_ids_pylist = cast_helper<pybind11::list>(python_config.attr("device_ids"));
 

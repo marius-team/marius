@@ -58,7 +58,7 @@ void init_config(py::module &m) {
 
     py::class_<DatasetConfig, std::shared_ptr<DatasetConfig>>(m, "DatasetConfig")
         .def(py::init<>())
-        .def_readwrite("base_directory", &DatasetConfig::base_directory)
+        .def_readwrite("dataset_dir", &DatasetConfig::dataset_dir)
         .def_readwrite("num_edges", &DatasetConfig::num_edges)
         .def_readwrite("num_nodes", &DatasetConfig::num_nodes)
         .def_readwrite("num_relations", &DatasetConfig::num_relations)
@@ -121,6 +121,7 @@ void init_config(py::module &m) {
         .def_readwrite("prefetch", &StorageConfig::prefetch)
         .def_readwrite("shuffle_input", &StorageConfig::shuffle_input)
         .def_readwrite("full_graph_evaluation", &StorageConfig::full_graph_evaluation)
+        .def_readwrite("model_dir", &StorageConfig::model_dir)
         .def_readwrite("export_encoded_nodes", &StorageConfig::export_encoded_nodes);
 
     py::class_<TrainingConfig, std::shared_ptr<TrainingConfig>>(m, "TrainingConfig")

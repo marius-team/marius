@@ -121,7 +121,7 @@ class SparkWriter(object):
                      num_partitions):
 
         dataset_stats = DatasetConfig()
-        dataset_stats.base_directory = Path(self.output_dir).absolute().__str__()
+        dataset_stats.dataset_dir = Path(self.output_dir).absolute().__str__()
 
         dataset_stats.num_edges = get_df_count(train_edges_df, EDGES_INDEX_COL)
         train_edges_df = train_edges_df.drop(EDGES_INDEX_COL)
