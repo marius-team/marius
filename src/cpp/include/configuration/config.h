@@ -70,7 +70,7 @@ struct StorageBackendConfig {
 };
 
 struct DatasetConfig {
-    string base_directory;
+    string dataset_dir;
     int64_t num_edges;
     int64_t num_nodes;
     int64_t num_relations;

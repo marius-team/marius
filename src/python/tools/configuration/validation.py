@@ -20,7 +20,7 @@ def validate_dataset_config(output_config):
     if output_config.model.learning_task == "LINK_PREDICTION":
         num_cols = 2 if dataset_config.num_relations == 1 else 3
         edges_dtype_size = 8 if output_config.storage.edges.options.dtype in long_dtype_list else 4
-        edges_path = Path(dataset_config.base_directory + "edges")
+        edges_path = Path(dataset_config.dataset_dir + "edges")
         train_edges_filepath = edges_path / Path("train_edges.bin")
         assert os.path.getsize(train_edges_filepath) == dataset_config.num_train * num_cols * edges_dtype_size, \
                 "Expected size for {} is {}, got {}".format(str(train_edges_filepath), \
@@ -72,7 +72,7 @@ def validate_dataset_config(output_config):
 
     if output_config.model.learning_task == "NODE_CLASSIFICATION":
         nodes_dtype_size = 8 if output_config.storage.nodes.options.dtype in long_dtype_list else 4
-        nodes_path = Path(dataset_config.base_directory + "nodes")
+        nodes_path = Path(dataset_config.dataset_dir + "nodes")
         train_nodes_filepath = nodes_path / Path("train_nodes.bin")
         if not train_nodes_filepath.exists():
             raise ValueError("{} does not exist".format(str(train_nodes_filepath)))
@@ -114,7 +114,7 @@ def validate_storage_config(output_config):
     if storage_config.embeddings.type != "PARTITION_BUFFER" and storage_config.features.type != "PARTITION_BUFFER":
         return 
     
-    edges_path = Path(dataset_config.base_directory + "edges")
+    edges_path = Path(dataset_config.dataset_dir + "edges")
     train_edges_partitions_filepath = edges_path / Path("train_partition_offsets.txt")
     if not train_edges_partitions_filepath.exists():
         raise ValueError("{} does not exist, required for PARTITION_BUFFER mode".format(str(train_edges_partitions_filepath)))

@@ -109,7 +109,7 @@ Define configuration file: 1-layer GraphSage GNN
         storage:
           device_type: cuda
           dataset:
-            base_directory: arxiv_example/
+            dataset_dir: arxiv_example/
             num_edges: 1166243
             num_train: 90941
             num_nodes: 169343

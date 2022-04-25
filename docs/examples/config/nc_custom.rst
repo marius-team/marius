@@ -76,7 +76,7 @@ Let's borrow the provided ``examples/python/custom_nc_graphsage.py`` and modify 
                 extract_file(archive_path, remove_input=False)
 
                 # Reading and processing the csv
-                df = pd.read_csv(base_directory / Path("cora/cora.content"), sep="\t", header=None)
+                df = pd.read_csv(dataset_dir / Path("cora/cora.content"), sep="\t", header=None)
                 cols = df.columns[1:len(df.columns)-1]
 
                 # Getting all the indices
@@ -86,27 +86,27 @@ Let's borrow the provided ``examples/python/custom_nc_graphsage.py`` and modify 
                 valid_indices = indices[int(0.8*len(df)):int(0.8*len(df))+int(0.1*len(df))]
                 test_indices = indices[int(0.8*len(df))+int(0.1*len(df)):]
 
-                np.savetxt(base_directory / Path("train.csv"), train_indices, delimiter=",", fmt="%d")
-                np.savetxt(base_directory / Path("valid.csv"), valid_indices, delimiter=",", fmt="%d")
-                np.savetxt(base_directory / Path("test.csv"), test_indices, delimiter=",", fmt="%d")
+                np.savetxt(dataset_dir / Path("train.csv"), train_indices, delimiter=",", fmt="%d")
+                np.savetxt(dataset_dir / Path("valid.csv"), valid_indices, delimiter=",", fmt="%d")
+                np.savetxt(dataset_dir / Path("test.csv"), test_indices, delimiter=",", fmt="%d")
 
 
                 # Features
                 features = df[cols]
-                features.to_csv(index=False, sep=",", path_or_buf = base_directory / Path("node-feat.csv"), header=False)
+                features.to_csv(index=False, sep=",", path_or_buf = dataset_dir / Path("node-feat.csv"), header=False)
 
                 # Labels
                 labels = df[df.columns[len(df.columns)-1]]
                 labels = labels.apply(switch_to_num)
-                labels.to_csv(index=False, sep=",", path_or_buf = base_directory / Path("node-label.csv"), header=False)
+                labels.to_csv(index=False, sep=",", path_or_buf = dataset_dir / Path("node-label.csv"), header=False)
 
                 # Edges
                 node_ids = df[df.columns[0]]
                 dict_reverse = node_ids.to_dict()
                 nodes_dict = {v: k for k, v in dict_reverse.items()}
-                df_edges = pd.read_csv(base_directory / Path("cora/cora.cites"), sep="\t", header=None)
+                df_edges = pd.read_csv(dataset_dir / Path("cora/cora.cites"), sep="\t", header=None)
                 df_edges.replace({0: nodes_dict, 1: nodes_dict},inplace=True)
-                df_edges.to_csv(index=False, sep=",", path_or_buf = base_directory / Path("edge.csv"), header=False)
+                df_edges.to_csv(index=False, sep=",", path_or_buf = dataset_dir / Path("edge.csv"), header=False)
 
             
         def preprocess(self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False):
@@ -163,9 +163,9 @@ Let's borrow the provided ``examples/python/custom_nc_graphsage.py`` and modify 
 
     if __name__ == '__main__':
         # initialize and preprocess dataset
-        base_directory = Path("datasets/custom_nc_example/cora/") # note that we write to this directory
-        dataset = MYDATASET(base_directory)
-        if not (base_directory / Path("edges/train_edges.bin")).exists():
+        dataset_dir = Path("datasets/custom_nc_example/cora/") # note that we write to this directory
+        dataset = MYDATASET(dataset_dir)
+        if not (dataset_dir / Path("edges/train_edges.bin")).exists():
             dataset.download()
             dataset.preprocess()
 
@@ -215,7 +215,7 @@ Let's check what is inside the generated ``dataset.yaml`` file:
 .. code-block:: bash
 
    $ cat datasets/ogbn_arxiv_example/dataset.yaml
-    base_directory: /marius-internal/datasets/custom_nc_example/cora/
+    dataset_dir: /marius-internal/datasets/custom_nc_example/cora/
     num_edges: 5429
     num_nodes: 2708
     num_relations: 1
@@ -242,7 +242,7 @@ The configuration file contains information including but not limited to the inp
 
 For the full configuration schema, please refer to ``docs/config_interface``.
 
-An example YAML configuration file for the Cora dataset is given in ``examples/configuration/custom_nc.yaml``. Note that the ``base_directory`` is set to the preprocessing output directory, in our example, ``datasets/custom_nc_example/cora/``.
+An example YAML configuration file for the Cora dataset is given in ``examples/configuration/custom_nc.yaml``. Note that the ``dataset_dir`` is set to the preprocessing output directory, in our example, ``datasets/custom_nc_example/cora/``.
 
 Let's create the same YAML configuration file for the OGBN_Arxiv dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs. 
 
@@ -300,8 +300,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
         evaluation:
           # omit
       
-#. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``base_directory`` is set to ``datasets/custom_nc_example/cora/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we simply copy the input dataset statistics obtained from ``datasets/custom_nc_example/cora/dataset.yaml`` and fill in each of their values. 
-   | Note two additional dataset parameters than a link prediction model: ``num_classes`` is required for node classification and ``node_feature_dim`` is required if a ``FEATURE`` type layer exists.
+#. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/custom_nc_example/cora/``, which is the preprocessing output directory.
 
     .. code-block:: yaml
     
@@ -309,16 +308,8 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
           # omit
         storage:
           device_type: cuda
-          dataset: # copy values from "datasets/custom_nc_example/cora/dataset.yaml"
-            base_directory: datasets/custom_nc_example/cora/
-            num_edges: 5429
-            num_nodes: 2708
-            num_relations: 1
-            num_train: 2166
-            num_valid: 270
-            num_test: 272
-            node_feature_dim: 1433
-            num_classes: 40
+          dataset:
+            dataset_dir: datasets/custom_nc_example/cora/
           edges:
             type: DEVICE_MEMORY
             options:

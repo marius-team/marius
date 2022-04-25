@@ -363,8 +363,8 @@ def preprocess_input_file(config, args):
     shape = infer_input_shape(config, args)
     str_dtype, numpy_dtype = get_dtype(storage_backend, args)
 
-    node_mapping_file = config.storage.dataset.base_directory + PathConstants.node_mapping_path
-    rel_mapping_file = config.storage.dataset.base_directory + PathConstants.relation_mapping_path
+    node_mapping_file = config.storage.dataset.dataset_dir + PathConstants.node_mapping_path
+    rel_mapping_file = config.storage.dataset.dataset_dir + PathConstants.relation_mapping_path
 
     node_mapping_df = None
     rel_mapping_df = None
@@ -428,10 +428,10 @@ def preprocess_input_file(config, args):
         input_file_offsets = args.input_file.split(".")[-2] + "_offsets.txt"
         input_tensor, offsets = partition_edges(input_tensor, config.storage.dataset.num_nodes, num_partitions)
 
-        with open(config.storage.dataset.base_directory + input_file_offsets, "w") as f:
+        with open(config.storage.dataset.dataset_dir + input_file_offsets, "w") as f:
             f.writelines([str(o) + "\n" for o in offsets])
 
-    with open(config.storage.dataset.base_directory + input_file, "wb") as f:
+    with open(config.storage.dataset.dataset_dir + input_file, "wb") as f:
         f.write(bytes(input_tensor.numpy()))
 
     return input_file, input_file_offsets, storage_backend, shape
@@ -488,7 +488,7 @@ def run_predict(args):
 
     output_dir = args.output_dir
     if output_dir == "":
-        output_dir = config.storage.dataset.base_directory
+        output_dir = config.storage.model_dir
 
     nbrs = get_nbrs_config(config, args)
 

@@ -55,7 +55,7 @@ Let's check what is inside the generated ``dataset.yaml`` file:
 .. code-block:: bash
 
    $ cat datasets/fb15k_237_example/dataset.yaml
-   base_directory: /marius-internal/datasets/fb15k_237_example/
+   dataset_dir: /marius-internal/datasets/fb15k_237_example/
    num_edges: 272115
    num_nodes: 14541
    num_relations: 237
@@ -84,7 +84,7 @@ The configuration file contains information including but not limited to the inp
 
 For the full configuration schema, please refer to ``docs/config_interface``.
 
-An example YAML configuration file for the FB15K_237 dataset is given in ``examples/configuration/fb15k_237.yaml``. Note that the ``base_directory`` is set to the preprocessing output directory, in our example, ``datasets/fb15k_237_example/``.
+An example YAML configuration file for the FB15K_237 dataset is given in ``examples/configuration/fb15k_237.yaml``. Note that the ``dataset_dir`` is set to the preprocessing output directory, in our example, ``datasets/fb15k_237_example/``.
 
 Let's create the same YAML configuration file for the FB15K_237 dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs. 
 
@@ -121,7 +121,7 @@ Let's create the same YAML configuration file for the FB15K_237 dataset from scr
         evaluation:
           # omit
       
-#. Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``base_directory`` is set to ``datasets/fb15k_237_example/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we simply copy the input dataset statistics obtained from ``datasets/fb15k_237_example/dataset.yaml`` and fill in each of their values.
+#. Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/fb15k_237_example/``, which is the preprocessing output directory.
 
     .. code-block:: yaml
     
@@ -129,14 +129,8 @@ Let's create the same YAML configuration file for the FB15K_237 dataset from scr
           # omit
         storage:
           device_type: cuda
-          dataset: # copy values from "datasets/fb15k_237_example/dataset.yaml"
-            base_directory: datasets/fb15k_237_example/
-            num_edges: 272115
-            num_train: 272115
-            num_nodes: 14541
-            num_relations: 237
-            num_valid: 17535
-            num_test: 20466
+          dataset:
+            dataset_dir: datasets/fb15k_237_example/
           edges:
             type: DEVICE_MEMORY
           embeddings:

@@ -132,7 +132,7 @@ shared_ptr<OptimizerConfig> initOptimizerConfig(pyobj python_config) {
 shared_ptr<DatasetConfig> initDatasetConfig(pyobj python_config) {
     shared_ptr<DatasetConfig> ret_config = std::make_shared<DatasetConfig>();
 
-    ret_config->base_directory = cast_helper<string>(python_config.attr("base_directory"));
+    ret_config->dataset_dir = cast_helper<string>(python_config.attr("dataset_dir"));
     ret_config->num_train = cast_helper<int64_t>(python_config.attr("num_train"));
     ret_config->num_valid = cast_helper<int64_t>(python_config.attr("num_valid"));
     ret_config->num_test = cast_helper<int64_t>(python_config.attr("num_test"));

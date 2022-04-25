@@ -72,7 +72,7 @@ Before we can run Marius we need to specify our model hyperparameters and path t
 
 ``training.num_epochs``: The number of epochs to train for. Adjust higher or lower based on the desired accuracy of the embeddings. Our default is ``100`` epochs.
 
-``storage.dataset.base_directory``: We assume we are in the link prediction example directory ``~/marius-examples/link-predict-example/`` when running the training process, so our default relative path is ``dataset/``. Change if running from another directory.
+``storage.dataset.dataset_dir``: We assume we are in the link prediction example directory ``~/marius-examples/link-predict-example/`` when running the training process, so our default relative path is ``dataset/``. Change if running from another directory.
 
 ``paleo_config.yaml``
 
@@ -95,13 +95,7 @@ Before we can run Marius we need to specify our model hyperparameters and path t
         storage:
             device_type: cuda
             dataset:
-                base_directory: dataset/
-                num_edges: 96522
-                num_train: 96522
-                num_nodes: 14752
-                num_relations: 5
-                num_valid: 5362
-                num_test: 5363
+                dataset_dir: dataset/
             edges:
                 type: DEVICE_MEMORY
             embeddings:
@@ -162,7 +156,7 @@ The output should appear similar to::
     Hits@100: 0.459437
     =================================
 
-After this has finished, our output will be in our ``[base_directory]`` (using the provided config, this will be ``dataset/``.
+After this has finished, our output will be in our ``[dataset_dir]`` (using the provided config, this will be ``dataset/``.
 
 Here are the files that were created in training:
 Let's check again what was added in the ``datasets/custom_lp_example/`` directory. For clarity, we only list the files that were created in training. Notice that several files have been created, including the trained model, the embedding table, a full configuration file, and output logs:

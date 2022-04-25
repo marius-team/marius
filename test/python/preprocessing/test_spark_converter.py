@@ -57,7 +57,7 @@ class TestSparkConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -89,7 +89,7 @@ class TestSparkConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -115,7 +115,7 @@ class TestSparkConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
@@ -143,7 +143,7 @@ class TestSparkConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -170,7 +170,7 @@ class TestSparkConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
@@ -195,7 +195,7 @@ class TestSparkConverter(unittest.TestCase):
         converter.convert()
 
         expected_stats = DatasetConfig()
-        expected_stats.base_directory = output_dir.__str__()
+        expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10

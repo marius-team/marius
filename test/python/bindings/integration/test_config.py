@@ -22,7 +22,7 @@ class TestConfig(unittest.TestCase):
     output_dir = TMP_TEST_DIR / Path("config")
 
     ds_config = marius.tools.configuration.marius_config.DatasetConfig()
-    ds_config.base_directory = output_dir.__str__()
+    ds_config.dataset_dir = output_dir.__str__()
     ds_config.num_edges = 1000
     ds_config.num_nodes = 100
     ds_config.num_relations = 1
@@ -50,6 +50,46 @@ class TestConfig(unittest.TestCase):
         except Exception as e:
             assert "Cannot find primary config" in e.__str__()
 
+    def test_missing_dataset_yaml(self):
+        generate_configs_for_dataset(self.output_dir,
+                                     model_names=["distmult"],
+                                     storage_names=["in_memory"],
+                                     training_names=["sync"],
+                                     evaluation_names=["sync"],
+                                     task="lp")
+        
+        os.system("rm {}".format(self.output_dir / Path("dataset.yaml"))) 
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("M-"):
+                try:
+                    config_file = self.output_dir / Path(filename)
+                    config = loadConfig(config_file.__str__(), save=True)
+                    raise RuntimeError("Exception not thrown")
+                except Exception as e:
+                    assert "expected to see dataset.yaml file" in e.__str__()
+        
+
+        shutil.rmtree(self.output_dir)
+        os.makedirs(self.output_dir)
+        OmegaConf.save(self.ds_config, self.output_dir / Path("dataset.yaml"))
+
+        generate_configs_for_dataset(self.output_dir,
+                                     model_names=["gs_1_layer"],
+                                     storage_names=["part_buffer"],
+                                     training_names=["sync"],
+                                     evaluation_names=["sync"],
+                                     task="nc")
+        
+        os.system("rm {}".format(self.output_dir / Path("dataset.yaml")))
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("M-"):
+                try:
+                    config_file = self.output_dir / Path(filename)
+                    config = loadConfig(config_file.__str__(), save=True)
+                    raise RuntimeError("Exception not thrown")
+                except Exception as e:
+                    assert "expected to see dataset.yaml file" in e.__str__()
+
     def test_load_config(self):
 
         generate_configs_for_dataset(self.output_dir,
@@ -76,7 +116,7 @@ class TestConfig(unittest.TestCase):
                 assert config.model.encoder is not None
                 assert config.model.decoder is not None
 
-                assert config.storage.dataset.base_directory.rstrip("/") == self.output_dir.__str__()
+                assert config.storage.dataset.dataset_dir.rstrip("/") == self.output_dir.__str__()
                 assert config.storage.dataset.num_edges == 1000
                 assert config.storage.dataset.num_nodes == 100
                 assert config.storage.dataset.num_relations == 1
@@ -119,7 +159,7 @@ class TestConfig(unittest.TestCase):
                 assert config.model.encoder is not None
                 assert config.model.decoder is not None
 
-                assert config.storage.dataset.base_directory.rstrip("/") == self.output_dir.__str__()
+                assert config.storage.dataset.dataset_dir.rstrip("/") == self.output_dir.__str__()
                 assert config.storage.dataset.num_edges == 1000
                 assert config.storage.dataset.num_nodes == 100
                 assert config.storage.dataset.num_relations == 1

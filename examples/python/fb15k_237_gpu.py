@@ -82,13 +82,13 @@ def eval_epoch(model, dataloader):
 
 if __name__ == '__main__':
 
-    base_directory = Path("fb15k_dataset/")
-    dataset = FB15K237(base_directory)
-    if not (base_directory / Path("edges/train_edges.bin")).exists():
+    dataset_dir = Path("fb15k_dataset/")
+    dataset = FB15K237(dataset_dir)
+    if not (dataset_dir / Path("edges/train_edges.bin")).exists():
         dataset.download()
         dataset.preprocess()
 
-    dataset_stats = OmegaConf.load(base_directory / Path("dataset.yaml"))
+    dataset_stats = OmegaConf.load(dataset_dir / Path("dataset.yaml"))
 
     # create model
     device = torch.device("cuda")

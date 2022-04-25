@@ -64,7 +64,7 @@ class MYDATASET(NodeClassificationDataset):
             extract_file(archive_path, remove_input=False)
 
             # Reading and processing the csv
-            df = pd.read_csv(base_directory / Path("cora/cora.content"), sep="\t", header=None)
+            df = pd.read_csv(dataset_dir / Path("cora/cora.content"), sep="\t", header=None)
             cols = df.columns[1:len(df.columns)-1]
 
             # Getting all the indices
@@ -74,27 +74,27 @@ class MYDATASET(NodeClassificationDataset):
             valid_indices = indices[int(0.8*len(df)):int(0.8*len(df))+int(0.1*len(df))]
             test_indices = indices[int(0.8*len(df))+int(0.1*len(df)):]
 
-            np.savetxt(base_directory / Path("train.csv"), train_indices, delimiter=",", fmt="%d")
-            np.savetxt(base_directory / Path("valid.csv"), valid_indices, delimiter=",", fmt="%d")
-            np.savetxt(base_directory / Path("test.csv"), test_indices, delimiter=",", fmt="%d")
+            np.savetxt(dataset_dir / Path("train.csv"), train_indices, delimiter=",", fmt="%d")
+            np.savetxt(dataset_dir / Path("valid.csv"), valid_indices, delimiter=",", fmt="%d")
+            np.savetxt(dataset_dir / Path("test.csv"), test_indices, delimiter=",", fmt="%d")
 
 
             # Features
             features = df[cols]
-            features.to_csv(index=False, sep=",", path_or_buf = base_directory / Path("node-feat.csv"), header=False)
+            features.to_csv(index=False, sep=",", path_or_buf = dataset_dir / Path("node-feat.csv"), header=False)
 
             # Labels
             labels = df[df.columns[len(df.columns)-1]]
             labels = labels.apply(switch_to_num)
-            labels.to_csv(index=False, sep=",", path_or_buf = base_directory / Path("node-label.csv"), header=False)
+            labels.to_csv(index=False, sep=",", path_or_buf = dataset_dir / Path("node-label.csv"), header=False)
 
             # Edges
             node_ids = df[df.columns[0]]
             dict_reverse = node_ids.to_dict()
             nodes_dict = {v: k for k, v in dict_reverse.items()}
-            df_edges = pd.read_csv(base_directory / Path("cora/cora.cites"), sep="\t", header=None)
+            df_edges = pd.read_csv(dataset_dir / Path("cora/cora.cites"), sep="\t", header=None)
             df_edges.replace({0: nodes_dict, 1: nodes_dict},inplace=True)
-            df_edges.to_csv(index=False, sep=",", path_or_buf = base_directory / Path("edge.csv"), header=False)
+            df_edges.to_csv(index=False, sep=",", path_or_buf = dataset_dir / Path("edge.csv"), header=False)
 
         
     def preprocess(self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False):
@@ -235,13 +235,13 @@ if __name__ == '__main__':
     # dataset class is doing can be found: [TODO add path location]
 
     # initialize and preprocess dataset
-    base_directory = Path("cora/")
-    dataset = MYDATASET(base_directory)
-    if not (base_directory / Path("edges/train_edges.bin")).exists():
+    dataset_dir = Path("cora/")
+    dataset = MYDATASET(dataset_dir)
+    if not (dataset_dir / Path("edges/train_edges.bin")).exists():
         dataset.download()
         dataset.preprocess()
 
-    dataset_stats = OmegaConf.load(base_directory / Path("dataset.yaml"))
+    dataset_stats = OmegaConf.load(dataset_dir / Path("dataset.yaml"))
 
     # Rest of the code (i.e. model, dataloader, training, etc) is same as nc_ogbn_arxiv example.
     # Please refer to the documentation at docs/examples/python/nc_ogbn_arxiv.rst for details rest of the code
