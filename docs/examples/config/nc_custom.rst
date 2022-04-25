@@ -300,8 +300,7 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
         evaluation:
           # omit
       
-#. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/custom_nc_example/cora/``, which is the preprocessing output directory. To populate the ``num_edges``, ``num_train``,..., ``num_test`` fields, we simply copy the input dataset statistics obtained from ``datasets/custom_nc_example/cora/dataset.yaml`` and fill in each of their values. 
-   | Note two additional dataset parameters than a link prediction model: ``num_classes`` is required for node classification and ``node_feature_dim`` is required if a ``FEATURE`` type layer exists.
+#. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/custom_nc_example/cora/``, which is the preprocessing output directory.
 
     .. code-block:: yaml
     

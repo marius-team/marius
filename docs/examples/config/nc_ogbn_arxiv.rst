@@ -154,7 +154,6 @@ Let's create the same YAML configuration file for the OGBN_Arxiv dataset from sc
           # omit
       
 #. | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/ogbn_arxiv_example/``, which is the preprocessing output directory.
-   | Note two additional dataset parameters than a link prediction model: ``num_classes`` is required for node classification and ``node_feature_dim`` is required if a ``FEATURE`` type layer exists.
 
     .. code-block:: yaml
     
