@@ -43,7 +43,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     initialization_timer.start();
     SPDLOG_INFO("Start initialization");
 
-    MariusLogger marius_logger = MariusLogger(marius_config->storage->dataset->dataset_dir);
+    MariusLogger marius_logger = MariusLogger(marius_config->storage->model_dir);
     spdlog::set_default_logger(marius_logger.main_logger_);
     marius_logger.setConsoleLogLevel(marius_config->storage->log_level);
 

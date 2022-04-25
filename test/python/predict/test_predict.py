@@ -14,7 +14,7 @@ import marius as m
 def validate_metrics(config, metrics, num_items, output_dir=None):
 
     if output_dir is None:
-        metrics_file = Path(config.storage.dataset.dataset_dir) / Path("metrics.txt")
+        metrics_file = Path(config.storage.model_dir) / Path("metrics.txt")
 
     else:
         metrics_file = Path(output_dir) / Path("metrics.txt")
@@ -57,7 +57,7 @@ def validate_metrics(config, metrics, num_items, output_dir=None):
 def validate_scores(config, num_edges, save_scores, save_ranks, output_dir=None):
 
     if output_dir is None:
-        scores_file = Path(config.storage.dataset.dataset_dir) / Path("scores.csv")
+        scores_file = Path(config.storage.model_dir) / Path("scores.csv")
     else:
         scores_file = Path(output_dir) / Path("scores.csv")
 
@@ -83,7 +83,7 @@ def validate_scores(config, num_edges, save_scores, save_ranks, output_dir=None)
 def validate_labels(config, num_nodes, output_dir=None):
 
     if output_dir is None:
-        labels_file = Path(config.storage.dataset.dataset_dir) / Path("labels.csv")
+        labels_file = Path(config.storage.model_dir) / Path("labels.csv")
     else:
         labels_file = Path(output_dir) / Path("labels.csv")
 

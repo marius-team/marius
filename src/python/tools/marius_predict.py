@@ -488,7 +488,7 @@ def run_predict(args):
 
     output_dir = args.output_dir
     if output_dir == "":
-        output_dir = config.storage.dataset.dataset_dir
+        output_dir = config.storage.model_dir
 
     nbrs = get_nbrs_config(config, args)
 

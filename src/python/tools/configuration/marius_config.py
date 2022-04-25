@@ -785,10 +785,6 @@ class MariusConfig:
     training: TrainingConfig = TrainingConfig()
     evaluation: EvaluationConfig = EvaluationConfig()
 
-    # perform high level validation here
-    # TODO, should we perform file validation here or somewhere else?
-    #  We should check somewhere the self.storage.dataset.dataset_dir for each learning task to make sure the
-    #  necessary files are present and have the correct sizes
     def __post_init__(self):
         if self.model.learning_task == "NODE_CLASSIFICATION":
             # do node classification specific validation
