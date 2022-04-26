@@ -7,6 +7,7 @@ from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.validation import *
 from dataclasses import field
 import os
+import re
 
 from pathlib import Path
 import shutil
@@ -868,7 +869,20 @@ def load_config(input_config_path, save=False):
         
         OmegaConf.save(output_config,
                        output_config.storage.model_dir + PathConstants.saved_full_config_file_name)
-
+    elif re.fullmatch("{}model_[0-9]+/".format(output_config.storage.dataset.dataset_dir), output_config.storage.model_dir):
+        # this path is taken in test cases where random configs are passed to this function for parsing.
+        # could also be taken when marius_predict is run.
+        
+        # if model_dir is of the form `model_x/`, where x belong to [0, 10], then set model_dir to the largest 
+        # existing directory. If model_dir is user specified, no need to change it. 
+        match_result = re.search(r".*/model_([0-9]+)/$", output_config.storage.model_dir)
+        last_model_id = -1
+        if len(match_result.groups()) == 1:
+            last_model_id = int(match_result.groups()[0]) - 1
+        
+        if last_model_id >= 0:
+            output_config.storage.model_dir = "{}model_{}/".format(output_config.storage.dataset.dataset_dir, last_model_id)
+            
     # we can then perform validation, and optimization over the fully specified configuration file here before returning
     validate_dataset_config(output_config)
     validate_storage_config(output_config)

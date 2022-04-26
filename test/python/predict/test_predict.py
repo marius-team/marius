@@ -131,7 +131,6 @@ class TestPredictLP(unittest.TestCase):
                 self.config_file = base_dir / Path(name) / Path(filename)
 
         config = m.config.loadConfig(self.config_file.__str__(), True)
-        self.config_file = Path(config.storage.model_dir) / Path("full_config.yaml")
         m.manager.marius_train(config)
 
     @classmethod
@@ -154,6 +153,45 @@ class TestPredictLP(unittest.TestCase):
 
         config = m.config.loadConfig(self.config_file.__str__(), save=False)
         validate_metrics(config, ["MRR", "MEAN RANK", "HITS@1", "HITS@2", "HITS@3", "HITS@4", "HITS@5", "HITS@10", "HITS@20"], config.storage.dataset.num_test)
+
+    def test_predict_model_dir(self):
+        # 1st prediction pass, only model_0/ exists in this case and prediction uses the same directory.
+        parser = set_args()
+        args = parser.parse_args(["--config", self.config_file.__str__(), "--metrics", "mrr", "mr", "hits1", "hits2", "hits3", "hits4", "hits5", "hits10", "hits20"])
+        run_predict(args)
+
+        config = m.config.loadConfig(self.config_file.__str__(), save=False)
+
+        prediction_out_dir = config.storage.dataset.dataset_dir + "model_0/"
+        assert config.storage.model_dir == prediction_out_dir, "Prediction should have used {} directory".format(prediction_out_dir)
+        validate_metrics(config, ["MRR", "MEAN RANK", "HITS@1", "HITS@2", "HITS@3", "HITS@4", "HITS@5", "HITS@10", "HITS@20"], config.storage.dataset.num_test)
+
+        # 2st prediction pass, model_0/ and model_1/ exist in this case and prediction uses model_1/ directory.
+        config = m.config.loadConfig(self.config_file.__str__(), True)
+        m.manager.marius_train(config)
+        run_predict(args)
+
+        config = m.config.loadConfig(self.config_file.__str__(), save=False)
+
+        prediction_out_dir = config.storage.dataset.dataset_dir + "model_1/"
+        assert config.storage.model_dir == prediction_out_dir, "Prediction should have used {} directory".format(prediction_out_dir)
+        validate_metrics(config, ["MRR", "MEAN RANK", "HITS@1", "HITS@2", "HITS@3", "HITS@4", "HITS@5", "HITS@10", "HITS@20"], config.storage.dataset.num_test)
+
+        # specify model_dir path in the config. in this case, we set it to model_1/. even when you train another model which ends up getting stored in model_2/,
+        # model_predict will still use model_1/ because `model_dir` is explicitly specified in the config.
+        config = m.config.loadConfig(self.config_file.__str__(), True)
+        full_config_file = Path(config.storage.model_dir) / Path("full_config.yaml")
+        m.manager.marius_train(config)
+        config = m.config.loadConfig(self.config_file.__str__(), True)
+        args = parser.parse_args(["--config", full_config_file.__str__(), "--metrics", "mrr", "mr", "hits1", "hits2", "hits3", "hits4", "hits5", "hits10", "hits20"])
+        run_predict(args)
+
+        config = m.config.loadConfig(full_config_file.__str__(), save=False)
+
+        assert config.storage.model_dir == prediction_out_dir, "Prediction should have used {} directory".format(prediction_out_dir)
+        validate_metrics(config, ["MRR", "MEAN RANK", "HITS@1", "HITS@2", "HITS@3", "HITS@4", "HITS@5", "HITS@10", "HITS@20"], config.storage.dataset.num_test)
+
+
 
     def test_lp_save_ranks(self):
         pass

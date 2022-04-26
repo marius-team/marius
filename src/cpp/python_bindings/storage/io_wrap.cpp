@@ -9,7 +9,7 @@ void init_io(py::module &m) {
 
     m.def("load_model", [](string filename, bool train) {
 
-        shared_ptr<MariusConfig> marius_config = loadConfig(filename, "");
+        shared_ptr<MariusConfig> marius_config = loadConfig(filename, train);
 
         std::vector<torch::Device> devices = devices_from_config(marius_config->storage);
 
@@ -24,7 +24,7 @@ void init_io(py::module &m) {
 
     m.def("load_storage", [](string filename, bool train) {
 
-        shared_ptr<MariusConfig> marius_config = loadConfig(filename, "");
+        shared_ptr<MariusConfig> marius_config = loadConfig(filename, train);
 
         std::vector<torch::Device> devices = devices_from_config(marius_config->storage);
 
@@ -40,7 +40,7 @@ void init_io(py::module &m) {
 
     m.def("init_from_config", [](string filename, bool train, bool load_storage) {
 
-        shared_ptr<MariusConfig> marius_config = loadConfig(filename, "");
+        shared_ptr<MariusConfig> marius_config = loadConfig(filename, train);
 
         std::vector<torch::Device> devices = devices_from_config(marius_config->storage);
 
