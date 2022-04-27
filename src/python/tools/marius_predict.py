@@ -473,7 +473,7 @@ def run_predict(args):
 
     model_dir_path = pathlib.Path(config.storage.model_dir)
     if not model_dir_path.exists():
-        raise RuntimeError("Path {} with model params doesn't exist. Probably try training a model and then run marius_predict??".format(str(model_dir_path)))
+        raise RuntimeError("Path {} with model params doesn't exist.".format(str(model_dir_path)))
 
     model: m.nn.Model = m.storage.load_model(args.config, train=False)
     graph_storage: m.storage.GraphModelStorage = m.storage.load_storage(args.config, train=False)
