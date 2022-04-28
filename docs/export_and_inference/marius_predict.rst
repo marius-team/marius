@@ -98,6 +98,11 @@ Contents of ``configs/fb15k237.yaml``. The test set here has been created during
           pipeline:
             sync: true
 
+Since ``storage.model_dir`` is not specified in the above configuration, ``marius_predict`` will use the latest trained model present in ``storage.dataset.dataset_dir``.
+When ``storage.model_dir`` is not specified, ``marius_train`` stores the model parameters in `model_x` directory within the `storage.dataset.dataset_dir`, where x changes 
+incrementally from 0 - 10. A maximum of 11 models are stored when `model_dir` is not specified, post which the contents in `model_10/` directory are overwritten with the 
+latest parameters. ``marius_predict`` will use the latest model for inference and save the files to that directory. If ``storage.model_dir`` is specified, the model 
+parameters will be loaded from the given directory and the generated files will be saved to the same. 
 
 Example output
 ****************************

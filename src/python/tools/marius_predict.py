@@ -471,6 +471,10 @@ def run_predict(args):
     config = m.config.loadConfig(args.config)
     metrics = get_metrics(config, args)
 
+    model_dir_path = pathlib.Path(config.storage.model_dir)
+    if not model_dir_path.exists():
+        raise RuntimeError("Path {} with model params doesn't exist.".format(str(model_dir_path)))
+
     model: m.nn.Model = m.storage.load_model(args.config, train=False)
     graph_storage: m.storage.GraphModelStorage = m.storage.load_storage(args.config, train=False)
 
