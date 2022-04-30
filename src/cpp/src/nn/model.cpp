@@ -100,7 +100,9 @@ void Model::save(std::string directory) {
     }
 
     for (int i = 0; i < optimizers_.size(); i++) {
-        optimizers_[i]->save(state_archive);
+        torch::serialize::OutputArchive optim_archive;
+        optimizers_[i]->save(optim_archive);
+        state_archive.write(std::to_string(i), optim_archive);
     }
 
     model_archive.save_to(model_filename);
