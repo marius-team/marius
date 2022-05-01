@@ -179,10 +179,19 @@ class TestPredictLP(unittest.TestCase):
 
         # specify model_dir path in the config. in this case, we set it to model_1/. even when you train another model which ends up getting stored in model_2/,
         # model_predict will still use model_1/ because `model_dir` is explicitly specified in the config.
-        config = m.config.loadConfig(self.config_file.__str__(), True)
         full_config_file = Path(config.storage.model_dir) / Path("full_config.yaml")
-        m.manager.marius_train(config)
         config = m.config.loadConfig(self.config_file.__str__(), True)
+
+        model_2_path = Path(config.storage.dataset.dataset_dir) / Path("model_2")
+        assert model_2_path.exists() == True, "{} should have been created".format(str(model_2_path))
+
+        m.manager.marius_train(config)
+        
+        config = m.config.loadConfig(self.config_file.__str__(), True)
+        model_3_path = Path(config.storage.dataset.dataset_dir) / Path("model_3")
+        assert model_3_path.exists() == True, "{} should have been created".format(str(model_3_path))
+
+        # run predict speifying model_dir as model_1
         args = parser.parse_args(["--config", full_config_file.__str__(), "--metrics", "mrr", "mr", "hits1", "hits2", "hits3", "hits4", "hits5", "hits10", "hits20"])
         run_predict(args)
 
