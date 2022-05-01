@@ -123,13 +123,12 @@ void Model::load(std::string directory, bool train) {
         state_archive.load_from(model_state_filename);
     }
 
+    int optimizer_idx = 0;
     for (auto key: state_archive.keys()) {
-        shared_ptr<Optimizer> curr_optim;
         torch::serialize::InputArchive tmp_state_archive;
         state_archive.read(key, tmp_state_archive);
-
-        curr_optim->load(tmp_state_archive);
-        optimizers_.emplace_back(curr_optim);
+        // optimizers have already been created as part of initModelFromConfig
+        optimizers_[optimizer_idx++]->load(tmp_state_archive);
     }
 
     std::dynamic_pointer_cast<torch::nn::Module>(encoder_)->load(model_archive);
