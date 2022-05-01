@@ -99,6 +99,8 @@ void Model::save(std::string directory) {
         std::dynamic_pointer_cast<torch::nn::Module>(decoder_)->save(model_archive);
     }
 
+    // Outputs each optimizer as a <K, V> pair, where key is the loop counter and value 
+    // is the optimizer itself. in Model::load, Optimizer::load is called on each key. 
     for (int i = 0; i < optimizers_.size(); i++) {
         torch::serialize::OutputArchive optim_archive;
         optimizers_[i]->save(optim_archive);
