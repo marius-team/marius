@@ -786,6 +786,7 @@ class MariusConfig:
     training: TrainingConfig = TrainingConfig()
     evaluation: EvaluationConfig = EvaluationConfig()
 
+    # defining this constructor prevents from re-use of old attribute values during testing. 
     def __init__(self):
         self.model = ModelConfig()
         self.storage = StorageConfig()
