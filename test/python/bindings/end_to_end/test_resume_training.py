@@ -31,8 +31,9 @@ class TestResumeTraining(unittest.TestCase):
 
     @classmethod
     def tearDown(self):
-        if Path(TMP_TEST_DIR).exists():
-            shutil.rmtree(Path(TMP_TEST_DIR))
+        pass
+        # if Path(TMP_TEST_DIR).exists():
+        #     shutil.rmtree(Path(TMP_TEST_DIR))
 
     def init_dataset_dir(self, name):
         num_nodes = 100
@@ -75,5 +76,27 @@ class TestResumeTraining(unittest.TestCase):
         run_config(full_config_path.__str__())
         
         # overwrites the model_0 directory with new model data
+        trained_epochs = int(get_line_in_file(metadata_file_path.__str__(), 2))
+        assert trained_epochs == 4, "Expected to see trained epochs as {} in {}, but found {}".format(4, str(metadata_file_path), trained_epochs)
+    
+    def test_resume_training_with_checkpoint_dir(self):
+        self.init_dataset_dir("with_checkpoint_dir")
+        
+        config = m.config.loadConfig(self.config_file.__str__(), False)
+        metadata_file_path = Path(config.storage.model_dir) / Path("metadata.csv")
+
+        trained_epochs = int(get_line_in_file(metadata_file_path.__str__(), 2))
+        assert trained_epochs == 2, "Expected to see trained epochs as {} in {}, but found {}".format(2, str(metadata_file_path), trained_epochs)
+        
+        full_config_path = Path(config.storage.model_dir) / Path("full_config.yaml")
+        replace_string_in_file(full_config_path.__str__() , 'resume_training: false', 'resume_training: true')
+        replace_string_in_file(full_config_path.__str__() , 'model_dir:.*', '')
+        replace_string_in_file(full_config_path.__str__() , 'resume_from_checkpoint:.*', "resume_from_checkpoint: {}".format(config.storage.model_dir))
+        
+        # creates model_1 directory with model data
+        run_config(full_config_path.__str__())
+        
+        config = m.config.loadConfig(full_config_path.__str__(), False)
+        metadata_file_path = Path(config.storage.model_dir) / Path("metadata.csv")
         trained_epochs = int(get_line_in_file(metadata_file_path.__str__(), 2))
         assert trained_epochs == 4, "Expected to see trained epochs as {} in {}, but found {}".format(4, str(metadata_file_path), trained_epochs)
