@@ -16,7 +16,6 @@ from distutils import dir_util
 from omegaconf import MISSING, OmegaConf, DictConfig
 
 import hydra
-from hydra.core.config_store import ConfigStore
 
 def get_model_dir_path(dataset_dir):
 
@@ -787,6 +786,12 @@ class MariusConfig:
     training: TrainingConfig = TrainingConfig()
     evaluation: EvaluationConfig = EvaluationConfig()
 
+    def __init__(self):
+        self.model = ModelConfig()
+        self.storage = StorageConfig()
+        self.training = TrainingConfig()
+        self.evaluation = EvaluationConfig()
+
     def __post_init__(self):
         if self.model.learning_task == "NODE_CLASSIFICATION":
             # do node classification specific validation
@@ -848,10 +853,6 @@ def infer_model_dir(output_config):
         
         if last_model_id >= 0:
             output_config.storage.model_dir = "{}model_{}/".format(output_config.storage.dataset.dataset_dir, last_model_id)
-
-cs = ConfigStore.instance()
-cs.store(name="base_config", node=MariusConfig)
-
 
 def load_config(input_config_path, save=False):
     """
