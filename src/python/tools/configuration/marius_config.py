@@ -11,11 +11,11 @@ import re
 
 from pathlib import Path
 import shutil
+from distutils import dir_util
 
 from omegaconf import MISSING, OmegaConf, DictConfig
 
 import hydra
-from hydra.core.config_store import ConfigStore
 
 def get_model_dir_path(dataset_dir):
 
@@ -786,6 +786,13 @@ class MariusConfig:
     training: TrainingConfig = TrainingConfig()
     evaluation: EvaluationConfig = EvaluationConfig()
 
+    # defining this constructor prevents from re-use of old attribute values during testing. 
+    def __init__(self):
+        self.model = ModelConfig()
+        self.storage = StorageConfig()
+        self.training = TrainingConfig()
+        self.evaluation = EvaluationConfig()
+
     def __post_init__(self):
         if self.model.learning_task == "NODE_CLASSIFICATION":
             # do node classification specific validation
@@ -830,8 +837,15 @@ def initialize_model_dir(output_config):
         shutil.copy(str(node_mapping_filepath), "{}/{}".format(output_config.storage.model_dir, "node_mapping.txt"))
 
 def infer_model_dir(output_config):
+    # if `output_config.storage.model_dir` points to a path which contains saved model params file, then just use that.
+    model_dir_path = Path(output_config.storage.model_dir)
+    model_file_path = model_dir_path / Path("model.pt")
+    if model_dir_path.exists() and model_file_path.exists():
+        return
+    
     # if model_dir is of the form `model_x/`, where x belong to [0, 10], then set model_dir to the largest 
-    # existing directory. If model_dir is user specified, no need to change it.     
+    # existing directory. If model_dir is user specified, the control would never reach here. 
+    # the below regex check is an additional validation step.
     if re.fullmatch("{}model_[0-9]+/".format(output_config.storage.dataset.dataset_dir), output_config.storage.model_dir):
         match_result = re.search(r".*/model_([0-9]+)/$", output_config.storage.model_dir)
         last_model_id = -1
@@ -840,10 +854,6 @@ def infer_model_dir(output_config):
         
         if last_model_id >= 0:
             output_config.storage.model_dir = "{}model_{}/".format(output_config.storage.dataset.dataset_dir, last_model_id)
-
-cs = ConfigStore.instance()
-cs.store(name="base_config", node=MariusConfig)
-
 
 def load_config(input_config_path, save=False):
     """
@@ -873,16 +883,28 @@ def load_config(input_config_path, save=False):
 
     if output_config.storage.model_dir[-1] != "/":
         output_config.storage.model_dir += "/"
+    
+    if output_config.training.resume_from_checkpoint != "" and output_config.training.resume_from_checkpoint[-1] != "/":
+        output_config.training.resume_from_checkpoint += "/"
 
-    if save:
+    if save and (output_config.training.resume_from_checkpoint != "" or not output_config.training.resume_training):
+        # create model_dir when
+        # 1. training from scratch [NOT resuming training]
+        # 2. resume_training mode, with resume_from_checkpoint specified. 
         Path(output_config.storage.model_dir).mkdir(parents=True, exist_ok=True)
         initialize_model_dir(output_config)
         
         OmegaConf.save(output_config,
                        output_config.storage.model_dir + PathConstants.saved_full_config_file_name)
+        
+        # incase of resuming training, copy files from resume_from_checkpoint to the new folder. 
+        if output_config.training.resume_from_checkpoint != "":
+            dir_util.copy_tree(output_config.training.resume_from_checkpoint, output_config.storage.model_dir)
+
     else:
         # this path is taken in test cases where random configs are passed to this function for parsing.
-        # could also be taken when marius_predict is run.
+        # could also be taken when marius_predict is run or marius_train is run with resume_training set to true,
+        # but resume_from_checkpoint isn't specified (it will then overwrite the model_dir with new model)
         infer_model_dir(output_config)
             
     # we can then perform validation, and optimization over the fully specified configuration file here before returning

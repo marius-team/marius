@@ -12,7 +12,7 @@
 class Optimizer {
 
 public:
-    int num_steps_;
+    int64_t num_steps_;
 
     torch::OrderedDict<std::string, torch::OrderedDict<std::string, torch::Tensor>> state_dict_;
     torch::OrderedDict<std::string, torch::Tensor> param_dict_;

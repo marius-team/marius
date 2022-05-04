@@ -1226,6 +1226,10 @@ Training Configuration
      - Bool
      - If true, the training procedure will resume from the previous state and will train `num_epochs` further epochs.  (Default False)
      - No
+   * - resume_from_checkpoint
+     - String
+     - If set, loads the model from the given directory and resumes training procedure. Will train `num_epochs` further epochs and store the new model parameters in `model_dir`.
+     - No
 
 A training configuration with batchsize of 1000 and a total of 10 epochs is as follows. `pipeline` is set to true, which ensures that 
 the training is synchronous and doesn't allow staleness. Marius groups edges into chunks and reuses negative samples within the chunk. 
