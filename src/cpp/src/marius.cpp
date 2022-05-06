@@ -97,7 +97,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
         CheckpointMeta checkpoint_meta = std::get<2>(tup);
         epochs_processed = checkpoint_meta.num_epochs;
     }
-
+    
     shared_ptr<DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage,
                                                                      model->learning_task_,
                                                                      marius_config->training,
@@ -133,6 +133,7 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
         metadata.has_encoded = marius_config->storage->export_encoded_nodes;
         metadata.has_model = true;
         metadata.has_edges = true;
+        metadata.link_prediction = marius_config->model->learning_task == LearningTask::LINK_PREDICTION;
     }
 
     if (marius_config->training->pipeline->sync) {
@@ -148,11 +149,9 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
     }
 
     for (int epoch = 0; epoch < marius_config->training->num_epochs; epoch++) {
-        if ((epoch + 1) % marius_config->evaluation->epochs_per_eval != 0) {
-            trainer->train(1);
-        } else {
-            trainer->train(1);
+        trainer->train(1);
 
+        if((epoch + 1) % marius_config->evaluation->epochs_per_eval == 0) {
             if (marius_config->storage->dataset->num_valid != -1) {
                 evaluator->evaluate(true);
             }
@@ -161,9 +160,13 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
                 evaluator->evaluate(false);
             }
         }
-    }
 
-    metadata.num_epochs = dataloader->epochs_processed_;
+
+        metadata.num_epochs = dataloader->epochs_processed_;
+        if((epoch + 1) % marius_config->training->checkpoint_after_epochs == 0 && epoch + 1 < marius_config->training->num_epochs) {
+            model_saver->create_checkpoint(marius_config->storage->model_dir, metadata, dataloader->epochs_processed_, marius_config->training->checkpoint_after_epochs);
+        }
+    }
 
     if (marius_config->training->save_model) {
         model_saver->save(marius_config->storage->model_dir, metadata);

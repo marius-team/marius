@@ -39,6 +39,8 @@ public:
     std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage> , CheckpointMeta> load(string checkpoint_dir, std::shared_ptr<MariusConfig> marius_config, bool train);
 
     void save(string checkpoint_dir, CheckpointMeta checkpoint_meta);
+
+    void create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs, int frequency);
 };
 
 #endif //MARIUS_CHECKPOINTER_H

@@ -152,6 +152,7 @@ struct TrainingConfig {
     shared_ptr<CheckpointConfig> checkpoint = nullptr;
     bool resume_training;
     string resume_from_checkpoint;
+    int checkpoint_after_epochs;
 };
 
 struct EvaluationConfig {

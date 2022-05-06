@@ -135,7 +135,8 @@ void init_config(py::module &m) {
         .def_readwrite("save_model", &TrainingConfig::save_model)
         .def_readwrite("checkpoint", &TrainingConfig::checkpoint)
         .def_readwrite("resume_training", &TrainingConfig::resume_training)
-        .def_readwrite("resume_from_checkpoint", &TrainingConfig::resume_from_checkpoint);
+        .def_readwrite("resume_from_checkpoint", &TrainingConfig::resume_from_checkpoint)
+        .def_readwrite("checkpoint_after_epochs", &TrainingConfig::checkpoint_after_epochs);
 
     py::class_<EvaluationConfig, std::shared_ptr<EvaluationConfig>>(m, "EvaluationConfig")
         .def(py::init<>())

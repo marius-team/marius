@@ -486,6 +486,7 @@ shared_ptr<TrainingConfig> initTrainingConfig(pyobj python_config) {
     ret_config->checkpoint = initCheckpointConfig(python_config.attr("checkpoint"));
     ret_config->resume_training = cast_helper<bool>(python_config.attr("resume_training"));
     ret_config->resume_from_checkpoint = cast_helper<string>(python_config.attr("resume_from_checkpoint"));
+    ret_config->checkpoint_after_epochs = cast_helper<int>(python_config.attr("checkpoint_after_epochs"));
 
     return ret_config;
 }

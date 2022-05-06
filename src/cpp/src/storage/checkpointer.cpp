@@ -3,6 +3,7 @@
 //
 
 #include <stdio.h>
+#include <filesystem>
 
 #include "configuration/util.h"
 #include "reporting/logger.h"
@@ -13,6 +14,54 @@ Checkpointer::Checkpointer(std::shared_ptr<Model> model, shared_ptr<GraphModelSt
     model_ = model;
     storage_ = storage;
     config_ = config;
+}
+
+void Checkpointer::create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs, int frequency) {
+    int prev_checkpoint = epochs - frequency;
+    std::string prev_checkpoint_dir = checkpoint_dir + "checkpoint_" + std::to_string(prev_checkpoint) + "/";
+
+    string tmp_checkpoint_dir = checkpoint_dir + "checkpoint_" + std::to_string(epochs) + "_tmp/";
+    std::filesystem::create_directory(tmp_checkpoint_dir);
+    
+    std::string new_embeddings_file = tmp_checkpoint_dir
+                                        + PathConstants::embeddings_file 
+                                        + PathConstants::file_ext;
+    std::string new_embeddings_state_file = tmp_checkpoint_dir
+                                            + PathConstants::embeddings_state_file
+                                            + PathConstants::file_ext;
+
+    if(std::filesystem::exists(prev_checkpoint_dir)) {
+        std::string embeddings_file = prev_checkpoint_dir 
+                                        + PathConstants::embeddings_file 
+                                        + PathConstants::file_ext;
+        std::string embeddings_state_file = prev_checkpoint_dir 
+                                                + PathConstants::embeddings_state_file
+                                                + PathConstants::file_ext;
+
+        if(std::filesystem::exists(embeddings_file)) {
+            std::filesystem::rename(embeddings_file, new_embeddings_file);
+            std::filesystem::rename(embeddings_state_file, new_embeddings_state_file);
+        }
+    } else {
+        std::string embeddings_file = checkpoint_dir 
+                                        + PathConstants::embeddings_file
+                                        + PathConstants::file_ext;
+        std::string embeddings_state_file = checkpoint_dir 
+                                                + PathConstants::embeddings_state_file
+                                                + PathConstants::file_ext;
+
+        if(std::filesystem::exists(embeddings_file)) {
+            std::filesystem::copy(embeddings_file, new_embeddings_file);
+            std::filesystem::copy(embeddings_state_file, new_embeddings_state_file);
+        }
+    }
+
+    this->save(tmp_checkpoint_dir, checkpoint_meta);
+
+    string final_checkpoint_dir = checkpoint_dir + "checkpoint_" + std::to_string(epochs) + "/";
+    std::filesystem::rename(tmp_checkpoint_dir, final_checkpoint_dir);
+    
+    std::filesystem::remove_all(prev_checkpoint_dir);
 }
 
 void Checkpointer::save(string checkpoint_dir, CheckpointMeta checkpoint_meta) {
