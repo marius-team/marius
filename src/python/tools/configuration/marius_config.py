@@ -701,7 +701,7 @@ class TrainingConfig:
     checkpoint: CheckpointConfig = MISSING
     resume_training: bool = False
     resume_from_checkpoint: str = ""
-    checkpoint_after_epochs: int = 5
+    checkpoint_after_epochs: int = -1
 
     def __post_init__(self):
         if self.batch_size <= 0:

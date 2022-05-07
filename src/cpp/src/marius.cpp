@@ -163,7 +163,8 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
 
 
         metadata.num_epochs = dataloader->epochs_processed_;
-        if((epoch + 1) % marius_config->training->checkpoint_after_epochs == 0 && epoch + 1 < marius_config->training->num_epochs) {
+        if(marius_config->training->checkpoint_after_epochs > 0 && (epoch + 1) % marius_config->training->checkpoint_after_epochs == 0 && 
+                epoch + 1 < marius_config->training->num_epochs) {
             model_saver->create_checkpoint(marius_config->storage->model_dir, metadata, dataloader->epochs_processed_, marius_config->training->checkpoint_after_epochs);
         }
     }
