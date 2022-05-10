@@ -22,8 +22,6 @@ Train the model at least once before trying to resume training.
    $ marius_train fb15k_237_config.yaml
    [05/06/22 18:08:21.037] ################ Finished training epoch 10 ################
    ...
-   [05/06/22 18:08:21.236] Start full graph encode
-   [05/06/22 18:08:21.246] Encode Complete: 0.009s
    $ ls datasets/fb15k_237_rt/
    README.txt
    dataset.yaml
@@ -34,9 +32,9 @@ Train the model at least once before trying to resume training.
 The current model parameters are present in ``datasets/fb15k_237_rt/model_0``
 
 
-1. Resume training and overwrite exsiting model
+1. Resume training and overwrite existing model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Assuming the model is trained at least once, ``training.resume_training`` can be set to ``true`` to train the previsouly saved model further for n epochs (default 10). 
+Assuming the model is trained at least once, ``training.resume_training`` can be set to ``true`` to train the previously saved model further for n epochs (default 10). 
 
 .. code-block:: yaml
 
@@ -54,11 +52,9 @@ Running ``marius_train`` with the updated config will now overwrite the model pa
    ...
    [05/06/22 18:13:59.233] ################ Finished training epoch 20 ################
    ...
-   [05/06/22 18:08:21.236] Start full graph encode
-   [05/06/22 18:08:21.246] Encode Complete: 0.009s
 
 
-2. Resume training from given Checkpoint
+2. Resume training from given checkpoint
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ``training.resume_from_checkpoint`` can be set to preserve the existing checkpointed model and write the new model to a different directory. 
 If ``storage.model_dir`` is set, the new model will be written to the given directory, else a new directory of the pattern ``datasets/fb15k_237_rt/model_x``
@@ -73,7 +69,7 @@ will be created where `x` changes incrementally from 0-10 and will take the leas
    model_0
    nodes
 
-Resuming Training from the above config with ``training.resume_from_checkpoint`` set will write the model to ``datasets/fb15k_237_rt/model_1`` if 
+Resuming training from the above config with ``training.resume_from_checkpoint`` set will write the model to ``datasets/fb15k_237_rt/model_1`` if 
 ``storage.model_dir`` is not set. Since ``datasets/fb15k_237_rt/model_0`` now has a model trained for 20 epochs, the new model will further be 
 trained 10 epochs from there.
 
@@ -94,8 +90,6 @@ Running ``marius_train`` with the updated config will save the new model paramet
    ...
    [05/06/22 18:13:59.233] ################ Finished training epoch 30 ################
    ...
-   [05/06/22 18:23:24.080] Start full graph encode
-   [05/06/22 18:23:24.090] Encode Complete: 0.01s
    $ ls datasets/fb15k_237_rt/
    README.txt
    dataset.yaml
