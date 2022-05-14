@@ -18,9 +18,7 @@ void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mode
         graph_encoder = std::make_shared<PipelineGraphEncoder>(dataloader, model, marius_config->evaluation->pipeline);
     }
 
-    string filename = marius_config->storage->model_dir
-                      + PathConstants::encoded_nodes_file
-                      + PathConstants::file_ext;
+    string filename = marius_config->storage->model_dir + PathConstants::encoded_nodes_file + PathConstants::file_ext;
 
     if (fileExists(filename)) {
         remove(filename.c_str());
@@ -38,7 +36,6 @@ void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mode
 }
 
 std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoader> > marius_init(shared_ptr<MariusConfig> marius_config, bool train) {
-
     Timer initialization_timer = Timer(false);
     initialization_timer.start();
     SPDLOG_INFO("Start initialization");
@@ -97,7 +94,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
         CheckpointMeta checkpoint_meta = std::get<2>(tup);
         epochs_processed = checkpoint_meta.num_epochs;
     }
-    
+
     shared_ptr<DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage,
                                                                      model->learning_task_,
                                                                      marius_config->training,
@@ -109,14 +106,12 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     initialization_timer.stop();
     int64_t initialization_time = initialization_timer.getDuration();
 
-    SPDLOG_INFO("Initialization Complete: {}s", (double) initialization_time / 1000);
+    SPDLOG_INFO("Initialization Complete: {}s", (double)initialization_time / 1000);
 
     return std::forward_as_tuple(model, graph_model_storage, dataloader);
-
 }
 
 void marius_train(shared_ptr<MariusConfig> marius_config) {
-
     auto tup = marius_init(marius_config, true);
     auto model = std::get<0>(tup);
     auto graph_model_storage = std::get<1>(tup);
@@ -128,7 +123,7 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
     shared_ptr<Checkpointer> model_saver;
     CheckpointMeta metadata;
     if (marius_config->training->save_model) {
-        model_saver = std::make_shared<Checkpointer>(model, graph_model_storage, nullptr);
+        model_saver = std::make_shared<Checkpointer>(model, graph_model_storage, marius_config->training->checkpoint);
         metadata.has_state = true;
         metadata.has_encoded = marius_config->storage->export_encoded_nodes;
         metadata.has_model = true;
@@ -148,10 +143,11 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
         evaluator = std::make_shared<PipelineEvaluator>(dataloader, model, marius_config->evaluation->pipeline);
     }
 
+    int checkpoint_interval = marius_config->training->checkpoint->interval;
     for (int epoch = 0; epoch < marius_config->training->num_epochs; epoch++) {
         trainer->train(1);
 
-        if((epoch + 1) % marius_config->evaluation->epochs_per_eval == 0) {
+        if ((epoch + 1) % marius_config->evaluation->epochs_per_eval == 0) {
             if (marius_config->storage->dataset->num_valid != -1) {
                 evaluator->evaluate(true);
             }
@@ -161,11 +157,10 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
             }
         }
 
-
         metadata.num_epochs = dataloader->epochs_processed_;
-        if(marius_config->training->checkpoint_after_epochs > 0 && (epoch + 1) % marius_config->training->checkpoint_after_epochs == 0 && 
-                epoch + 1 < marius_config->training->num_epochs) {
-            model_saver->create_checkpoint(marius_config->storage->model_dir, metadata, dataloader->epochs_processed_, marius_config->training->checkpoint_after_epochs);
+        if (checkpoint_interval > 0 && (epoch + 1) % checkpoint_interval == 0 &&
+            epoch + 1 < marius_config->training->num_epochs) {
+            model_saver->create_checkpoint(marius_config->storage->model_dir, metadata, dataloader->epochs_processed_);
         }
     }
 
@@ -179,7 +174,6 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
 }
 
 void marius_eval(shared_ptr<MariusConfig> marius_config) {
-
     auto tup = marius_init(marius_config, false);
     auto model = std::get<0>(tup);
     auto graph_model_storage = std::get<1>(tup);
@@ -202,8 +196,7 @@ void marius_eval(shared_ptr<MariusConfig> marius_config) {
 }
 
 void marius(int argc, char *argv[]) {
-
-    (void) argc;
+    (void)argc;
 
     bool train = true;
     string command_path = string(argv[0]);

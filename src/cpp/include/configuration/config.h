@@ -113,6 +113,7 @@ struct CheckpointConfig {
     bool save_edges;
     bool save_state;
     bool save_encoded;
+    int save_prev_num;
 };
 
 struct ModelConfig {
@@ -152,7 +153,6 @@ struct TrainingConfig {
     shared_ptr<CheckpointConfig> checkpoint = nullptr;
     bool resume_training;
     string resume_from_checkpoint;
-    int checkpoint_after_epochs;
 };
 
 struct EvaluationConfig {

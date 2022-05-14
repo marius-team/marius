@@ -40,7 +40,7 @@ public:
 
     void save(string checkpoint_dir, CheckpointMeta checkpoint_meta);
 
-    void create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs, int frequency);
+    void create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs);
 };
 
 #endif //MARIUS_CHECKPOINTER_H

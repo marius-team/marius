@@ -97,7 +97,8 @@ void init_config(py::module &m) {
         .def_readwrite("interval", &CheckpointConfig::interval)
         .def_readwrite("save_edges", &CheckpointConfig::save_edges)
         .def_readwrite("save_state", &CheckpointConfig::save_state)
-        .def_readwrite("save_encoded", &CheckpointConfig::save_encoded);
+        .def_readwrite("save_encoded", &CheckpointConfig::save_encoded)
+        .def_readwrite("save_prev_num", &CheckpointConfig::save_prev_num);
 
     py::class_<ModelConfig, std::shared_ptr<ModelConfig>>(m, "ModelConfig")
         .def(py::init<>())
@@ -135,8 +136,7 @@ void init_config(py::module &m) {
         .def_readwrite("save_model", &TrainingConfig::save_model)
         .def_readwrite("checkpoint", &TrainingConfig::checkpoint)
         .def_readwrite("resume_training", &TrainingConfig::resume_training)
-        .def_readwrite("resume_from_checkpoint", &TrainingConfig::resume_from_checkpoint)
-        .def_readwrite("checkpoint_after_epochs", &TrainingConfig::checkpoint_after_epochs);
+        .def_readwrite("resume_from_checkpoint", &TrainingConfig::resume_from_checkpoint);
 
     py::class_<EvaluationConfig, std::shared_ptr<EvaluationConfig>>(m, "EvaluationConfig")
         .def(py::init<>())

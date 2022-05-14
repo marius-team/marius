@@ -609,6 +609,7 @@ class CheckpointConfig:
     save_edges: bool = False
     save_state: bool = False
     save_encoded: bool = False
+    save_prev_num: int = 1
 
     def merge(self, input_config: DictConfig):
         """
@@ -634,6 +635,9 @@ class CheckpointConfig:
 
         if "save_encoded" in input_config.keys():
             self.save_encoded = input_config.save_encoded
+        
+        if "save_prev_num" in input_config.keys():
+            self.save_prev_num = input_config.save_prev_num
 
 
 @dataclass
@@ -701,7 +705,6 @@ class TrainingConfig:
     checkpoint: CheckpointConfig = MISSING
     resume_training: bool = False
     resume_from_checkpoint: str = ""
-    checkpoint_after_epochs: int = -1
 
     def __post_init__(self):
         if self.batch_size <= 0:
@@ -887,7 +890,7 @@ def load_config(input_config_path, save=False):
     
     if output_config.training.resume_from_checkpoint != "" and output_config.training.resume_from_checkpoint[-1] != "/":
         output_config.training.resume_from_checkpoint += "/"
-    
+
     if save and (output_config.training.resume_from_checkpoint != "" or not output_config.training.resume_training):
         # create model_dir when
         # 1. training from scratch [NOT resuming training]
@@ -907,12 +910,12 @@ def load_config(input_config_path, save=False):
         # could also be taken when marius_predict is run or marius_train is run with resume_training set to true,
         # but resume_from_checkpoint isn't specified (it will then overwrite the model_dir with new model)
         infer_model_dir(output_config)
-
+            
     # we can then perform validation, and optimization over the fully specified configuration file here before returning
     validate_dataset_config(output_config)
     validate_storage_config(output_config)
     check_encoder_layer_dimensions(output_config)
     check_gnn_layers_alignment(output_config)
     check_full_graph_evaluation(output_config)
-    
+
     return output_config
