@@ -702,7 +702,7 @@ class TrainingConfig:
     epochs_per_shuffle: int = 1
     logs_per_epoch: int = 10
     save_model: bool = True
-    checkpoint: CheckpointConfig = MISSING
+    checkpoint: CheckpointConfig = CheckpointConfig()
     resume_training: bool = False
     resume_from_checkpoint: str = ""
 
@@ -737,8 +737,6 @@ class TrainingConfig:
                             self.pipeline = PipelineConfig()
                         self.pipeline.merge(input_config.pipeline)
                     elif key == "checkpoint":
-                        if self.checkpoint is MISSING:
-                            self.checkpoint = CheckpointConfig()
                         self.checkpoint.merge(input_config.checkpoint)
                     else:
                         val = input_config.__getattr__(key)
