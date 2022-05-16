@@ -92,13 +92,9 @@ void init_config(py::module &m) {
 
     py::class_<CheckpointConfig, std::shared_ptr<CheckpointConfig>>(m, "CheckpointConfig")
         .def(py::init<>())
-        .def_readwrite("dir", &CheckpointConfig::dir)
         .def_readwrite("save_best", &CheckpointConfig::save_best)
         .def_readwrite("interval", &CheckpointConfig::interval)
-        .def_readwrite("save_edges", &CheckpointConfig::save_edges)
-        .def_readwrite("save_state", &CheckpointConfig::save_state)
-        .def_readwrite("save_encoded", &CheckpointConfig::save_encoded)
-        .def_readwrite("save_prev_num", &CheckpointConfig::save_prev_num);
+        .def_readwrite("save_state", &CheckpointConfig::save_state);
 
     py::class_<ModelConfig, std::shared_ptr<ModelConfig>>(m, "ModelConfig")
         .def(py::init<>())

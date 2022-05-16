@@ -417,13 +417,9 @@ shared_ptr<CheckpointConfig> initCheckpointConfig(pyobj python_config) {
 
     shared_ptr<CheckpointConfig> ret_config = std::make_shared<CheckpointConfig>();
 
-    ret_config->dir = cast_helper<string>(python_config.attr("dir"));
     ret_config->save_best = cast_helper<bool>(python_config.attr("save_best"));
     ret_config->interval = cast_helper<int>(python_config.attr("interval"));
-    ret_config->save_edges = cast_helper<bool>(python_config.attr("save_edges"));
     ret_config->save_state = cast_helper<bool>(python_config.attr("save_state"));
-    ret_config->save_encoded = cast_helper<bool>(python_config.attr("save_encoded"));
-    ret_config->save_prev_num = cast_helper<int>(python_config.attr("save_prev_num"));
     return ret_config;
 }
 

@@ -18,7 +18,9 @@ void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mode
         graph_encoder = std::make_shared<PipelineGraphEncoder>(dataloader, model, marius_config->evaluation->pipeline);
     }
 
-    string filename = marius_config->storage->model_dir + PathConstants::encoded_nodes_file + PathConstants::file_ext;
+    string filename = marius_config->storage->model_dir
+                    + PathConstants::encoded_nodes_file
+                    + PathConstants::file_ext;
 
     if (fileExists(filename)) {
         remove(filename.c_str());
@@ -106,7 +108,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     initialization_timer.stop();
     int64_t initialization_time = initialization_timer.getDuration();
 
-    SPDLOG_INFO("Initialization Complete: {}s", (double)initialization_time / 1000);
+    SPDLOG_INFO("Initialization Complete: {}s", (double) initialization_time / 1000);
 
     return std::forward_as_tuple(model, graph_model_storage, dataloader);
 }
@@ -196,7 +198,7 @@ void marius_eval(shared_ptr<MariusConfig> marius_config) {
 }
 
 void marius(int argc, char *argv[]) {
-    (void)argc;
+    (void) argc;
 
     bool train = true;
     string command_path = string(argv[0]);

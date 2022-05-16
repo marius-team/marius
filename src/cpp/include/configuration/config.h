@@ -107,13 +107,10 @@ struct PipelineConfig {
 };
 
 struct CheckpointConfig {
-    string dir;
+    // TODO: save the checkpoint which performs best on the valid/test set.
     bool save_best;
     int interval;
-    bool save_edges;
     bool save_state;
-    bool save_encoded;
-    int save_prev_num;
 };
 
 struct ModelConfig {
