@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - db2graph
   pull_request:
     branches:
       - main
