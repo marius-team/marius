@@ -414,7 +414,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
         if first_pass:
             mem_copy = psutil.virtual_memory()
             mem_copy_used = mem_copy.used
-            limit_fetchSize = mem_copy.available / 2
+            limit_fetchSize = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
@@ -446,7 +446,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
 
             if first_pass:
                 delta = psutil.virtual_memory().used - mem_copy_used # delta between two virtual_memory(), i.e. mem used curr fetchSize
-                est_fetchSize = limit_fetchSize / delta * fetchSize # estimated optimal fetchSize for 
+                est_fetchSize = limit_fetchSize / (delta + 1) * fetchSize # estimated optimal fetchSize for 
                 if est_fetchSize > limit_fetchSize:
                     fetchSize = int(limit_fetchSize)
                 elif 10000 < est_fetchSize and est_fetchSize <= limit_fetchSize:
@@ -529,7 +529,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         if first_pass:
             mem_copy = psutil.virtual_memory()
             mem_copy_used = mem_copy.used
-            limit_fetchSize = mem_copy.available / 2
+            limit_fetchSize = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
@@ -569,7 +569,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
 
             if first_pass:
                 delta = psutil.virtual_memory().used - mem_copy_used # delta between two virtual_memory(), i.e. mem used for curr fetchSize
-                est_fetchSize = limit_fetchSize / delta * fetchSize # estimated optimal fetchSize for 
+                est_fetchSize = limit_fetchSize / (delta + 1) * fetchSize # estimated optimal fetchSize for 
                 if est_fetchSize > limit_fetchSize:
                     fetchSize = int(limit_fetchSize)
                 elif 10000 < est_fetchSize and est_fetchSize <= limit_fetchSize:
@@ -613,7 +613,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         if first_pass:
             mem_copy = psutil.virtual_memory()
             mem_copy_used = mem_copy.used
-            limit_fetchSize = mem_copy.available / 2
+            limit_fetchSize = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
@@ -647,7 +647,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
 
             if first_pass:
                 delta = psutil.virtual_memory().used - mem_copy_used # delta between two virtual_memory(), mem used for curr fetchSize
-                est_fetchSize = limit_fetchSize / delta * fetchSize # estimated optimal fetchSize for 
+                est_fetchSize = limit_fetchSize / (delta + 1) * fetchSize # estimated optimal fetchSize for 
                 if est_fetchSize > limit_fetchSize:
                     fetchSize = int(limit_fetchSize)
                 elif 10000 < est_fetchSize and est_fetchSize <= limit_fetchSize:
