@@ -40,7 +40,7 @@ jobs:
         run: pip3 install -r src/python/tools/db2graph/requirements.txt
 
       - name: Running pytest
-        run: pytest -s test/python/db2graph/test_postgres.py
+        run: pytest -s test/db2graph/test_postgres.py
         # Environment variables used in the test
         env:
           # The hostname used to communicate with the PostgreSQL service container
