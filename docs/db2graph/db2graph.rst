@@ -117,22 +117,22 @@ Assuming a database has been created locally and ``marius`` has been installed s
          - Path to the text file that contains the SQL SELECT queries fetching edges from entity nodes to feature values.
          - Yes
 
-#. | Next, define SQL SELECT queries. Assume the file ``conf/entity_nodes.txt`` has been created. In it, define SQL queries with the following format. Each SQL SELECT query represent an entity node in the graph. Note that SQL key words such as ``DISTINCT`` and ``WHERE`` are optional:
+#. | Next, define SQL SELECT queries. Assume the file ``conf/entity_nodes.txt`` has been created. In it, define SQL queries with the following format. Each SQL SELECT query represent an entity node in the graph. Note that SQL key word ``DISTINCT`` is optional & you can use any SQL key word after WHERE.:
 
     .. code-block:: sql
        
-       SELECT [DISTINCT] table_name.column_name_A FROM table_name [WHERE]; -- this row represents entity node A
-       SELECT [DISTINCT] table_name.column_name_B FROM table_name [WHERE]; -- this row represents entity node B
-       SELECT [DISTINCT] table_name.column_name_C FROM table_name [WHERE]; -- this row represents entity node C
+       SELECT [DISTINCT] table_name.column_name_A FROM table_name WHERE ...; -- this row represents entity node A
+       SELECT [DISTINCT] table_name.column_name_B FROM table_name WHERE ...; -- this row represents entity node B
+       SELECT [DISTINCT] table_name.column_name_C FROM table_name WHERE ...; -- this row represents entity node C
 
    | Assume the files ``conf/edges_entity_entity.txt`` and ``conf/edges_entity_feature_values.txt`` has been created. In them, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that ``DISTINCT`` is not needed here.
     
     .. code-block:: sql
            
            relation_name_A_to_B -- this is the name of the edge from A to B
-           SELECT table_name.column_name_A, table_name.column_name_B FROM table_name; -- this row represents an edge from source entity node A to destination entity node B
+           SELECT table1_name.column_name_A, table2_name.column_name_B FROM table1_name, table1_name WHERE ...; -- this row represents an edge from source entity node A to destination entity node B
            relation_name_B_to_C -- this is the name of the edge from B to C
-           SELECT table_name.column_name_B, table_name.column_name_C FROM table_name; -- this row represents an edge from source entity node B to destination entity node C
+           SELECT table1_name.column_name_B, table2_name.column_name_C FROM table1_name, table2_name WHERE ...; -- this row represents an edge from source entity node B to destination entity node C
 
    | The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database.
 
@@ -147,7 +147,7 @@ Assuming a database has been created locally and ``marius`` has been installed s
            Starting a new run!!!
            Edge file written to output_dir/all_edges.txt
 
-   | The  ``--config_path`` flag specifies pecifies where the configuration file created by the user is.
+   | The  ``--config_path`` flag specifies where the configuration file created by the user is.
 
    | The  ``--output_directory`` flag specifies where the data will be output and is set by the user. In this example, assume we have not created the output_dir directory. ``db2graph`` will create it for us. 
 
@@ -259,6 +259,8 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
 
    | For simplicity, we limit the queries to focus on the movies table. The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database.
 
+   | Both ``conf/entity_nodes.txt`` and ``conf/edges_entity_feature_values.txt`` are empty. We don't need to define them in this example.
+
    .. note::
        
        The queries above have ``ORDER BY`` clause at the end, which is not compulsory (and can have performance impact). We have kept it for the example because it will ensure same output across multiple runs. For optimal performance remove the ``ORDER BY`` clause.
@@ -282,13 +284,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
            conf/  
              ...    
           $ cat output_dir/all_edges.txt
-          persons_name_tom_hanks    acted_in     movies_title_toy_story
-          persons_name_robin williams    acted_in    movies_title_jumanji
+          persons_name_강계열	acted_in	movies_title_님아, 그 강을 건너지 마오
+          persons_name_조병만	acted_in	movies_title_님아, 그 강을 건너지 마오
+          persons_name_2 chainz	acted_in	movies_title_the art of organized noize
           ...
-
-Upcoming Features 
-""""""""""""""""""""
-
-* Support for other databases
-* Robust table/column name parsing in SQL SELECT queries 
-* Validation check for the correctness of queries

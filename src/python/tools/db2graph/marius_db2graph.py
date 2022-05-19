@@ -6,7 +6,7 @@ import psycopg2
 from pathlib import Path
 import uuid
 import re
-import hydra
+from omegaconf import OmegaConf
 from pathlib import Path
 import time
 import logging
@@ -51,12 +51,8 @@ def config_parser_fn(config_name):
     """
     input_cfg = None
     input_config_path = Path(config_name).absolute()
-
-    config_name = input_config_path.name
-    config_dir = input_config_path.parent
-
-    with hydra.initialize_config_dir(config_dir=config_dir.__str__()):
-        input_cfg = hydra.compose(config_name=config_name)
+    
+    input_cfg = OmegaConf.load(input_config_path)
 
     # db_server used to distinguish between different databases
     db_server = None
