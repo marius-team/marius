@@ -4,7 +4,7 @@ import random
 import sys
 from pathlib import Path
 sys.path.append('src/python/tools/db2graph/') # moving to the parent directory
-from db2graph import connect_to_db, entity_node_to_uuids, post_processing
+from marius_db2graph import connect_to_db, entity_node_to_uuids, post_processing
 
 class TestConnector():
     database = "postgres"
