@@ -14,6 +14,7 @@ import logging
 import psutil
 
 INVALID_ENTRY_LIST = ["0", None, "", 0, "not reported", "None", "none"]
+FETCH_SIZE = 10000
 
 def set_args():
     parser = argparse.ArgumentParser(
@@ -101,7 +102,7 @@ def config_parser_fn(config_name):
     if "generate_uuid" in input_cfg.keys():
         generate_uuid = input_cfg["generate_uuid"]
     else:
-        # default is assumed as ture
+        # default is assumed as true
         generate_uuid = True
 
     # Getting all the entity nodes sql queries in a list
@@ -189,7 +190,7 @@ def connect_to_db(db_server, db_name, db_user, db_password, db_host):
     :param db_host: The hostname of the database
     :return cnx: cursor object that can be used to execute the database queries
     """
-    if db_server == 'maria-db':
+    if db_server == 'maria-db' or db_server == 'my-sql':
         try:
             cnx = mysql.connector.connect(user=db_user,
                                         password=db_password,  # change password to your own
@@ -258,14 +259,7 @@ def validation_check_entity_queries(entity_query_list):
             print("Error: Incorrect entity query formatting, FROM not at correct position")
             exit(1)
         
-        # # We have rigid stop at table name because we are using this structure to extract table name
-        # # Update: Table name extraction logic updated so no longer need this check 
-        # if (qry_split[4][-1] != ";"):
-        #     print("Error: Incorrect entity query formatting, there should be nothing after table name")
-        #     exit(1)
-        
         new_query_list.append(' '.join(qry_split))
-    
     return new_query_list
 
 def validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list):
@@ -364,6 +358,36 @@ def get_uuid(row):
     """
     return uuid.uuid5(uuid.NAMESPACE_DNS, row['entity_node'])
 
+def get_init_fetch_size():
+    """
+    In an initial pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory() 
+
+    :return limit_fetch_size: the optimal maximum possible fetch_size for database engine
+    """
+    mem_copy = psutil.virtual_memory()
+    mem_copy_used = mem_copy.used
+    limit_fetch_size = min(mem_copy.available / 2, 1000000000) # max fetch_size limit at one billion due to database constraint
+    return limit_fetch_size
+
+def get_fetch_size(limit_fetch_size):
+    """
+    Calculates the optimal maximum fetch_size based on the current snapshot of virtual_memory() 
+    Increase fetch_size if the amount of memory used is less than half of machine's total available memory
+    The size of fetch_size is limited between 10000 and limit_fetch_size bytes
+
+    :param limit_fetch_size: the optimal maximum possible fetch_size
+    :return fetch_size: updated fetch_size passed into database engine
+    """
+    delta = psutil.virtual_memory().used - mem_copy_used # delta between two virtual_memory(), i.e. mem used for curr fetch_size
+    est_fetch_size = limit_fetch_size / (delta + 1) * fetch_size # estimated optimal fetch_size
+    if est_fetch_size > limit_fetch_size:
+        fetch_size = int(limit_fetch_size)
+    elif FETCH_SIZE < est_fetch_size and est_fetch_size <= limit_fetch_size:
+        fetch_size = int(est_fetch_size)
+    else:
+        fetch_size = FETCH_SIZE
+    return fetch_size
+
 def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
     """
     Takes entity node queries as inputs, execute the queries, store the results in temp dataframes,
@@ -381,7 +405,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
     entity_mapping = pd.DataFrame()
 
 
-    fetchSize = 10000
+    fetch_size = FETCH_SIZE
     # New post processing code for edges entity node to entity nodes
     for i in range(len(entity_queries_list)):
         start_time2 = time.time()
@@ -405,21 +429,19 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
         col_name = str(query.split()[2].split('.')[1]) # column name of the query
         
         # Processing each batch of cursor on client
-        rowsCompleted = 0
+        rows_completed = 0
 
-        # In an initial sample pass, estimates the optimal maximum possible fetchSize for given query based on memory usage report of virtual_memory() 
-        # process data with fetchSize=10000, record the amount of memory used,
-        # increase fetchSize if the amount of memory used is less than half of machine's total available memory, 
-        # Note: all unit size are in bytes, fetchSize limited between 10000 and 100000000 bytes
+        # In an initial sample pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory() 
+        # process data with fetch_size=10000, record the amount of memory used,
+        # increase fetch_size if the amount of memory used is less than half of machine's total available memory, 
+        # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
         if first_pass:
-            mem_copy = psutil.virtual_memory()
-            mem_copy_used = mem_copy.used
-            limit_fetchSize = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
+            limit_fetch_size = get_init_fetch_size()
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
         while (True): # Looping till all rows are completed and processed
-            result = cursor.fetchmany(fetchSize)
+            result = cursor.fetchmany(fetch_size)
             result = pd.DataFrame(result)
             if (result.shape[0] == 0):
                 break
@@ -442,18 +464,12 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
             result.to_csv(output_dir / Path("entity_mapping.txt"), sep='\t',\
                 header=False, index=False, mode='a') # Appending the output to disk
             del result
-            rowsCompleted += fetchSize
+            rows_completed += fetch_size
 
+            # update fetch_size based on current snapshot of the machine's memory usage
             if first_pass:
-                delta = psutil.virtual_memory().used - mem_copy_used # delta between two virtual_memory(), i.e. mem used curr fetchSize
-                est_fetchSize = limit_fetchSize / (delta + 1) * fetchSize # estimated optimal fetchSize for 
-                if est_fetchSize > limit_fetchSize:
-                    fetchSize = int(limit_fetchSize)
-                elif 10000 < est_fetchSize and est_fetchSize <= limit_fetchSize:
-                    fetchSize = int(est_fetchSize)
-                else:
-                    fetchSize = 10000
-                first_pass = False  # executing get_fetchSize means we are in 
+                fetch_size = get_fetch_size(limit_fetch_size)
+                first_pass = False 
         logging.info(f'finishing converting entity nodes to uuid, execution time: {time.time() - start_time2}')
     return entity_mapping.set_index('entity_node').to_dict()['uuid']
 
@@ -471,7 +487,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     :param edge_entity_feature_val_queries_list: List of all the queries defining edges from feature nodes to feature nodes
     :param edge_entity_feature_val_rel_list: List of all the relationships defining edges from feature nodes to feature nodes
     :param entity_mapping: dictionary of Entity_nodes mapping to UUIDs
-    :param generate_uuid: boolean value, if ture converts entity nodes to UUID, else skip the conversion
+    :param generate_uuid: boolean value, if true converts entity nodes to UUID, else skip the conversion
     :param db_server: database server name
     :return 0: 0 for success, exit code 1 for failure
     """
@@ -494,7 +510,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     num_edge_type = []  # number of edges
     
 
-    fetchSize = 10000
+    fetch_size = FETCH_SIZE
     # New post processing code for edges entity node to entity nodes
     for i in range(len(edge_entity_entity_queries_list)):
         start_time2 = time.time()
@@ -520,21 +536,19 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         col_name2 = table_name_list[2].split('.')[1] # dst/target column
         
         # Processing each batch of cursor on client
-        rowsCompleted = 0
+        rows_completed = 0
 
-        # In an initial sample pass, estimates the optimal maximum possible fetchSize for given query based on memory usage report of virtual_memory() 
-        # process data with fetchSize=10000, record the amount of memory used,
-        # increase fetchSize if the amount of memory used is less than half of machine's total available memory, 
-        # Note: all unit size are in bytes, fetchSize limited between 10000 and 100000000 bytes
+        # In an initial sample pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory() 
+        # process data with fetch_size=10000, record the amount of memory used,
+        # increase fetch_size if the amount of memory used is less than half of machine's total available memory, 
+        # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
         if first_pass:
-            mem_copy = psutil.virtual_memory()
-            mem_copy_used = mem_copy.used
-            limit_fetchSize = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
+            limit_fetch_size = get_init_fetch_size()
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
         while (True): # Looping till all rows are completed and processed
-            result = cursor.fetchmany(fetchSize)
+            result = cursor.fetchmany(fetch_size)
             result = pd.DataFrame(result)
             if (result.shape[0] == 0):
                 break
@@ -565,23 +579,17 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
             result.to_csv(output_dir / Path("all_edges.txt"), sep='\t',\
                 header=False, index=False, mode='a') # Appending the output to disk
             del result
-            rowsCompleted += fetchSize
+            rows_completed += fetch_size
 
+            # update fetch_size based on current snapshot of the machine's memory usage
             if first_pass:
-                delta = psutil.virtual_memory().used - mem_copy_used # delta between two virtual_memory(), i.e. mem used for curr fetchSize
-                est_fetchSize = limit_fetchSize / (delta + 1) * fetchSize # estimated optimal fetchSize for 
-                if est_fetchSize > limit_fetchSize:
-                    fetchSize = int(limit_fetchSize)
-                elif 10000 < est_fetchSize and est_fetchSize <= limit_fetchSize:
-                    fetchSize = int(est_fetchSize)
-                else:
-                    fetchSize = 10000
-                first_pass = False  # executing get_fetchSize means we are in 
+                fetch_size = get_fetch_size(limit_fetch_size)
+                first_pass = False
         logging.info(f'finishing post_processing enttiy nodes, execution time: {time.time() - start_time2}')
 
     # edges from entity node to feature values processing
     # Note: feature values will not have table_name and col_name appended
-    fetchSize = 10000
+    fetch_size = FETCH_SIZE
     for i in range(len(edge_entity_feature_val_queries_list)):
         start_time2 = time.time()
         first_pass = True
@@ -604,21 +612,21 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         col_name1 = table_name_list[1].split('.')[1][:-1] # src column, (note last character ',' is removed)
         
         # Processing each batch of cursor on client
-        rowsCompleted = 0
+        rows_completed = 0
 
-        # In an initial sample pass, estimates the optimal maximum possible fetchSize for given query based on memory usage report of virtual_memory() 
-        # process data with fetchSize=10000, record the amount of memory used,
-        # increase fetchSize if the amount of memory used is less than half of machine's total available memory, 
-        # Note: all unit size are in bytes, fetchSize limited between 10000 and 100000000 bytes
+        # In an initial sample pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory() 
+        # process data with fetch_size=10000, record the amount of memory used,
+        # increase fetch_size if the amount of memory used is less than half of machine's total available memory, 
+        # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
         if first_pass:
             mem_copy = psutil.virtual_memory()
             mem_copy_used = mem_copy.used
-            limit_fetchSize = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
+            limit_fetch_size = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
         while (True): # Looping till all rows are completed and processed
-            result = cursor.fetchmany(fetchSize)
+            result = cursor.fetchmany(fetch_size)
             result = pd.DataFrame(result)
             if (result.shape[0] == 0):
                 break
@@ -643,18 +651,12 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
             result.to_csv(output_dir / Path("all_edges.txt"), sep='\t',\
                 header=False, index=False, mode='a') # Appending the output to disk
             del result
-            rowsCompleted += fetchSize
+            rows_completed += fetch_size
 
+            # update fetch_size based on current snapshot of the machine's memory usage
             if first_pass:
-                delta = psutil.virtual_memory().used - mem_copy_used # delta between two virtual_memory(), mem used for curr fetchSize
-                est_fetchSize = limit_fetchSize / (delta + 1) * fetchSize # estimated optimal fetchSize for 
-                if est_fetchSize > limit_fetchSize:
-                    fetchSize = int(limit_fetchSize)
-                elif 10000 < est_fetchSize and est_fetchSize <= limit_fetchSize:
-                    fetchSize = int(est_fetchSize)
-                else:
-                    fetchSize = 10000
-                first_pass = False  # executing get_fetchSize means we are in 
+                fetch_size = get_fetch_size(limit_fetch_size)
+                first_pass = False 
         logging.info(f'finishing post_processing feature nodes, execution time: {time.time() - start_time2}')
     return 0
 
@@ -678,7 +680,7 @@ def main():
 
     output_dir = Path(args.output_directory)
     output_dir.mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(filename=output_dir / Path('output.log'), encoding='utf-8', level=logging.INFO) # set filemode='w' if want to start a fresh log file
+    logging.basicConfig(filename=output_dir / Path('marius_db2graph.log'), encoding='utf-8', level=logging.INFO) # set filemode='w' if want to start a fresh log file
 
     try:
         logging.info('Starting a new run!!!\n')
@@ -687,13 +689,11 @@ def main():
         cnx = connect_to_db(db_server, db_name, db_user, db_password, db_host)
         if generate_uuid:
             entity_queries_list = validation_check_entity_queries(entity_queries_list)
-        edge_entity_entity_queries_list = validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
-        edge_entity_feature_val_queries_list = validation_check_edge_entity_feature_val_queries(edge_entity_feature_val_queries_list)
-        
-        if generate_uuid:
             entity_mapping = entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server)
         else:
             entity_mapping = None
+        edge_entity_entity_queries_list = validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
+        edge_entity_feature_val_queries_list = validation_check_edge_entity_feature_val_queries(edge_entity_feature_val_queries_list)
         
         src_rel_dst = post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list,
             edge_entity_feature_val_queries_list, edge_entity_feature_val_rel_list,
