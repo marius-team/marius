@@ -1,5 +1,5 @@
 Db2Graph: Database to Graph conversion tool
-=========================
+============================================
 
 Introduction
 """"""""""""""""""""
@@ -19,14 +19,14 @@ Below we lay out the requirements, definitions, and steps for using Db2Graph, an
 Requirements
 """"""""""""""""""""
 
-Db2Graph currently supports graph conversion from three relational database management systems: **MySQL**, **MariaDB**, and **PostgreSQL**. Db2Graph requires no installation but additional packages not included in the Marius installation. The following packages are required:
+Db2Graph currently supports graph conversion from three relational database management systems: **MySQL**, **MariaDB**, and **PostgreSQL**. Db2Graph requires no installation and all the required python packages are part of Marius installation. Following are the packages required:
 
-* python >= 3.6  (included in Marius)
-* pandas  (included in Marius)
-* hydra  (included in Marius)
-* psutil  (included in Marius)
-* MySQL connector >= 8.0
-* Psycopg2 >= 2.9
+* python >= 3.6  (included in Marius installation)
+* pandas  (included in Marius installation)
+* hydra  (included in Marius installation)
+* psutil  (included in Marius installation)
+* MySQL connector >= 8.0 (included in Marius installation)
+* Psycopg2 >= 2.9 (included in Marius installation)
 
 System Design
 """"""""""""""""""""
@@ -45,7 +45,7 @@ Db2Graph outputs a set of triplets in the format of ``[source node] [edge] [dest
 How to Use
 """"""""""""""""""""
 
-Assuming a database has been created locally and we are in the ``db2graph`` root directory, database to graph conversion with Db2Graph can be achieved in the following steps: 
+Assuming a database has been created locally and ``marius`` has been installed successfully, database to graph conversion with Db2Graph can be achieved in the following steps: 
 
 #. | First, create a YAML configuration file ``config.yaml`` and three query definition files to contain SQL SELECT queries of type ``entity_node_queries``, ``edges_entity_entity_queries``, and ``edges_entity_feature_values_queries``. Assume that the config file and all query files are placed in a ``./conf/`` directory. 
 
@@ -57,7 +57,6 @@ Assuming a database has been created locally and we are in the ``db2graph`` root
          entity_node.txt                     # defines entity_node_queries
          edges_entity_entity.txt             # defines edges_entity_entity_queries
          edges_entity_feature_values.txt     # defines edges_entity_feature_values_queries
-       db2graph.py                                # db2graph script
 
    | Define the configuration file in ``config.yaml``. Below is a sample configuration file. Note that all fields are required. An error would be thrown if the query files do not exist.
     
@@ -65,6 +64,9 @@ Assuming a database has been created locally and we are in the ``db2graph`` root
         
             db_server: postgre-sql
             db_name: sample_db
+            db_user: sample_user
+            db_password: sample_password
+            db_host: localhost
             generate_uuid: false 
             entity_node_queries: conf/entity_nodes.txt
             edges_entity_entity_queries: conf/edges_entity_entity.txt
@@ -80,11 +82,23 @@ Assuming a database has been created locally and we are in the ``db2graph`` root
          - Required
        * - db_server
          - String
-         - Denotes the RDBMS to use. Options: [“maria-db”, “postgre-sql”].
+         - Denotes the RDBMS to use. Options: [“maria-db”, “postgre-sql”, "my-sql"].
          - Yes
        * - db_name
          - String
          - Denotes the name of the database.
+         - Yes
+       * - db_user
+         - String
+         - Denotes the user name to access the database.
+         - Yes
+       * - db_password
+         - String
+         - Password to access the database.
+         - Yes
+       * - db_host
+         - String
+         - Denotes the hostname of the database.
          - Yes
        * - generate_uuid
          - Boolean
@@ -125,11 +139,11 @@ Assuming a database has been created locally and we are in the ``db2graph`` root
    .. note:: 
        Db2Graph validates the correctness of format of each query. However, it does not validate the correctness of the queries. That is, it assumes that all column names and table names exist in the given database schema provided by the user. An error will be thrown in the event that the validation check fails.
     
-#. | Lastly, execute Db2Graph with the following script. Two flags are required. Note that only error information will be printed, all information will be logged to ``./output_dir/output.log``:
+#. | Lastly, execute Db2Graph with the following commands. Two flags are required. Note that only error information will be printed, all information will be logged to ``./output_dir/output.log``:
 
     .. code-block:: bash
         
-           $ python db2graph.py --config_path conf/config.yaml --output_directory output_dir/
+           $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
            Starting a new run!!!
            Edge file written to output_dir/all_edges.txt
 
@@ -149,8 +163,7 @@ Assuming a database has been created locally and we are in the ``db2graph`` root
              config.yaml                         # config file
              entity_node.txt                     # defines entity_node_queries
              edges_entity_entity.txt             # defines edges_entity_entity_queries
-             edges_entity_feature_values.txt     # defines edges_entity_feature_values_queries
-           db2graph.py    
+             edges_entity_feature_values.txt     # defines edges_entity_feature_values_queries    
           $ cat output_dir/all_edges.txt
           column_name_A    relation_name_A_to_B    column_name_B
           column_name_B    relation_name_B_to_C    column_name_C
@@ -207,17 +220,16 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
        $ apt-get install git
        $ apt-get install python3
        $ apt-get install python3-pip
-       $ pip3 install psycopg2-binary
-       $ pip3 install mysql-connector-python
-       $ pip3 install hydra-core --upgrade
        $ git clone https://github.com/marius-team/marius.git
-       $ pip3 install. 
+       $ cd marius
+       $ MARIUS_NO_BINDINGS=1 python3 -m pip install . 
 
-#. | Next, create the configuration files. From the root directory, navigate to the Db2Graph directory and create the ``conf/config.yaml``, ``conf/entity_nodes.txt``, ``conf/edges_entity_entity.txt``, and ``conf/edges_entity_feature_values.txt`` files if they have not been created. 
+#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml``, ``conf/entity_nodes.txt``, ``conf/edges_entity_entity.txt``, and ``conf/edges_entity_feature_values.txt`` files if they have not been created. 
 
     .. code-block:: bash 
        
-       $ cd Marius/src/python/tools/db2graph/
+       $ mkdir empty_dir
+       $ cd empty_dir
        $ vi conf/config.yaml
 
    | In ``conf/config.yaml``, define the following fields:
@@ -239,23 +251,27 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
     .. code-block:: sql
            
            acted_in
-           SELECT persons.name, movies.title FROM persons, actors, movies WHERE persons.id = actors.person_id AND actors.movie_id = movies.id;
+           SELECT persons.name, movies.title FROM persons, actors, movies WHERE persons.id = actors.person_id AND actors.movie_id = movies.id ORDER BY persons.name ASC;
            directed_by
-           SELECT movies.title, persons.name FROM persons, directors, movies WHERE persons.id = directors.director_id AND directors.movie_id = movies.id;
+           SELECT movies.title, persons.name FROM persons, directors, movies WHERE persons.id = directors.director_id AND directors.movie_id = movies.id ORDER BY movies.title ASC;
            produced_by
-           SELECT movies.title, production_companies.name FROM production_companies, movies_production_companies, movies WHERE production_companies.id = movies_production_companies.production_company_id AND movies_production_companies.movie_id = movies.id;  
+           SELECT movies.title, production_companies.name FROM production_companies, movies_production_companies, movies WHERE production_companies.id = movies_production_companies.production_company_id AND movies_production_companies.movie_id = movies.id ORDER BY movies.title ASC;  
 
    | For simplicity, we limit the queries to focus on the movies table. The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database.
+
+   .. note::
+       
+       The queries above have ``ORDER BY`` clause at the end, which is not compulsory (and can have performance impact). We have kept it for the example because it will ensure same output across multiple runs. For optimal performance remove the ``ORDER BY`` clause.
 
 #. | Lastly, execute Db2Graph with the following script:
 
     .. code-block:: bash
         
-           $ python3 db2graph.py --config_path conf/config.yaml --output_directory output_dir/
+           $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
            Starting a new run!!!
            Edge file written to output_dir/all_edges.txt
 
-   | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679931 edges representing the three relationships we defined earlier:
+   | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679923 edges representing the three relationships we defined earlier:
     
     .. code-block:: bash
         
@@ -264,8 +280,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
              all_edges.txt                       # generated file with sets of triples
              output.log                          # output log file
            conf/  
-             ...
-           db2graph.py    
+             ...    
           $ cat output_dir/all_edges.txt
           persons_name_tom_hanks    acted_in     movies_title_toy_story
           persons_name_robin williams    acted_in    movies_title_jumanji
