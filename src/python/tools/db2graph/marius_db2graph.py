@@ -11,6 +11,7 @@ from pathlib import Path
 import time
 import logging
 import psutil
+import sys
 
 INVALID_ENTRY_LIST = ["0", None, "", 0, "not reported", "None", "none"]
 FETCH_SIZE = 10000
@@ -59,7 +60,7 @@ def config_parser_fn(config_name):
     if "db_server" in input_cfg.keys():
         db_server = input_cfg["db_server"]
     else:
-        print("ERROR: db_server is not defined")
+        logging.error("ERROR: db_server is not defined")
         exit(1)
 
     # db_name is the name of the database to pull the data from
@@ -67,7 +68,7 @@ def config_parser_fn(config_name):
     if "db_name" in input_cfg.keys():
         db_name = input_cfg["db_name"]
     else:
-        print("ERROR: db_name is not defined")
+        logging.error("ERROR: db_name is not defined")
         exit(1)
 
     # db_user is the user name used to access the database
@@ -75,21 +76,21 @@ def config_parser_fn(config_name):
     if "db_user" in input_cfg.keys():
         db_user = input_cfg["db_user"]
     else:
-        print("ERROR: db_user is not defined")
+        logging.error("ERROR: db_user is not defined")
     
     # db_password is the password used to access the database
     db_password = None
     if "db_password" in input_cfg.keys():
         db_password = input_cfg["db_password"]
     else:
-        print("ERROR: db_password is not defined")
+        logging.error("ERROR: db_password is not defined")
     
     # db_host is the hostname of the database
     db_host = None
     if "db_host" in input_cfg.keys():
         db_host = input_cfg["db_host"]
     else:
-        print("ERROR: db_host is not defined")
+        logging.error("ERROR: db_host is not defined")
 
     # generate_uuid is used to identify whether to generate the uuid using entity nodes or 
     # use the table_name-col_name-value as the unique identifier
@@ -115,7 +116,7 @@ def config_parser_fn(config_name):
             if (entity_node_sql_queries[i][-1] == '\n'):
                 entity_node_sql_queries[i] = entity_node_sql_queries[i][:-1]
     else:
-        print("ERROR: entity_node_queries is not defined")
+        logging.error("ERROR: entity_node_queries is not defined")
         exit(1)
 
     # Getting all edge queries for edge type entity node to entity node
@@ -141,7 +142,7 @@ def config_parser_fn(config_name):
             else:
                 edge_entity_entity_sql_queries.append(read_lines[i])
     else:
-        print("ERROR: edges_entity_entity_queries is not defined")
+        logging.error("ERROR: edges_entity_entity_queries is not defined")
         exit(1)
 
     # Gettting all edge queries for edge type entity node to feature values
@@ -166,7 +167,7 @@ def config_parser_fn(config_name):
             else:
                 edge_entity_feature_values_sql_queries.append(read_lines[i])
     else:
-        print("ERROR: edges_entity_feature_values_queries is not defined")
+        logging.error("ERROR: edges_entity_feature_values_queries is not defined")
         exit(1)
 
     return db_server, db_name, db_user, db_password, db_host, generate_uuid, entity_node_sql_queries, edge_entity_entity_sql_queries,\
@@ -194,11 +195,11 @@ def connect_to_db(db_server, db_name, db_user, db_password, db_host):
             # cursor = cnx.cursor(name="my_cursor") # Make cursor only when you need it
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print(f"Incorrect user name or password\n{err}")
+                logging.error(f"Incorrect user name or password\n{err}")
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print(f"Non-existing database\n{err}")
+                logging.error(f"Non-existing database\n{err}")
             else:
-                print(err)
+                logging.error(err)
 
     elif db_server == 'postgre-sql':
         try:
@@ -215,10 +216,10 @@ def connect_to_db(db_server, db_name, db_user, db_password, db_host):
             # cursor = cnx.cursor(name="my_cursor")
 
         except psycopg2.Error as err:
-            print(f"Error\n{err}")
+            logging.error(f"Error\n{err}")
 
     else:
-        print('Other databases are currently not supported.')
+        logging.error('Other databases are currently not supported.')
     
     return cnx
 
@@ -236,22 +237,22 @@ def validation_check_entity_queries(entity_query_list):
         
         check_var = qry_split[0].lower() # To ensure no case sensitivity issues
         if (check_var != "select"):
-            print("Error: Incorrect entity query formatting, not starting with SELECT")
+            logging.error("Error: Incorrect entity query formatting, not starting with SELECT")
             exit(1)
         
         check_var = qry_split[1].lower()
         if (check_var != "distinct"):
-            print("Adding distinct to the entity query " + str(q) +" (0 indexed position)")
+            logging.error("Adding distinct to the entity query " + str(q) +" (0 indexed position)")
             qry_split.insert(1,"distinct")
         
         check_split = qry_split[2].split('.')
         if (len(check_split) != 2):
-            print("Error: Incorrect entity query formatting, table_name.col_name should in the SELECT line")
+            logging.error("Error: Incorrect entity query formatting, table_name.col_name should in the SELECT line")
             exit(1) 
         
         check_var = qry_split[3].lower()
         if (check_var != "from"):
-            print("Error: Incorrect entity query formatting, FROM not at correct position")
+            logging.error("Error: Incorrect entity query formatting, FROM not at correct position")
             exit(1)
         
         new_query_list.append(' '.join(qry_split))
@@ -271,29 +272,29 @@ def validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
         
         check_var = qry_split[0].lower()
         if (check_var != "select"):
-            print("Error: Incorrect edge entity node - entity node formatting, " +
+            logging.error("Error: Incorrect edge entity node - entity node formatting, " +
                 "not starting with SELECT")
             exit(1)
         
         check_split = qry_split[1].split('.')
         if (len(check_split) != 2):
-            print("Error: Incorrect edge entity node - entity node formatting, " +
+            logging.error("Error: Incorrect edge entity node - entity node formatting, " +
                 "table1_name.col1_name not correctly formatted")
             exit(1)
         if (check_split[1][-1] != ','):
-            print("Error: Incorrect edge entity node - entity node formatting, " +
+            logging.error("Error: Incorrect edge entity node - entity node formatting, " +
                 "missing ',' at the end of table1_name.col1_name")
             exit(1)
         
         check_split = qry_split[2].split('.')
         if (len(check_split) != 2):
-            print("Error: Incorrect edge entity node - entity node formatting, " +
+            logging.error("Error: Incorrect edge entity node - entity node formatting, " +
                 "table2_name.col2_name not correctly formatted")
             exit(1)
         
         check_var = qry_split[3].lower()
         if (check_var != "from"):
-            print("Error: Incorrect edge entity node - entity node formatting, " +
+            logging.error("Error: Incorrect edge entity node - entity node formatting, " +
                 "extra elements after table2_name.col2_name")
             exit(1)
         
@@ -315,17 +316,17 @@ def validation_check_edge_entity_feature_val_queries(edge_entity_feature_val_que
         
         check_var = qry_split[0].lower()
         if (check_var != "select"):
-            print("Error: Incorrect edge entity node - feature value formatting, " +
+            logging.error("Error: Incorrect edge entity node - feature value formatting, " +
                 "not starting with SELECT")
             exit(1)
         
         check_split = qry_split[1].split('.')
         if (len(check_split) != 2):
-            print("Error: Incorrect edge entity node - feature value formatting, " +
+            logging.error("Error: Incorrect edge entity node - feature value formatting, " +
                 "table1_name.col1_name not correctly formatted")
             exit(1)
         if (check_split[1][-1] != ','):
-            print("Error: Incorrect edge entity node - feature value formatting, " +
+            logging.error("Error: Incorrect edge entity node - feature value formatting, " +
                 "missing ',' at the end of table1_name.col1_name")
             exit(1)
         
@@ -487,12 +488,10 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     :return 0: 0 for success, exit code 1 for failure
     """
     if (len(edge_entity_entity_queries_list) != len(edge_entity_entity_rel_list)):
-        print("Number of queries in edge_entity_entity_queries_list must match number of edges in edge_entity_entity_rel_list")
         logging.error("Number of queries in edge_entity_entity_queries_list must match number of edges in edge_entity_entity_rel_list")
         exit(1)
     
     if (len(edge_entity_feature_val_queries_list) != len(edge_entity_feature_val_rel_list)):
-        print("Number of queries in edge_entity_feature_val_queries_list must match number of edges in edge_entity_feature_val_rel_list")
         logging.error("Number of queries in edge_entity_feature_val_queries_list must match number of edges in edge_entity_feature_val_rel_list")
         exit(1)
 
@@ -675,11 +674,11 @@ def main():
 
     output_dir = Path(args.output_directory)
     output_dir.mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(filename=output_dir / Path('marius_db2graph.log'), encoding='utf-8', level=logging.INFO) # set filemode='w' if want to start a fresh log file
+    logging.basicConfig(filename=output_dir / Path('marius_db2graph.log'), encoding='utf-8', level=logging.INFO, filemode='w') # set filemode='w' if want to start a fresh log file
+    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout)) # add handler to print to console
 
     try:
         logging.info('Starting a new run!!!\n')
-        print('Starting a new run!!!')
         # returning both cnx & cursor because cnx is main object deleting it leads to lose of cursor
         cnx = connect_to_db(db_server, db_name, db_user, db_password, db_host)
         if generate_uuid:
@@ -695,10 +694,9 @@ def main():
              entity_mapping, generate_uuid, db_server)  # this is the pd dataframe
         # convert_to_int() should be next, but we are relying on the Marius' preprocessing module
         cnx.close()
-        print('Edge file written to ' + str(output_dir / Path("all_edges.txt")))
         logging.info(f'Total execution time: {time.time()-total_time}\n')
+        logging.info('Edge file written to ' + str(output_dir / Path("all_edges.txt")))
     except Exception as e:
-        print(e)
         logging.error(e)
         logging.info(f'Total execution time: {time.time()-total_time}\n')
 

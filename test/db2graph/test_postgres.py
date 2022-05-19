@@ -22,14 +22,6 @@ class TestConnector():
                     'salmon', 'sourdough bread', 'meatballs', 'root beer', 'croissant',
                     'taco sauce']
 
-    @classmethod
-    def set_up(self):
-        pass
-    
-    @classmethod
-    def tear_down(self):
-        pass
-
     def fill_db(self):
         """
         Filling the database with data for testing things
