@@ -416,7 +416,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
         query = entity_queries_list[i]
         cursor_name = "entity_queries_list" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
         cursor = []
-        if db_server == 'maria-db':
+        if db_server == 'maria-db' or db_server == 'my-sql':
             cursor = cnx.cursor()
         elif db_server == 'postgre-sql':
             cursor = cnx.cursor(name = cursor_name)
@@ -521,7 +521,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         query = edge_entity_entity_queries_list[i]
         cursor_name = "edge_entity_entity_cursor" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
         cursor = []
-        if db_server == 'maria-db':
+        if db_server == 'maria-db' or db_server == 'my-sql':
             cursor = cnx.cursor()
         elif db_server == 'postgre-sql':
             cursor = cnx.cursor(name = cursor_name)
@@ -599,7 +599,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         query = edge_entity_feature_val_queries_list[i]
         cursor_name = "edge_entity_feature_val_cursor" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
         cursor = []
-        if db_server == 'maria-db':
+        if db_server == 'maria-db' or db_server == 'my-sql':
             cursor = cnx.cursor()
         elif db_server == 'postgre-sql':
             cursor = cnx.cursor(name = cursor_name)
