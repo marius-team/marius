@@ -48,7 +48,7 @@ class TestConfig(unittest.TestCase):
             loadConfig("foo.yaml")
             raise RuntimeError("Exception not thrown")
         except Exception as e:
-            assert "Cannot find primary config" in e.__str__()
+            assert "No such file or directory" in e.__str__()
 
     def test_missing_dataset_yaml(self):
         generate_configs_for_dataset(self.output_dir,
