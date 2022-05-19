@@ -367,9 +367,9 @@ def get_init_fetch_size():
     mem_copy = psutil.virtual_memory()
     mem_copy_used = mem_copy.used
     limit_fetch_size = min(mem_copy.available / 2, 1000000000) # max fetch_size limit at one billion due to database constraint
-    return limit_fetch_size
+    return limit_fetch_size, mem_copy_used
 
-def get_fetch_size(limit_fetch_size):
+def get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used):
     """
     Calculates the optimal maximum fetch_size based on the current snapshot of virtual_memory() 
     Increase fetch_size if the amount of memory used is less than half of machine's total available memory
@@ -436,7 +436,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
         # increase fetch_size if the amount of memory used is less than half of machine's total available memory, 
         # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
         if first_pass:
-            limit_fetch_size = get_init_fetch_size()
+            limit_fetch_size, mem_copy_used = get_init_fetch_size()
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
@@ -468,7 +468,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
 
             # update fetch_size based on current snapshot of the machine's memory usage
             if first_pass:
-                fetch_size = get_fetch_size(limit_fetch_size)
+                fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
                 first_pass = False 
         logging.info(f'finishing converting entity nodes to uuid, execution time: {time.time() - start_time2}')
     return entity_mapping.set_index('entity_node').to_dict()['uuid']
@@ -543,7 +543,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         # increase fetch_size if the amount of memory used is less than half of machine's total available memory, 
         # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
         if first_pass:
-            limit_fetch_size = get_init_fetch_size()
+            limit_fetch_size, mem_copy_used = get_init_fetch_size()
 
         # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
         # expected that user db does not have dupliacted
@@ -583,7 +583,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
 
             # update fetch_size based on current snapshot of the machine's memory usage
             if first_pass:
-                fetch_size = get_fetch_size(limit_fetch_size)
+                fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
                 first_pass = False
         logging.info(f'finishing post_processing enttiy nodes, execution time: {time.time() - start_time2}')
 
@@ -655,7 +655,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
 
             # update fetch_size based on current snapshot of the machine's memory usage
             if first_pass:
-                fetch_size = get_fetch_size(limit_fetch_size)
+                fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
                 first_pass = False 
         logging.info(f'finishing post_processing feature nodes, execution time: {time.time() - start_time2}')
     return 0
