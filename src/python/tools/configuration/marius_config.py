@@ -1,11 +1,9 @@
-import dataclasses
 import random
 import sys
 
-from marius.tools.configuration.datatypes import *
-from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.validation import *
 from dataclasses import field
+from typing import List
 import os
 import re
 
@@ -15,19 +13,18 @@ from distutils import dir_util
 
 from omegaconf import MISSING, OmegaConf, DictConfig
 
-import hydra
 
 def get_model_dir_path(dataset_dir):
-
-    # will support storing upto 11 different model params when model_dir is not specified. 
+    # will support storing upto 11 different model params when model_dir is not specified.
     # post that, it will overwrite in <dataset_dir>/model_10 directory. 
     for i in range(11):
         model_dir = "{}/model_{}".format(dataset_dir, i)
         model_dir_path = Path(model_dir)
         if not model_dir_path.exists():
             return str(model_dir_path)
-    
+
     return str(model_dir_path)
+
 
 @dataclass
 class NeighborSamplingConfig:
@@ -38,29 +35,29 @@ class NeighborSamplingConfig:
     use_hashmap_sets: bool = True
 
     def merge(self, input_config: DictConfig):
-            """
-            Merges under specified dictionary config into the current configuration object
-            :param input_config: The input configuration dictionary
-            :return: Structured output config
-            """
+        """
+        Merges under specified dictionary config into the current configuration object
+        :param input_config: The input configuration dictionary
+        :return: Structured output config
+        """
 
-            self.type = input_config.type.upper()
+        self.type = input_config.type.upper()
 
-            new_options = NeighborSamplingOptions()
+        new_options = NeighborSamplingOptions()
 
-            if self.type == "UNIFORM":
-                new_options = UniformSamplingOptions()
+        if self.type == "UNIFORM":
+            new_options = UniformSamplingOptions()
 
-            if self.type == "DROPOUT":
-                new_options = DropoutSamplingOptions()
+        if self.type == "DROPOUT":
+            new_options = DropoutSamplingOptions()
 
-            if "options" in input_config.keys():
-                for key in new_options.__dict__.keys():
-                    if key in input_config.options.keys():
-                        val = input_config.options.__getattr__(key)
-                        new_options.__setattr__(key, val)
+        if "options" in input_config.keys():
+            for key in new_options.__dict__.keys():
+                if key in input_config.options.keys():
+                    val = input_config.options.__getattr__(key)
+                    new_options.__setattr__(key, val)
 
-            self.options = new_options
+        self.options = new_options
 
 
 @dataclass
@@ -229,9 +226,9 @@ class LayerConfig:
 
 @dataclass
 class EncoderConfig:
-    layers: list = field(default_factory=list)
-    train_neighbor_sampling: list = field(default_factory=list)
-    eval_neighbor_sampling: list = field(default_factory=list)
+    layers: List[List[LayerConfig]] = field(default_factory=list)
+    train_neighbor_sampling: List[NeighborSamplingConfig] = field(default_factory=list)
+    eval_neighbor_sampling: List[NeighborSamplingConfig] = field(default_factory=list)
     embedding_dim: int = -1
 
     def merge(self, input_config: DictConfig):
@@ -354,7 +351,7 @@ class ModelConfig:
 
         if "sparse_optimizer" in input_config.keys():
             self.sparse_optimizer.merge(input_config.sparse_optimizer)
-        
+
         self.__post_init__()
 
 
@@ -403,51 +400,47 @@ class DatasetConfig:
     def __post_init__(self):
         if not self.initialized:
             return
-        
+
         edges_path = Path(self.dataset_dir) / Path("edges")
         if not edges_path.exists():
             raise ValueError("{} does not exist".format(str(edges_path)))
-        
+
         train_edges_filepath = edges_path / Path("train_edges.bin")
         if not train_edges_filepath.exists():
             raise ValueError("{} does not exist".format(str(train_edges_filepath)))
-        
+
         nodes_path = Path(self.dataset_dir) / Path("nodes")
         node_mapping_filepath = nodes_path / Path("node_mapping.txt")
         if node_mapping_filepath.exists():
             num_lines = int(os.popen("wc -l {}".format(node_mapping_filepath)).read().lstrip().split(' ')[0])
             if num_lines != self.num_nodes:
                 raise ValueError("Expected to see {} lines in file {}, but found {}".format(self.num_nodes, \
-                                                                                            str(node_mapping_filepath), 
+                                                                                            str(node_mapping_filepath),
                                                                                             num_lines))
-        
+
         relation_mapping_filepath = edges_path / Path("relation_mapping.txt")
         if relation_mapping_filepath.exists():
             num_lines = int(os.popen("wc -l {}".format(relation_mapping_filepath)).read().lstrip().split(' ')[0])
             if num_lines != self.num_relations:
                 raise ValueError("Expected to see {} lines in file {}, but found {}".format(self.num_relations, \
-                                                                                            str(relation_mapping_filepath), 
+                                                                                            str(relation_mapping_filepath),
                                                                                             num_lines))
 
     def populate_dataset_stats(self):
         if self.dataset_dir is MISSING:
             raise ValueError("Path to pre-processed dataset directory <dataset_dir> not found")
-        
+
         dataset_dir_path = Path(self.dataset_dir)
         if not dataset_dir_path.exists():
             raise ValueError("Path specified as dataset_dir ({}) does not exist".format(str(dataset_dir_path)))
-        
+
         dataset_stats_path = Path(self.dataset_dir) / Path("dataset.yaml")
         dataset_stats_path = dataset_stats_path.absolute()
         if not dataset_stats_path.exists():
             raise ValueError("{} does not exist, expected to see dataset.yaml file in {} generated by marius_preprocess".format(str(dataset_stats_path), self.dataset_dir))
-        
-        dataset_config_dir = dataset_stats_path.parent
-        dataset_config_name = dataset_stats_path.name
 
-        with hydra.initialize_config_dir(config_dir=dataset_config_dir.__str__()):
-            dataset_cfg = hydra.compose(config_name=dataset_config_name)
-        
+        dataset_cfg = OmegaConf.load(dataset_stats_path)
+
         keys = self.__dict__.keys()
         for key in dataset_cfg.keys():
             if key in keys:
@@ -475,7 +468,7 @@ class DatasetConfig:
 @dataclass
 class StorageConfig:
     device_type: str = "cpu"
-    device_ids: list = field(default_factory=list)
+    device_ids: List[int] = field(default_factory=list)
     dataset: DatasetConfig = DatasetConfig()
     edges: StorageBackendConfig = StorageBackendConfig(options=StorageOptions(dtype="int"))
     nodes: StorageBackendConfig = StorageBackendConfig(options=StorageOptions(dtype="int"))
@@ -495,10 +488,10 @@ class StorageConfig:
     def __post_init__(self):
         if self.embeddings.type not in self.SUPPORTED_EMBEDDING_BACKENDS:
             raise ValueError("Storage type for embeddings should be one of PARTITION_BUFFER, DEVICE_MEMORY or HOST_MEMORY")
-        
+
         if self.edges.type not in self.SUPPORTED_EDGE_BACKENDS:
             raise ValueError("Storage type for edges should be one of FLAT_FILE, DEVICE_MEMORY or HOST_MEMORY")
-        
+
         if self.nodes.type not in self.SUPPORTED_NODE_BACKENDS:
             raise ValueError("Storage type for nodes should be one of DEVICE_MEMORY or HOST_MEMORY")
 
@@ -517,7 +510,7 @@ class StorageConfig:
 
         if "dataset" in input_config.keys():
             self.dataset.merge(input_config.dataset)
-        
+
         if "model_dir" in input_config.keys():
             self.model_dir = input_config.model_dir
         else:
@@ -552,7 +545,7 @@ class StorageConfig:
 
         if "export_encoded_nodes" in input_config.keys():
             self.export_encoded_nodes = input_config.export_encoded_nodes
-        
+
         self.__post_init__()
 
         if "log_level" in input_config.keys():
@@ -750,7 +743,7 @@ class EvaluationConfig:
     pipeline: PipelineConfig = PipelineConfig()
     epochs_per_eval: int = 1
     checkpoint_dir: str = ""
-    
+
     def __post_init__(self):
         if self.batch_size <= 0:
             raise ValueError("batch_size must be positive")
@@ -826,8 +819,8 @@ def type_safe_merge(base_config: MariusConfig, input_config: DictConfig):
 
     return base_config
 
+
 def initialize_model_dir(output_config):
-    
     relation_mapping_filepath = Path(output_config.storage.dataset.dataset_dir) / Path("edges") / Path("relation_mapping.txt")
     if relation_mapping_filepath.exists():
         shutil.copy(str(relation_mapping_filepath), "{}/{}".format(output_config.storage.model_dir, "relation_mapping.txt"))
@@ -836,13 +829,14 @@ def initialize_model_dir(output_config):
     if node_mapping_filepath.exists():
         shutil.copy(str(node_mapping_filepath), "{}/{}".format(output_config.storage.model_dir, "node_mapping.txt"))
 
+
 def infer_model_dir(output_config):
     # if `output_config.storage.model_dir` points to a path which contains saved model params file, then just use that.
     model_dir_path = Path(output_config.storage.model_dir)
     model_file_path = model_dir_path / Path("model.pt")
     if model_dir_path.exists() and model_file_path.exists():
         return
-    
+
     # if model_dir is of the form `model_x/`, where x belong to [0, 10], then set model_dir to the largest 
     # existing directory. If model_dir is user specified, the control would never reach here. 
     # the below regex check is an additional validation step.
@@ -851,9 +845,10 @@ def infer_model_dir(output_config):
         last_model_id = -1
         if len(match_result.groups()) == 1:
             last_model_id = int(match_result.groups()[0]) - 1
-        
+
         if last_model_id >= 0:
             output_config.storage.model_dir = "{}model_{}/".format(output_config.storage.dataset.dataset_dir, last_model_id)
+
 
 def load_config(input_config_path, save=False):
     """
@@ -863,16 +858,8 @@ def load_config(input_config_path, save=False):
     :save If true, the full configuration file will be saved to <dir_of_input_config>/full_config.yaml
     :return: config dict object
     """
-    input_cfg = None
-
     input_config_path = Path(input_config_path).absolute()
-
-    config_dir = input_config_path.parent
-    config_name = input_config_path.name
-
-    # get user defined config
-    with hydra.initialize_config_dir(config_dir=config_dir.__str__()):
-        input_cfg = hydra.compose(config_name=config_name)
+    input_cfg = OmegaConf.load(input_config_path)
 
     # merge the underspecified input configuration with the fully specified default configuration
     base_config = MariusConfig()
@@ -883,7 +870,7 @@ def load_config(input_config_path, save=False):
 
     if output_config.storage.model_dir[-1] != "/":
         output_config.storage.model_dir += "/"
-    
+
     if output_config.training.resume_from_checkpoint != "" and output_config.training.resume_from_checkpoint[-1] != "/":
         output_config.training.resume_from_checkpoint += "/"
 
@@ -893,10 +880,10 @@ def load_config(input_config_path, save=False):
         # 2. resume_training mode, with resume_from_checkpoint specified. 
         Path(output_config.storage.model_dir).mkdir(parents=True, exist_ok=True)
         initialize_model_dir(output_config)
-        
+
         OmegaConf.save(output_config,
                        output_config.storage.model_dir + PathConstants.saved_full_config_file_name)
-        
+
         # incase of resuming training, copy files from resume_from_checkpoint to the new folder. 
         if output_config.training.resume_from_checkpoint != "":
             dir_util.copy_tree(output_config.training.resume_from_checkpoint, output_config.storage.model_dir)
@@ -906,7 +893,7 @@ def load_config(input_config_path, save=False):
         # could also be taken when marius_predict is run or marius_train is run with resume_training set to true,
         # but resume_from_checkpoint isn't specified (it will then overwrite the model_dir with new model)
         infer_model_dir(output_config)
-            
+
     # we can then perform validation, and optimization over the fully specified configuration file here before returning
     validate_dataset_config(output_config)
     validate_storage_config(output_config)
