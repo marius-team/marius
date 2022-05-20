@@ -384,6 +384,22 @@ def get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used):
         fetch_size = FETCH_SIZE
     return fetch_size
 
+def get_cursor(cnx, db_server, cursor_name):
+    """
+    Gets the cursor for the database connection
+
+    :param cnx: database connection
+    :param db_server: database server
+    :param cursor_name: name of the cursor (needed for postgre-sql)
+    :return cursor: cursor for database connection
+    """
+    cursor = []
+    if db_server == 'maria-db' or db_server == 'my-sql':
+        cursor = cnx.cursor()
+    elif db_server == 'postgre-sql':
+        cursor = cnx.cursor(name = cursor_name)
+    return cursor
+
 def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
     """
     Takes entity node queries as inputs, execute the queries, store the results in temp dataframes,
@@ -411,11 +427,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
         add_time1 = time.time()
         query = entity_queries_list[i]
         cursor_name = "entity_queries_list" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
-        cursor = []
-        if db_server == 'maria-db' or db_server == 'my-sql':
-            cursor = cnx.cursor()
-        elif db_server == 'postgre-sql':
-            cursor = cnx.cursor(name = cursor_name)
+        cursor = get_cursor(cnx, db_server, cursor_name)
         cursor.execute(query)
         logging.info(f'Cursor.execute time is: {time.time() - add_time1}')
 
@@ -514,11 +526,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         add_time1 = time.time()
         query = edge_entity_entity_queries_list[i]
         cursor_name = "edge_entity_entity_cursor" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
-        cursor = []
-        if db_server == 'maria-db' or db_server == 'my-sql':
-            cursor = cnx.cursor()
-        elif db_server == 'postgre-sql':
-            cursor = cnx.cursor(name = cursor_name)
+        cursor = get_cursor(cnx, db_server, cursor_name)
         cursor.execute(query)
         logging.info(f'Cursor.execute time is: {time.time() - add_time1}')
 
@@ -592,11 +600,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         add_time1 = time.time()
         query = edge_entity_feature_val_queries_list[i]
         cursor_name = "edge_entity_feature_val_cursor" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
-        cursor = []
-        if db_server == 'maria-db' or db_server == 'my-sql':
-            cursor = cnx.cursor()
-        elif db_server == 'postgre-sql':
-            cursor = cnx.cursor(name = cursor_name)
+        cursor = get_cursor(cnx, db_server, cursor_name)
         cursor.execute(query)
         logging.info(f'Cursor.execute time is: {time.time() - add_time1}')
             
