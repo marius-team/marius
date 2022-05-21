@@ -46,7 +46,7 @@ def get_gpu_info():
 
 
 def get_python_info():
-    py_deps = ['sphinx_rtd_theme', 'breathe', 'numpy', 'pandas', 'tox', 'pytest', 'torch', 'hydra', 'pyspark', 'pip']
+    py_deps = ['sphinx_rtd_theme', 'breathe', 'numpy', 'pandas', 'tox', 'pytest', 'torch', 'omegaconf', 'pyspark', 'pip']
     py_deps_version = {}
     for dep in py_deps:
         try:
