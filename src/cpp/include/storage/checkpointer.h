@@ -18,8 +18,6 @@ struct CheckpointMeta {
     bool has_state = false;
     bool has_encoded = false;
     bool has_model = true;
-    bool has_edges = false;
-    bool has_features = false;
 };
 
 class Checkpointer {
@@ -39,6 +37,8 @@ public:
     std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage> , CheckpointMeta> load(string checkpoint_dir, std::shared_ptr<MariusConfig> marius_config, bool train);
 
     void save(string checkpoint_dir, CheckpointMeta checkpoint_meta);
+
+    void create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs);
 };
 
 #endif //MARIUS_CHECKPOINTER_H
