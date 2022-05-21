@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  db2graph-python-3.6:
+  db2graph-python-3_6:
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: python:3.6.15
@@ -45,7 +45,7 @@ jobs:
           # The default PostgreSQL port - using default port
           POSTGRES_PORT: 5432
 
-  db2graph-python-3.7:
+  db2graph-python-3_7:
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: python:3.7
@@ -81,7 +81,7 @@ jobs:
           # The default PostgreSQL port - using default port
           POSTGRES_PORT: 5432
 
-  db2graph-python-3.8:
+  db2graph-python-3_8:
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: python:3.8
@@ -117,7 +117,7 @@ jobs:
           # The default PostgreSQL port - using default port
           POSTGRES_PORT: 5432
 
-  db2graph-python-3.9:
+  db2graph-python-3_9:
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: python:3.9
@@ -153,7 +153,7 @@ jobs:
           # The default PostgreSQL port - using default port
           POSTGRES_PORT: 5432
 
-  db2graph-python-3.10:
+  db2graph-python-3_10:
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: python:3.10
