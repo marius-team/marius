@@ -129,7 +129,6 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
         metadata.has_state = true;
         metadata.has_encoded = marius_config->storage->export_encoded_nodes;
         metadata.has_model = true;
-        metadata.has_edges = true;
         metadata.link_prediction = marius_config->model->learning_task == LearningTask::LINK_PREDICTION;
     }
 

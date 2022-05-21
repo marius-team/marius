@@ -110,12 +110,6 @@ CheckpointMeta Checkpointer::loadMetadata(string directory) {
     std::getline(input_file, line);
     std::istringstream(line) >> ret_meta.has_model;
 
-    std::getline(input_file, line);
-    std::istringstream(line) >> ret_meta.has_edges;
-
-    std::getline(input_file, line);
-    std::istringstream(line) >> ret_meta.has_features;
-
     return ret_meta;
 }
 
@@ -130,6 +124,4 @@ void Checkpointer::saveMetadata(string directory, CheckpointMeta checkpoint_meta
     output_file << checkpoint_meta.has_state << "\n";
     output_file << checkpoint_meta.has_encoded << "\n";
     output_file << checkpoint_meta.has_model << "\n";
-    output_file << checkpoint_meta.has_edges << "\n";
-    output_file << checkpoint_meta.has_features << "\n";
 }

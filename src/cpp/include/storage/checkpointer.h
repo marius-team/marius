@@ -18,8 +18,6 @@ struct CheckpointMeta {
     bool has_state = false;
     bool has_encoded = false;
     bool has_model = true;
-    bool has_edges = false;
-    bool has_features = false;
 };
 
 class Checkpointer {
