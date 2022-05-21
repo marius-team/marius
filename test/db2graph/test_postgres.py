@@ -234,7 +234,7 @@ class TestConnector():
         correct_output.append(f"orders_item_taco sauce\tordered_by_people_from_country\tcustomers_country_spain\n")
         correct_output.append(f"orders_item_tomato\tordered_by_people_from_country\tcustomers_country_spain\n")
         correct_output.append(f"orders_item_wasabi\tordered_by_people_from_country\tcustomers_country_japan\n")
-        with open(output_dir / "all_edges.txt", "r") as file:
+        with open(output_dir / "edges.txt", "r") as file:
             for line in file:
                 assert(line in correct_output)
         
