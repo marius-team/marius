@@ -4,7 +4,7 @@ import random
 import sys
 from pathlib import Path
 sys.path.append('src/python/tools/db2graph/') # moving to the parent directory
-from marius_db2graph import connect_to_db, entity_node_to_uuids, post_processing
+from marius_db2graph import connect_to_db, post_processing
 
 class TestConnector():
     database = "postgres"
@@ -169,54 +169,7 @@ class TestConnector():
             assert(row[2] == self.age[index])
             index += 1
         conn.close()
-    
-    def test_entity_node_to_uuids(self):
-        """
-        Testing entity_node_to_uuids function from db2graph.py
-        """
-        self.fill_db() # Filling database with data for testing
 
-        # Getting all the inputs for the function
-        output_dir = Path("output_dir/")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        db_server = 'postgre-sql'
-        conn = psycopg2.connect(database = self.database,
-                                user = self.user,
-                                password = self.password,
-                                host = self.host,
-                                port = self.port)
-        entity_queries_list = []
-        entity_queries_list.append("SELECT DISTINCT customers.customername from customers ORDER BY customers.customername ASC;")
-        entity_queries_list.append("SELECT DISTINCT customers.country from customers ORDER BY customers.country ASC;")
-        entity_queries_list.append("SELECT DISTINCT orders.item from orders ORDER BY orders.item ASC;")
-
-        # Testing the function
-        entity_mapping = entity_node_to_uuids(output_dir, conn, entity_queries_list, db_server)
-
-        # Asserting the corrections of the output
-        custs = list(set(self.customer_names))
-        custs.sort()
-        custs = ['customers_customername_' + elem for elem in custs]
-        counts = list(set(self.country_names))
-        counts.sort()
-        counts = ['customers_country_' + elem for elem in counts]
-        itms = list(set(self.item_names))
-        itms.sort()
-        itms = ['orders_item_' + elem for elem in itms]
-        with open(output_dir / "entity_mapping.txt", "r") as file:
-            lines = file.readlines()
-            lines = [elem.split('\t')[0] for elem in lines]
-
-            # Checking the elements that we added
-            for elem in custs:
-                assert(elem in lines)
-            for elem in counts:
-                assert(elem in lines)
-            for elem in itms:
-                assert(elem in lines)
-        
-        return
-    
     def test_edges_entity_entity(self):
         """
         Testing edges_entity_entity type of queries which generate edges
@@ -240,17 +193,11 @@ class TestConnector():
         edge_entity_entity_queries_list.append("SELECT orders.item, customers.country FROM orders, customers WHERE orders.customerid = customers.id ORDER BY orders.item ASC;")
         edge_entity_entity_rel_list = ["lives_in", "ordered_by_people_from_country"]
 
-        entity_mapping = None
-
-        generate_uuid = False
-
         # Testing the function
         post_processing(output_dir,
                         conn,
                         edge_entity_entity_queries_list,
                         edge_entity_entity_rel_list,
-                        entity_mapping,
-                        generate_uuid,
                         db_server)
         
         # Asserting the correctionness of the output

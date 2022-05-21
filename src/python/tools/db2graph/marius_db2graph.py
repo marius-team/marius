@@ -4,7 +4,6 @@ import mysql.connector
 from mysql.connector import errorcode
 import psycopg2
 from pathlib import Path
-import uuid
 import re
 from omegaconf import OmegaConf
 from pathlib import Path
@@ -44,7 +43,6 @@ def config_parser_fn(config_name):
         - db_user: user name used to access the database
         - db_password: password used to access the database
         - db_host: hostname of the database
-        - entity_node_sql_queries: list of sql queries used to define entity nodes
         - edge_entity_entity_sql_queries: list of sql queries to define edges of type entity nodes to entity nodes 
             & the names of edges
     """
@@ -90,33 +88,6 @@ def config_parser_fn(config_name):
     else:
         logging.error("ERROR: db_host is not defined")
 
-    # generate_uuid is used to identify whether to generate the uuid using entity nodes or 
-    # use the table_name-col_name-value as the unique identifier
-    generate_uuid = None
-    if "generate_uuid" in input_cfg.keys():
-        generate_uuid = input_cfg["generate_uuid"]
-    else:
-        # default is assumed as true
-        generate_uuid = True
-
-    # Getting all the entity nodes sql queries in a list
-    entity_node_sql_queries = list()
-    if "entity_node_queries" in input_cfg.keys():
-        query_filepath = input_cfg["entity_node_queries"]
-
-        if not Path(query_filepath).exists():
-            raise ValueError("{} does not exist".format(str(query_filepath)))
-
-        file = open(query_filepath, 'r')
-        entity_node_sql_queries = file.readlines()
-        for i in range(len(entity_node_sql_queries)):
-            # Removing the last '\n' character
-            if (entity_node_sql_queries[i][-1] == '\n'):
-                entity_node_sql_queries[i] = entity_node_sql_queries[i][:-1]
-    else:
-        logging.error("ERROR: entity_node_queries is not defined")
-        exit(1)
-
     # Getting all edge queries for edge type entity node to entity node
     edge_entity_entity_sql_queries = list()
     edge_entity_entity_rel_list = list()
@@ -143,7 +114,7 @@ def config_parser_fn(config_name):
         logging.error("ERROR: edges_entity_entity_queries is not defined")
         exit(1)
 
-    return db_server, db_name, db_user, db_password, db_host, generate_uuid, entity_node_sql_queries, edge_entity_entity_sql_queries,\
+    return db_server, db_name, db_user, db_password, db_host, edge_entity_entity_sql_queries,\
      edge_entity_entity_rel_list
 
 def connect_to_db(db_server, db_name, db_user, db_password, db_host):
@@ -162,10 +133,9 @@ def connect_to_db(db_server, db_name, db_user, db_password, db_host):
     if db_server == 'maria-db' or db_server == 'my-sql':
         try:
             cnx = mysql.connector.connect(user=db_user,
-                                        password=db_password,  # change password to your own
+                                        password=db_password,
                                         host=db_host,
                                         database=db_name)
-            # cursor = cnx.cursor(name="my_cursor") # Make cursor only when you need it
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 logging.error(f"Incorrect user name or password\n{err}")
@@ -177,17 +147,9 @@ def connect_to_db(db_server, db_name, db_user, db_password, db_host):
     elif db_server == 'postgre-sql':
         try:
             cnx = psycopg2.connect(user=db_user,
-                                 password=db_password,  # change password to your own
+                                 password=db_password,
                                  host=db_host,
                                  database=db_name)
-            # Note: It is important to have cursor name in psycopg else all the data will be transfered 
-            # to client application and lead to out-of-memory error with just cursor.execute()
-            # Reference: https://www.psycopg.org/docs/usage.html#server-side-cursors
-            # Or: https://stackoverflow.com/questions/28343240/psycopg2-uses-up-memory-on-large-select-query
-            
-            # Make cursor only when you need it - As named cursor can only execute one query so need to make new ones
-            # cursor = cnx.cursor(name="my_cursor")
-
         except psycopg2.Error as err:
             logging.error(f"Error\n{err}")
 
@@ -195,41 +157,6 @@ def connect_to_db(db_server, db_name, db_user, db_password, db_host):
         logging.error('Other databases are currently not supported.')
     
     return cnx
-
-def validation_check_entity_queries(entity_query_list):
-    """
-    Ensures that the entity queries are correctly formatted.
-
-    :param entity_query_list: List of entity queries and each will be checked and validated
-    :return new_query_list: List of new queries with necessary updates
-    """
-    # Format: SELECT DISTINCT table_name.col_name FROM ____ WHERE ____;
-    new_query_list = list()
-    for q in range(len(entity_query_list)):
-        qry_split = entity_query_list[q].split()
-        
-        check_var = qry_split[0].lower() # To ensure no case sensitivity issues
-        if (check_var != "select"):
-            logging.error("Error: Incorrect entity query formatting, not starting with SELECT")
-            exit(1)
-        
-        check_var = qry_split[1].lower()
-        if (check_var != "distinct"):
-            logging.error("Adding distinct to the entity query " + str(q) +" (0 indexed position)")
-            qry_split.insert(1,"distinct")
-        
-        check_split = qry_split[2].split('.')
-        if (len(check_split) != 2):
-            logging.error("Error: Incorrect entity query formatting, table_name.col_name should in the SELECT line")
-            exit(1) 
-        
-        check_var = qry_split[3].lower()
-        if (check_var != "from"):
-            logging.error("Error: Incorrect entity query formatting, FROM not at correct position")
-            exit(1)
-        
-        new_query_list.append(' '.join(qry_split))
-    return new_query_list
 
 def validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list):
     """
@@ -286,15 +213,6 @@ def clean_token(token):
     token = token.strip().strip("\t.\'\" ")
     return token.lower()
 
-def get_uuid(row):
-    """
-    Gets the UUID associated with entity_node on this row consisting of a three-tuple
-
-    :param row: a row in the dataframe
-    :return uuid: the UUID associated with entity_node on this row
-    """
-    return uuid.uuid5(uuid.NAMESPACE_DNS, row['entity_node'])
-
 def get_init_fetch_size():
     """
     In an initial pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory() 
@@ -341,99 +259,16 @@ def get_cursor(cnx, db_server, cursor_name):
         cursor = cnx.cursor(name = cursor_name)
     return cursor
 
-def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
-    """
-    Takes entity node queries as inputs, execute the queries, store the results in temp dataframes,
-    then concatenate each entity node with its respective table name & column name, 
-    convert each into uuid, and store the mapping in a dictionary
-    Assumption: Entries are case insentitive, i.e. 'BOB' and 'bob' are considered as duplicates
-
-    :param output_dir: Directory to put output file
-    :param cnx: Cursor object
-    :param entity_queries_list: List of all the entity queries 
-    :param db_server: Database server name
-    :return entity_mapping: dictionary of Entity_nodes mapping to UUIDs
-    """
-    logging.info('starting entity_node_to_uuids')
-    entity_mapping = pd.DataFrame()
-
-
-    fetch_size = FETCH_SIZE
-    # New post processing code for edges entity node to entity nodes
-    for i in range(len(entity_queries_list)):
-        start_time2 = time.time()
-        first_pass = True
-
-        # Executing the query and timing it
-        add_time1 = time.time()
-        query = entity_queries_list[i]
-        cursor_name = "entity_queries_list" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
-        cursor = get_cursor(cnx, db_server, cursor_name)
-        cursor.execute(query)
-        logging.info(f'Cursor.execute time is: {time.time() - add_time1}')
-
-        # Getting Basic Details
-        # extracting table and column names
-        table_name = query.split()[2].split('.')[0]  # table name of the query to execute
-        col_name = str(query.split()[2].split('.')[1]) # column name of the query
-        
-        # Processing each batch of cursor on client
-        rows_completed = 0
-
-        # In an initial sample pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory() 
-        # process data with fetch_size=10000, record the amount of memory used,
-        # increase fetch_size if the amount of memory used is less than half of machine's total available memory, 
-        # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
-        if first_pass:
-            limit_fetch_size, mem_copy_used = get_init_fetch_size()
-
-        # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
-        # expected that user db does not have dupliacted
-        while (True): # Looping till all rows are completed and processed
-            result = cursor.fetchmany(fetch_size)
-            result = pd.DataFrame(result)
-            if (result.shape[0] == 0):
-                break
-
-            # Cleaning Part
-            result = result.applymap(clean_token)  # strip tokens and lower case strings
-            result = result[~result.iloc[:, 0].isin(INVALID_ENTRY_LIST)] # clean invalid data
-            result = result.drop_duplicates()  # remove invalid row
-
-            # concatenate each entity node with its respective table nam
-            result[result.columns[0]] = table_name + '_' + col_name + '_' + result[result.columns[0]].map(str)
-
-            result['uuid'] = ''
-            result.columns = ['entity_node', 'uuid']
-            result['entity_node'] = result['entity_node'].str.lower() # entries in lower case
-            result = result.drop_duplicates() # removing duplicates
-            result['uuid'] = result.apply(lambda row: get_uuid(row), axis=1) # convert each entity node to uuid
-            entity_mapping = pd.concat([entity_mapping, result]).drop_duplicates()
-
-            result.to_csv(output_dir / Path("entity_mapping.txt"), sep='\t',\
-                header=False, index=False, mode='a') # Appending the output to disk
-            del result
-            rows_completed += fetch_size
-
-            # update fetch_size based on current snapshot of the machine's memory usage
-            if first_pass:
-                fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
-                first_pass = False 
-        logging.info(f'finishing converting entity nodes to uuid, execution time: {time.time() - start_time2}')
-    return entity_mapping.set_index('entity_node').to_dict()['uuid']
-
-def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, 
-    entity_mapping, generate_uuid, db_server):
+def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, db_server):
     """
     Executes the given queries_list one by one, cleanses the data by removing duplicates,
-    then replace the entity nodes with their respective UUIDs, and store the final result in a dataframe/.txt file
+    then append the entity nodes with tableName_colName which works as Unique Identifier, 
+    and store the final result in a dataframe/.txt file
 
     :param output_dir: Directory to put output file
     :param cnx: Cursor object
     :param edge_entity_entity_queries_list: List of all the queries defining edges from entity nodes to entity nodes
     :param edge_entity_entity_rel_list: List of all the relationships defining edges from entity nodes to entity nodes
-    :param entity_mapping: dictionary of Entity_nodes mapping to UUIDs
-    :param generate_uuid: boolean value, if true converts entity nodes to UUID, else skip the conversion
     :param db_server: database server name
     :return 0: 0 for success, exit code 1 for failure
     """
@@ -449,7 +284,6 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     num_uniq = []  # number of entities
     num_edge_type = []  # number of edges
     
-
     fetch_size = FETCH_SIZE
     # generating edges entity node to entity nodes
     for i in range(len(edge_entity_entity_queries_list)):
@@ -499,19 +333,8 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
             result.iloc[:, 1] = table_name2 + "_" + col_name2 + '_' + result.iloc[:, 1] # dst/target
             result.insert(1, "rel", edge_entity_entity_rel_list[i])  # rel
             result.columns = ["src", "rel", "dst"]
-            
-            if generate_uuid:
-                # convert entity nodes to respective UUIDs
-                result['src'] = result['src'].map(entity_mapping)
-                if (result['src'].isna().any()):
-                    logging.warning(f'Some src column entities did not map in edges_entity_entity')
-                    exit(1)
-                
-                result['dst'] = result['dst'].map(entity_mapping)
-                if (result['dst'].isna().any()):
-                    logging.warning(f'Some dst column entities did not map in edges_entity_entity')
-                    exit(1)
 
+            # storing the output
             result.to_csv(output_dir / Path("all_edges.txt"), sep='\t',\
                 header=False, index=False, mode='a') # Appending the output to disk
             del result
@@ -521,7 +344,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
             if first_pass:
                 fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
                 first_pass = False
-        logging.info(f'finishing post_processing enttiy nodes, execution time: {time.time() - start_time2}')
+        logging.info(f'finishing post_processing entity nodes, execution time: {time.time() - start_time2}')
 
     return 0
 
@@ -536,10 +359,8 @@ def main():
     db_user = ret_data[2]
     db_password = ret_data[3]
     db_host = ret_data[4]
-    generate_uuid = ret_data[5]
-    entity_queries_list = ret_data[6]
-    edge_entity_entity_queries_list = ret_data[7]
-    edge_entity_entity_rel_list = ret_data[8]
+    edge_entity_entity_queries_list = ret_data[5]
+    edge_entity_entity_rel_list = ret_data[6]
 
     output_dir = Path(args.output_directory)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -549,18 +370,13 @@ def main():
 
     try:
         logging.info('Starting a new run!!!\n')
-        # returning both cnx & cursor because cnx is main object deleting it leads to lose of cursor
-        cnx = connect_to_db(db_server, db_name, db_user, db_password, db_host)
-        if generate_uuid:
-            entity_queries_list = validation_check_entity_queries(entity_queries_list)
-            entity_mapping = entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server)
-        else:
-            entity_mapping = None
-        edge_entity_entity_queries_list = validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
         
-        post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, entity_mapping,
-                        generate_uuid, db_server)  # this is the pd dataframe
-        # convert_to_int() should be next, but we are relying on the Marius' preprocessing module
+        cnx = connect_to_db(db_server, db_name, db_user, db_password, db_host)
+        
+        # Generating edges
+        edge_entity_entity_queries_list = validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
+        post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, db_server)
+
         cnx.close()
         logging.info(f'Total execution time: {time.time()-total_time}\n')
         logging.info('Edge file written to ' + str(output_dir / Path("all_edges.txt")))

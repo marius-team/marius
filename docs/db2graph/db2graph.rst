@@ -33,7 +33,7 @@ System Design
 
 Db2Graph classifies a graph into the following two types:
 
-* Entity Nodes: Nodes that are globally unique either by UUID's (Universally Unique Identifier) or in the format of ``table-name_col-name_val``. In a graph, entity nodes either point to other entity nodes or are pointed to by other entity nodes.
+* Entity Nodes: Nodes that are globally unique. Global uniqueness is ensured by appending ``table-name_col-name_val`` to the literal. In a graph, entity nodes either point to other entity nodes or are pointed to by other entity nodes.
 * Edges of Entity Node to Entity Node: Directed edges where both source and destination are entity nodes.
 
 During the conversion, we assume that all nodes are **case insensitive**. We ignore the following set of **invalid nodes names**: ``"0", None, "", 0, "not reported", "None", "none"``.
@@ -45,14 +45,13 @@ How to Use
 
 Assuming a database has been created locally and ``marius`` has been installed successfully, database to graph conversion with Db2Graph can be achieved in the following steps: 
 
-#. | First, create a YAML configuration file ``config.yaml`` and two query definition files to contain SQL SELECT queries of type ``entity_node_queries`` and ``edges_entity_entity_queries``. Assume that the config file and all query files are placed in a ``./conf/`` directory. 
+#. | First, create a YAML configuration file ``config.yaml`` and a query definition files to contain SQL SELECT queries of type ``edges_entity_entity_queries``. Assume that the config file and query file are placed in a ``./conf/`` directory. 
 
     .. code-block:: bash
     
        $ ls -l .
        conf/  
          config.yaml                         # config file
-         entity_node.txt                     # defines entity_node_queries
          edges_entity_entity.txt             # defines edges_entity_entity_queries
 
    | Define the configuration file in ``config.yaml``. Below is a sample configuration file. Note that all fields are required. An error would be thrown if the query files do not exist.
@@ -64,8 +63,6 @@ Assuming a database has been created locally and ``marius`` has been installed s
             db_user: sample_user
             db_password: sample_password
             db_host: localhost
-            generate_uuid: false 
-            entity_node_queries: conf/entity_nodes.txt
             edges_entity_entity_queries: conf/edges_entity_entity.txt
 
     .. list-table::
@@ -96,28 +93,12 @@ Assuming a database has been created locally and ``marius`` has been installed s
          - String
          - Denotes the hostname of the database.
          - Yes
-       * - generate_uuid
-         - Boolean
-         - If true, converts entity_nodes to UUID's as globally unique identifiers. If false, defaults to use ``table-name_col-name_val`` as global unigue identifiers. Options: [“true”, “false”].
-         - Yes
-       * - entity_node_queries
-         - String
-         - Path to the text file that contains the SQL SELECT queries of entity nodes.
-         - Yes
        * - edges_entity_entity_queries
          - String
          - Path to the text file that contains the SQL SELECT queries fetching edges from entity nodes to entity nodes.
          - Yes
 
-#. | Next, define SQL SELECT queries. Assume the file ``conf/entity_nodes.txt`` has been created. In it, define SQL queries with the following format. Each SQL SELECT query represent an entity node in the graph. Note that SQL key word ``DISTINCT`` is optional & you can use any SQL key word after WHERE.:
-
-    .. code-block:: sql
-       
-       SELECT [DISTINCT] table_name.column_name_A FROM table_name WHERE ...; -- this row represents entity node A
-       SELECT [DISTINCT] table_name.column_name_B FROM table_name WHERE ...; -- this row represents entity node B
-       SELECT [DISTINCT] table_name.column_name_C FROM table_name WHERE ...; -- this row represents entity node C
-
-   | Assume the file ``conf/edges_entity_entity.txt`` has been created. In it, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that ``DISTINCT`` is not needed here.
+#. | Next, define SQL SELECT queries. Assume the file ``conf/edges_entity_entity.txt`` has been created. In it, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that you can any SQL keyword after WHERE clause.
     
     .. code-block:: sql
            
@@ -126,17 +107,18 @@ Assuming a database has been created locally and ``marius`` has been installed s
            relation_name_B_to_C -- this is the name of the edge from B to C
            SELECT table1_name.column_name_B, table2_name.column_name_C FROM table1_name, table2_name WHERE ...; -- this row represents an edge from source entity node B to destination entity node C
 
-   | The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database.
+   | The user can expand or shorten the list of queries in the above query definition file to query a certain subset of data from the database.
 
    .. note:: 
        Db2Graph validates the correctness of format of each query. However, it does not validate the correctness of the queries. That is, it assumes that all column names and table names exist in the given database schema provided by the user. An error will be thrown in the event that the validation check fails.
     
-#. | Lastly, execute Db2Graph with the following commands. Two flags are required. Note that only error information will be printed, all information will be logged to ``./output_dir/output.log``:
+#. | Lastly, execute Db2Graph with the following commands. Two flags are required. Note that prints will include both errors and general information, and those are also logged to ``./output_dir/output.log``:
 
     .. code-block:: bash
         
            $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
            Starting a new run!!!
+           ...
            Edge file written to output_dir/all_edges.txt
 
    | The  ``--config_path`` flag specifies where the configuration file created by the user is.
@@ -153,7 +135,6 @@ Assuming a database has been created locally and ``marius`` has been installed s
              output.log                          # output log file
            conf/  
              config.yaml                         # config file
-             entity_node.txt                     # defines entity_node_queries
              edges_entity_entity.txt             # defines edges_entity_entity_queries    
           $ cat output_dir/all_edges.txt
           column_name_A    relation_name_A_to_B    column_name_B
@@ -201,7 +182,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
    
    | This creates 15 tables containing information about actors, movies, keywords, production companies, production countries, as well as credits data.
    
-   | Install Marius and the required dependencies for Db2Graph.
+   | Install ``marius_db2graph`` and the required dependencies.
    
    .. code-block:: bash 
        
@@ -215,7 +196,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
        $ cd marius
        $ MARIUS_NO_BINDINGS=1 python3 -m pip install . 
 
-#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml``, ``conf/entity_nodes.txt``, and ``conf/edges_entity_entity.txt`` files if they have not been created. 
+#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml`` and ``conf/edges_entity_entity.txt`` files if they have not been created. 
 
     .. code-block:: bash 
        
@@ -232,8 +213,6 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
             db_user: postgres
             db_password: password
             db_host: 127.0.0.1
-            generate_uuid: false 
-            entity_node_queries: conf/entity_nodes.txt
             edges_entity_entity_queries: conf/edges_entity_entity.txt
 
    | In ``conf/edges_entity_entity.txt``, define the following queries. Note that we create three edges/relationships: An actor acted in a movie; A movie directed by a director; A movie produced by a production company.
@@ -249,8 +228,6 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
 
    | For simplicity, we limit the queries to focus on the movies table. The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database.
 
-   | The ``conf/entity_nodes.txt`` is empty. We don't need to define it in this example.
-
    .. note::
        
        The queries above have ``ORDER BY`` clause at the end, which is not compulsory (and can have performance impact). We have kept it for the example because it will ensure same output across multiple runs. For optimal performance remove the ``ORDER BY`` clause.
@@ -261,6 +238,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
         
            $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
            Starting a new run!!!
+           ...
            Edge file written to output_dir/all_edges.txt
 
    | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679923 edges representing the three relationships we defined earlier:
