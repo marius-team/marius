@@ -240,9 +240,6 @@ class TestConnector():
         edge_entity_entity_queries_list.append("SELECT orders.item, customers.country FROM orders, customers WHERE orders.customerid = customers.id ORDER BY orders.item ASC;")
         edge_entity_entity_rel_list = ["lives_in", "ordered_by_people_from_country"]
 
-        edge_entity_feature_val_queries_list = []
-        edge_entity_feature_val_rel_list = []
-
         entity_mapping = None
 
         generate_uuid = False
@@ -252,8 +249,6 @@ class TestConnector():
                         conn,
                         edge_entity_entity_queries_list,
                         edge_entity_entity_rel_list,
-                        edge_entity_feature_val_queries_list,
-                        edge_entity_feature_val_rel_list,
                         entity_mapping,
                         generate_uuid,
                         db_server)
@@ -292,74 +287,6 @@ class TestConnector():
         correct_output.append(f"orders_item_taco sauce\tordered_by_people_from_country\tcustomers_country_spain\n")
         correct_output.append(f"orders_item_tomato\tordered_by_people_from_country\tcustomers_country_spain\n")
         correct_output.append(f"orders_item_wasabi\tordered_by_people_from_country\tcustomers_country_japan\n")
-        with open(output_dir / "all_edges.txt", "r") as file:
-            for line in file:
-                assert(line in correct_output)
-        
-        return
-    
-    def test_edges_entity_feature_values(self):
-        """
-        Testing the edges_entity_feature_values function
-        """
-        self.fill_db() # Filling the database with the test data
-
-        # Getting all the inputs to the function
-        output_dir = Path("output_dir_edges_entity_feature_values/")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        db_server = 'postgre-sql'
-        
-        conn = psycopg2.connect(database = self.database,
-                                user = self.user,
-                                password = self.password,
-                                host = self.host,
-                                port = self.port)
-        
-        edge_entity_entity_queries_list = []
-        edge_entity_entity_rel_list = []
-
-        edge_entity_feature_val_queries_list = []
-        edge_entity_feature_val_queries_list.append("SELECT orders.item, orders.amount FROM orders ORDER BY orders.item ASC;")
-        edge_entity_feature_val_rel_list = ["costs"]
-
-        entity_mapping = None
-
-        generate_uuid = False
-
-        # Testing the function
-        post_processing(output_dir,
-                        conn,
-                        edge_entity_entity_queries_list,
-                        edge_entity_entity_rel_list,
-                        edge_entity_feature_val_queries_list,
-                        edge_entity_feature_val_rel_list,
-                        entity_mapping,
-                        generate_uuid,
-                        db_server)
-        
-        # Asserting the correctionness of the output
-        # Predefined correct output for the input queries
-        correct_output = []
-
-        # expected outputs for query
-        correct_output.append(f"orders_item_chicken breast\tcosts\t12\n")
-        correct_output.append(f"orders_item_croissant\tcosts\t6\n")
-        correct_output.append(f"orders_item_cumin\tcosts\t5\n")
-        correct_output.append(f"orders_item_eggs\tcosts\t1\n")
-        correct_output.append(f"orders_item_fenugreek\tcosts\t5\n")
-        correct_output.append(f"orders_item_meatballs\tcosts\t8\n")
-        correct_output.append(f"orders_item_onions\tcosts\t3\n")
-        correct_output.append(f"orders_item_oregano\tcosts\t2\n")
-        correct_output.append(f"orders_item_rice\tcosts\t9\n")
-        correct_output.append(f"orders_item_root beer\tcosts\t2\n")
-        correct_output.append(f"orders_item_salmon\tcosts\t20\n")
-        correct_output.append(f"orders_item_sourdough bread\tcosts\t11\n")
-        correct_output.append(f"orders_item_soy sauce\tcosts\t7\n")
-        correct_output.append(f"orders_item_taco sauce\tcosts\t4\n")
-        correct_output.append(f"orders_item_tomato\tcosts\t3\n")
-        correct_output.append(f"orders_item_wasabi\tcosts\t15\n")
-
         with open(output_dir / "all_edges.txt", "r") as file:
             for line in file:
                 assert(line in correct_output)

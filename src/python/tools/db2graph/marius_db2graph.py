@@ -47,8 +47,6 @@ def config_parser_fn(config_name):
         - entity_node_sql_queries: list of sql queries used to define entity nodes
         - edge_entity_entity_sql_queries: list of sql queries to define edges of type entity nodes to entity nodes 
             & the names of edges
-        - edge_entity_feature_values_sql_queries: list of sql queries to define edges of type entity node to feature 
-            values & also the names of edges
     """
     input_cfg = None
     input_config_path = Path(config_name).absolute()
@@ -145,33 +143,8 @@ def config_parser_fn(config_name):
         logging.error("ERROR: edges_entity_entity_queries is not defined")
         exit(1)
 
-    # Gettting all edge queries for edge type entity node to feature values
-    edge_entity_feature_values_sql_queries = list()
-    edge_entity_feature_values_rel_list = list()
-    if "edges_entity_feature_values_queries" in input_cfg.keys():
-        query_filepath = input_cfg["edges_entity_feature_values_queries"]
-
-        if not Path(query_filepath).exists():
-            raise ValueError("{} does not exist".format(str(query_filepath)))
-
-        file = open(query_filepath, 'r')
-        read_lines = file.readlines()
-        for i in range(len(read_lines)):
-            # Removing the last '\n' character
-            if (read_lines[i][-1] == '\n'):
-                read_lines[i] = read_lines[i][:-1]
-            
-            # Adding the line to rel_list if even else its a query
-            if (i % 2 == 0):
-                edge_entity_feature_values_rel_list.append(read_lines[i])
-            else:
-                edge_entity_feature_values_sql_queries.append(read_lines[i])
-    else:
-        logging.error("ERROR: edges_entity_feature_values_queries is not defined")
-        exit(1)
-
     return db_server, db_name, db_user, db_password, db_host, generate_uuid, entity_node_sql_queries, edge_entity_entity_sql_queries,\
-     edge_entity_entity_rel_list, edge_entity_feature_values_sql_queries, edge_entity_feature_values_rel_list
+     edge_entity_entity_rel_list
 
 def connect_to_db(db_server, db_name, db_user, db_password, db_host):
     """
@@ -299,38 +272,6 @@ def validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
             exit(1)
         
         new_query_list.append(edge_entity_entity_queries_list[q])
-    
-    return new_query_list
-
-def validation_check_edge_entity_feature_val_queries(edge_entity_feature_val_queries_list):
-    """
-    Ensures that the edge_entity_feature_val_queries_list are correctly formatted.
-
-    :param edge_entity_feature_val_queries_list: List of all the queries defining edges from entity node to feature values
-    :return new_query_list: These are updated queries with necessary changes if any
-    """
-    # Format: SELECT table1_name.col1_name, ____ FROM ____ WHERE ____ (and so on);
-    new_query_list = list()
-    for q in range(len(edge_entity_feature_val_queries_list)):
-        qry_split = edge_entity_feature_val_queries_list[q].split(' ')
-        
-        check_var = qry_split[0].lower()
-        if (check_var != "select"):
-            logging.error("Error: Incorrect edge entity node - feature value formatting, " +
-                "not starting with SELECT")
-            exit(1)
-        
-        check_split = qry_split[1].split('.')
-        if (len(check_split) != 2):
-            logging.error("Error: Incorrect edge entity node - feature value formatting, " +
-                "table1_name.col1_name not correctly formatted")
-            exit(1)
-        if (check_split[1][-1] != ','):
-            logging.error("Error: Incorrect edge entity node - feature value formatting, " +
-                "missing ',' at the end of table1_name.col1_name")
-            exit(1)
-        
-        new_query_list.append(edge_entity_feature_val_queries_list[q])
     
     return new_query_list
 
@@ -482,8 +423,7 @@ def entity_node_to_uuids(output_dir, cnx, entity_queries_list, db_server):
     return entity_mapping.set_index('entity_node').to_dict()['uuid']
 
 def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, 
-    edge_entity_feature_val_queries_list, edge_entity_feature_val_rel_list, entity_mapping,
-    generate_uuid, db_server):
+    entity_mapping, generate_uuid, db_server):
     """
     Executes the given queries_list one by one, cleanses the data by removing duplicates,
     then replace the entity nodes with their respective UUIDs, and store the final result in a dataframe/.txt file
@@ -492,8 +432,6 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     :param cnx: Cursor object
     :param edge_entity_entity_queries_list: List of all the queries defining edges from entity nodes to entity nodes
     :param edge_entity_entity_rel_list: List of all the relationships defining edges from entity nodes to entity nodes
-    :param edge_entity_feature_val_queries_list: List of all the queries defining edges from feature nodes to feature nodes
-    :param edge_entity_feature_val_rel_list: List of all the relationships defining edges from feature nodes to feature nodes
     :param entity_mapping: dictionary of Entity_nodes mapping to UUIDs
     :param generate_uuid: boolean value, if true converts entity nodes to UUID, else skip the conversion
     :param db_server: database server name
@@ -501,10 +439,6 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     """
     if (len(edge_entity_entity_queries_list) != len(edge_entity_entity_rel_list)):
         logging.error("Number of queries in edge_entity_entity_queries_list must match number of edges in edge_entity_entity_rel_list")
-        exit(1)
-    
-    if (len(edge_entity_feature_val_queries_list) != len(edge_entity_feature_val_rel_list)):
-        logging.error("Number of queries in edge_entity_feature_val_queries_list must match number of edges in edge_entity_feature_val_rel_list")
         exit(1)
 
     src_rel_dst = pd.DataFrame()
@@ -517,7 +451,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     
 
     fetch_size = FETCH_SIZE
-    # New post processing code for edges entity node to entity nodes
+    # generating edges entity node to entity nodes
     for i in range(len(edge_entity_entity_queries_list)):
         start_time2 = time.time()
         first_pass = True
@@ -589,73 +523,6 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
                 first_pass = False
         logging.info(f'finishing post_processing enttiy nodes, execution time: {time.time() - start_time2}')
 
-    # edges from entity node to feature values processing
-    # Note: feature values will not have table_name and col_name appended
-    fetch_size = FETCH_SIZE
-    for i in range(len(edge_entity_feature_val_queries_list)):
-        start_time2 = time.time()
-        first_pass = True
-
-        # Executing the query and timing it
-        add_time1 = time.time()
-        query = edge_entity_feature_val_queries_list[i]
-        cursor_name = "edge_entity_feature_val_cursor" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
-        cursor = get_cursor(cnx, db_server, cursor_name)
-        cursor.execute(query)
-        logging.info(f'Cursor.execute time is: {time.time() - add_time1}')
-            
-        # Getting Basic Details
-        table_name_list = re.split(' ', query)  # table name of the query to execute
-        table_name1 = table_name_list[1].split('.')[0] # src table
-        col_name1 = table_name_list[1].split('.')[1][:-1] # src column, (note last character ',' is removed)
-        
-        # Processing each batch of cursor on client
-        rows_completed = 0
-
-        # In an initial sample pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory() 
-        # process data with fetch_size=10000, record the amount of memory used,
-        # increase fetch_size if the amount of memory used is less than half of machine's total available memory, 
-        # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
-        if first_pass:
-            mem_copy = psutil.virtual_memory()
-            mem_copy_used = mem_copy.used
-            limit_fetch_size = min(mem_copy.available / 2, 1000000000) # max limit 1 billion
-
-        # Potential issue: There might be duplicates now possible as drop_duplicates over smaller range
-        # expected that user db does not have dupliacted
-        while (True): # Looping till all rows are completed and processed
-            result = cursor.fetchmany(fetch_size)
-            result = pd.DataFrame(result)
-            if (result.shape[0] == 0):
-                break
-
-            # Cleaning Part
-            result = result.applymap(clean_token)  # strip tokens and lower case strings
-            result = result[~result.iloc[:, 1].isin(INVALID_ENTRY_LIST)]  # clean invalid data
-            result = result[~result.iloc[:, 0].isin(INVALID_ENTRY_LIST)]
-            result = result.drop_duplicates()  # remove invalid row
-
-            result.iloc[:, 0] = table_name1 + "_" + col_name1 + '_' + result.iloc[:, 0]   # src
-            result.insert(1, "rel", edge_entity_feature_val_rel_list[i])  # rel
-            result.columns = ["src", "rel", "dst"]
-            
-            if generate_uuid:
-                # convert entity nodes to respective UUIDs
-                result['src'] = result['src'].map(entity_mapping)
-                if (result['src'].isna().any()):
-                    logging.warning(f'Some src column entities did not map in edges_entity_entity')
-                    exit(1)
-
-            result.to_csv(output_dir / Path("all_edges.txt"), sep='\t',\
-                header=False, index=False, mode='a') # Appending the output to disk
-            del result
-            rows_completed += fetch_size
-
-            # update fetch_size based on current snapshot of the machine's memory usage
-            if first_pass:
-                fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
-                first_pass = False 
-        logging.info(f'finishing post_processing feature nodes, execution time: {time.time() - start_time2}')
     return 0
 
 def main():
@@ -673,12 +540,11 @@ def main():
     entity_queries_list = ret_data[6]
     edge_entity_entity_queries_list = ret_data[7]
     edge_entity_entity_rel_list = ret_data[8]
-    edge_entity_feature_val_queries_list = ret_data[9]
-    edge_entity_feature_val_rel_list = ret_data[10]
 
     output_dir = Path(args.output_directory)
     output_dir.mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(filename=output_dir / Path('marius_db2graph.log'), encoding='utf-8', level=logging.INFO, filemode='w') # set filemode='w' if want to start a fresh log file
+    logging.basicConfig(filename=output_dir / Path('marius_db2graph.log'),
+                        encoding='utf-8', level=logging.INFO, filemode='w') # set filemode='w' if want to start a fresh log file
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout)) # add handler to print to console
 
     try:
@@ -691,11 +557,9 @@ def main():
         else:
             entity_mapping = None
         edge_entity_entity_queries_list = validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
-        edge_entity_feature_val_queries_list = validation_check_edge_entity_feature_val_queries(edge_entity_feature_val_queries_list)
         
-        src_rel_dst = post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list,
-            edge_entity_feature_val_queries_list, edge_entity_feature_val_rel_list,
-             entity_mapping, generate_uuid, db_server)  # this is the pd dataframe
+        post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, entity_mapping,
+                        generate_uuid, db_server)  # this is the pd dataframe
         # convert_to_int() should be next, but we are relying on the Marius' preprocessing module
         cnx.close()
         logging.info(f'Total execution time: {time.time()-total_time}\n')

@@ -31,12 +31,10 @@ Db2Graph currently supports graph conversion from three relational database mana
 System Design
 """"""""""""""""""""
 
-Db2Graph classifies a graph into the following four types:
+Db2Graph classifies a graph into the following two types:
 
-* Entity Nodes: Nodes that are globally unique either by UUID's (Universally Unique Identifier) or in the format of ``table-name_col-name_val``. In a graph, entity nodes either point to other entity nodes or feature values, or are pointed to by other entity nodes.
-* Feature Values: Features values define the features of entities nodes and are not globally unique. Feature Values can only be pointed to by entity nodes.
+* Entity Nodes: Nodes that are globally unique either by UUID's (Universally Unique Identifier) or in the format of ``table-name_col-name_val``. In a graph, entity nodes either point to other entity nodes or are pointed to by other entity nodes.
 * Edges of Entity Node to Entity Node: Directed edges where both source and destination are entity nodes.
-* Edges of Entity Node to Feature Value: Directed edges where the source is an entity node and the destination is a feature value.
 
 During the conversion, we assume that all nodes are **case insensitive**. We ignore the following set of **invalid nodes names**: ``"0", None, "", 0, "not reported", "None", "none"``.
 
@@ -47,7 +45,7 @@ How to Use
 
 Assuming a database has been created locally and ``marius`` has been installed successfully, database to graph conversion with Db2Graph can be achieved in the following steps: 
 
-#. | First, create a YAML configuration file ``config.yaml`` and three query definition files to contain SQL SELECT queries of type ``entity_node_queries``, ``edges_entity_entity_queries``, and ``edges_entity_feature_values_queries``. Assume that the config file and all query files are placed in a ``./conf/`` directory. 
+#. | First, create a YAML configuration file ``config.yaml`` and two query definition files to contain SQL SELECT queries of type ``entity_node_queries`` and ``edges_entity_entity_queries``. Assume that the config file and all query files are placed in a ``./conf/`` directory. 
 
     .. code-block:: bash
     
@@ -56,7 +54,6 @@ Assuming a database has been created locally and ``marius`` has been installed s
          config.yaml                         # config file
          entity_node.txt                     # defines entity_node_queries
          edges_entity_entity.txt             # defines edges_entity_entity_queries
-         edges_entity_feature_values.txt     # defines edges_entity_feature_values_queries
 
    | Define the configuration file in ``config.yaml``. Below is a sample configuration file. Note that all fields are required. An error would be thrown if the query files do not exist.
     
@@ -70,7 +67,6 @@ Assuming a database has been created locally and ``marius`` has been installed s
             generate_uuid: false 
             entity_node_queries: conf/entity_nodes.txt
             edges_entity_entity_queries: conf/edges_entity_entity.txt
-            edges_entity_feature_values_queries: conf/edges_entity_feature_values.txt
 
     .. list-table::
        :widths: 15 10 50 15
@@ -112,10 +108,6 @@ Assuming a database has been created locally and ``marius`` has been installed s
          - String
          - Path to the text file that contains the SQL SELECT queries fetching edges from entity nodes to entity nodes.
          - Yes
-       * - edges_entity_feature_values_queries
-         - String
-         - Path to the text file that contains the SQL SELECT queries fetching edges from entity nodes to feature values.
-         - Yes
 
 #. | Next, define SQL SELECT queries. Assume the file ``conf/entity_nodes.txt`` has been created. In it, define SQL queries with the following format. Each SQL SELECT query represent an entity node in the graph. Note that SQL key word ``DISTINCT`` is optional & you can use any SQL key word after WHERE.:
 
@@ -125,7 +117,7 @@ Assuming a database has been created locally and ``marius`` has been installed s
        SELECT [DISTINCT] table_name.column_name_B FROM table_name WHERE ...; -- this row represents entity node B
        SELECT [DISTINCT] table_name.column_name_C FROM table_name WHERE ...; -- this row represents entity node C
 
-   | Assume the files ``conf/edges_entity_entity.txt`` and ``conf/edges_entity_feature_values.txt`` has been created. In them, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that ``DISTINCT`` is not needed here.
+   | Assume the file ``conf/edges_entity_entity.txt`` has been created. In it, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that ``DISTINCT`` is not needed here.
     
     .. code-block:: sql
            
@@ -162,8 +154,7 @@ Assuming a database has been created locally and ``marius`` has been installed s
            conf/  
              config.yaml                         # config file
              entity_node.txt                     # defines entity_node_queries
-             edges_entity_entity.txt             # defines edges_entity_entity_queries
-             edges_entity_feature_values.txt     # defines edges_entity_feature_values_queries    
+             edges_entity_entity.txt             # defines edges_entity_entity_queries    
           $ cat output_dir/all_edges.txt
           column_name_A    relation_name_A_to_B    column_name_B
           column_name_B    relation_name_B_to_C    column_name_C
@@ -224,7 +215,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
        $ cd marius
        $ MARIUS_NO_BINDINGS=1 python3 -m pip install . 
 
-#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml``, ``conf/entity_nodes.txt``, ``conf/edges_entity_entity.txt``, and ``conf/edges_entity_feature_values.txt`` files if they have not been created. 
+#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml``, ``conf/entity_nodes.txt``, and ``conf/edges_entity_entity.txt`` files if they have not been created. 
 
     .. code-block:: bash 
        
@@ -244,7 +235,6 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
             generate_uuid: false 
             entity_node_queries: conf/entity_nodes.txt
             edges_entity_entity_queries: conf/edges_entity_entity.txt
-            edges_entity_feature_values_queries: conf/edges_entity_feature_values.txt
 
    | In ``conf/edges_entity_entity.txt``, define the following queries. Note that we create three edges/relationships: An actor acted in a movie; A movie directed by a director; A movie produced by a production company.
     
@@ -259,7 +249,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
 
    | For simplicity, we limit the queries to focus on the movies table. The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database.
 
-   | Both ``conf/entity_nodes.txt`` and ``conf/edges_entity_feature_values.txt`` are empty. We don't need to define them in this example.
+   | The ``conf/entity_nodes.txt`` is empty. We don't need to define it in this example.
 
    .. note::
        
