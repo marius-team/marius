@@ -13,23 +13,27 @@ import psutil
 import sys
 
 INVALID_ENTRY_LIST = ["0", None, "", 0, "not reported", "None", "none"]
-FETCH_SIZE = 10000
+FETCH_SIZE = int(1E4)
+MAX_FETCH_SIZE = int(1E9)
+OUTPUT_FILE_NAME = "edges.txt"
 
 def set_args():
     parser = argparse.ArgumentParser(
-                description='Db2Graph', prog='db2graph')
+                description='Db2Graph is tool to generate graphs from relational database using SQL queries.\
+                See documentation docs/db2graph for more details.',
+                prog='db2graph')
 
     parser.add_argument('--config_path',
                         metavar='config_path',
                         type=str,
                         default="",
-                        help='Path to the config file')
+                        help='Path to the config file. See documentation docs/db2graph for more details.')
 
     parser.add_argument('--output_directory',
                         metavar='output_directory',
                         type=str,
                         default="./",
-                        help='Directory to put output data and log file')
+                        help='Directory to put output data and log file. See documentation docs/db2graph for more details.')
     return parser
 
 def config_parser_fn(config_name):
@@ -221,7 +225,7 @@ def get_init_fetch_size():
     """
     mem_copy = psutil.virtual_memory()
     mem_copy_used = mem_copy.used
-    limit_fetch_size = min(mem_copy.available / 2, 1000000000) # max fetch_size limit at one billion due to database constraint
+    limit_fetch_size = min(mem_copy.available / 2, MAX_FETCH_SIZE) # max fetch_size limited to MAX_FETCH_SIZE
     return limit_fetch_size, mem_copy_used
 
 def get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used):
@@ -277,8 +281,8 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
         exit(1)
 
     src_rel_dst = pd.DataFrame()
-    open(output_dir / Path("all_edges.txt"), 'w').close() # Clearing the output file
-    logging.info('in postprocessing')
+    open(output_dir / Path(OUTPUT_FILE_NAME), 'w').close() # Clearing the output file
+    logging.info('In post_processing')
 
     # These are just for metrics - Only correct when not batch processing
     num_uniq = []  # number of entities
@@ -335,7 +339,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
             result.columns = ["src", "rel", "dst"]
 
             # storing the output
-            result.to_csv(output_dir / Path("all_edges.txt"), sep='\t',\
+            result.to_csv(output_dir / Path(OUTPUT_FILE_NAME), sep='\t',\
                 header=False, index=False, mode='a') # Appending the output to disk
             del result
             rows_completed += fetch_size
@@ -344,7 +348,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
             if first_pass:
                 fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
                 first_pass = False
-        logging.info(f'finishing post_processing entity nodes, execution time: {time.time() - start_time2}')
+        logging.info(f'Finishing post_processing entity nodes, execution time: {time.time() - start_time2}')
 
     return 0
 
@@ -379,7 +383,7 @@ def main():
 
         cnx.close()
         logging.info(f'Total execution time: {time.time()-total_time}\n')
-        logging.info('Edge file written to ' + str(output_dir / Path("all_edges.txt")))
+        logging.info('Edge file written to ' + str(output_dir / Path(OUTPUT_FILE_NAME)))
     except Exception as e:
         logging.error(e)
         logging.info(f'Total execution time: {time.time()-total_time}\n')

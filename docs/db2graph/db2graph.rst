@@ -19,14 +19,7 @@ Below we lay out the requirements, definitions, and steps for using Db2Graph, an
 Requirements
 """"""""""""""""""""
 
-Db2Graph currently supports graph conversion from three relational database management systems: **MySQL**, **MariaDB**, and **PostgreSQL**. Db2Graph requires no installation and all the required python packages are part of Marius installation. Following are the packages required:
-
-* python >= 3.6  (included in Marius installation)
-* pandas  (included in Marius installation)
-* hydra  (included in Marius installation)
-* psutil  (included in Marius installation)
-* MySQL connector >= 8.0 (included in Marius installation)
-* Psycopg2 >= 2.9 (included in Marius installation)
+Db2Graph currently supports graph conversion from three relational database management systems: **MySQL**, **MariaDB**, and **PostgreSQL**. Db2Graph requires no additional installation as all the required python packages are part of Marius installation. Please refer to `mairus installation <https://github.com/marius-team/marius/blob/main/README.md>`_ for installing the required packages.
 
 System Design
 """"""""""""""""""""
@@ -241,7 +234,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
            ...
            Edge file written to output_dir/all_edges.txt
 
-   | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679923 edges representing the three relationships we defined earlier:
+   | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679924 edges representing the three relationships we defined earlier:
     
     .. code-block:: bash
         
