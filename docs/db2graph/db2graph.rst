@@ -234,7 +234,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
            ...
            Edge file written to output_dir/all_edges.txt
 
-   | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679924 edges representing the three relationships we defined earlier:
+   | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679923 edges representing the three relationships we defined earlier:
     
     .. code-block:: bash
         
@@ -249,3 +249,5 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
           persons_name_조병만	acted_in	movies_title_님아, 그 강을 건너지 마오
           persons_name_2 chainz	acted_in	movies_title_the art of organized noize
           ...
+
+Once the ``edges.txt`` is generated, we can do training and inference using marius. For example if we want to do link prediction using these edges we can follow `Custom Link Prediction example <https://github.com/marius-team/marius/blob/main/docs/examples/python/lp_custom.rst>`_ from the docs. Please refer to docs/examples to see all the examples.
