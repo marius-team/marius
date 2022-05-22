@@ -8,7 +8,7 @@ Introduction
 
 #. Users import/create the database locally
 
-#. Users define the configuration file and entity/edge SQL SELECT queries
+#. Users define the configuration file and edge SQL SELECT queries
 
 #. Db2Graph executes the SQL SELECT queries
 
@@ -38,14 +38,14 @@ How to Use
 
 Assuming a database has been created locally and ``marius`` has been installed successfully, database to graph conversion with Db2Graph can be achieved in the following steps: 
 
-#. | First, create a YAML configuration file ``config.yaml`` and a query definition files to contain SQL SELECT queries of type ``edges_entity_entity_queries``. Assume that the config file and query file are placed in a ``./conf/`` directory. 
+#. | First, create a YAML configuration file ``config.yaml`` and a query definition files to contain SQL SELECT queries of type ``edges_queries``. Assume that the config file and query file are placed in a ``./conf/`` directory. 
 
     .. code-block:: bash
     
        $ ls -l .
        conf/  
          config.yaml                         # config file
-         edges_entity_entity.txt             # defines edges_entity_entity_queries
+         edges_queries.txt             # defines edges_queries
 
    | Define the configuration file in ``config.yaml``. Below is a sample configuration file. Note that all fields are required. An error would be thrown if the query files do not exist.
     
@@ -56,7 +56,7 @@ Assuming a database has been created locally and ``marius`` has been installed s
             db_user: sample_user
             db_password: sample_password
             db_host: localhost
-            edges_entity_entity_queries: conf/edges_entity_entity.txt
+            edges_queries: conf/edges_queries.txt
 
     .. list-table::
        :widths: 15 10 50 15
@@ -86,12 +86,12 @@ Assuming a database has been created locally and ``marius`` has been installed s
          - String
          - Denotes the hostname of the database.
          - Yes
-       * - edges_entity_entity_queries
+       * - edges_queries
          - String
          - Path to the text file that contains the SQL SELECT queries fetching edges from entity nodes to entity nodes.
          - Yes
 
-#. | Next, define SQL SELECT queries. Assume the file ``conf/edges_entity_entity.txt`` has been created. In it, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that you can any SQL keyword after WHERE clause.
+#. | Next, define SQL SELECT queries. Assume the file ``conf/edges_queries.txt`` has been created. In it, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that you can any SQL keyword after WHERE clause.
     
     .. code-block:: sql
            
@@ -112,24 +112,24 @@ Assuming a database has been created locally and ``marius`` has been installed s
            $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
            Starting a new run!!!
            ...
-           Edge file written to output_dir/all_edges.txt
+           Edge file written to output_dir/edges.txt
 
    | The  ``--config_path`` flag specifies where the configuration file created by the user is.
 
    | The  ``--output_directory`` flag specifies where the data will be output and is set by the user. In this example, assume we have not created the output_dir directory. ``db2graph`` will create it for us. 
 
-   | The conversion result will be written to ``all_edges.txt`` in a newly created directory named ``./output_dir``:
+   | The conversion result will be written to ``edges.txt`` in a newly created directory named ``./output_dir``:
     
     .. code-block:: bash
         
            $ ls -l .
            output_dir/
-             all_edges.txt                       # generated file with sets of triples
+             edges.txt                       # generated file with sets of triples
              output.log                          # output log file
            conf/  
              config.yaml                         # config file
-             edges_entity_entity.txt             # defines edges_entity_entity_queries    
-          $ cat output_dir/all_edges.txt
+             edges_queries.txt             # defines edges_queries    
+          $ cat output_dir/edges.txt
           column_name_A    relation_name_A_to_B    column_name_B
           column_name_B    relation_name_B_to_C    column_name_C
     
@@ -189,7 +189,7 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
        $ cd marius
        $ MARIUS_NO_BINDINGS=1 python3 -m pip install . 
 
-#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml`` and ``conf/edges_entity_entity.txt`` files if they have not been created. 
+#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml`` and ``conf/edges_queries.txt`` files if they have not been created. 
 
     .. code-block:: bash 
        
@@ -206,9 +206,9 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
             db_user: postgres
             db_password: password
             db_host: 127.0.0.1
-            edges_entity_entity_queries: conf/edges_entity_entity.txt
+            edges_queries: conf/edges_queries.txt
 
-   | In ``conf/edges_entity_entity.txt``, define the following queries. Note that we create three edges/relationships: An actor acted in a movie; A movie directed by a director; A movie produced by a production company.
+   | In ``conf/edges_queries.txt``, define the following queries. Note that we create three edges/relationships: An actor acted in a movie; A movie directed by a director; A movie produced by a production company.
     
     .. code-block:: sql
            
@@ -232,19 +232,19 @@ We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movie
            $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
            Starting a new run!!!
            ...
-           Edge file written to output_dir/all_edges.txt
+           Edge file written to output_dir/edges.txt
 
-   | The conversion result was written to ``all_edges.txt`` in a newly created directory ``./output_dir``. In ``all_edges.txt``, there should be 679923 edges representing the three relationships we defined earlier:
+   | The conversion result was written to ``edges.txt`` in a newly created directory ``./output_dir``. In ``edges.txt``, there should be 679923 edges representing the three relationships we defined earlier:
     
     .. code-block:: bash
         
            $ ls -l .
            output_dir/
-             all_edges.txt                       # generated file with sets of triples
+             edges.txt                       # generated file with sets of triples
              output.log                          # output log file
            conf/  
              ...    
-          $ cat output_dir/all_edges.txt
+          $ cat output_dir/edges.txt
           persons_name_강계열	acted_in	movies_title_님아, 그 강을 건너지 마오
           persons_name_조병만	acted_in	movies_title_님아, 그 강을 건너지 마오
           persons_name_2 chainz	acted_in	movies_title_the art of organized noize

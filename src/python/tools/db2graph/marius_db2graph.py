@@ -47,7 +47,7 @@ def config_parser_fn(config_name):
         - db_user: user name used to access the database
         - db_password: password used to access the database
         - db_host: hostname of the database
-        - edge_entity_entity_sql_queries: list of sql queries to define edges of type entity nodes to entity nodes 
+        - edges_queries_list: list of sql queries to define edges of type entity nodes to entity nodes 
             & the names of edges
     """
     input_cfg = None
@@ -93,17 +93,16 @@ def config_parser_fn(config_name):
         logging.error("ERROR: db_host is not defined")
 
     # Getting all edge queries for edge type entity node to entity node
-    edge_entity_entity_sql_queries = list()
-    edge_entity_entity_rel_list = list()
-    if "edges_entity_entity_queries" in input_cfg.keys():
-        query_filepath = input_cfg["edges_entity_entity_queries"]
+    edges_queries_list = list()
+    edge_rel_list = list()
+    if "edges_queries" in input_cfg.keys():
+        query_filepath = input_cfg["edges_queries"]
 
         if not Path(query_filepath).exists():
             raise ValueError("{} does not exist".format(str(query_filepath)))
 
-        file = open(query_filepath, 'r')
-        # edge_entity_entity_sql_queries = file.readlines()
-        read_lines = file.readlines()
+        edge_queries_file = open(query_filepath, 'r')
+        read_lines = edge_queries_file.readlines()
         for i in range(len(read_lines)):
             # Removing the last '\n' character
             if (read_lines[i][-1] == '\n'):
@@ -111,15 +110,15 @@ def config_parser_fn(config_name):
             
             # Adding the line to rel_list if even else its a query
             if (i % 2 == 0):
-                edge_entity_entity_rel_list.append(read_lines[i])
+                edge_rel_list.append(read_lines[i])
             else:
-                edge_entity_entity_sql_queries.append(read_lines[i])
+                edges_queries_list.append(read_lines[i])
     else:
-        logging.error("ERROR: edges_entity_entity_queries is not defined")
+        logging.error("ERROR: edges_queries is not defined")
         exit(1)
 
-    return db_server, db_name, db_user, db_password, db_host, edge_entity_entity_sql_queries,\
-     edge_entity_entity_rel_list
+    return db_server, db_name, db_user, db_password, db_host, edges_queries_list,\
+     edge_rel_list
 
 def connect_to_db(db_server, db_name, db_user, db_password, db_host):
     """
@@ -162,17 +161,17 @@ def connect_to_db(db_server, db_name, db_user, db_password, db_host):
     
     return cnx
 
-def validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list):
+def validation_check_edge_entity_entity_queries(edges_queries_list):
     """
     Ensures that the edge_entity_entity_queries are correctly formatted.
 
-    :param edge_entity_entity_queries_list: List of all the queries defining edges from entity nodes to entity nodes
+    :param edges_queries_list: List of all the queries defining edges from entity nodes to entity nodes
     :return new_query_list: These are updated queries with necessary changes if any
     """
     # Format: SELECT table1_name.col1_name, table2_name.col2_name FROM ____ WHERE ____ (and so on);
     new_query_list = list()
-    for q in range(len(edge_entity_entity_queries_list)):
-        qry_split = edge_entity_entity_queries_list[q].split()
+    for q in range(len(edges_queries_list)):
+        qry_split = edges_queries_list[q].split()
         
         check_var = qry_split[0].lower()
         if (check_var != "select"):
@@ -202,7 +201,7 @@ def validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
                 "extra elements after table2_name.col2_name")
             exit(1)
         
-        new_query_list.append(edge_entity_entity_queries_list[q])
+        new_query_list.append(edges_queries_list[q])
     
     return new_query_list
 
@@ -263,7 +262,7 @@ def get_cursor(cnx, db_server, cursor_name):
         cursor = cnx.cursor(name = cursor_name)
     return cursor
 
-def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, db_server):
+def post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_server):
     """
     Executes the given queries_list one by one, cleanses the data by removing duplicates,
     then append the entity nodes with tableName_colName which works as Unique Identifier, 
@@ -271,13 +270,13 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
 
     :param output_dir: Directory to put output file
     :param cnx: Cursor object
-    :param edge_entity_entity_queries_list: List of all the queries defining edges from entity nodes to entity nodes
-    :param edge_entity_entity_rel_list: List of all the relationships defining edges from entity nodes to entity nodes
+    :param edges_queries_list: List of all the queries defining edges from entity nodes to entity nodes
+    :param edge_rel_list: List of all the relationships defining edges from entity nodes to entity nodes
     :param db_server: database server name
     :return 0: 0 for success, exit code 1 for failure
     """
-    if (len(edge_entity_entity_queries_list) != len(edge_entity_entity_rel_list)):
-        logging.error("Number of queries in edge_entity_entity_queries_list must match number of edges in edge_entity_entity_rel_list")
+    if (len(edges_queries_list) != len(edge_rel_list)):
+        logging.error("Number of queries in edges_queries_list must match number of edges in edge_rel_list")
         exit(1)
 
     src_rel_dst = pd.DataFrame()
@@ -290,13 +289,13 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
     
     fetch_size = FETCH_SIZE
     # generating edges entity node to entity nodes
-    for i in range(len(edge_entity_entity_queries_list)):
+    for i in range(len(edges_queries_list)):
         start_time2 = time.time()
         first_pass = True
 
         # Executing the query and timing it
         add_time1 = time.time()
-        query = edge_entity_entity_queries_list[i]
+        query = edges_queries_list[i]
         cursor_name = "edge_entity_entity_cursor" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
         cursor = get_cursor(cnx, db_server, cursor_name)
         cursor.execute(query)
@@ -335,7 +334,7 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
 
             result.iloc[:, 0] = table_name1 + "_" + col_name1 + '_' + result.iloc[:, 0]   # src
             result.iloc[:, 1] = table_name2 + "_" + col_name2 + '_' + result.iloc[:, 1] # dst/target
-            result.insert(1, "rel", edge_entity_entity_rel_list[i])  # rel
+            result.insert(1, "rel", edge_rel_list[i])  # rel
             result.columns = ["src", "rel", "dst"]
 
             # storing the output
@@ -350,8 +349,6 @@ def post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entit
                 first_pass = False
         logging.info(f'Finishing post_processing entity nodes, execution time: {time.time() - start_time2}')
 
-    return 0
-
 def main():
     total_time = time.time()
     parser = set_args()
@@ -363,8 +360,8 @@ def main():
     db_user = ret_data[2]
     db_password = ret_data[3]
     db_host = ret_data[4]
-    edge_entity_entity_queries_list = ret_data[5]
-    edge_entity_entity_rel_list = ret_data[6]
+    edges_queries_list = ret_data[5]
+    edge_rel_list = ret_data[6]
 
     output_dir = Path(args.output_directory)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -378,8 +375,8 @@ def main():
         cnx = connect_to_db(db_server, db_name, db_user, db_password, db_host)
         
         # Generating edges
-        edge_entity_entity_queries_list = validation_check_edge_entity_entity_queries(edge_entity_entity_queries_list)
-        post_processing(output_dir, cnx, edge_entity_entity_queries_list, edge_entity_entity_rel_list, db_server)
+        edges_queries_list = validation_check_edge_entity_entity_queries(edges_queries_list)
+        post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_server)
 
         cnx.close()
         logging.info(f'Total execution time: {time.time()-total_time}\n')
