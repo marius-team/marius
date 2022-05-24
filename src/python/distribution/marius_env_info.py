@@ -103,10 +103,9 @@ def get_marius_info():
     try:
         import marius
         marius_info['install_path'] = marius.__path__[0]
+        marius_info['version'] = version('marius')
     except ImportError:
         return marius_info
-
-    marius_info['version'] = version('marius')
 
     try:
         import marius.nn
