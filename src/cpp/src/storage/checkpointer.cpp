@@ -4,13 +4,10 @@
 
 #include "storage/checkpointer.h"
 
-#include <stdio.h>
-
-#include <filesystem>
-
 #include "configuration/util.h"
 #include "reporting/logger.h"
 #include "storage/io.h"
+#include "storage/storage.h"
 
 Checkpointer::Checkpointer(std::shared_ptr<Model> model, shared_ptr<GraphModelStorage> storage, std::shared_ptr<CheckpointConfig> config) {
     model_ = model;
@@ -20,7 +17,7 @@ Checkpointer::Checkpointer(std::shared_ptr<Model> model, shared_ptr<GraphModelSt
 
 void Checkpointer::create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs) {
     string tmp_checkpoint_dir = checkpoint_dir + "checkpoint_" + std::to_string(epochs) + "_tmp/";
-    std::filesystem::create_directory(tmp_checkpoint_dir);
+    createDir(tmp_checkpoint_dir, false);
 
     std::string new_embeddings_file = tmp_checkpoint_dir + PathConstants::embeddings_file + PathConstants::file_ext;
     std::string new_embeddings_state_file = tmp_checkpoint_dir + PathConstants::embeddings_state_file + PathConstants::file_ext;
@@ -28,15 +25,15 @@ void Checkpointer::create_checkpoint(string checkpoint_dir, CheckpointMeta check
     std::string embeddings_file = checkpoint_dir + PathConstants::embeddings_file + PathConstants::file_ext;
     std::string embeddings_state_file = checkpoint_dir + PathConstants::embeddings_state_file + PathConstants::file_ext;
 
-    if (std::filesystem::exists(embeddings_file)) {
-        std::filesystem::copy(embeddings_file, new_embeddings_file);
-        if (this->config_->save_state) std::filesystem::copy(embeddings_state_file, new_embeddings_state_file);
+    if (fileExists(embeddings_file)) {
+        copyFile(embeddings_file, new_embeddings_file);
+        if (this->config_->save_state) copyFile(embeddings_state_file, new_embeddings_state_file);
     }
 
     this->save(tmp_checkpoint_dir, checkpoint_meta);
 
     string final_checkpoint_dir = checkpoint_dir + "checkpoint_" + std::to_string(epochs) + "/";
-    std::filesystem::rename(tmp_checkpoint_dir, final_checkpoint_dir);
+    renameFile(tmp_checkpoint_dir, final_checkpoint_dir);
 }
 
 void Checkpointer::save(string checkpoint_dir, CheckpointMeta checkpoint_meta) {
