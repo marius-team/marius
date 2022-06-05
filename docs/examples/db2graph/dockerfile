@@ -1,0 +1,12 @@
+# install MySQL
+FROM mysql:8.0
+
+# set environment variables
+ENV MYSQL_DATABASE=sakila \ MYSQL_USER=test \ MYSQL_ROOT_PASSWORD=test
+
+# add database dump files to /docker-entrypoint-initdb.d in the Docker container. The docker-entrypoint.sh file runs .sql files against the MySQL database upon creation
+ADD sakila-db/sakila-1-schema.sql /docker-entrypoint-initdb.d
+ADD sakila-db/sakila-data.sql /docker-entrypoint-initdb.d
+
+# use port 3306
+EXPOSE 3306
