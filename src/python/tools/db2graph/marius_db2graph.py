@@ -366,7 +366,7 @@ def main():
     output_dir = Path(args.output_directory)
     output_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(filename=output_dir / Path('marius_db2graph.log'),
-                        encoding='utf-8', level=logging.INFO, filemode='w') # set filemode='w' if want to start a fresh log file
+                        level=logging.INFO, filemode='w') # set filemode='w' if want to start a fresh log file
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout)) # add handler to print to console
 
     try:

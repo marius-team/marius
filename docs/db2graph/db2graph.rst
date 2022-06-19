@@ -105,6 +105,9 @@ Assuming a database has been created locally and ``marius`` has been installed s
    .. note:: 
        Db2Graph validates the correctness of format of each query. However, it does not validate the correctness of the queries. That is, it assumes that all column names and table names exist in the given database schema provided by the user. An error will be thrown in the event that the validation check fails.
     
+   .. note:: 
+       There cannot be ``AS`` alias within the queries. Any alias violates the correctness of the queries in Db2Graph.
+    
 #. | Lastly, execute Db2Graph with the following commands. Two flags are required. Note that prints will include both errors and general information, and those are also logged to ``./output_dir/output.log``:
 
     .. code-block:: bash
@@ -133,121 +136,385 @@ Assuming a database has been created locally and ``marius`` has been installed s
           column_name_A    relation_name_A_to_B    column_name_B
           column_name_B    relation_name_B_to_C    column_name_C
     
-Example Use Case
+End-to-end Example Use Case
 """"""""""""""""""""
 
-We use `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset>`_ from Kaggle as an example to demonstrate a step-by-step walkthrough from loading a dataset into a PostgreSQL database to defining the edge queries and to converting the database into a graph using Db2Graph. Note the following steps assume the database has not been created and Marius has not been installed.
+We use `the Sakila DVD store database <https://dev.mysql.com/doc/sakila/en/>`_ from MySQL to demonstrate an end-to-end example from converting a database into a graph using Db2Graph to preprocessing and training the dataset using Marius. For simplicity, we have provided a dockerfile and a bash script which install Marius along with Db2Graph and initialize the Sakila database for you. 
 
-#. | First, create a docker container from the PostgreSQL image. This container will contain all of our work in this example. Note that the password of this container, ``password``, will be the password of the database we create.
+#. | First, download an place the provided ``dockerfile`` and ``run.sh`` in the current working directory. Create and run a docker container using the dockerfile. This dockerfile pre-installs Marius and all dependencies needed for using Marius in this end-to-end example. It also copies ``run.sh`` into the container. 
 
     .. code-block:: bash
     
-       $ docker run --name movies_dataset -e POSTGRES_PASSWORD=password -d postgres:12  
-       $ docker exec -it movies_dataset bash # Attach to the container in interactive mode in bash
+       $ docker build -t db2graph_image . # Builds a docker image named db2graph_image
+       $ docker run -it --name db2graph_container -itd db2graph_image # Create the container named db2graph_container
+       $ docker exec -it db2graph_container bash # Run the container in interactive mode in bash
 
-   | Create a PostgreSQL database ``test_db`` with the username set to ``postgres`` and the password being ``password``. (Assuming in the root directory)
+   | In the root directory of the container, execute ``run.sh``. This script downloads and initializes the Sakila database. Note that the username is set to ``root``, the database name is set to ``sakila``, and the password is set to ``password``.
     
        .. code-block:: bash
     
-        $ psql -U postgres
-        > postgres=# create database test_db; 
-        > postgres=# \q
+        $ run.sh
+        $ cd marius/
 
-   | Download `The Movie Dataset <https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset>`_ from Kaggle and load it using `the-movie-database-import <https://github.com/guenthermi/the-movie-database-import.git>`_ script. The script allows for easy import into the PostgreSQL database created in prior steps. Note that we place the downloaded ``archive.zip`` dataset from Kaggle in the ``dataset/`` directory. We skip the downloading step as different ways can be used. 
+   | Perform the following step in MySQL to avoid this password issue https://stackoverflow.com/questions/39281594/error-1698-28000-access-denied-for-user-rootlocalhost. Note that this also resets the password to nothing.
+
+       .. code-block:: bash
+
+        $ mysql -u root
+        > USE mysql;
+        > UPDATE user SET plugin='mysql_native_password' WHERE User='root';
+        > FLUSH PRIVILEGES;
+        > exit;
+        $ service mysql restart
+
+   | To verify that the database has been install correctly:
     
        .. code-block:: bash
     
-        $ git clone https://github.com/guenthermi/the-movie-database-import.git 
-        $ cd the-movie-database-import
-        $ vi db_config.json # update the username, password, host, and db_name fields if applicable. Here, password is changed to 'password' and db_name is 'test_db'
-        $ mkdir dataset/ # create a dataset directory and place the downloaded dataset file in it
-        $ unzip archive.zip # unzip the downloaded dataset file
-        $ python3 loader.py dataset/ # load the dataset files from the path to your dataset folder
-        $ psql -U postgres -d test_db # check what is inside the database now
-        > postgres=# \d
-                                 List of relations
-         Schema |                Name                |   Type   |  Owner
-        --------+------------------------------------+----------+----------
-         public | actors                             | table    | postgres
-         public | actors_id_seq                      | sequence | postgres
+        $ mysql
+        mysql> USE sakila;
+        mysql> SHOW FULL tables;
+        +----------------------------+------------+
+        | Tables_in_sakila           | Table_type |
+        +----------------------------+------------+
+        | actor                      | BASE TABLE |
+        | actor_info                 | VIEW       |
          ...
-        (30 rows)    
-   
-   | This creates 15 tables containing information about actors, movies, keywords, production companies, production countries, as well as credits data.
-   
-   | Install ``marius_db2graph`` and the required dependencies.
-   
-   .. code-block:: bash 
-       
-       $ cd / # back to root directory
-       $ apt-get update
-       $ apt-get install vim
-       $ apt-get install git
-       $ apt-get install python3
-       $ apt-get install python3-pip
-       $ git clone https://github.com/marius-team/marius.git
-       $ cd marius
-       $ MARIUS_NO_BINDINGS=1 python3 -m pip install . 
+        23 rows in set (0.01 sec)    
 
-#. | Next, create the configuration files. From the root directory, create & navigate to an empty directory and create the ``conf/config.yaml`` and ``conf/edges_queries.txt`` files if they have not been created. 
+    .. note::
+       
+       If you see any error of type ``ERROR 2002 (HY000): Can't' connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (111)``, run the command ``systemctl start mysql`` and retry.
+
+#. | Next, create the configuration file for using Db2Graph. Assuming we are in the ``marius/`` root directory, create & navigate to the ``datasets/sakila`` directory. Create the ``conf/config.yaml`` and ``conf/edges_queries.txt`` files if they have not been created. 
 
     .. code-block:: bash 
        
-       $ mkdir empty_dir
-       $ cd empty_dir
-       $ vi conf/config.yaml
+       $ mkdir -p datasets/sakila/conf/
+       $ vi datasets/sakila/conf/config.yaml
+       $ vi datasets/sakila/conf/edges_queries.txt
 
-   | In ``conf/config.yaml``, define the following fields:
+   | In ``datasets/sakila/conf/config.yaml``, define the following fields:
     
     .. code-block:: yaml
         
-            db_server: postgre-sql
-            db_name: test_db
-            db_user: postgres
-            db_password: password
+            db_server: my-sql
+            db_name: sakila
+            db_user: root
+            db_password: 
             db_host: 127.0.0.1
-            edges_queries: conf/edges_queries.txt
+            edges_queries: edges_queries.txt
 
-   | In ``conf/edges_queries.txt``, define the following queries. Note that we create three edges/relationships: An actor acted in a movie; A movie directed by a director; A movie produced by a production company.
+   | In ``datasets/sakila/conf/edges_queries.txt``, define the following queries. Note that we create three edges/relationships: An actor acted in a film; A film sold by a store; A film categorized as a category.
     
     .. code-block:: sql
            
            acted_in
-           SELECT persons.name, movies.title FROM persons, actors, movies WHERE persons.id = actors.person_id AND actors.movie_id = movies.id ORDER BY persons.name ASC;
-           directed_by
-           SELECT movies.title, persons.name FROM persons, directors, movies WHERE persons.id = directors.director_id AND directors.movie_id = movies.id ORDER BY movies.title ASC;
-           produced_by
-           SELECT movies.title, production_companies.name FROM production_companies, movies_production_companies, movies WHERE production_companies.id = movies_production_companies.production_company_id AND movies_production_companies.movie_id = movies.id ORDER BY movies.title ASC;  
+           SELECT actor.first_name, film.title FROM actor, film_actor, film WHERE actor.actor_id = film_actor.actor_id AND film_actor.film_id = film.film_id ORDER BY film.title ASC;
+           sold_by
+           SELECT film.title, address.address FROM film, inventory, store, address WHERE film.film_id = inventory.film_id AND inventory.store_id = store.store_id AND store.address_id = address.address_id ORDER BY film.title ASC;
+           categorized_as
+           SELECT film.title, category.name FROM film, film_category, category WHERE film.film_id = film_category.film_id AND film_category.category_id = category.category_id ORDER BY film.title ASC;  
 
-   | For simplicity, we limit the queries to focus on the movies table. The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database.
+   | For simplicity, we limit the queries to focus on the film table. The user can expand or shorten the list of queries in each of the above query definition files to query a certain subset of data from the database. For the Sakila database structure, please refer to `this MySQL documentation <https://dev.mysql.com/doc/sakila/en/sakila-structure.html>`_.
 
-   .. note::
+    .. note::
        
        The queries above have ``ORDER BY`` clause at the end, which is not compulsory (and can have performance impact). We have kept it for the example because it will ensure same output across multiple runs. For optimal performance remove the ``ORDER BY`` clause.
-
+   
 #. | Lastly, execute Db2Graph with the following script:
 
     .. code-block:: bash
         
-           $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
+           $ marius_db2graph --config_path datasets/sakila/conf/config.yaml --output_directory datasets/sakila/
            Starting a new run!!!
            ...
-           Edge file written to output_dir/edges.txt
+           Edge file written to datasets/sakila/edges.txt
 
-   | The conversion result was written to ``edges.txt`` in a newly created directory ``./output_dir``. In ``edges.txt``, there should be 679923 edges representing the three relationships we defined earlier:
+   | The conversion result was written to ``edges.txt`` in the specified directory ``datasets/sakila/``. In ``edges.txt``, there should be 7915 edges representing the three relationships we defined earlier:
     
     .. code-block:: bash
         
-           $ ls -l .
-           output_dir/
-             edges.txt                       # generated file with sets of triples
-             output.log                          # output log file
+           $ ls -1 datasets/sakila/
+           edges.txt                       # generated file with sets of triples
+           marius_db2graph.log             # output log file
            conf/  
              ...    
-          $ cat output_dir/edges.txt
-          persons_name_강계열	acted_in	movies_title_님아, 그 강을 건너지 마오
-          persons_name_조병만	acted_in	movies_title_님아, 그 강을 건너지 마오
-          persons_name_2 chainz	acted_in	movies_title_the art of organized noize
+          $ cat datasets/sakila/edges.txt
+          actor_first_name_rock   acted_in        film_title_academy dinosaur
+          actor_first_name_mary   acted_in        film_title_academy dinosaur
+          actor_first_name_oprah  acted_in        film_title_academy dinosaur
           ...
 
-Once the ``edges.txt`` is generated, we can do training and inference using marius. For example if we want to do link prediction using these edges we can follow `Custom Link Prediction example <https://github.com/marius-team/marius/blob/main/docs/examples/python/lp_custom.rst>`_ from the docs. Please refer to docs/examples to see all the examples.
+    .. note::
+       
+       This concludes the example for using Db2Graph. For an end-to-end example of using Db2Graph with Marius, continue through the sections below. For example, for a custom link prediction example, follow `Custom Link Prediction example <https://github.com/marius-team/marius/blob/main/docs/examples/python/lp_custom.rst>`_ from the docs. Please refer to docs/examples to see all the examples.
+   
+#. | Preprocessing and training a custom dataset like the Sakila database is straightforward with the ``marius_preprocess`` and ``marius_train`` commands. These commands come with ``marius`` when ``marius`` is installed.
+
+    .. code-block:: bash
+        
+           $  marius_preprocess --output_dir datasets/sakila/ --edges datasets/sakila/edges.txt --dataset_split 0.8 0.1 0.1 --delim="\t"
+           Preprocess custom dataset
+           Reading edges
+           /usr/local/lib/python3.8/dist-packages/marius/tools/preprocess/converters/readers/pandas_readers.py:55: ParserWarning: Falling back to the 'python' engine because the 'c' engine does not support regex separators (separators > 1 char and different from '\s+' are interpreted as regex); you can avoid this warning by specifying engine='python'.
+             train_edges_df = pd.read_csv(self.train_edges, delimiter=self.delim, skiprows=self.header_length, header=None)
+           Remapping Edges
+           Node mapping written to: datasets/sakila/nodes/node_mapping.txt
+           Relation mapping written to: datasets/sakila/edges/relation_mapping.txt
+           Splitting into: 0.8/0.1/0.1 fractions
+           Dataset statistics written to: datasets/sakila/dataset.yaml
+
+   | In the above command, we set ``dataset_split`` to a list of ``0.8 0.1 0.1``. Under the hood, this splits ``edge.txt`` into ``edges/train_edges.bin``, ``edges/validation_edges.bin`` and ``edges/test_edges.bin`` based on the given list of fractions.
+
+   | Note that ``edge.txt`` contains three columns delimited by tabs, so we set ``--delim="\t"``.
+
+   | The  ``--edges`` flag specifies the raw edge list file that ``marius_preprocess`` will preprocess (and train later).
+
+   | The  ``--output_directory`` flag specifies where the preprocessed graph will be output and is set by the user. In this example, assume we have not created the datasets/fb15k_237_example repository. ``marius_preprocess`` will create it for us. 
+
+   | For detailed usages of  ``marius_preprocess``, please execute the following command:
+
+    .. code-block:: bash
+
+        $ marius_preprocess -h
+
+   | Let's check again what was created inside the ``datasets/sakila/`` directory:
+
+    .. code-block:: bash
+
+      $ ls -1 datasets/sakila/ 
+      dataset.yaml                       # input dataset statistics                                
+      nodes/  
+        node_mapping.txt                 # mapping of raw node ids to integer uuids
+      edges/   
+        relation_mapping.txt             # mapping of relations to integer uuids
+        test_edges.bin                   # preprocessed testing edge list 
+        train_edges.bin                  # preprocessed training edge list 
+        validation_edges.bin             # preprocessed validation edge list 
+      conf/                              # directory containing config files
+        ...  
+
+   | Let's check what is inside the generated ``dataset.yaml`` file:
+
+    .. code-block:: bash
+
+      $ cat datasets/sakila/dataset.yaml
+        dataset_dir: /marius/datasets/sakila/
+        num_edges: 6332
+        num_nodes: 1146
+        num_relations: 3
+        num_train: 6332
+        num_valid: 791
+        num_test: 792
+        node_feature_dim: -1
+        rel_feature_dim: -1
+        num_classes: -1
+        initialized: false
+
+    .. note:: 
+      If the above ``marius_preprocess`` command fails due to any missing directory errors, please create the ``<output_directory>/edges`` and ``<output_directory>/nodes`` directories as a workaround.
+
+   | To train a model, we need to define a YAML configuration file based on information created from ``marius_preprocess``. An example YAML configuration file for the Sakila database (link prediction model with DistMult) is given in ``examples/configuration/sakila.yaml``. Note that the ``dataset_dir`` is set to the preprocessing output directory, in our example, ``datasets/sakila/``.
+   
+   | Let's create the same YAML configuration file for the Sakila database from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs. 
+  
+    .. code-block:: bash
+
+      $ vi datasets/sakila/sakila.yaml 
+
+    .. note:: 
+      String values in the configuration file are case insensitive but we use capital letters for convention.
+
+   | First, we define the **model**. We begin by setting all required parameters. This includes ``learning_task``, ``encoder``, ``decoder``, and ``loss``. The rest of the configurations can be fine-tuned by the user.
+
+    .. code-block:: yaml
+    
+        model:
+          learning_task: LINK_PREDICTION # set the learning task to link prediction
+          encoder:
+            layers:
+              - - type: EMBEDDING # set the encoder to be an embedding table with 50-dimensional embeddings
+                  output_dim: 50
+          decoder:
+            type: DISTMULT # set the decoder to DistMult
+            options:
+              input_dim: 50
+          loss:
+            type: SOFTMAX_CE
+            options:
+              reduction: SUM
+          dense_optimizer: # optimizer to use for dense model parameters. In this case these are the DistMult relation (edge-type) embeddings
+              type: ADAM
+              options:
+                learning_rate: 0.1
+          sparse_optimizer: # optimizer to use for node embedding table
+              type: ADAGRAD
+              options:
+                learning_rate: 0.1
+        storage:
+          # omit
+        training:
+          # omit
+        evaluation:
+          # omit
+      
+   | Next, we set the **storage** and **dataset**. We begin by setting all required parameters. This includes ``dataset``. Here, the ``dataset_dir`` is set to ``datasets/sakila/``, which is the preprocessing output directory.
+
+    .. code-block:: yaml
+    
+        model:
+          # omit
+        storage:
+          device_type: cuda
+          dataset:
+            dataset_dir: /marius/datasets/sakila/
+          edges:
+            type: DEVICE_MEMORY
+          embeddings:
+            type: DEVICE_MEMORY
+          save_model: true
+        training:
+          # omit
+        evaluation:
+          # omit
+
+   | Lastly, we configure **training** and **evaluation**. We begin by setting all required parameters. We begin by setting all required parameters. This includes ``num_epochs`` and ``negative_sampling``. We set ``num_epochs=10`` (10 epochs to train) to demonstrate this example. Note that ``negative_sampling`` is required for link prediction.
+
+    .. code-block:: yaml
+    
+        model:
+          # omit
+        storage:
+          # omit
+        training:
+          batch_size: 1000
+          negative_sampling:
+            num_chunks: 10
+            negatives_per_positive: 500
+            degree_fraction: 0.0
+            filtered: false
+          num_epochs: 10
+          pipeline:
+            sync: true
+          epochs_per_shuffle: 1        
+        evaluation:
+          batch_size: 1000
+          negative_sampling:
+            filtered: true
+          pipeline:
+            sync: true   
+
+   | After defining our configuration file, training is run with ``marius_train <your_config.yaml>``.
+
+   | We can now train our example using the configuration file we just created by running the following command (assuming we are in the ``marius`` root directory):
+
+    .. code-block:: bash
+
+      $ marius_train datasets/sakila/sakila.yaml  
+      [2022-06-19 07:01:39.828] [info] [marius.cpp:44] Start initialization
+      [06/19/22 07:01:44.287] Initialization Complete: 4.458s
+      [06/19/22 07:01:44.292] ################ Starting training epoch 1 ################
+      [06/19/22 07:01:44.308] Edges processed: [1000/6332], 15.79%
+      [06/19/22 07:01:44.311] Edges processed: [2000/6332], 31.59%
+      [06/19/22 07:01:44.313] Edges processed: [3000/6332], 47.38%
+      [06/19/22 07:01:44.315] Edges processed: [4000/6332], 63.17%
+      [06/19/22 07:01:44.317] Edges processed: [5000/6332], 78.96%
+      [06/19/22 07:01:44.320] Edges processed: [6000/6332], 94.76%
+      [06/19/22 07:01:44.322] Edges processed: [6332/6332], 100.00%
+      [06/19/22 07:01:44.322] ################ Finished training epoch 1 ################
+      [06/19/22 07:01:44.322] Epoch Runtime: 29ms
+      [06/19/22 07:01:44.322] Edges per Second: 218344.83
+      [06/19/22 07:01:44.322] Evaluating validation set
+      [06/19/22 07:01:44.329]
+      =================================
+      Link Prediction: 1582 edges evaluated
+      Mean Rank: 548.639697
+      MRR: 0.005009
+      Hits@1: 0.000632
+      Hits@3: 0.001264
+      Hits@5: 0.001264
+      Hits@10: 0.001896
+      Hits@50: 0.034766
+      Hits@100: 0.075221
+      =================================
+      [06/19/22 07:01:44.330] Evaluating test set
+      [06/19/22 07:01:44.333]
+      =================================
+      Link Prediction: 1584 edges evaluated
+      Mean Rank: 525.809343
+      MRR: 0.006225
+      Hits@1: 0.000000
+      Hits@3: 0.001263
+      Hits@5: 0.004419
+      Hits@10: 0.005682
+      Hits@50: 0.046086
+      Hits@100: 0.107323
+      =================================
+
+   | After running this configuration for 10 epochs, we should see a result similar to below:
+
+    .. code-block:: bash
+
+      [06/19/22 07:01:44.524] ################ Starting training epoch 10 ################
+      [06/19/22 07:01:44.527] Edges processed: [1000/6332], 15.79%
+      [06/19/22 07:01:44.529] Edges processed: [2000/6332], 31.59%
+      [06/19/22 07:01:44.531] Edges processed: [3000/6332], 47.38%
+      [06/19/22 07:01:44.533] Edges processed: [4000/6332], 63.17%
+      [06/19/22 07:01:44.536] Edges processed: [5000/6332], 78.96%
+      [06/19/22 07:01:44.538] Edges processed: [6000/6332], 94.76%
+      [06/19/22 07:01:44.540] Edges processed: [6332/6332], 100.00%
+      [06/19/22 07:01:44.540] ################ Finished training epoch 10 ################
+      [06/19/22 07:01:44.540] Epoch Runtime: 16ms
+      [06/19/22 07:01:44.540] Edges per Second: 395749.97
+      [06/19/22 07:01:44.540] Evaluating validation set
+      [06/19/22 07:01:44.544]
+      =================================
+      Link Prediction: 1582 edges evaluated
+      Mean Rank: 469.225664
+      MRR: 0.047117
+      Hits@1: 0.030973
+      Hits@3: 0.044880
+      Hits@5: 0.051833
+      Hits@10: 0.071429
+      Hits@50: 0.136536
+      Hits@100: 0.197219
+      =================================
+      [06/19/22 07:01:44.544] Evaluating test set
+      [06/19/22 07:01:44.547]
+      =================================
+      Link Prediction: 1584 edges evaluated
+      Mean Rank: 456.828283
+      MRR: 0.041465
+      Hits@1: 0.023990
+      Hits@3: 0.040404
+      Hits@5: 0.051768
+      Hits@10: 0.068813
+      Hits@50: 0.147096
+      Hits@100: 0.210227
+      =================================
+   
+   | Let's check again what was added in the ``datasets/sakila/`` directory. For clarity, we only list the files that were created in training. Notice that several files have been created, including the trained model, the embedding table, a full configuration file, and output logs:
+
+    .. code-block:: bash
+
+      $ ls datasets/sakila/ 
+      model_0/
+        embeddings.bin                   # trained node embeddings of the graph
+        embeddings_state.bin             # node embedding optimizer state
+        model.pt                         # contains the dense model parameters, embeddings of the edge-types
+        model_stlsate.pt                 # optimizer state of the trained model parameters
+        node_mapping.txt                 # mapping of raw node ids to integer uuids
+        relation_mapping.txt             # mapping of relations to integer uuids
+        full_config.yaml                 # detailed config generated based on user-defined config
+        metadata.csv                     # information about metadata
+        logs/                            # logs containing output, error, debug information, and etc.
+      nodes/  
+        ...
+      edges/   
+        ...
+      ...
+
+    .. note:: 
+        ``model.pt`` contains the dense model parameters. For DistMult, this is the embeddings of the edge-types. For GNN encoders, this file will include the GNN parameters.
+      

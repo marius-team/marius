@@ -1,0 +1,48 @@
+model:
+  learning_task: LINK_PREDICTION # set the learning task to link prediction
+  encoder:
+    layers:
+      - - type: EMBEDDING # set the encoder to be an embedding table with 50-dimensional embeddings
+          output_dim: 50
+  decoder:
+    type: DISTMULT # set the decoder to DistMult
+    options:
+      input_dim: 50
+  loss:
+    type: SOFTMAX_CE
+    options:
+      reduction: SUM
+  dense_optimizer: # optimizer to use for dense model parameters. In this case these are the DistMult relation (edge-type) embeddings
+      type: ADAM
+      options:
+        learning_rate: 0.1
+  sparse_optimizer: # optimizer to use for node embedding table
+      type: ADAGRAD
+      options:
+        learning_rate: 0.1
+storage:
+  device_type: cuda
+  dataset:
+    dataset_dir: /marius/datasets/sakila/
+  edges:
+    type: DEVICE_MEMORY
+  embeddings:
+    type: DEVICE_MEMORY
+  save_model: true
+training:
+  batch_size: 1000
+  negative_sampling:
+    num_chunks: 10
+    negatives_per_positive: 500
+    degree_fraction: 0.0
+    filtered: false
+  num_epochs: 10
+  pipeline:
+    sync: true
+  epochs_per_shuffle: 1
+evaluation:
+  batch_size: 1000
+  negative_sampling:
+    filtered: true
+  pipeline:
+    sync: true
