@@ -146,26 +146,15 @@ We use `the Sakila DVD store database <https://dev.mysql.com/doc/sakila/en/>`_ f
     .. code-block:: bash
     
        $ docker build -t db2graph_image . # Builds a docker image named db2graph_image
-       $ docker run -it --name db2graph_container -itd db2graph_image # Create the container named db2graph_container
+       $ docker run --name db2graph_container -itd db2graph_image # Create the container named db2graph_container
        $ docker exec -it db2graph_container bash # Run the container in interactive mode in bash
 
-   | In the root directory of the container, execute ``run.sh``. This script downloads and initializes the Sakila database. Note that the username is set to ``root``, the database name is set to ``sakila``, and the password is set to ``password``.
+   | In the root directory of the container, execute ``run.sh``. This script downloads and initializes the Sakila database. Note that the username is set to ``root``, the database name is set to ``sakila_user``, and the password is set to ``sakila_password``.
     
        .. code-block:: bash
     
         $ run.sh
         $ cd marius/
-
-   | Perform the following step in MySQL to avoid this password issue https://stackoverflow.com/questions/39281594/error-1698-28000-access-denied-for-user-rootlocalhost. Note that this also resets the password to nothing.
-
-       .. code-block:: bash
-
-        $ mysql -u root
-        > USE mysql;
-        > UPDATE user SET plugin='mysql_native_password' WHERE User='root';
-        > FLUSH PRIVILEGES;
-        > exit;
-        $ service mysql restart
 
    | To verify that the database has been install correctly:
     
@@ -200,10 +189,10 @@ We use `the Sakila DVD store database <https://dev.mysql.com/doc/sakila/en/>`_ f
         
             db_server: my-sql
             db_name: sakila
-            db_user: root
-            db_password: 
+            db_user: sakila_user
+            db_password: sakila_password
             db_host: 127.0.0.1
-            edges_queries: edges_queries.txt
+            edges_queries: datasets/sakila/conf/edges_queries.txt
 
    | In ``datasets/sakila/conf/edges_queries.txt``, define the following queries. Note that we create three edges/relationships: An actor acted in a film; A film sold by a store; A film categorized as a category.
     
