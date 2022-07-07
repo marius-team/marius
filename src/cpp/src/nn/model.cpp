@@ -10,17 +10,14 @@
 
 #include "configuration/constants.h"
 #include "data/samplers/negative.h"
+#include "nn/decoders/edge/decoder_methods.h"
 #include "nn/layers/embedding/embedding.h"
 #include "nn/model_helpers.h"
 #include "reporting/logger.h"
-#include "nn/decoders/edge/decoder_methods.h"
 
-Model::Model(shared_ptr<GeneralEncoder> encoder,
-             shared_ptr<Decoder> decoder,
-             shared_ptr<LossFunction> loss,
-             shared_ptr<Reporter> reporter,
-             std::vector<shared_ptr<Optimizer>> optimizers) : device_(torch::Device(torch::kCPU)) {
-
+Model::Model(shared_ptr<GeneralEncoder> encoder, shared_ptr<Decoder> decoder, shared_ptr<LossFunction> loss, shared_ptr<Reporter> reporter,
+             std::vector<shared_ptr<Optimizer>> optimizers)
+    : device_(torch::Device(torch::kCPU)) {
     encoder_ = encoder;
     decoder_ = decoder;
     loss_function_ = loss;
@@ -57,8 +54,7 @@ Model::Model(shared_ptr<GeneralEncoder> encoder,
 }
 
 void Model::clear_grad() {
-
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < optimizers_.size(); i++) {
         optimizers_[i]->clear_grad();
     }
@@ -71,8 +67,7 @@ void Model::clear_grad_all() {
 }
 
 void Model::step() {
-
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < optimizers_.size(); i++) {
         optimizers_[i]->step();
     }
@@ -85,7 +80,6 @@ void Model::step_all() {
 }
 
 void Model::save(std::string directory) {
-
     string model_filename = directory + PathConstants::model_file;
     string model_state_filename = directory + PathConstants::model_state_file;
     string model_meta_filename = directory + PathConstants::model_config_file;
@@ -99,8 +93,8 @@ void Model::save(std::string directory) {
         std::dynamic_pointer_cast<torch::nn::Module>(decoder_)->save(model_archive);
     }
 
-    // Outputs each optimizer as a <K, V> pair, where key is the loop counter and value 
-    // is the optimizer itself. in Model::load, Optimizer::load is called on each key. 
+    // Outputs each optimizer as a <K, V> pair, where key is the loop counter and value
+    // is the optimizer itself. in Model::load, Optimizer::load is called on each key.
     for (int i = 0; i < optimizers_.size(); i++) {
         torch::serialize::OutputArchive optim_archive;
         optimizers_[i]->save(optim_archive);
@@ -112,7 +106,6 @@ void Model::save(std::string directory) {
 }
 
 void Model::load(std::string directory, bool train) {
-
     string model_filename = directory + PathConstants::model_file;
     string model_state_filename = directory + PathConstants::model_state_file;
 
@@ -126,7 +119,7 @@ void Model::load(std::string directory, bool train) {
     }
 
     int optimizer_idx = 0;
-    for (auto key: state_archive.keys()) {
+    for (auto key : state_archive.keys()) {
         torch::serialize::InputArchive tmp_state_archive;
         state_archive.read(key, tmp_state_archive);
         // optimizers have already been created as part of initModelFromConfig
@@ -141,7 +134,6 @@ void Model::load(std::string directory, bool train) {
 }
 
 void Model::all_reduce() {
-
     torch::NoGradGuard no_grad;
     int num_gpus = device_models_.size();
 
@@ -150,7 +142,6 @@ void Model::all_reduce() {
 
         std::vector<torch::Tensor> input_gradients(num_gpus);
         for (int j = 0; j < num_gpus; j++) {
-
             if (!device_models_[j]->named_parameters()[key].mutable_grad().defined()) {
                 device_models_[j]->named_parameters()[key].mutable_grad() = torch::zeros_like(device_models_[j]->named_parameters()[key]);
             }
@@ -158,9 +149,9 @@ void Model::all_reduce() {
             input_gradients[j] = (device_models_[j]->named_parameters()[key].mutable_grad());
         }
 
-        #ifdef MARIUS_CUDA
+#ifdef MARIUS_CUDA
         torch::cuda::nccl::all_reduce(input_gradients, input_gradients);
-        #endif
+#endif
     }
 
     step_all();
@@ -168,7 +159,6 @@ void Model::all_reduce() {
 }
 
 void Model::setup_optimizers(shared_ptr<ModelConfig> model_config) {
-
     if (model_config->dense_optimizer == nullptr) {
         throw UnexpectedNullPtrException();
     }
@@ -182,33 +172,32 @@ void Model::setup_optimizers(shared_ptr<ModelConfig> model_config) {
     }
 
     // get optimizers we need to keep track of for the encoder
-    for (auto module_name: encoder_->named_modules().keys()) {
+    for (auto module_name : encoder_->named_modules().keys()) {
         if (module_name.empty()) {
             continue;
         }
         auto layer = std::dynamic_pointer_cast<Layer>(encoder_->named_modules()[module_name]);
         if (layer->config_->optimizer == nullptr) {
-            for (auto param_name: layer->named_parameters().keys()) {
+            for (auto param_name : layer->named_parameters().keys()) {
                 param_map[model_config->dense_optimizer].insert(module_name + "_" + param_name, layer->named_parameters()[param_name]);
             }
         } else {
-
             if (!param_map.contains(layer->config_->optimizer)) {
                 torch::OrderedDict<std::string, torch::Tensor> empty_dict;
                 param_map.insert(layer->config_->optimizer, empty_dict);
             }
 
-            for (auto param_name: layer->named_parameters().keys()) {
+            for (auto param_name : layer->named_parameters().keys()) {
                 param_map[layer->config_->optimizer].insert(module_name + "_" + param_name, layer->named_parameters()[param_name]);
             }
         }
     }
 
-    for (auto key: std::dynamic_pointer_cast<torch::nn::Module>(decoder_)->named_parameters().keys()) {
+    for (auto key : std::dynamic_pointer_cast<torch::nn::Module>(decoder_)->named_parameters().keys()) {
         param_map[model_config->dense_optimizer].insert(key, std::dynamic_pointer_cast<torch::nn::Module>(decoder_)->named_parameters()[key]);
     }
 
-    for (auto key: param_map.keys()) {
+    for (auto key : param_map.keys()) {
         switch (key->type) {
             case OptimizerType::SGD: {
                 optimizers_.emplace_back(std::make_shared<SGDOptimizer>(param_map[key], key->options->learning_rate));
@@ -229,12 +218,11 @@ void Model::setup_optimizers(shared_ptr<ModelConfig> model_config) {
 }
 
 int64_t Model::get_base_embedding_dim() {
-
     int max_offset = 0;
     int size = 0;
 
-    for (auto stage: encoder_->layers_) {
-        for (auto layer: stage) {
+    for (auto stage : encoder_->layers_) {
+        for (auto layer : stage) {
             if (layer->config_->type == LayerType::EMBEDDING) {
                 int offset = std::dynamic_pointer_cast<EmbeddingLayer>(layer)->offset_;
 
@@ -253,21 +241,15 @@ int64_t Model::get_base_embedding_dim() {
     return max_offset + size;
 }
 
-bool Model::has_embeddings() {
-    return encoder_->has_embeddings_;
-}
+bool Model::has_embeddings() { return encoder_->has_embeddings_; }
 
-torch::Tensor Model::forward_nc(at::optional<torch::Tensor> node_embeddings,
-                                at::optional<torch::Tensor> node_features,
-                                DENSEGraph dense_graph,
-                                bool train) {
+torch::Tensor Model::forward_nc(at::optional<torch::Tensor> node_embeddings, at::optional<torch::Tensor> node_features, DENSEGraph dense_graph, bool train) {
     torch::Tensor encoded_nodes = encoder_->forward(node_embeddings, node_features, dense_graph, train);
     torch::Tensor y_pred = std::dynamic_pointer_cast<NodeDecoder>(decoder_)->forward(encoded_nodes);
     return y_pred;
 }
 
 std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Model::forward_lp(shared_ptr<Batch> batch, bool train) {
-
     torch::Tensor encoded_nodes = encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, train);
 
     // call proper decoder
@@ -284,10 +266,12 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Model::fo
         throw MariusRuntimeException("Decoder method currently unsupported.");
         std::tie(pos_scores, neg_scores, inv_pos_scores, inv_neg_scores) = neg_and_pos_forward(edge_decoder, batch->edges_, batch->neg_edges_, encoded_nodes);
     } else if (edge_decoder->decoder_method_ == EdgeDecoderMethod::CORRUPT_NODE) {
-        std::tie(pos_scores, neg_scores, inv_pos_scores, inv_neg_scores) = node_corrupt_forward(edge_decoder, batch->edges_, encoded_nodes, batch->dst_neg_indices_mapping_, batch->src_neg_indices_mapping_);
+        std::tie(pos_scores, neg_scores, inv_pos_scores, inv_neg_scores) =
+            node_corrupt_forward(edge_decoder, batch->edges_, encoded_nodes, batch->dst_neg_indices_mapping_, batch->src_neg_indices_mapping_);
     } else if (edge_decoder->decoder_method_ == EdgeDecoderMethod::CORRUPT_REL) {
         throw MariusRuntimeException("Decoder method currently unsupported.");
-        std::tie(pos_scores, neg_scores, inv_pos_scores, inv_neg_scores) = rel_corrupt_forward(edge_decoder, batch->edges_, encoded_nodes, batch->rel_neg_indices_);
+        std::tie(pos_scores, neg_scores, inv_pos_scores, inv_neg_scores) =
+            rel_corrupt_forward(edge_decoder, batch->edges_, encoded_nodes, batch->rel_neg_indices_);
     } else {
         throw MariusRuntimeException("Unsupported encoder method");
     }
@@ -304,7 +288,6 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Model::fo
 }
 
 void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
-
     if (call_step) {
         clear_grad();
     }
@@ -350,9 +333,7 @@ void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
 }
 
 void Model::evaluate_batch(shared_ptr<Batch> batch) {
-
     if (learning_task_ == LearningTask::LINK_PREDICTION) {
-
         auto all_scores = forward_lp(batch, true);
         torch::Tensor pos_scores = std::get<0>(all_scores);
         torch::Tensor neg_scores = std::get<1>(all_scores);
@@ -367,7 +348,6 @@ void Model::evaluate_batch(shared_ptr<Batch> batch) {
             std::dynamic_pointer_cast<LinkPredictionReporter>(reporter_)->addResult(inv_pos_scores, inv_neg_scores);
         }
     } else if (learning_task_ == LearningTask::NODE_CLASSIFICATION) {
-
         torch::Tensor y_pred = forward_nc(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, true);
         torch::Tensor labels = batch->node_labels_;
 
@@ -376,13 +356,11 @@ void Model::evaluate_batch(shared_ptr<Batch> batch) {
     } else {
         throw MariusRuntimeException("Unsupported learning task for evaluation");
     }
-
 }
 
 void Model::broadcast(std::vector<torch::Device> devices) {
-
     int i = 0;
-    for (auto device: devices) {
+    for (auto device : devices) {
         SPDLOG_INFO("Broadcast to GPU {}", device.index());
         if (device != device_) {
             shared_ptr<GeneralEncoder> encoder = encoder_clone_helper(encoder_, device);
@@ -401,7 +379,6 @@ void Model::broadcast(std::vector<torch::Device> devices) {
 }
 
 shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std::vector<torch::Device> devices, int num_relations, bool train) {
-
     shared_ptr<GeneralEncoder> encoder = nullptr;
     shared_ptr<Decoder> decoder = nullptr;
     shared_ptr<LossFunction> loss = nullptr;
@@ -424,18 +401,13 @@ shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std:
     encoder = std::make_shared<GeneralEncoder>(model_config->encoder, devices[0], num_relations);
 
     if (model_config->learning_task == LearningTask::LINK_PREDICTION) {
-
         shared_ptr<EdgeDecoderOptions> decoder_options = std::dynamic_pointer_cast<EdgeDecoderOptions>(model_config->decoder->options);
 
         int last_stage = model_config->encoder->layers.size() - 1;
         int last_layer = model_config->encoder->layers[last_stage].size() - 1;
         int64_t dim = model_config->encoder->layers[last_stage][last_layer]->output_dim;
 
-        decoder = get_edge_decoder(model_config->decoder->type,
-                                   decoder_options->edge_decoder_method,
-                                   num_relations,
-                                   dim,
-                                   tensor_options,
+        decoder = get_edge_decoder(model_config->decoder->type, decoder_options->edge_decoder_method, num_relations, dim, tensor_options,
                                    decoder_options->inverse_edges);
     } else {
         decoder = get_node_decoder(model_config->decoder->type);

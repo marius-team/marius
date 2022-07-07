@@ -12,9 +12,7 @@ FeatureLayer::FeatureLayer(shared_ptr<LayerConfig> layer_config, torch::Device d
     reset();
 }
 
-torch::Tensor FeatureLayer::forward(torch::Tensor input) {
-    return input.narrow(1, offset_, config_->output_dim);
-}
+torch::Tensor FeatureLayer::forward(torch::Tensor input) { return input.narrow(1, offset_, config_->output_dim); }
 
 void FeatureLayer::reset() {
     if (config_->bias) {

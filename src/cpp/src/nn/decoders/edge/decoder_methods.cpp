@@ -4,9 +4,7 @@
 
 #include "nn/decoders/edge/decoder_methods.h"
 
-std::tuple<torch::Tensor, torch::Tensor> only_pos_forward(shared_ptr<EdgeDecoder> decoder,
-                                                          torch::Tensor edges,
-                                                          torch::Tensor node_embeddings) {
+std::tuple<torch::Tensor, torch::Tensor> only_pos_forward(shared_ptr<EdgeDecoder> decoder, torch::Tensor edges, torch::Tensor node_embeddings) {
     torch::Tensor pos_scores;
     torch::Tensor inv_pos_scores;
 
@@ -43,10 +41,8 @@ std::tuple<torch::Tensor, torch::Tensor> only_pos_forward(shared_ptr<EdgeDecoder
     return std::forward_as_tuple(pos_scores, inv_pos_scores);
 }
 
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> neg_and_pos_forward(shared_ptr<EdgeDecoder> decoder,
-                                                                                           torch::Tensor positive_edges,
-                                                                                           torch::Tensor negative_edges,
-                                                                                           torch::Tensor node_embeddings) {
+std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> neg_and_pos_forward(shared_ptr<EdgeDecoder> decoder, torch::Tensor positive_edges,
+                                                                                           torch::Tensor negative_edges, torch::Tensor node_embeddings) {
     torch::Tensor pos_scores;
     torch::Tensor inv_pos_scores;
     torch::Tensor neg_scores;
@@ -58,10 +54,8 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> neg_and_p
     return std::forward_as_tuple(pos_scores, neg_scores, inv_pos_scores, inv_neg_scores);
 }
 
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> node_corrupt_forward(shared_ptr<EdgeDecoder> decoder,
-                                                                                            torch::Tensor positive_edges,
-                                                                                            torch::Tensor node_embeddings,
-                                                                                            torch::Tensor dst_negs,
+std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> node_corrupt_forward(shared_ptr<EdgeDecoder> decoder, torch::Tensor positive_edges,
+                                                                                            torch::Tensor node_embeddings, torch::Tensor dst_negs,
                                                                                             torch::Tensor src_negs) {
     torch::Tensor pos_scores;
     torch::Tensor inv_pos_scores;
@@ -119,10 +113,8 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> node_corr
     return std::forward_as_tuple(pos_scores, neg_scores, inv_pos_scores, inv_neg_scores);
 }
 
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> rel_corrupt_forward(shared_ptr<EdgeDecoder> decoder,
-                                                                                           torch::Tensor positive_edges,
-                                                                                           torch::Tensor node_embeddings,
-                                                                                           torch::Tensor neg_rel_ids) {
+std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> rel_corrupt_forward(shared_ptr<EdgeDecoder> decoder, torch::Tensor positive_edges,
+                                                                                           torch::Tensor node_embeddings, torch::Tensor neg_rel_ids) {
     torch::Tensor pos_scores;
     torch::Tensor inv_pos_scores;
     torch::Tensor neg_scores;

@@ -1,0 +1,10 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check linting with Flake8
+        run: tox -e check_lint

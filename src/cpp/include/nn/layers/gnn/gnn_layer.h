@@ -11,15 +11,14 @@
 #include "nn/initialization.h"
 #include "nn/layers/layer.h"
 
-
 class GNNLayer : public Layer {
-public:
+   public:
     int input_dim_;
     int output_dim_;
 
-    virtual ~GNNLayer() {};
+    virtual ~GNNLayer(){};
 
-    virtual torch::Tensor forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train) {return torch::Tensor();};
+    virtual torch::Tensor forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train) { return torch::Tensor(); };
 };
 
-#endif //MARIUS_GNN_LAYER_H
+#endif  // MARIUS_GNN_LAYER_H

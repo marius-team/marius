@@ -1,20 +1,24 @@
+import os
 import shutil
 import unittest
 from pathlib import Path
-from test.python.constants import TMP_TEST_DIR, TESTING_DATA_DIR
-from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
-from marius.tools.configuration.marius_config import DatasetConfig
-from marius.tools.configuration.constants import PathConstants
-from omegaconf import OmegaConf, MISSING
+from test.python.constants import TESTING_DATA_DIR, TMP_TEST_DIR
+
 import numpy as np
-import torch
-import os
 import pandas as pd
+import torch
+from omegaconf import MISSING, OmegaConf
+
+from marius.tools.configuration.constants import PathConstants
+from marius.tools.configuration.marius_config import DatasetConfig
+from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 
 test_files = ["train_edges.txt", "valid_edges.txt", "test_edges.txt"]
 
 
-def validate_partitioned_output_dir(output_dir: Path, expected_stats: DatasetConfig, num_partitions, dtype=np.int32, partitioned_eval=False):
+def validate_partitioned_output_dir(
+    output_dir: Path, expected_stats: DatasetConfig, num_partitions, dtype=np.int32, partitioned_eval=False
+):
     validate_output_dir(output_dir, expected_stats, dtype, remap_ids=True)
 
     train_edges_path = output_dir / Path(PathConstants.train_edges_path)
@@ -30,16 +34,14 @@ def validate_partitioned_output_dir(output_dir: Path, expected_stats: DatasetCon
     offset = 0
     node_partition_size = np.ceil(expected_stats.num_nodes / num_partitions)
     for i in range(num_partitions):
-
         src_lower_bound = i * node_partition_size
         src_upper_bound = src_lower_bound + node_partition_size
 
         for j in range(num_partitions):
-
-            bucket_size = int(train_buckets_sizes[i*num_partitions + j])
+            bucket_size = int(train_buckets_sizes[i * num_partitions + j])
 
             if bucket_size != 0:
-                edge_bucket = train_edges[offset:offset+bucket_size]
+                edge_bucket = train_edges[offset : offset + bucket_size]
 
                 dst_lower_bound = j * node_partition_size
                 dst_upper_bound = dst_lower_bound + node_partition_size
@@ -125,13 +127,11 @@ class TestTorchConverter(unittest.TestCase):
 
     @classmethod
     def setUp(self):
-
         if not Path(TMP_TEST_DIR).exists():
             Path(TMP_TEST_DIR).mkdir()
 
         for test_file in test_files:
-            shutil.copy(str(Path(TESTING_DATA_DIR) / Path(test_file)),
-                        str(Path(TMP_TEST_DIR) / Path(test_file)))
+            shutil.copy(str(Path(TESTING_DATA_DIR) / Path(test_file)), str(Path(TMP_TEST_DIR) / Path(test_file)))
         pass
 
     @classmethod
@@ -140,14 +140,11 @@ class TestTorchConverter(unittest.TestCase):
             shutil.rmtree(Path(TMP_TEST_DIR))
 
     def test_delimited_defaults(self):
-
         output_dir = Path(TMP_TEST_DIR) / Path("test_delim_default")
         output_dir.mkdir()
 
         converter = TorchEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
-            delim=" "
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"), delim=" "
         )
 
         converter.convert()
@@ -159,13 +156,9 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_delimited_str_ids(self):
-
         output_dir = Path(TMP_TEST_DIR) / Path("test_delim_str_ids")
         output_dir.mkdir()
 
@@ -178,9 +171,7 @@ class TestTorchConverter(unittest.TestCase):
         tmp.to_csv(Path(TMP_TEST_DIR) / Path("str_train_edges.txt"), header=None, sep=" ", index=False)
 
         converter = TorchEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("str_train_edges.txt"),
-            delim=" "
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("str_train_edges.txt"), delim=" "
         )
 
         converter.convert()
@@ -192,10 +183,7 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_numpy_defaults(self):
         output_dir = Path(TMP_TEST_DIR) / Path("test_numpy_defaults")
@@ -205,11 +193,7 @@ class TestTorchConverter(unittest.TestCase):
 
         train_edges = train_edges_df.to_numpy()
 
-        converter = TorchEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=train_edges,
-            format="numpy"
-        )
+        converter = TorchEdgeListConverter(output_dir=output_dir, train_edges=train_edges, format="numpy")
 
         converter.convert()
 
@@ -220,10 +204,7 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_pytorch_defaults(self):
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
@@ -233,11 +214,7 @@ class TestTorchConverter(unittest.TestCase):
 
         train_edges = torch.tensor(train_edges_df.to_numpy())
 
-        converter = TorchEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=train_edges,
-            format="pytorch"
-        )
+        converter = TorchEdgeListConverter(output_dir=output_dir, train_edges=train_edges, format="pytorch")
 
         converter.convert()
 
@@ -248,10 +225,7 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_splits(self):
         output_dir = Path(TMP_TEST_DIR) / Path("test_splits")
@@ -261,7 +235,7 @@ class TestTorchConverter(unittest.TestCase):
             output_dir=output_dir,
             train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
             delim=" ",
-            splits=[.9, .05, .05]
+            splits=[0.9, 0.05, 0.05],
         )
 
         converter.convert()
@@ -275,20 +249,14 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_valid = 50
         expected_stats.num_test = 50
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_columns(self):
         output_dir = Path(TMP_TEST_DIR) / Path("test_columns")
         output_dir.mkdir()
 
         converter = TorchEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
-            delim=" ",
-            columns=[0, 2]
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"), delim=" ", columns=[0, 2]
         )
 
         converter.convert()
@@ -300,24 +268,22 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_header(self):
-
         output_dir = Path(TMP_TEST_DIR) / Path("test_header")
         output_dir.mkdir()
 
         tmp = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
-        tmp.to_csv(Path(TMP_TEST_DIR) / Path("header_train_edges.txt"), header=["src", "rel", "dst"], sep=" ", index=False)
+        tmp.to_csv(
+            Path(TMP_TEST_DIR) / Path("header_train_edges.txt"), header=["src", "rel", "dst"], sep=" ", index=False
+        )
 
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=Path(TMP_TEST_DIR) / Path("header_train_edges.txt"),
             delim=" ",
-            header_length=1
+            header_length=1,
         )
 
         converter.convert()
@@ -329,13 +295,9 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_delim(self):
-
         output_dir = Path(TMP_TEST_DIR) / Path("test_delim")
         output_dir.mkdir()
 
@@ -343,9 +305,7 @@ class TestTorchConverter(unittest.TestCase):
         tmp.to_csv(Path(TMP_TEST_DIR) / Path("delim_train_edges.txt"), header=None, sep=",", index=False)
 
         converter = TorchEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("delim_train_edges.txt"),
-            delim=","
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("delim_train_edges.txt"), delim=","
         )
 
         converter.convert()
@@ -357,21 +317,14 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_dtype(self):
-
         output_dir = Path(TMP_TEST_DIR) / Path("test_dtype")
         output_dir.mkdir()
 
         converter = TorchEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
-            delim=" ",
-            dtype="int64"
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"), delim=" ", dtype="int64"
         )
 
         converter.convert()
@@ -383,10 +336,7 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int64,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int64, remap_ids=True)
 
     def test_partitions(self):
         output_dir = Path(TMP_TEST_DIR) / Path("test_partitions")
@@ -396,7 +346,7 @@ class TestTorchConverter(unittest.TestCase):
             output_dir=output_dir,
             train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
             delim=" ",
-            num_partitions=10
+            num_partitions=10,
         )
 
         converter.convert()
@@ -408,27 +358,24 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_partitioned_output_dir(output_dir=output_dir,
-                                        expected_stats=expected_stats,
-                                        dtype=np.int32,
-                                        num_partitions=10)
+        validate_partitioned_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, num_partitions=10
+        )
 
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
             delim=" ",
-            num_partitions=100
+            num_partitions=100,
         )
 
         converter.convert()
 
-        validate_partitioned_output_dir(output_dir=output_dir,
-                                        expected_stats=expected_stats,
-                                        dtype=np.int32,
-                                        num_partitions=100)
+        validate_partitioned_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, num_partitions=100
+        )
 
     def test_no_remap(self):
-
         output_dir = Path(TMP_TEST_DIR) / Path("test_dtype")
         output_dir.mkdir()
 
@@ -438,7 +385,7 @@ class TestTorchConverter(unittest.TestCase):
             delim=" ",
             remap_ids=False,
             num_nodes=100,
-            num_rels=10
+            num_rels=10,
         )
 
         converter.convert()
@@ -450,7 +397,4 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=False)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=False)

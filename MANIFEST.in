@@ -1,10 +1,3 @@
-graft test
-graft marius_package
 graft src
-graft include
-graft third_party
-graft cmake
-graft python_bindings
-
 include CMakeLists.txt
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store *.gpickle

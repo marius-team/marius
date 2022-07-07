@@ -1,21 +1,23 @@
 from pathlib import Path
-from marius.tools.preprocess.converters.readers.reader import Reader
+
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
+from marius.tools.preprocess.converters.readers.reader import Reader
+
 
 class SparkDelimitedFileReader(Reader):
-
-    def __init__(self,
-                 spark: SparkSession,
-                 train_edges: Path,
-                 valid_edges: Path = None,
-                 test_edges: Path = None,
-                 columns: list = [0, 1, 2],
-                 header_length: int = 0,
-                 delim: str = "\t",
-                 dtype: str = "int32"
-                 ):
+    def __init__(
+        self,
+        spark: SparkSession,
+        train_edges: Path,
+        valid_edges: Path = None,
+        test_edges: Path = None,
+        columns: list = [0, 1, 2],
+        header_length: int = 0,
+        delim: str = "\t",
+        dtype: str = "int32",
+    ):
         """
         This class converts an input dataset from a delimited file format, into the format required for input to Marius
 
@@ -59,10 +61,10 @@ class SparkDelimitedFileReader(Reader):
             self.has_rels = True
         else:
             raise RuntimeError(
-                "Incorrect number of columns specified, expected length 2 or 3, received {}".format(len(self.columns)))
+                "Incorrect number of columns specified, expected length 2 or 3, received {}".format(len(self.columns))
+            )
 
     def read(self):
-
         all_edges_df: DataFrame = None
         train_edges_df: DataFrame = None
         valid_edges_df: DataFrame = None
@@ -72,8 +74,7 @@ class SparkDelimitedFileReader(Reader):
             # no validation or test edges supplied
 
             # read in training edge list
-            all_edges_df = self.spark.read.option("header", self.header) \
-                .csv(self.train_edges.__str__(), sep=self.delim)
+            all_edges_df = self.spark.read.option("header", self.header).csv(self.train_edges.__str__(), sep=self.delim)
 
             column_order = []
             for i in self.columns:
@@ -82,20 +83,19 @@ class SparkDelimitedFileReader(Reader):
             all_edges_df = all_edges_df.select(column_order)
         else:
             # predefined valid and test edges.
-            all_edges_df = self.spark.read.option("header", self.header) \
-                .csv([self.train_edges.__str__(),
-                      self.valid_edges.__str__(),
-                      self.test_edges.__str__()],
-                     sep=self.delim)
+            all_edges_df = self.spark.read.option("header", self.header).csv(
+                [self.train_edges.__str__(), self.valid_edges.__str__(), self.test_edges.__str__()], sep=self.delim
+            )
 
-            train_edges_df = self.spark.read.option("header", self.header) \
-                .csv(self.train_edges.__str__(), sep=self.delim)
+            train_edges_df = self.spark.read.option("header", self.header).csv(
+                self.train_edges.__str__(), sep=self.delim
+            )
 
-            valid_edges_df = self.spark.read.option("header", self.header) \
-                .csv(self.valid_edges.__str__(), sep=self.delim)
+            valid_edges_df = self.spark.read.option("header", self.header).csv(
+                self.valid_edges.__str__(), sep=self.delim
+            )
 
-            test_edges_df = self.spark.read.option("header", self.header) \
-                .csv(self.test_edges.__str__(), sep=self.delim)
+            test_edges_df = self.spark.read.option("header", self.header).csv(self.test_edges.__str__(), sep=self.delim)
 
             column_order = []
             for i in self.columns:

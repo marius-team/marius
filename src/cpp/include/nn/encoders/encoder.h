@@ -5,12 +5,11 @@
 #ifndef MARIUS_ENCODER_H
 #define MARIUS_ENCODER_H
 
-#include "nn/layers/layer.h"
 #include "configuration/config.h"
-
+#include "nn/layers/layer.h"
 
 class GeneralEncoder : public torch::nn::Cloneable<GeneralEncoder> {
-public:
+   public:
     shared_ptr<EncoderConfig> encoder_config_;
     int num_relations_;
     torch::Device device_;
@@ -38,5 +37,4 @@ public:
     std::shared_ptr<Layer> initReductionLayer(shared_ptr<LayerConfig> layer_config, int stage_id, int layer_id);
 };
 
-
-#endif //MARIUS_ENCODER_H
+#endif  // MARIUS_ENCODER_H

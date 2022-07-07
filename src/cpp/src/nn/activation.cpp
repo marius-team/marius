@@ -5,7 +5,6 @@
 #include "nn/activation.h"
 
 torch::Tensor apply_activation(ActivationFunction activation_function, torch::Tensor input) {
-
     if (!input.defined()) {
         throw UndefinedTensorException();
     }

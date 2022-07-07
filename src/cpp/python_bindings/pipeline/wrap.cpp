@@ -6,7 +6,6 @@ void init_graph_encoder(py::module &);
 void init_trainer(py::module &);
 
 PYBIND11_MODULE(_pipeline, m) {
-
     m.doc() = "Training and Evaluation pipelines.";
 
     // pipeline

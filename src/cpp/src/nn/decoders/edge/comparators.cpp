@@ -6,7 +6,7 @@
 
 torch::Tensor pad_and_reshape(torch::Tensor input, int num_chunks) {
     int num_pos = input.size(0);
-    int num_per_chunk = (int) ceil((float) num_pos / num_chunks);
+    int num_per_chunk = (int)ceil((float)num_pos / num_chunks);
 
     if (num_per_chunk != num_pos / num_chunks) {
         int64_t new_size = num_per_chunk * num_chunks;
@@ -20,7 +20,6 @@ torch::Tensor pad_and_reshape(torch::Tensor input, int num_chunks) {
 }
 
 torch::Tensor L2Compare::operator()(torch::Tensor src, torch::Tensor dst) {
-
     if (!src.defined() || !dst.defined()) {
         throw UndefinedTensorException();
     }
@@ -37,12 +36,11 @@ torch::Tensor L2Compare::operator()(torch::Tensor src, torch::Tensor dst) {
         double tol = 1e-8;
 
         // (x - y)^2 = x^2 + y^2 - 2*x*y
-        return torch::sqrt(torch::clamp_min(x2 + y2 - 2*xy, tol)).flatten(0, 1).clone();
+        return torch::sqrt(torch::clamp_min(x2 + y2 - 2 * xy, tol)).flatten(0, 1).clone();
     }
 }
 
 torch::Tensor CosineCompare::operator()(torch::Tensor src, torch::Tensor dst) {
-
     if (!src.defined() || !dst.defined()) {
         throw UndefinedTensorException();
     }
@@ -62,7 +60,6 @@ torch::Tensor CosineCompare::operator()(torch::Tensor src, torch::Tensor dst) {
 }
 
 torch::Tensor DotCompare::operator()(torch::Tensor src, torch::Tensor dst) {
-
     if (!src.defined() || !dst.defined()) {
         throw UndefinedTensorException();
     }

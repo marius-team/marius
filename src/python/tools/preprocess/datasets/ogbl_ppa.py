@@ -1,24 +1,31 @@
 from pathlib import Path
+
+import torch
+
+from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
+from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
-import numpy as np
-from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
-import torch
-import os
 
 
 class OGBLPpa(LinkPredictionDataset):
+    """
+    Open Graph Benchmark: ppa
+
+    The ogbl-ppa dataset is an undirected, unweighted graph.
+    Nodes represent proteins from 58 different species, and edges indicate biologically meaningful
+    associations between proteins, e.g., physical interactions, co-expression, homology or genomic neighborhood.
+    Each node contains a 58-dimensional one-hot feature vector that indicates the species that
+    the corresponding protein comes from.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
-
         super().__init__(output_directory, spark)
 
         self.dataset_name = "ogbl_ppa"
         self.dataset_url = "http://snap.stanford.edu/ogb/data/linkproppred/ppassoc.zip"
 
     def download(self, overwrite=False, remap_ids=True):
-
         self.input_train_edges_file = self.output_directory / Path("train.pt")
         self.input_valid_edges_file = self.output_directory / Path("valid.pt")
         self.input_test_edges_file = self.output_directory / Path("test.pt")
@@ -38,7 +45,9 @@ class OGBLPpa(LinkPredictionDataset):
             for file in (self.output_directory / Path("ppassoc/split/throughput")).iterdir():
                 file.rename(self.output_directory / Path(file.name))
 
-    def preprocess(self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False):
+    def preprocess(
+        self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False
+    ):
         train_idx = torch.load(self.input_train_edges_file).get("edge")
         valid_idx = torch.load(self.input_valid_edges_file).get("edge")
         test_idx = torch.load(self.input_test_edges_file).get("edge")
@@ -52,7 +61,7 @@ class OGBLPpa(LinkPredictionDataset):
             num_partitions=num_partitions,
             remap_ids=remap_ids,
             format="numpy",
-            partitioned_evaluation=partitioned_eval
+            partitioned_evaluation=partitioned_eval,
         )
 
         return converter.convert()

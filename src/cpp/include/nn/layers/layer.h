@@ -8,18 +8,18 @@
 #include "common/datatypes.h"
 #include "configuration/config.h"
 #include "data/graph.h"
-#include "nn/initialization.h"
 #include "nn/activation.h"
+#include "nn/initialization.h"
 
 class Layer : public torch::nn::Module {
-public:
+   public:
     shared_ptr<LayerConfig> config_;
     torch::Device device_;
     torch::Tensor bias_;
 
     Layer();
 
-    virtual ~Layer() {};
+    virtual ~Layer(){};
 
     virtual void reset() = 0;
 
@@ -28,4 +28,4 @@ public:
     void init_bias();
 };
 
-#endif //MARIUS_LAYER_H
+#endif  // MARIUS_LAYER_H

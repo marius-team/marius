@@ -8,81 +8,75 @@
 #include "common/datatypes.h"
 
 class Metric {
-  public:
+   public:
     std::string name_;
     std::string unit_;
 
-    virtual ~Metric() {};
+    virtual ~Metric(){};
 };
 
 class RankingMetric : public Metric {
-  public:
+   public:
     virtual torch::Tensor computeMetric(torch::Tensor ranks) = 0;
 };
 
 class HitskMetric : public RankingMetric {
     int k_;
-  public:
+
+   public:
     HitskMetric(int k);
 
     torch::Tensor computeMetric(torch::Tensor ranks);
 };
 
 class MeanRankMetric : public RankingMetric {
-  public:
+   public:
     MeanRankMetric();
 
     torch::Tensor computeMetric(torch::Tensor ranks);
 };
 
 class MeanReciprocalRankMetric : public RankingMetric {
-  public:
+   public:
     MeanReciprocalRankMetric();
 
     torch::Tensor computeMetric(torch::Tensor ranks);
 };
 
 class ClassificationMetric : public Metric {
-  public:
+   public:
     virtual torch::Tensor computeMetric(torch::Tensor y_true, torch::Tensor y_pred) = 0;
 };
 
 class CategoricalAccuracyMetric : public ClassificationMetric {
-  public:
+   public:
     CategoricalAccuracyMetric();
 
     torch::Tensor computeMetric(torch::Tensor y_true, torch::Tensor y_pred) override;
 };
 
 class Reporter {
-  private:
+   private:
     std::mutex *lock_;
-  public:
+
+   public:
     std::vector<shared_ptr<Metric>> metrics_;
 
-    Reporter() {
-        lock_ = new std::mutex();
-    }
+    Reporter() { lock_ = new std::mutex(); }
 
     virtual ~Reporter();
 
-    void lock() {
-        lock_->lock();
-    }
+    void lock() { lock_->lock(); }
 
-    void unlock() {
-        lock_->unlock();
-    }
+    void unlock() { lock_->unlock(); }
 
-    void addMetric(shared_ptr<Metric> metric) {
-        metrics_.emplace_back(metric);
-    }
+    void addMetric(shared_ptr<Metric> metric) { metrics_.emplace_back(metric); }
 
     virtual void report() = 0;
 };
 
 class LinkPredictionReporter : public Reporter {
-  public:
+   public:
     std::vector<torch::Tensor> per_batch_ranks_;
     std::vector<torch::Tensor> per_batch_scores_;
     std::vector<torch::Tensor> per_batch_edges_;
@@ -106,17 +100,13 @@ class LinkPredictionReporter : public Reporter {
 };
 
 class NodeClassificationReporter : public Reporter {
-
-public:
-
-
+   public:
     std::vector<torch::Tensor> per_batch_y_true_;
     std::vector<torch::Tensor> per_batch_y_pred_;
     std::vector<torch::Tensor> per_batch_nodes_;
     torch::Tensor all_y_true_;
     torch::Tensor all_y_pred_;
     torch::Tensor all_nodes_;
-
 
     NodeClassificationReporter();
 
@@ -138,7 +128,8 @@ class ProgressReporter : public Reporter {
     int total_reports_;
     int64_t next_report_;
     int64_t items_per_report_;
-  public:
+
+   public:
     ProgressReporter(std::string item_name, int64_t total_items, int total_reports);
 
     ~ProgressReporter();
@@ -148,8 +139,6 @@ class ProgressReporter : public Reporter {
     void addResult(int64_t items_processed);
 
     void report() override;
-
-
 };
 
-#endif //MARIUS_SRC_CPP_INCLUDE_REPORTING_H_
+#endif  // MARIUS_SRC_CPP_INCLUDE_REPORTING_H_

@@ -1,12 +1,11 @@
 #include "common/pybind_headers.h"
-
 #include "pipeline/graph_encoder.h"
 
 namespace py = pybind11;
 
 // Trampoline class
 class PyGraphEncoder : GraphEncoder {
-public:
+   public:
     using GraphEncoder::GraphEncoder;
     void encode(bool separate_layers) override { PYBIND11_OVERRIDE_PURE(void, GraphEncoder, encode, separate_layers); }
 };
@@ -18,13 +17,9 @@ void init_graph_encoder(py::module &m) {
         .def("encode", &GraphEncoder::encode, py::arg("separate_layers") = false);
 
     py::class_<SynchronousGraphEncoder, GraphEncoder, std::shared_ptr<SynchronousGraphEncoder>>(m, "SynchronousEncoder")
-        .def(py::init<shared_ptr<DataLoader> , std::shared_ptr<Model>>(),
-             py::arg("dataloader"),
-             py::arg("model"));
+        .def(py::init<shared_ptr<DataLoader>, std::shared_ptr<Model>>(), py::arg("dataloader"), py::arg("model"));
 
     py::class_<PipelineGraphEncoder, GraphEncoder, std::shared_ptr<PipelineGraphEncoder>>(m, "PipelineEncoder")
-        .def(py::init<shared_ptr<DataLoader> , std::shared_ptr<Model>, std::shared_ptr<PipelineConfig>>(),
-             py::arg("dataloader"),
-             py::arg("model"),
+        .def(py::init<shared_ptr<DataLoader>, std::shared_ptr<Model>, std::shared_ptr<PipelineConfig>>(), py::arg("dataloader"), py::arg("model"),
              py::arg("pipeline_config"));
 }

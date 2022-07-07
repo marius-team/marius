@@ -1,21 +1,23 @@
 from pathlib import Path
-from marius.tools.preprocess.converters.readers.reader import Reader
+
 import pandas as pd
+
+from marius.tools.preprocess.converters.readers.reader import Reader
 
 
 class PandasDelimitedFileReader(Reader):
-
-    def __init__(self,
-                 train_edges: Path,
-                 valid_edges: Path = None,
-                 test_edges: Path = None,
-                 columns: list = [0, 1, 2],
-                 header_length: int = 0,
-                 delim: str = "\t"
-                 ):
+    def __init__(
+        self,
+        train_edges: Path,
+        valid_edges: Path = None,
+        test_edges: Path = None,
+        columns: list = [0, 1, 2],
+        header_length: int = 0,
+        delim: str = "\t",
+    ):
         """
         This class converts an input dataset from a delimited file format, into the format required for input to Marius
-        
+
         :param train_edges:                 The path to the raw training edge list [REQUIRED]
         :param valid_edges:                 The path to the raw validation edge list
         :param test_edges:                  The path to the raw test edge list
@@ -44,7 +46,8 @@ class PandasDelimitedFileReader(Reader):
             self.has_rels = True
         else:
             raise RuntimeError(
-                "Incorrect number of columns specified, expected length 2 or 3, received {}".format(len(self.columns)))
+                "Incorrect number of columns specified, expected length 2 or 3, received {}".format(len(self.columns))
+            )
 
     def read(self):
         train_edges_df: pd.DataFrame = None
@@ -56,7 +59,9 @@ class PandasDelimitedFileReader(Reader):
         train_edges_df = train_edges_df[train_edges_df.columns[self.columns]]
 
         if self.valid_edges is not None:
-            valid_edges_df = pd.read_csv(self.valid_edges, delimiter=self.delim, skiprows=self.header_length, header=None)
+            valid_edges_df = pd.read_csv(
+                self.valid_edges, delimiter=self.delim, skiprows=self.header_length, header=None
+            )
             valid_edges_df = valid_edges_df[valid_edges_df.columns[self.columns]]
         if self.test_edges is not None:
             test_edges_df = pd.read_csv(self.test_edges, delimiter=self.delim, skiprows=self.header_length, header=None)

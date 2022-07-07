@@ -5,21 +5,19 @@
 #ifndef MARIUS_SRC_CPP_INCLUDE_GRAPH_H_
 #define MARIUS_SRC_CPP_INCLUDE_GRAPH_H_
 
-#include "nn/layers/gnn/layer_helpers.h"
-#include "configuration/config.h"
 #include "common/datatypes.h"
 #include "common/util.h"
-
+#include "configuration/config.h"
+#include "nn/layers/gnn/layer_helpers.h"
 
 /**
  * Object to handle arbitrary in-memory graph/sub-graph.
  */
-class MariusGraph  {
-  public:
-    EdgeList src_sorted_edges_; // easy access of outgoing neighbors
-    EdgeList dst_sorted_edges_; // easy access of incoming neighbors
-    EdgeList active_in_memory_subgraph_; // shuffled
-
+class MariusGraph {
+   public:
+    EdgeList src_sorted_edges_;           // easy access of outgoing neighbors
+    EdgeList dst_sorted_edges_;           // easy access of incoming neighbors
+    EdgeList active_in_memory_subgraph_;  // shuffled
 
     int64_t num_nodes_in_memory_;
     Indices node_ids_;
@@ -87,7 +85,8 @@ class MariusGraph  {
      * @param max_neighbors_size The maximum number of neighbors to sample
      * @return Neighbors of specified nodes
      */
-    std::tuple<torch::Tensor, torch::Tensor> getNeighborsForNodeIds(torch::Tensor node_ids, bool incoming, NeighborSamplingLayer neighbor_sampling_layer, int max_neighbors_size, float rate);
+    std::tuple<torch::Tensor, torch::Tensor> getNeighborsForNodeIds(torch::Tensor node_ids, bool incoming, NeighborSamplingLayer neighbor_sampling_layer,
+                                                                    int max_neighbors_size, float rate);
 
     /**
      * Clear the graph.
@@ -100,11 +99,10 @@ class MariusGraph  {
 };
 
 /**
-  * MariusGraph sublass, orders the CSR representation of the graph for fast GNN encoding.
-  */
+ * MariusGraph sublass, orders the CSR representation of the graph for fast GNN encoding.
+ */
 class DENSEGraph : public MariusGraph {
-  public:
-
+   public:
     Indices hop_offsets_;
 
     Indices in_neighbors_mapping_;
@@ -119,32 +117,33 @@ class DENSEGraph : public MariusGraph {
 
     DENSEGraph();
 
-    DENSEGraph(Indices hop_offsets, Indices node_ids, Indices in_offsets, std::vector<torch::Tensor> in_neighbors_vec, Indices in_neighbors_mapping, Indices out_offsets, std::vector<torch::Tensor> out_neighbors_vec, Indices out_neighbors_mapping, int num_nodes_in_memory);
+    DENSEGraph(Indices hop_offsets, Indices node_ids, Indices in_offsets, std::vector<torch::Tensor> in_neighbors_vec, Indices in_neighbors_mapping,
+               Indices out_offsets, std::vector<torch::Tensor> out_neighbors_vec, Indices out_neighbors_mapping, int num_nodes_in_memory);
 
     ~DENSEGraph();
 
     /**
-      * Prepares GNN graph for next layer.
-      */
+     * Prepares GNN graph for next layer.
+     */
     void prepareForNextLayer();
 
     /**
-      * Gets the ids of the neighbors for the current layer.
-      * @param incoming Get incoming edges if true, outgoing edges if false
-      * @param global If false, return node IDs local to the batch. If true, return any global node IDs
-      * @return Tensor of edge IDs
-      */
+     * Gets the ids of the neighbors for the current layer.
+     * @param incoming Get incoming edges if true, outgoing edges if false
+     * @param global If false, return node IDs local to the batch. If true, return any global node IDs
+     * @return Tensor of edge IDs
+     */
     Indices getNeighborIDs(bool incoming = true, bool global = false);
 
     /**
-      * Gets the offset of the node ids in the outermost layer.
-      * @return Layer offset
-      */
+     * Gets the offset of the node ids in the outermost layer.
+     * @return Layer offset
+     */
     int64_t getLayerOffset();
 
     /**
-      * Maps local IDs to batch.
-      */
+     * Maps local IDs to batch.
+     */
     void performMap();
 
     void setNodeProperties(torch::Tensor node_properties);
@@ -157,5 +156,4 @@ class DENSEGraph : public MariusGraph {
     void to(torch::Device device);
 };
 
-
-#endif //MARIUS_SRC_CPP_INCLUDE_GRAPH_H_
+#endif  // MARIUS_SRC_CPP_INCLUDE_GRAPH_H_

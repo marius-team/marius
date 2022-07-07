@@ -10,4 +10,4 @@
 
 torch::Tensor apply_activation(ActivationFunction activation_function, torch::Tensor input);
 
-#endif //MARIUS_ACTIVATION_H
+#endif  // MARIUS_ACTIVATION_H

@@ -5,7 +5,6 @@
 #include "data/samplers/negative.h"
 
 std::tuple<torch::Tensor, torch::Tensor> batch_sample(torch::Tensor edges, int num_negatives, bool inverse) {
-
     auto device = edges.device();
     int64_t batch_size = edges.size(0);
     Indices sample_edge_id = torch::randint(0, batch_size, {num_negatives}, device).to(torch::kInt64);
@@ -26,7 +25,7 @@ torch::Tensor deg_negative_local_filter(torch::Tensor deg_sample_indices, torch:
     }
 
     int64_t num_chunks = deg_sample_indices.size(0);
-    int64_t chunk_size = ceil((double) edges.size(0) / num_chunks);
+    int64_t chunk_size = ceil((double)edges.size(0) / num_chunks);
     int64_t num_deg_negs = deg_sample_indices.size(1);
 
     torch::Tensor chunk_ids = deg_sample_indices.div(chunk_size, "trunc");
@@ -50,7 +49,6 @@ torch::Tensor compute_filter_corruption(shared_ptr<MariusGraph> graph, torch::Te
 
 torch::Tensor compute_filter_corruption_cpu(shared_ptr<MariusGraph> graph, torch::Tensor edges, torch::Tensor corruption_nodes, bool inverse, bool global,
                                             LocalFilterMode local_filter_mode, torch::Tensor deg_sample_indices) {
-
     if (local_filter_mode == LocalFilterMode::DEG && !global) {
         return deg_negative_local_filter(deg_sample_indices, edges);
     }
@@ -73,7 +71,7 @@ torch::Tensor compute_filter_corruption_cpu(shared_ptr<MariusGraph> graph, torch
 
     int64_t num_chunks = corruption_nodes.size(0);
     int64_t num_edges = edges.size(0);
-    int64_t chunk_size = ceil((double) num_edges / num_chunks);
+    int64_t chunk_size = ceil((double)num_edges / num_chunks);
 
     torch::Tensor all_sorted_edges;
     torch::Tensor all_sorted_nodes;
@@ -132,7 +130,7 @@ torch::Tensor compute_filter_corruption_cpu(shared_ptr<MariusGraph> graph, torch
     std::vector<std::vector<int64_t>> filters(num_edges);
 
     torch::Tensor starts = torch::searchsorted(all_sorted_nodes, nodes);
-    torch::Tensor ends = torch::searchsorted(all_sorted_nodes, nodes+1);
+    torch::Tensor ends = torch::searchsorted(all_sorted_nodes, nodes + 1);
 
     auto edges_accessor = edges.accessor<int64_t, 2>();
     auto starts_accessor = starts.accessor<int64_t, 1>();
@@ -141,9 +139,8 @@ torch::Tensor compute_filter_corruption_cpu(shared_ptr<MariusGraph> graph, torch
     auto negs_accessor = corruption_nodes.accessor<int64_t, 2>();
 
     if (global) {
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int64_t edge_id = 0; edge_id < nodes.size(0); edge_id++) {
-
             int64_t curr_start = starts_accessor[edge_id];
             int64_t curr_end = ends_accessor[edge_id];
 
@@ -154,16 +151,14 @@ torch::Tensor compute_filter_corruption_cpu(shared_ptr<MariusGraph> graph, torch
             }
         }
     } else {
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int64_t edge_id = 0; edge_id < nodes.size(0); edge_id++) {
-
             int64_t curr_start = starts_accessor[edge_id];
             int64_t curr_end = ends_accessor[edge_id];
 
             int chunk_id = edge_id / chunk_size;
 
             for (int64_t neg_id = 0; neg_id < corruption_nodes.size(1); neg_id++) {
-
                 int64_t neg_node = negs_accessor[chunk_id][neg_id];
 
                 for (int64_t curr = curr_start; curr < curr_end; curr++) {
@@ -201,7 +196,6 @@ torch::Tensor compute_filter_corruption_cpu(shared_ptr<MariusGraph> graph, torch
 
 torch::Tensor compute_filter_corruption_gpu(shared_ptr<MariusGraph> graph, torch::Tensor edges, torch::Tensor corruption_nodes, bool inverse, bool global,
                                             LocalFilterMode local_filter_mode, torch::Tensor deg_sample_indices) {
-
     if (local_filter_mode == LocalFilterMode::DEG && !global) {
         return deg_negative_local_filter(deg_sample_indices, edges);
     }
@@ -224,7 +218,7 @@ torch::Tensor compute_filter_corruption_gpu(shared_ptr<MariusGraph> graph, torch
 
     int64_t num_chunks = corruption_nodes.size(0);
     int64_t num_edges = edges.size(0);
-    int64_t chunk_size = ceil((double) num_edges / num_chunks);
+    int64_t chunk_size = ceil((double)num_edges / num_chunks);
 
     int64_t negs_per_pos = corruption_nodes.size(1);
 
@@ -236,7 +230,6 @@ torch::Tensor compute_filter_corruption_gpu(shared_ptr<MariusGraph> graph, torch
     int corrupt_id;
 
     if (inverse) {
-
         if (has_relations) {
             tup_id = 2;
         } else {
@@ -275,7 +268,7 @@ torch::Tensor compute_filter_corruption_gpu(shared_ptr<MariusGraph> graph, torch
     }
 
     torch::Tensor starts = torch::searchsorted(all_sorted_nodes, nodes);
-    torch::Tensor ends = torch::searchsorted(all_sorted_nodes, nodes+1);
+    torch::Tensor ends = torch::searchsorted(all_sorted_nodes, nodes + 1);
     torch::Tensor num_neighbors = ends - starts;
 
     torch::Tensor summed_num_neighbors = num_neighbors.cumsum(0);
@@ -291,7 +284,8 @@ torch::Tensor compute_filter_corruption_gpu(shared_ptr<MariusGraph> graph, torch
         torch::Tensor edge_ids = torch::arange(edges.size(0), edges.options()).repeat_interleave(num_neighbors);
 
         if (has_relations) {
-            torch::Tensor filter_tmp_ids = torch::cat({edge_ids.view({-1, 1}), batch_neighbors.select(1, 1).view({-1, 1}), batch_neighbors.select(1, corrupt_id).view({-1, 1})}, 1);
+            torch::Tensor filter_tmp_ids =
+                torch::cat({edge_ids.view({-1, 1}), batch_neighbors.select(1, 1).view({-1, 1}), batch_neighbors.select(1, corrupt_id).view({-1, 1})}, 1);
             torch::Tensor rel_ids = edges.select(1, 1).repeat_interleave(num_neighbors);
             torch::Tensor mask = filter_tmp_ids.select(1, 1) == rel_ids;
             filter_tmp_ids = filter_tmp_ids.index_select(0, torch::arange(filter_tmp_ids.size(0), filter_tmp_ids.options()).masked_select(mask));
@@ -302,8 +296,8 @@ torch::Tensor compute_filter_corruption_gpu(shared_ptr<MariusGraph> graph, torch
     } else {
         // TODO implement local filtering on the GPU, filter needs to be an int64, shape [*, 2], unit tests for this would be good
         // like above when edges are int32 the filter may end up as int32
-//        torch::TensorOptions ind_opts = torch::TensorOptions().dtype(torch::kInt64).device(edges.device());
-//        filter = torch::empty({0, 2}, ind_opts);
+        //        torch::TensorOptions ind_opts = torch::TensorOptions().dtype(torch::kInt64).device(edges.device());
+        //        filter = torch::empty({0, 2}, ind_opts);
         throw MariusRuntimeException("Local filtering against all edges in the batch not yet supported on GPU.");
     }
     return filter;
@@ -316,10 +310,7 @@ torch::Tensor apply_score_filter(torch::Tensor scores, torch::Tensor filter) {
     return scores;
 }
 
-CorruptNodeNegativeSampler::CorruptNodeNegativeSampler(int num_chunks,
-                                                       int num_negatives,
-                                                       float degree_fraction,
-                                                       bool filtered,
+CorruptNodeNegativeSampler::CorruptNodeNegativeSampler(int num_chunks, int num_negatives, float degree_fraction, bool filtered,
                                                        LocalFilterMode local_filter_mode) {
     num_chunks_ = num_chunks;
     num_negatives_ = num_negatives;
@@ -335,13 +326,12 @@ CorruptNodeNegativeSampler::CorruptNodeNegativeSampler(int num_chunks,
 }
 
 std::tuple<torch::Tensor, torch::Tensor> CorruptNodeNegativeSampler::getNegatives(shared_ptr<MariusGraph> graph, torch::Tensor edges, bool inverse) {
-
     vector<Indices> ret_indices(num_chunks_);
     vector<Indices> deg_sample_indices_vec(num_chunks_);
 
     int64_t num_nodes = graph->num_nodes_in_memory_;
 
-    int num_batch = (int) (num_negatives_ * degree_fraction_);
+    int num_batch = (int)(num_negatives_ * degree_fraction_);
     int num_uni = num_negatives_ - num_batch;
 
     torch::TensorOptions ind_opts = torch::TensorOptions().dtype(torch::kInt64).device(edges.device());
@@ -371,7 +361,6 @@ std::tuple<torch::Tensor, torch::Tensor> CorruptNodeNegativeSampler::getNegative
     if (degree_fraction_ > 0 && local_filter_mode_ == LocalFilterMode::DEG) {
         deg_sample_indices = torch::stack(deg_sample_indices_vec);
     }
-    torch::Tensor score_filter = compute_filter_corruption(graph, edges, output_ids, inverse, filtered_,
-                                                           local_filter_mode_, deg_sample_indices);
+    torch::Tensor score_filter = compute_filter_corruption(graph, edges, output_ids, inverse, filtered_, local_filter_mode_, deg_sample_indices);
     return std::forward_as_tuple(output_ids, score_filter);
 }

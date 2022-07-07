@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 # This file contains enums and detailed option settings for each enum value, where applicable
 
 
@@ -39,12 +40,12 @@ class LossOptions:
 
 @dataclass
 class RankingLossOptions(LossOptions):
-    margin: float = .1
+    margin: float = 0.1
 
 
 @dataclass
 class OptimizerOptions:
-    learning_rate: float = .1
+    learning_rate: float = 0.1
 
     def __post_init__(self):
         if self.learning_rate <= 0:
@@ -53,7 +54,7 @@ class OptimizerOptions:
 
 @dataclass
 class AdagradOptions(OptimizerOptions):
-    learning_rate = .1
+    learning_rate = 0.1
     eps: float = 1e-10
     init_value: float = 0
     lr_decay: float = 0
@@ -67,15 +68,14 @@ class AdagradOptions(OptimizerOptions):
             raise ValueError("lr_decay for AdaGradOptimizer must be non-negative")
         if self.weight_decay < 0:
             raise ValueError("weight_decay for AdaGradOptimizer must be non-negative")
-        
 
 
 @dataclass
 class AdamOptions(OptimizerOptions):
-    learning_rate = .1
+    learning_rate = 0.1
     amsgrad: bool = False
-    beta_1: float = .9
-    beta_2: float = .999
+    beta_1: float = 0.9
+    beta_2: float = 0.999
     eps: float = 1e-8
     weight_decay: float = 0
 
@@ -131,7 +131,7 @@ class GATLayerOptions(GNNLayerOptions):
     type: str = "GAT"
     num_heads: int = 10
     average_heads: bool = True
-    negative_slope: float = .2
+    negative_slope: float = 0.2
     input_dropout: float = 0.0
     attention_dropout: float = 0.0
 
@@ -170,11 +170,13 @@ class PartitionBufferOptions(StorageOptions):
 
     def __post_init__(self):
         if self.num_partitions < 2:
-            raise ValueError("There must be at least two partitions to use the partition buffer, got: {}".format(
-                self.num_partitions))
+            raise ValueError(
+                "There must be at least two partitions to use the partition buffer, got: {}".format(self.num_partitions)
+            )
         if self.buffer_capacity < 2:
-            raise ValueError("The partition buffer must have capacity of at least 2, got: {}".format(
-                self.buffer_capacity))
+            raise ValueError(
+                "The partition buffer must have capacity of at least 2, got: {}".format(self.buffer_capacity)
+            )
 
         # no need to have a buffer capacity larger than the number of partitions
         if self.num_partitions < self.buffer_capacity:
@@ -202,4 +204,3 @@ class DropoutSamplingOptions(NeighborSamplingOptions):
     def __post_init__(self):
         if self.rate < 0 or self.rate >= 1:
             raise ValueError("rate must be in [0, 1)")
-

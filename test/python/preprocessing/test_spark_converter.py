@@ -1,33 +1,26 @@
 import shutil
 import unittest
-import pytest
 from pathlib import Path
-from test.python.preprocessing.test_torch_converter import validate_partitioned_output_dir, validate_output_dir
-from test.python.constants import TMP_TEST_DIR, TESTING_DATA_DIR
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
-from marius.tools.configuration.marius_config import DatasetConfig
-from marius.tools.configuration.constants import PathConstants
-from omegaconf import OmegaConf, MISSING
+from test.python.constants import TESTING_DATA_DIR, TMP_TEST_DIR
+from test.python.preprocessing.test_torch_converter import validate_output_dir, validate_partitioned_output_dir
+
 import numpy as np
-import torch
-import subprocess
 import pandas as pd
+
+from marius.tools.configuration.marius_config import DatasetConfig
+from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 
 test_files = ["train_edges.txt", "valid_edges.txt", "test_edges.txt"]
 
 
-@pytest.mark.skip("Need to add a check for if java is installed")
 class TestSparkConverter(unittest.TestCase):
-
     @classmethod
     def setUp(self):
-
         if not Path(TMP_TEST_DIR).exists():
             Path(TMP_TEST_DIR).mkdir()
 
         for test_file in test_files:
-            shutil.copy(str(Path(TESTING_DATA_DIR) / Path(test_file)),
-                        str(Path(TMP_TEST_DIR) / Path(test_file)))
+            shutil.copy(str(Path(TESTING_DATA_DIR) / Path(test_file)), str(Path(TMP_TEST_DIR) / Path(test_file)))
         pass
 
     @classmethod
@@ -35,7 +28,7 @@ class TestSparkConverter(unittest.TestCase):
         pass
         if Path(TMP_TEST_DIR).exists():
             shutil.rmtree(Path(TMP_TEST_DIR))
-    
+
     def make_directory_tree(self, dir_path):
         output_dir = Path(TMP_TEST_DIR) / Path(dir_path)
         output_dir.mkdir()
@@ -47,11 +40,9 @@ class TestSparkConverter(unittest.TestCase):
 
     def test_delimited_defaults(self):
         output_dir = self.make_directory_tree("test_delim_default")
-        
+
         converter = SparkEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
-            delim=" "
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"), delim=" "
         )
 
         converter.convert()
@@ -63,15 +54,11 @@ class TestSparkConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
-    
-    def test_delimited_str_ids(self):
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
+    def test_delimited_str_ids(self):
         output_dir = self.make_directory_tree("test_delimited_str_ids")
-        
+
         tmp = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
 
         tmp[0] = tmp[0].map(str) + "_test"
@@ -81,9 +68,7 @@ class TestSparkConverter(unittest.TestCase):
         tmp.to_csv(Path(TMP_TEST_DIR) / Path("str_train_edges.txt"), header=None, sep=" ", index=False)
 
         converter = SparkEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("str_train_edges.txt"),
-            delim=" "
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("str_train_edges.txt"), delim=" "
         )
 
         converter.convert()
@@ -95,21 +80,15 @@ class TestSparkConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
-    
-    # randomSplit doesn't split the df in the exact ratio, outputs a close one though. skippping this one. 
-    
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
+
+    # randomSplit doesn't split the df in the exact ratio, outputs a close one though. skippping this one.
+
     def test_columns(self):
         output_dir = self.make_directory_tree("test_columns")
 
         converter = SparkEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
-            delim=" ",
-            columns=[0, 2]
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"), delim=" ", columns=[0, 2]
         )
 
         converter.convert()
@@ -121,23 +100,21 @@ class TestSparkConverter(unittest.TestCase):
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
-    
-    def test_header(self):
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
+    def test_header(self):
         output_dir = self.make_directory_tree("test_header")
 
         tmp = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
-        tmp.to_csv(Path(TMP_TEST_DIR) / Path("header_train_edges.txt"), header=["src", "rel", "dst"], sep=" ", index=False)
+        tmp.to_csv(
+            Path(TMP_TEST_DIR) / Path("header_train_edges.txt"), header=["src", "rel", "dst"], sep=" ", index=False
+        )
 
         converter = SparkEdgeListConverter(
             output_dir=output_dir,
             train_edges=Path(TMP_TEST_DIR) / Path("header_train_edges.txt"),
             delim=" ",
-            header_length=1
+            header_length=1,
         )
 
         converter.convert()
@@ -149,22 +126,16 @@ class TestSparkConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_delim(self):
-
         output_dir = self.make_directory_tree("test_delim")
 
         tmp = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         tmp.to_csv(Path(TMP_TEST_DIR) / Path("delim_train_edges.txt"), header=None, sep=",", index=False)
 
         converter = SparkEdgeListConverter(
-            output_dir=output_dir,
-            train_edges=Path(TMP_TEST_DIR) / Path("delim_train_edges.txt"),
-            delim=","
+            output_dir=output_dir, train_edges=Path(TMP_TEST_DIR) / Path("delim_train_edges.txt"), delim=","
         )
 
         converter.convert()
@@ -176,20 +147,16 @@ class TestSparkConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_output_dir(output_dir=output_dir,
-                            expected_stats=expected_stats,
-                            dtype=np.int32,
-                            remap_ids=True)
-
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=True)
 
     def test_partitions(self):
         output_dir = self.make_directory_tree("test_partitions")
-        
+
         converter = SparkEdgeListConverter(
             output_dir=output_dir,
             train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
             delim=" ",
-            num_partitions=10
+            num_partitions=10,
         )
 
         converter.convert()
@@ -201,24 +168,19 @@ class TestSparkConverter(unittest.TestCase):
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
 
-        validate_partitioned_output_dir(output_dir=output_dir,
-                                        expected_stats=expected_stats,
-                                        dtype=np.int32,
-                                        num_partitions=10)
+        validate_partitioned_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, num_partitions=10
+        )
 
         converter = SparkEdgeListConverter(
             output_dir=output_dir,
             train_edges=Path(TMP_TEST_DIR) / Path("train_edges.txt"),
             delim=" ",
-            num_partitions=100
+            num_partitions=100,
         )
 
         converter.convert()
 
-        validate_partitioned_output_dir(output_dir=output_dir,
-                                        expected_stats=expected_stats,
-                                        dtype=np.int32,
-                                        num_partitions=100)
-
-
-
+        validate_partitioned_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, num_partitions=100
+        )

@@ -6,10 +6,11 @@
 
 #include "reporting/logger.h"
 
-using std::tie;
 using std::get;
+using std::tie;
 
-PipelineGraphEncoder::PipelineGraphEncoder(shared_ptr<DataLoader> dataloader, shared_ptr<Model>model, shared_ptr<PipelineConfig> pipeline_config, int logs_per_epoch) {
+PipelineGraphEncoder::PipelineGraphEncoder(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config,
+                                           int logs_per_epoch) {
     dataloader_ = dataloader;
 
     std::string item_name = "Nodes";
@@ -25,7 +26,6 @@ PipelineGraphEncoder::PipelineGraphEncoder(shared_ptr<DataLoader> dataloader, sh
 }
 
 void PipelineGraphEncoder::encode(bool separate_layers) {
-
     Timer timer = Timer(false);
     timer.start();
 
@@ -40,7 +40,7 @@ void PipelineGraphEncoder::encode(bool separate_layers) {
     int64_t num_items = dataloader_->graph_storage_->getNumNodes();
 
     int64_t epoch_time = timer.getDuration();
-    float items_per_second = (float) num_items / ((float) epoch_time / 1000);
+    float items_per_second = (float)num_items / ((float)epoch_time / 1000);
     SPDLOG_INFO("Encode took: {}ms", epoch_time);
     SPDLOG_INFO("{} per Second: {}", item_name, items_per_second);
 }
@@ -81,5 +81,5 @@ void SynchronousGraphEncoder::encode(bool separate_layers) {
     }
 
     timer.stop();
-    SPDLOG_INFO("Encode Complete: {}s", (double) timer.getDuration() / 1000);
+    SPDLOG_INFO("Encode Complete: {}s", (double)timer.getDuration() / 1000);
 }

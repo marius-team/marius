@@ -14,7 +14,6 @@ std::vector<int64_t> shape2 = {5, 3};
 std::vector<int64_t> shape3 = {5, 3, 2};
 
 TEST(TestInitialization, TestUniform) {
-
     float scale_factor1 = 1.0;
     float scale_factor2 = 2.0;
     float scale_factor3 = .25;
@@ -51,8 +50,7 @@ TEST(TestInitialization, TestUniform) {
 }
 
 TEST(TestInitialization, TestNormal) {
-
-    std::vector<int64_t> shape_large = {500, 500}; // large shape used to get better estimate of mean and std for normal distribution
+    std::vector<int64_t> shape_large = {500, 500};  // large shape used to get better estimate of mean and std for normal distribution
 
     float mean1 = 0.0;
     float mean2 = -.5;
@@ -186,7 +184,6 @@ TEST(TestInitialization, TestComputeFans) {
 }
 
 TEST(TestInitialization, TestGlorotUniform) {
-
     std::tuple<int64_t, int64_t> compute_fans = {-1, -1};
     std::tuple<int64_t, int64_t> given_fans = {1, 1};
 
@@ -314,7 +311,6 @@ TEST(TestInitialization, TestGlorotNormal) {
 }
 
 TEST(TestInitialization, TestTensorInit) {
-
     torch::Tensor tensor;
     shared_ptr<InitConfig> init_config = std::make_shared<InitConfig>();
 

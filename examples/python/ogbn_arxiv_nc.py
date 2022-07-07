@@ -1,33 +1,30 @@
-import marius as m
+from pathlib import Path
+
 import torch
-from marius.tools.preprocess.datasets.ogbn_arxiv import OGBNArxiv
 from omegaconf import OmegaConf
 
-from pathlib import Path
+import marius as m
+from marius.tools.preprocess.datasets.ogbn_arxiv import OGBNArxiv
 
 
 def init_model(feature_dim, num_classes, device):
     feature_layer = m.nn.layers.FeatureLayer(dimension=feature_dim, device=device)
 
-    graph_sage_layer1 = m.nn.layers.GraphSageLayer(input_dim=feature_dim,
-                                                   output_dim=feature_dim,
-                                                   device=device,
-                                                   bias=True)
+    graph_sage_layer1 = m.nn.layers.GraphSageLayer(
+        input_dim=feature_dim, output_dim=feature_dim, device=device, bias=True
+    )
 
-    graph_sage_layer2 = m.nn.layers.GraphSageLayer(input_dim=feature_dim,
-                                                   output_dim=feature_dim,
-                                                   device=device,
-                                                   bias=True)
+    graph_sage_layer2 = m.nn.layers.GraphSageLayer(
+        input_dim=feature_dim, output_dim=feature_dim, device=device, bias=True
+    )
 
-    graph_sage_layer3 = m.nn.layers.GraphSageLayer(input_dim=feature_dim,
-                                                   output_dim=num_classes,
-                                                   device=device,
-                                                   bias=True)
+    graph_sage_layer3 = m.nn.layers.GraphSageLayer(
+        input_dim=feature_dim, output_dim=num_classes, device=device, bias=True
+    )
 
-    encoder = m.encoders.GeneralEncoder(layers=[[feature_layer],
-                                                [graph_sage_layer1],
-                                                [graph_sage_layer2],
-                                                [graph_sage_layer3]])
+    encoder = m.encoders.GeneralEncoder(
+        layers=[[feature_layer], [graph_sage_layer1], [graph_sage_layer2], [graph_sage_layer3]]
+    )
 
     # Setting up the decoder
     decoder = m.nn.decoders.node.NoOpNodeDecoder()
@@ -43,7 +40,7 @@ def init_model(feature_dim, num_classes, device):
     model = m.nn.Model(encoder, decoder, loss, reporter)
 
     # Set optimizer
-    model.optimizers = [m.nn.AdamOptimizer(model.named_parameters(), lr=.01)]
+    model.optimizers = [m.nn.AdamOptimizer(model.named_parameters(), lr=0.01)]
 
     return model
 
@@ -54,7 +51,6 @@ def train_epoch(model, dataloader):
 
     counter = 0
     while dataloader.hasNextBatch():
-
         batch = dataloader.getBatch()
         model.train_batch(batch)
 
@@ -71,7 +67,6 @@ def eval_epoch(model, dataloader):
 
     counter = 0
     while dataloader.hasNextBatch():
-
         batch = dataloader.getBatch()
         model.evaluate_batch(batch)
 
@@ -84,8 +79,7 @@ def eval_epoch(model, dataloader):
     model.reporter.report()
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     # initialize and preprocess dataset
     dataset_dir = Path("ogbn_arxiv_nc_dataset/")
     dataset = OGBNArxiv(dataset_dir)
@@ -102,31 +96,45 @@ if __name__ == '__main__':
     model = init_model(feature_dim, dataset_stats.num_classes, device)
 
     # load training Data - Edges, Nodes, Features, labels
-    edges_all = m.storage.tensor_from_file(filename=dataset.edge_list_file, shape=[dataset_stats.num_edges, -1], dtype=torch.int32, device=device)
-    train_nodes = m.storage.tensor_from_file(filename=dataset.train_nodes_file, shape=[dataset_stats.num_train], dtype=torch.int32, device=device)
-    features = m.storage.tensor_from_file(filename=dataset.node_features_file, shape=[dataset_stats.num_nodes, -1], dtype=torch.float32, device=device)
-    labels = m.storage.tensor_from_file(filename=dataset.node_labels_file, shape=[dataset_stats.num_nodes], dtype=torch.int32, device=device)
+    edges_all = m.storage.tensor_from_file(
+        filename=dataset.edge_list_file, shape=[dataset_stats.num_edges, -1], dtype=torch.int32, device=device
+    )
+    train_nodes = m.storage.tensor_from_file(
+        filename=dataset.train_nodes_file, shape=[dataset_stats.num_train], dtype=torch.int32, device=device
+    )
+    features = m.storage.tensor_from_file(
+        filename=dataset.node_features_file, shape=[dataset_stats.num_nodes, -1], dtype=torch.float32, device=device
+    )
+    labels = m.storage.tensor_from_file(
+        filename=dataset.node_labels_file, shape=[dataset_stats.num_nodes], dtype=torch.int32, device=device
+    )
 
     nbr_sampler_3_hop = m.data.samplers.LayeredNeighborSampler(num_neighbors=[-1, -1, -1])
-    train_dataloader = m.data.DataLoader(nodes=train_nodes,
-                                         edges=edges_all,
-                                         node_features=features,
-                                         node_labels=labels,
-                                         batch_size=1000,
-                                         nbr_sampler=nbr_sampler_3_hop,
-                                         learning_task="nc",
-                                         train=True)
+    train_dataloader = m.data.DataLoader(
+        nodes=train_nodes,
+        edges=edges_all,
+        node_features=features,
+        node_labels=labels,
+        batch_size=1000,
+        nbr_sampler=nbr_sampler_3_hop,
+        learning_task="nc",
+        train=True,
+    )
 
     # Evaluation:
-    test_nodes = m.storage.tensor_from_file(filename=dataset.test_nodes_file, shape=[dataset_stats.num_test], dtype=torch.int32, device=device)
-    eval_dataloader = m.data.DataLoader(nodes=test_nodes,
-                                        edges=edges_all,
-                                        node_labels=labels,
-                                        node_features=features,
-                                        batch_size=1000,
-                                        nbr_sampler=nbr_sampler_3_hop,
-                                        learning_task="nc",
-                                        train=False)
+    test_nodes = m.storage.tensor_from_file(
+        filename=dataset.test_nodes_file, shape=[dataset_stats.num_test], dtype=torch.int32, device=device
+    )
+    eval_dataloader = m.data.DataLoader(
+        nodes=test_nodes,
+        edges=edges_all,
+        node_labels=labels,
+        node_features=features,
+        batch_size=1000,
+        nbr_sampler=nbr_sampler_3_hop,
+        learning_task="nc",
+        train=False,
+    )
 
     # Doing the iterations
     for i in range(5):

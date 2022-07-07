@@ -3,9 +3,11 @@
 //
 
 #include "data/samplers/neighbor.h"
+
 #include <parallel_hashmap/phmap.h>
 
-std::tuple<torch::Tensor, torch::Tensor> sample_all_gpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets, torch::Tensor num_neighbors) {
+std::tuple<torch::Tensor, torch::Tensor> sample_all_gpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets,
+                                                        torch::Tensor num_neighbors) {
     torch::Tensor repeated_starts = global_offsets.repeat_interleave(num_neighbors);
     torch::Tensor repeated_offsets = local_offsets.repeat_interleave(num_neighbors);
     torch::Tensor arange = torch::arange(repeated_offsets.size(0), edges.options());
@@ -14,8 +16,8 @@ std::tuple<torch::Tensor, torch::Tensor> sample_all_gpu(torch::Tensor edges, tor
     return std::forward_as_tuple(edges.index_select(0, sorted_list_idx), local_offsets);
 }
 
-std::tuple<torch::Tensor, torch::Tensor> sample_all_cpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets, torch::Tensor num_neighbors, int64_t total_neighbors) {
-
+std::tuple<torch::Tensor, torch::Tensor> sample_all_cpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets,
+                                                        torch::Tensor num_neighbors, int64_t total_neighbors) {
     auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
     auto local_offsets_accessor = local_offsets.accessor<int64_t, 1>();
     auto num_neighbors_accessor = num_neighbors.accessor<int64_t, 1>();
@@ -28,9 +30,9 @@ std::tuple<torch::Tensor, torch::Tensor> sample_all_cpu(torch::Tensor edges, tor
     int64_t *sorted_list_ptr = edges.data_ptr<int64_t>();
 
     if (num_columns == 3) {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #pragma omp for
+#pragma omp for
             for (int i = 0; i < local_offsets.size(0); i++) {
                 int64_t local_offset = local_offsets_accessor[i];
                 int64_t global_offset = global_offsets_accessor[i];
@@ -48,9 +50,9 @@ std::tuple<torch::Tensor, torch::Tensor> sample_all_cpu(torch::Tensor edges, tor
             }
         }
     } else {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #pragma omp for
+#pragma omp for
             for (int i = 0; i < local_offsets.size(0); i++) {
                 int64_t local_offset = local_offsets_accessor[i];
                 int64_t global_offset = global_offsets_accessor[i];
@@ -70,7 +72,8 @@ std::tuple<torch::Tensor, torch::Tensor> sample_all_cpu(torch::Tensor edges, tor
     return std::forward_as_tuple(ret_neighbor_id_edges, local_offsets);
 }
 
-std::tuple<torch::Tensor, torch::Tensor> sample_uniform_gpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets, torch::Tensor num_neighbors, int64_t max_neighbors, int64_t max_id) {
+std::tuple<torch::Tensor, torch::Tensor> sample_uniform_gpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets,
+                                                            torch::Tensor num_neighbors, int64_t max_neighbors, int64_t max_id) {
     torch::Tensor mask = num_neighbors > max_neighbors;
 
     torch::Tensor capped_num_neighbors = num_neighbors.masked_fill(mask, max_neighbors);
@@ -93,7 +96,8 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_gpu(torch::Tensor edges,
     return std::forward_as_tuple(edges.index_select(0, sorted_list_idx), local_offsets);
 }
 
-std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets, torch::Tensor num_neighbors, int64_t max_neighbors, int64_t total_neighbors) {
+std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets,
+                                                            torch::Tensor num_neighbors, int64_t max_neighbors, int64_t total_neighbors) {
     auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
     auto num_neighbors_accessor = num_neighbors.accessor<int64_t, 1>();
 
@@ -101,7 +105,7 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
     auto capped_num_neighbors_accessor = capped_num_neighbors.accessor<int64_t, 1>();
     int64_t *capped_num_neighbors_mem = capped_num_neighbors.data_ptr<int64_t>();
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < local_offsets.size(0); i++) {
         if (capped_num_neighbors_accessor[i] > max_neighbors) {
             *(capped_num_neighbors_mem + i) = max_neighbors;
@@ -124,13 +128,13 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
     // setup seeds
     unsigned int num_threads = 1;
 
-    #ifdef MARIUS_OMP
-    #pragma omp parallel
-                {
-                    #pragma omp single
-                    num_threads = omp_get_num_threads();
-                }
-    #endif
+#ifdef MARIUS_OMP
+#pragma omp parallel
+    {
+#pragma omp single
+        num_threads = omp_get_num_threads();
+    }
+#endif
 
     std::vector<unsigned int> tid_seeds(num_threads);
 
@@ -138,17 +142,16 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
         tid_seeds[i] = rand();
     }
 
-
     if (num_columns == 3) {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #ifdef MARIUS_OMP
+#ifdef MARIUS_OMP
             unsigned int seed = tid_seeds[omp_get_thread_num()];
-            #else
+#else
             unsigned int seed = tid_seeds[0];
-            #endif
+#endif
 
-            #pragma omp for
+#pragma omp for
             for (int i = 0; i < local_offsets.size(0); i++) {
                 int64_t local_offset = local_offsets_accessor[i];
                 int64_t global_offset = global_offsets_accessor[i];
@@ -158,7 +161,6 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
                     int count = 0;
                     int64_t rand_id = 0;
                     for (int64_t j = 0; j < max_neighbors; j++) {
-
                         rand_id = 3 * (global_offset + (rand_r(&seed) % num_edges));
 
                         *(ret_neighbor_id_edges_mem + (3 * (local_offset + count))) = *(sorted_list_ptr + rand_id);
@@ -178,15 +180,15 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
             }
         }
     } else {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #ifdef MARIUS_OMP
+#ifdef MARIUS_OMP
             unsigned int seed = tid_seeds[omp_get_thread_num()];
-            #else
+#else
             unsigned int seed = tid_seeds[0];
-            #endif
+#endif
 
-            #pragma omp for
+#pragma omp for
             for (int i = 0; i < local_offsets.size(0); i++) {
                 int64_t local_offset = local_offsets_accessor[i];
                 int64_t global_offset = global_offsets_accessor[i];
@@ -196,7 +198,6 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
                     int count = 0;
                     int64_t rand_id = 0;
                     for (int64_t j = 0; j < max_neighbors; j++) {
-
                         rand_id = 2 * (global_offset + (rand_r(&seed) % num_edges));
 
                         *(ret_neighbor_id_edges_mem + (2 * (local_offset + count))) = *(sorted_list_ptr + rand_id);
@@ -217,7 +218,8 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
     return std::forward_as_tuple(ret_neighbor_id_edges, local_offsets);
 }
 
-std::tuple<torch::Tensor, torch::Tensor> sample_dropout_gpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets, torch::Tensor num_neighbors, float rate) {
+std::tuple<torch::Tensor, torch::Tensor> sample_dropout_gpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets,
+                                                            torch::Tensor num_neighbors, float rate) {
     torch::Tensor repeated_starts = global_offsets.repeat_interleave(num_neighbors);
     torch::Tensor repeated_offsets = local_offsets.repeat_interleave(num_neighbors);
     torch::Tensor arange = torch::arange(repeated_offsets.size(0), edges.options());
@@ -235,7 +237,8 @@ std::tuple<torch::Tensor, torch::Tensor> sample_dropout_gpu(torch::Tensor edges,
     return std::forward_as_tuple(edges.index_select(0, sorted_list_idx), local_offsets);
 }
 
-std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets, torch::Tensor num_neighbors, float rate, int64_t total_neighbors) {
+std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges, torch::Tensor global_offsets, torch::Tensor local_offsets,
+                                                            torch::Tensor num_neighbors, float rate, int64_t total_neighbors) {
     auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
     auto local_offsets_accessor = local_offsets.accessor<int64_t, 1>();
     auto num_neighbors_accessor = num_neighbors.accessor<int64_t, 1>();
@@ -248,16 +251,16 @@ std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges,
 
     int num_columns = edges.size(1);
 
-    #pragma omp parallel
+#pragma omp parallel
     {
-        #pragma omp for
+#pragma omp for
         for (int i = 0; i < local_offsets.size(0); i++) {
             int64_t local_offset = local_offsets_accessor[i];
             int64_t num_edges = num_neighbors_accessor[i];
 
             int count = 0;
             for (int j = local_offset; j < local_offset + num_edges; j++) {
-                if (keep_mask_accessor[j] >= rate){
+                if (keep_mask_accessor[j] >= rate) {
                     count++;
                 }
             }
@@ -277,9 +280,9 @@ std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges,
     int64_t *sorted_list_ptr = edges.data_ptr<int64_t>();
 
     if (num_columns == 3) {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #pragma omp for
+#pragma omp for
             for (int i = 0; i < local_offsets.size(0); i++) {
                 int64_t old_local_offset = local_offsets_accessor[i];
                 int64_t local_offset = new_local_offsets_accessor[i];
@@ -302,9 +305,9 @@ std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges,
             }
         }
     } else {
-        #pragma omp parallel
+#pragma omp parallel
         {
-            #pragma omp for
+#pragma omp for
             for (int i = 0; i < local_offsets.size(0); i++) {
                 int64_t old_local_offset = local_offsets_accessor[i];
                 int64_t local_offset = new_local_offsets_accessor[i];
@@ -329,16 +332,13 @@ std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges,
     return std::forward_as_tuple(ret_neighbor_id_edges, new_local_offsets);
 }
 
-
-LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<GraphModelStorage> storage,
-                                               std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs) {
+LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<GraphModelStorage> storage, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs) {
     storage_ = storage;
     graph_ = nullptr;
     sampling_layers_ = layer_configs;
 }
 
-LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<MariusGraph> graph,
-                                               std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs) {
+LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<MariusGraph> graph, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs) {
     graph_ = graph;
     storage_ = nullptr;
     sampling_layers_ = layer_configs;
@@ -351,7 +351,6 @@ LayeredNeighborSampler::LayeredNeighborSampler(std::vector<shared_ptr<NeighborSa
 }
 
 DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_ptr<MariusGraph> graph) {
-
     Indices hop_offsets;
     torch::Tensor incoming_edges;
     Indices incoming_offsets;
@@ -483,22 +482,20 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
 
             delta_ids = hash_map.nonzero().flatten(0, 1);
         } else {
-
             if (!sampling_layers_[i]->use_hashmap_sets) {
-                delta_ids = computeDeltaIdsHelperMethod1(hash_map, node_ids, delta_incoming_edges, delta_outgoing_edges,
-                                                         num_nodes_in_memory);
+                delta_ids = computeDeltaIdsHelperMethod1(hash_map, node_ids, delta_incoming_edges, delta_outgoing_edges, num_nodes_in_memory);
             } else {
                 delta_ids_vec.clear();
 
                 if (i == 0) {
-                    auto nodes_accessor = node_ids.accessor<int64_t , 1>();
+                    auto nodes_accessor = node_ids.accessor<int64_t, 1>();
                     for (int j = 0; j < node_ids.size(0); j++) {
                         seen_unique_nodes.emplace(nodes_accessor[j]);
                     }
                 }
 
                 if (delta_incoming_edges.size(0) > 0) {
-                    auto incoming_accessor = delta_incoming_edges.accessor<int64_t , 2>();
+                    auto incoming_accessor = delta_incoming_edges.accessor<int64_t, 2>();
                     for (int j = 0; j < delta_incoming_edges.size(0); j++) {
                         found = seen_unique_nodes.find(incoming_accessor[j][0]);
                         if (found == seen_unique_nodes.end()) {
@@ -509,8 +506,8 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
                 }
 
                 if (delta_outgoing_edges.size(0) > 0) {
-                    int column_idx = delta_outgoing_edges.size(1) - 1; // RW: -1 has some weird bug for accessor
-                    auto outgoing_accessor = delta_outgoing_edges.accessor<int64_t , 2>();
+                    int column_idx = delta_outgoing_edges.size(1) - 1;  // RW: -1 has some weird bug for accessor
+                    auto outgoing_accessor = delta_outgoing_edges.accessor<int64_t, 2>();
                     for (int j = 0; j < delta_outgoing_edges.size(0); j++) {
                         found = seen_unique_nodes.find(outgoing_accessor[j][column_idx]);
                         if (found == seen_unique_nodes.end()) {
@@ -520,9 +517,8 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
                     }
                 }
 
-                delta_ids = torch::from_blob(delta_ids_vec.data(), {(int) delta_ids_vec.size()}, torch::kInt64);
+                delta_ids = torch::from_blob(delta_ids_vec.data(), {(int)delta_ids_vec.size()}, torch::kInt64);
             }
-
         }
 
         hop_offsets = hop_offsets + delta_ids.size(0);
@@ -534,7 +530,8 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
     }
     hop_offsets = torch::cat({hop_offsets, torch::tensor({node_ids.size(0)}, device_options)});
 
-    DENSEGraph ret = DENSEGraph(hop_offsets, node_ids, incoming_offsets, incoming_edges_vec, in_neighbors_mapping, outgoing_offsets, outgoing_edges_vec, out_neighbors_mapping, num_nodes_in_memory);
+    DENSEGraph ret = DENSEGraph(hop_offsets, node_ids, incoming_offsets, incoming_edges_vec, in_neighbors_mapping, outgoing_offsets, outgoing_edges_vec,
+                                out_neighbors_mapping, num_nodes_in_memory);
 
     if (!gpu and !use_hashmap_sets) {
         free(hash_map_mem);
@@ -543,64 +540,61 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
     return ret;
 }
 
-torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor hash_map, torch::Tensor node_ids,
-                                                                   torch::Tensor delta_incoming_edges,
-                                                                   torch::Tensor delta_outgoing_edges,
-                                                                   int64_t num_nodes_in_memory) {
+torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor hash_map, torch::Tensor node_ids, torch::Tensor delta_incoming_edges,
+                                                                   torch::Tensor delta_outgoing_edges, int64_t num_nodes_in_memory) {
     auto hash_map_accessor = hash_map.accessor<bool, 1>();
-    auto nodes_accessor = node_ids.accessor<int64_t , 1>();
+    auto nodes_accessor = node_ids.accessor<int64_t, 1>();
 
-    // zero hash map
-    #pragma omp parallel for
+// zero hash map
+#pragma omp parallel for
     for (int64_t j = 0; j < hash_map.size(0); j++) {
         hash_map_accessor[j] = 0;
     }
 
     if (delta_incoming_edges.size(0) > 0) {
-        auto incoming_accessor = delta_incoming_edges.accessor<int64_t , 2>();
+        auto incoming_accessor = delta_incoming_edges.accessor<int64_t, 2>();
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int64_t j = 0; j < delta_incoming_edges.size(0); j++) {
             hash_map_accessor[incoming_accessor[j][0]] = 1;
         }
     }
 
     if (delta_outgoing_edges.size(0) > 0) {
-        auto outgoing_accessor = delta_outgoing_edges.accessor<int64_t , 2>();
-        int column_idx = delta_outgoing_edges.size(1) - 1; // RW: -1 has some weird bug for accessor
+        auto outgoing_accessor = delta_outgoing_edges.accessor<int64_t, 2>();
+        int column_idx = delta_outgoing_edges.size(1) - 1;  // RW: -1 has some weird bug for accessor
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int64_t j = 0; j < delta_outgoing_edges.size(0); j++) {
             hash_map_accessor[outgoing_accessor[j][column_idx]] = 1;
         }
     }
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int64_t j = 0; j < node_ids.size(0); j++) {
         hash_map_accessor[nodes_accessor[j]] = 0;
     }
 
     unsigned int num_threads = 1;
-    #ifdef MARIUS_OMP
-    #pragma omp parallel
+#ifdef MARIUS_OMP
+#pragma omp parallel
     {
-        #pragma omp single
+#pragma omp single
         num_threads = omp_get_num_threads();
     }
-    #endif
+#endif
 
     std::vector<int> sub_counts = std::vector<int>(num_threads, 0);
     std::vector<int> sub_offsets = std::vector<int>(num_threads, 0);
-    int64_t chunk_size = ceil((double) num_nodes_in_memory / num_threads);
+    int64_t chunk_size = ceil((double)num_nodes_in_memory / num_threads);
 
-    #pragma omp parallel
+#pragma omp parallel
     {
-
-        #ifdef MARIUS_OMP
+#ifdef MARIUS_OMP
         int tid = omp_get_thread_num();
-        #else
+#else
         int tid = 0;
-        #endif
+#endif
 
         int64_t start = chunk_size * tid;
         int64_t end = start + chunk_size;
@@ -623,21 +617,21 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
         count += c;
     }
 
-    for (int k = 0; k < num_threads-1; k++) {
-        sub_offsets[k+1] = sub_offsets[k] + sub_counts[k];
+    for (int k = 0; k < num_threads - 1; k++) {
+        sub_offsets[k + 1] = sub_offsets[k] + sub_counts[k];
     }
 
     auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
     torch::Tensor delta_ids = torch::zeros({count}, device_options);
     auto delta_ids_accessor = delta_ids.accessor<int64_t, 1>();
 
-    #pragma omp parallel
+#pragma omp parallel
     {
-        #ifdef MARIUS_OMP
+#ifdef MARIUS_OMP
         int tid = omp_get_thread_num();
-        #else
+#else
         int tid = 0;
-        #endif
+#endif
 
         int64_t start = chunk_size * tid;
         int64_t end = start + chunk_size;

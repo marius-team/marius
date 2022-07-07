@@ -1,17 +1,19 @@
+import gzip
+import os
+import shutil
+import tarfile
+import zipfile
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
-import tarfile
-import zipfile
 from zipfile import ZipFile
-import gzip
-import shutil
-import os
+
 
 def get_df_count(df, col):
     if df is None:
         return None
     return df.agg({col: "max"}).collect()[0][0] + 1
+
 
 def download_url(url, output_dir, overwrite):
     output_dir = Path(output_dir)
@@ -35,12 +37,10 @@ def download_url(url, output_dir, overwrite):
 def extract_file(filepath, remove_input=True):
     try:
         if tarfile.is_tarfile(str(filepath)):
-            if (str(filepath).endswith(".gzip") or
-                    str(filepath).endswith(".gz")):
+            if str(filepath).endswith(".gzip") or str(filepath).endswith(".gz"):
                 with tarfile.open(filepath, "r:gz") as tar:
                     tar.extractall(path=filepath.parent)
-            elif (str(filepath).endswith(".tar.gz") or
-                  str(filepath).endswith(".tgz")):
+            elif str(filepath).endswith(".tar.gz") or str(filepath).endswith(".tgz"):
                 with tarfile.open(filepath, "r:gz") as tar:
                     tar.extractall(path=filepath.parent)
             elif str(filepath).endswith(".tar"):
@@ -55,19 +55,17 @@ def extract_file(filepath, remove_input=True):
                         tar.extractall(path=filepath.parent)
                 except tarfile.TarError:
                     raise RuntimeError(
-                        "Unrecognized file format, may need to perform extraction manually with a custom dataset.")
+                        "Unrecognized file format, may need to perform extraction manually with a custom dataset."
+                    )
         elif zipfile.is_zipfile(str(filepath)):
             with ZipFile(filepath, "r") as zip:
                 zip.extractall(filepath.parent)
         else:
             try:
-                with filepath.with_suffix("").open("wb") as output_f, \
-                        gzip.GzipFile(filepath) as gzip_f:
+                with filepath.with_suffix("").open("wb") as output_f, gzip.GzipFile(filepath) as gzip_f:
                     shutil.copyfileobj(gzip_f, output_f)
             except gzip.BadGzipFile:
                 raise RuntimeError("Undefined file format.")
-            except:
-                raise RuntimeError("Undefined exception.")
     except EOFError:
         raise RuntimeError("Dataset file isn't complete. Try downloading again.")
 
@@ -78,7 +76,7 @@ def extract_file(filepath, remove_input=True):
 
 
 def strip_header(filepath, num_lines):
-    cmd = "tail -n +{} {} > tmp.txt".format(num_lines+1, filepath)
+    cmd = "tail -n +{} {} > tmp.txt".format(num_lines + 1, filepath)
     os.system(cmd)
 
     cmd = "mv tmp.txt {}".format(filepath)

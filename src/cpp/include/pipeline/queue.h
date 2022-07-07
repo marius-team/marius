@@ -5,11 +5,12 @@
 #ifndef MARIUS_QUEUE_H
 #define MARIUS_QUEUE_H
 
-template<class T>
+template <class T>
 class Queue {
-private:
+   private:
     int max_size_;
-public:
+
+   public:
     std::deque<T> queue_;
     std::mutex *mutex_;
     std::condition_variable *cv_;
@@ -22,7 +23,6 @@ public:
         cv_ = new std::condition_variable();
         expecting_data_ = true;
     }
-
 
     bool push(T item) {
         bool result = true;
@@ -78,13 +78,9 @@ public:
         return std::forward_as_tuple(popped, item);
     }
 
-    void lock() {
-        mutex_->lock();
-    }
+    void lock() { mutex_->lock(); }
 
-    void unlock() {
-        mutex_->unlock();
-    }
+    void unlock() { mutex_->unlock(); }
 
     void flush() {
         lock();
@@ -92,21 +88,13 @@ public:
         unlock();
     }
 
-    int size() {
-        return queue_.size();
-    }
+    int size() { return queue_.size(); }
 
-    bool isFull() {
-        return queue_.size() == max_size_;
-    }
+    bool isFull() { return queue_.size() == max_size_; }
 
-    bool isEmpty() {
-        return queue_.size() == 0;
-    }
+    bool isEmpty() { return queue_.size() == 0; }
 
-    int getMaxSize() {
-        return max_size_;
-    }
+    int getMaxSize() { return max_size_; }
 
     typedef typename std::deque<T> queue_type;
 
@@ -122,4 +110,4 @@ public:
     inline const_iterator cend() const noexcept { return queue_.cend(); }
 };
 
-#endif //MARIUS_QUEUE_H
+#endif  // MARIUS_QUEUE_H

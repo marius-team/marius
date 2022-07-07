@@ -5,7 +5,6 @@
 #include "nn/optim.h"
 
 void Optimizer::load(torch::serialize::InputArchive &input_archive) {
-
     torch::IValue tmp;
     input_archive.read("num_steps", tmp);
     num_steps_ = tmp.toInt();
@@ -24,7 +23,6 @@ void Optimizer::load(torch::serialize::InputArchive &input_archive) {
 }
 
 void Optimizer::save(torch::serialize::OutputArchive &output_archive) {
-
     output_archive.write("num_steps", num_steps_);
 
     for (auto itr = state_dict_.begin(); itr != state_dict_.end(); itr++) {
@@ -42,9 +40,8 @@ void Optimizer::save(torch::serialize::OutputArchive &output_archive) {
 }
 
 void Optimizer::clear_grad() {
-
     auto param_items = param_dict_.items();
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < param_dict_.size(); i++) {
         param_items[i].value().mutable_grad() = torch::Tensor();
     }
@@ -57,15 +54,13 @@ SGDOptimizer::SGDOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_
     reset_state();
 }
 
-void SGDOptimizer::reset_state() {
-    num_steps_ = 0;
-}
+void SGDOptimizer::reset_state() { num_steps_ = 0; }
 
 void SGDOptimizer::step() {
     num_steps_++;
 
     auto param_items = param_dict_.items();
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < param_dict_.size(); i++) {
         torch::NoGradGuard no_grad;
 
@@ -83,9 +78,7 @@ void SGDOptimizer::step() {
     }
 }
 
-std::shared_ptr<Optimizer> SGDOptimizer::clone() {
-    return std::make_shared<SGDOptimizer>(*this);
-}
+std::shared_ptr<Optimizer> SGDOptimizer::clone() { return std::make_shared<SGDOptimizer>(*this); }
 
 AdagradOptimizer::AdagradOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_dict, std::shared_ptr<AdagradOptions> options) {
     param_dict_ = param_dict;
@@ -120,7 +113,7 @@ void AdagradOptimizer::reset_state() {
 
 void AdagradOptimizer::step() {
     auto param_items = param_dict_.items();
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < param_dict_.size(); i++) {
         torch::NoGradGuard no_grad;
 
@@ -151,9 +144,7 @@ void AdagradOptimizer::step() {
     num_steps_++;
 }
 
-std::shared_ptr<Optimizer> AdagradOptimizer::clone() {
-    return std::make_shared<AdagradOptimizer>(*this);
-}
+std::shared_ptr<Optimizer> AdagradOptimizer::clone() { return std::make_shared<AdagradOptimizer>(*this); }
 
 AdamOptimizer::AdamOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_dict, std::shared_ptr<AdamOptions> options) {
     param_dict_ = param_dict;
@@ -169,7 +160,6 @@ AdamOptimizer::AdamOptimizer(torch::OrderedDict<std::string, torch::Tensor> para
 }
 
 void AdamOptimizer::reset_state() {
-
     num_steps_ = 0;
     state_dict_ = torch::OrderedDict<std::string, torch::OrderedDict<std::string, torch::Tensor>>();
 
@@ -194,9 +184,8 @@ void AdamOptimizer::reset_state() {
 }
 
 void AdamOptimizer::step() {
-
     auto param_items = param_dict_.items();
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < param_dict_.size(); i++) {
         torch::NoGradGuard no_grad;
 
@@ -223,8 +212,7 @@ void AdamOptimizer::step() {
         exp_avg_sq_state.mul_(beta_2_).addcmul_(param_grad, param_grad, 1 - beta_2_);
 
         torch::Tensor denom;
-        if(amsgrad_) {
-
+        if (amsgrad_) {
             torch::Tensor max_exp_avg_sq_state = state_dict_[key]["max_exp_avg_sq"];
             // Maintains the maximum of all 2nd moment running avg. till now
             torch::max_out(max_exp_avg_sq_state, exp_avg_sq_state, max_exp_avg_sq_state);
@@ -243,6 +231,4 @@ void AdamOptimizer::step() {
     num_steps_++;
 }
 
-std::shared_ptr<Optimizer> AdamOptimizer::clone() {
-    return std::make_shared<AdamOptimizer>(*this);
-}
+std::shared_ptr<Optimizer> AdamOptimizer::clone() { return std::make_shared<AdamOptimizer>(*this); }

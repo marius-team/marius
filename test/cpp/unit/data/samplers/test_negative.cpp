@@ -2,30 +2,20 @@
 // Created by Jason Mohoney on 2/9/22.
 //
 
-#include <gtest/gtest.h>
 #include <data/samplers/negative.h>
+#include <gtest/gtest.h>
 
 int num_nodes = 6;
 
-torch::Tensor edges = torch::tensor({{0, 2},
-                                     {0, 4},
-                                     {1, 3},
-                                     {1, 5},
-                                     {4, 2},
-                                     {5, 2}}, torch::kInt64);
+torch::Tensor edges = torch::tensor({{0, 2}, {0, 4}, {1, 3}, {1, 5}, {4, 2}, {5, 2}}, torch::kInt64);
 
-torch::Tensor typed_edges = torch::tensor({{0, 0, 2},
-                                           {0, 1, 4},
-                                           {1, 1, 3},
-                                           {1, 0, 5},
-                                           {4, 0, 2},
-                                           {5, 1, 2}}, torch::kInt64);
+torch::Tensor typed_edges = torch::tensor({{0, 0, 2}, {0, 1, 4}, {1, 1, 3}, {1, 0, 5}, {4, 0, 2}, {5, 1, 2}}, torch::kInt64);
 
 torch::Tensor batch_edges = torch::tensor({{1, 5}, {0, 2}, {4, 2}}, torch::kInt64);
 torch::Tensor batch_typed_edges = torch::tensor({{1, 0, 5}, {0, 0, 2}, {4, 0, 2}}, torch::kInt64);
 
 class CorruptNodeNegativeSamplerTest : public ::testing::Test {
-protected:
+   protected:
     shared_ptr<MariusGraph> graph;
     shared_ptr<MariusGraph> typed_graph;
 
@@ -42,7 +32,6 @@ protected:
 };
 
 void validate_sample(shared_ptr<CorruptNodeNegativeSampler> sampler, torch::Tensor sample, shared_ptr<MariusGraph> graph) {
-
     // validate shape
     ASSERT_EQ(sample.size(0), sampler->num_chunks_);
 
@@ -58,7 +47,6 @@ void validate_sample(shared_ptr<CorruptNodeNegativeSampler> sampler, torch::Tens
 }
 
 void validate_filter_local(torch::Tensor filter, torch::Tensor sample, torch::Tensor edges_t, bool inverse) {
-
     // check filtered edges are present in the graph
     auto batch_accessor = edges_t.accessor<int64_t, 2>();
     auto sample_accessor = sample.accessor<int64_t, 2>();
@@ -71,7 +59,7 @@ void validate_filter_local(torch::Tensor filter, torch::Tensor sample, torch::Te
 
     int64_t num_chunks = sample.size(0);
     int64_t num_edges = edges_t.size(0);
-    int64_t chunk_size = ceil((double) num_edges / num_chunks);
+    int64_t chunk_size = ceil((double)num_edges / num_chunks);
 
     for (int i = 0; i < filter.size(0); i++) {
         int64_t src;
@@ -118,7 +106,6 @@ void validate_filter_local(torch::Tensor filter, torch::Tensor sample, torch::Te
 }
 
 void validate_filter_global(torch::Tensor filter, torch::Tensor sample, shared_ptr<MariusGraph> graph, torch::Tensor edges_t, bool inverse) {
-
     // check filtered edges are present in the graph
     auto graph_accessor = graph->src_sorted_edges_.accessor<int64_t, 2>();
     auto batch_accessor = edges_t.accessor<int64_t, 2>();
@@ -131,8 +118,8 @@ void validate_filter_global(torch::Tensor filter, torch::Tensor sample, shared_p
     }
 
     int64_t num_chunks = sample.size(0);
-    int64_t num_edges =  edges_t.size(0);
-    int64_t chunk_size = ceil((double) num_edges / num_chunks);
+    int64_t num_edges = edges_t.size(0);
+    int64_t chunk_size = ceil((double)num_edges / num_chunks);
 
     for (int i = 0; i < filter.size(0); i++) {
         int64_t src;
