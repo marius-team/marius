@@ -6,5 +6,8 @@ jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-      - name: Check linting with Flake8
-        run: tox -e check_lint
+    - uses: actions/checkout@v2
+    - name: Install Tox
+      run: pip3 install tox
+    - name: Check linting with Flake8
+      run: tox -e check_lint
