@@ -104,6 +104,12 @@ def config_parser_fn(config_name):
         edge_queries_file = open(query_filepath, 'r')
         read_lines = edge_queries_file.readlines()
         for i in range(len(read_lines)):
+            read_lines[i] = read_lines[i].strip()
+            if (read_lines[i] == ''):
+                logging.error("Error: Empty lines are not allowed in edges_query file. " +
+                    "Please remove them")
+                exit(1)
+            
             # Removing the last '\n' character
             if (read_lines[i][-1] == '\n'):
                 read_lines[i] = read_lines[i][:-1]
@@ -169,10 +175,17 @@ def validation_check_edge_entity_entity_queries(edges_queries_list):
     :return new_query_list: These are updated queries with necessary changes if any
     """
     # Format: SELECT table1_name.col1_name, table2_name.col2_name FROM ____ WHERE ____ (and so on);
+    logging.info('\nValidating queries for proper formatting')
     new_query_list = list()
     for q in range(len(edges_queries_list)):
-        qry_split = edges_queries_list[q].split()
+        logging.info(f'Checking query[{q}]')
+        qry_split = edges_queries_list[q].strip().split()
         
+        if "AS" in qry_split or "as" in qry_split:
+            logging.error("Error: Cannot use AS keyword in query. Please update" +
+                " the query")
+            exit(1)
+            
         check_var = qry_split[0].lower()
         if (check_var != "select"):
             logging.error("Error: Incorrect edge entity node - entity node formatting, " +
@@ -281,7 +294,7 @@ def post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_serve
 
     src_rel_dst = pd.DataFrame()
     open(output_dir / Path(OUTPUT_FILE_NAME), 'w').close() # Clearing the output file
-    logging.info('In post_processing')
+    logging.info('\nProcessing queries to generate edges')
 
     # These are just for metrics - Only correct when not batch processing
     num_uniq = []  # number of entities
@@ -299,7 +312,7 @@ def post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_serve
         cursor_name = "edge_entity_entity_cursor" + str(i)  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
         cursor = get_cursor(cnx, db_server, cursor_name)
         cursor.execute(query)
-        logging.info(f'Cursor.execute time is: {time.time() - add_time1}')
+        # logging.info(f'Cursor.execute time is: {time.time() - add_time1:.3f}')
 
         # Getting Basic Details
         table_name_list = re.split(' ', query)  # table name of the query to execute
@@ -347,7 +360,7 @@ def post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_serve
             if first_pass:
                 fetch_size = get_fetch_size(fetch_size, limit_fetch_size, mem_copy_used)
                 first_pass = False
-        logging.info(f'Finishing post_processing entity nodes, execution time: {time.time() - start_time2}')
+        logging.info(f'Finished processing query[{i}] in {time.time() - start_time2:.3f} seconds')
 
 def main():
     total_time = time.time()
@@ -370,7 +383,7 @@ def main():
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout)) # add handler to print to console
 
     try:
-        logging.info('Starting a new run!!!\n')
+        logging.info(f'\nStarting marius_db2graph conversion tool for config: {args.config_path}')
         
         cnx = connect_to_db(db_server, db_name, db_user, db_password, db_host)
         
@@ -379,11 +392,11 @@ def main():
         post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_server)
 
         cnx.close()
-        logging.info(f'Total execution time: {time.time()-total_time}\n')
-        logging.info('Edge file written to ' + str(output_dir / Path(OUTPUT_FILE_NAME)))
+        logging.info(f'\nTotal execution time: {time.time()-total_time:.3f} seconds')
+        logging.info('\nEdge file written to ' + str(output_dir / Path(OUTPUT_FILE_NAME)))
     except Exception as e:
         logging.error(e)
-        logging.info(f'Total execution time: {time.time()-total_time}\n')
+        logging.info(f'\nTotal execution time: {time.time()-total_time:.3f} seconds')
 
 if __name__ == "__main__":
     main()
