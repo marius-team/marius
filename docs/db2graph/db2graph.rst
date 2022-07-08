@@ -91,7 +91,7 @@ Assuming a database has been created locally and ``marius`` has been installed s
          - Path to the text file that contains the SQL SELECT queries fetching edges from entity nodes to entity nodes.
          - Yes
 
-#. | Next, define SQL SELECT queries. Assume the file ``conf/edges_queries.txt`` has been created. In it, define queries with the following format. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that you can any SQL keyword after WHERE clause.
+#. | Next, define SQL SELECT queries. Assume the file ``conf/edges_queries.txt`` has been created. In it, define queries with the following format with no empty lines in-between lines. Each edge consists of two rows: A single ``relation_name`` followed by another row of SQL SELECT query. Note that you can include any SQL keyword after WHERE clause.
     
     .. code-block:: sql
            
@@ -112,10 +112,10 @@ Assuming a database has been created locally and ``marius`` has been installed s
 
     .. code-block:: bash
         
-           $ MARIUS_NO_BINDINGS=1 marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
-           Starting a new run!!!
+           $ marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
+           Starting marius_db2graph conversion tool for config: conf/config.yaml
            ...
-           Edge file written to output_dir/edges.txt
+           Edge file written to edges.txt
 
    | The  ``--config_path`` flag specifies where the configuration file created by the user is.
 
@@ -216,8 +216,9 @@ We use `the Sakila DVD store database <https://dev.mysql.com/doc/sakila/en/>`_ f
     .. code-block:: bash
         
            $ marius_db2graph --config_path datasets/sakila/conf/config.yaml --output_directory datasets/sakila/
-           Starting a new run!!!
+           Starting marius_db2graph conversion tool for config: datasets/sakila/conf/config.yaml
            ...
+           Total execution time: 0.382 seconds
            Edge file written to datasets/sakila/edges.txt
 
    | The conversion result was written to ``edges.txt`` in the specified directory ``datasets/sakila/``. In ``edges.txt``, there should be 7915 edges representing the three relationships we defined earlier:

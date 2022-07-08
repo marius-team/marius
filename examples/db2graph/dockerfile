@@ -28,8 +28,7 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0
 RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113 && pip3 install docutils==0.17
 
 # install Marius
-# TODO: change to the marius repo when merge into main
-RUN git clone https://github.com/ryansun117/marius.git && cd marius && git fetch && git switch db2graph && pip3 install .
+RUN git clone https://github.com/marius-team/marius.git && cd marius && pip3 install .
 
 # install debconf-set-selections & systemctl
 RUN apt-get install debconf
