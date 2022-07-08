@@ -115,7 +115,7 @@ Assuming a database has been created locally and ``marius`` has been installed s
            $ marius_db2graph --config_path conf/config.yaml --output_directory output_dir/
            Starting marius_db2graph conversion tool for config: conf/config.yaml
            ...
-           Edge file written to edges.txt
+           Edge file written to output_dir/edges.txt
 
    | The  ``--config_path`` flag specifies where the configuration file created by the user is.
 
