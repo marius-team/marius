@@ -18,7 +18,7 @@ We scale graph neural network training ([preprint](https://arxiv.org/abs/2202.02
 * CuDNN >= 7 
 * pytorch >= 1.8
 * python >= 3.6
-* GCC >= 7 (On Linux) or Clang 12.0 (On MacOS)
+* GCC >= 7 (On Linux) or Clang >= 11.0 (On MacOS)
 * cmake >= 3.12
 * make >= 3.8
 
@@ -33,13 +33,17 @@ pip3 install .
 
 The Python API can be accessed with ``import marius``
 
-The following commands will be installed:
+The following command line tools will be installed:
 - marius_train: Train models using configuration files and the command line
 - marius_eval: Command line model evaluation
 - marius_preprocess: Built-in dataset downloading and preprocessing
 - marius_predict: Batch inference tool for link prediction or node classification
 
-## Command Line Training ##
+## Command Line Interface ##
+
+The command line interface supports performant in-memory and out-of-core training and evaluation of graph learning models. Experimental results from our papers can be reproduced by using this interface. 
+
+### Quick Start: ###
 
 First make sure marius is installed with `pip3 install .` 
 
@@ -55,6 +59,7 @@ See the [full example](http://marius-project.org/marius/examples/config/lp_fb15k
 
 ## Python API ##
 
+The Python API is currently experimental and can be used to perform in-memory training and evaluation of graph learning models. 
 
 See the [documentation](http://marius-project.org/marius/examples/python/index.html#) for Python API usage and examples.
 

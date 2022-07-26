@@ -596,12 +596,9 @@ class NegativeSamplingConfig:
 
 @dataclass
 class CheckpointConfig:
-    dir: str = ""
     save_best: bool = False
     interval: int = -1
-    save_edges: bool = False
     save_state: bool = False
-    save_encoded: bool = False
 
     def merge(self, input_config: DictConfig):
         """
@@ -610,24 +607,15 @@ class CheckpointConfig:
         :return: Structured output config
         """
 
-        if "dir" in input_config.keys():
-            self.dir = input_config.dir
-
         if "save_best" in input_config.keys():
             self.save_best = input_config.save_best
 
         if "interval" in input_config.keys():
             self.interval = input_config.interval
 
-        if "save_edges" in input_config.keys():
-            self.save_edges = input_config.save_edges
-
         if "save_state" in input_config.keys():
             self.save_state = input_config.save_state
-
-        if "save_encoded" in input_config.keys():
-            self.save_encoded = input_config.save_encoded
-
+        
 
 @dataclass
 class PipelineConfig:
@@ -691,7 +679,7 @@ class TrainingConfig:
     epochs_per_shuffle: int = 1
     logs_per_epoch: int = 10
     save_model: bool = True
-    checkpoint: CheckpointConfig = MISSING
+    checkpoint: CheckpointConfig = CheckpointConfig()
     resume_training: bool = False
     resume_from_checkpoint: str = ""
 
@@ -726,8 +714,6 @@ class TrainingConfig:
                             self.pipeline = PipelineConfig()
                         self.pipeline.merge(input_config.pipeline)
                     elif key == "checkpoint":
-                        if self.checkpoint is MISSING:
-                            self.checkpoint = CheckpointConfig()
                         self.checkpoint.merge(input_config.checkpoint)
                     else:
                         val = input_config.__getattr__(key)

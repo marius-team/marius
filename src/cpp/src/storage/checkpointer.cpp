@@ -2,12 +2,12 @@
 // Created by Jason Mohoney on 12/15/21.
 //
 
-#include <stdio.h>
+#include "storage/checkpointer.h"
 
 #include "configuration/util.h"
 #include "reporting/logger.h"
-#include "storage/checkpointer.h"
 #include "storage/io.h"
+#include "storage/storage.h"
 
 Checkpointer::Checkpointer(std::shared_ptr<Model> model, shared_ptr<GraphModelStorage> storage, std::shared_ptr<CheckpointConfig> config) {
     model_ = model;
@@ -15,10 +15,29 @@ Checkpointer::Checkpointer(std::shared_ptr<Model> model, shared_ptr<GraphModelSt
     config_ = config;
 }
 
+void Checkpointer::create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs) {
+    string tmp_checkpoint_dir = checkpoint_dir + "checkpoint_" + std::to_string(epochs) + "_tmp/";
+    createDir(tmp_checkpoint_dir, false);
+
+    std::string new_embeddings_file = tmp_checkpoint_dir + PathConstants::embeddings_file + PathConstants::file_ext;
+    std::string new_embeddings_state_file = tmp_checkpoint_dir + PathConstants::embeddings_state_file + PathConstants::file_ext;
+
+    std::string embeddings_file = checkpoint_dir + PathConstants::embeddings_file + PathConstants::file_ext;
+    std::string embeddings_state_file = checkpoint_dir + PathConstants::embeddings_state_file + PathConstants::file_ext;
+
+    if (fileExists(embeddings_file)) {
+        copyFile(embeddings_file, new_embeddings_file);
+        if (this->config_->save_state) copyFile(embeddings_state_file, new_embeddings_state_file);
+    }
+
+    this->save(tmp_checkpoint_dir, checkpoint_meta);
+
+    string final_checkpoint_dir = checkpoint_dir + "checkpoint_" + std::to_string(epochs) + "/";
+    renameFile(tmp_checkpoint_dir, final_checkpoint_dir);
+}
+
 void Checkpointer::save(string checkpoint_dir, CheckpointMeta checkpoint_meta) {
-
     if (checkpoint_meta.has_model) {
-
         if (storage_->storage_ptrs_.node_embeddings != nullptr) {
             storage_->storage_ptrs_.node_embeddings->write();
         }
@@ -32,88 +51,12 @@ void Checkpointer::save(string checkpoint_dir, CheckpointMeta checkpoint_meta) {
     }
 
     saveMetadata(checkpoint_dir, checkpoint_meta);
-
-//    if (storage_->base_directory_ != checkpoint_dir) {
-//
-//        createDir(checkpoint_dir, false);
-//        createDir(checkpoint_dir + PathConstants::edges_directory, false);
-//        createDir(checkpoint_dir + PathConstants::nodes_directory, false);
-//
-//        string node_mapping_filename = storage_->base_directory_
-//                                       + PathConstants::nodes_directory
-//                                       + PathConstants::node_mapping_file;
-//
-//        string output_node_mapping_filename = checkpoint_dir
-//                                              + PathConstants::nodes_directory
-//                                              + PathConstants::node_mapping_file;
-//
-//        if (fileExists(node_mapping_filename)) {
-//            copyFile(node_mapping_filename, output_node_mapping_filename);
-//        }
-//
-//        string relation_mapping_filename = storage_->base_directory_
-//                                           + PathConstants::edges_directory
-//                                           + PathConstants::relation_mapping_file;
-//
-//        string output_relation_mapping_filename = checkpoint_dir
-//                                                  + PathConstants::edges_directory
-//                                                  + PathConstants::relation_mapping_file;
-//
-//        if (fileExists(relation_mapping_filename)) {
-//            copyFile(relation_mapping_filename, output_relation_mapping_filename);
-//        }
-//
-//        // get node embeddings and model
-//        if (checkpoint_meta.has_model) {
-//            string node_embedding_filename = storage_->base_directory_
-//                                             + PathConstants::nodes_directory
-//                                             + PathConstants::embeddings_file
-//                                             + PathConstants::file_ext;
-//
-//            string output_node_embedding_filename = checkpoint_dir
-//                                                    + PathConstants::nodes_directory
-//                                                    + PathConstants::embeddings_file
-//                                                    + PathConstants::file_ext;
-//
-//
-//            if (fileExists(node_embedding_filename)) {
-//                copyFile(node_embedding_filename, output_node_embedding_filename);
-//            }
-//
-//            string model_filename = storage_->base_directory_ + PathConstants::model_file;
-//            string output_model_filename = checkpoint_dir + PathConstants::model_file;
-//
-//            if (fileExists(model_filename)) {
-//                copyFile(model_filename, output_model_filename);
-//            }
-//
-//            if (checkpoint_meta.has_state) {
-//                string node_state_filename = storage_->base_directory_
-//                                             + PathConstants::nodes_directory
-//                                             + PathConstants::embeddings_state_file
-//                                             + PathConstants::file_ext;
-//
-//                string output_node_state_filename = checkpoint_dir
-//                                                    + PathConstants::nodes_directory
-//                                                    + PathConstants::embeddings_state_file
-//                                                    + PathConstants::file_ext;
-//
-//                if (fileExists(node_state_filename)) {
-//                    copyFile(node_state_filename, output_node_state_filename);
-//                }
-//            }
-//        }
-//        copyFile(storage_->base_directory_ + PathConstants::config_file, checkpoint_dir + PathConstants::config_file);
-//
-//        copyFile(storage_->base_directory_ + PathConstants::checkpoint_metadata_file, checkpoint_dir + PathConstants::checkpoint_metadata_file);
-//    }
 }
 
-std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage> , CheckpointMeta> Checkpointer::load(string checkpoint_dir,
-                                                                                           std::shared_ptr<MariusConfig> marius_config,
-                                                                                           bool train) {
+std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage>, CheckpointMeta> Checkpointer::load(string checkpoint_dir,
+                                                                                                     std::shared_ptr<MariusConfig> marius_config,
+                                                                                                     bool train) {
     CheckpointMeta checkpoint_meta = loadMetadata(checkpoint_dir);
-
 
     std::vector<torch::Device> devices = devices_from_config(marius_config->storage);
     std::shared_ptr<Model> model = initModelFromConfig(marius_config->model,
@@ -129,9 +72,9 @@ std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage> , CheckpointMet
     }
 
     shared_ptr<GraphModelStorage> storage = initializeStorage(model,
-                                                   marius_config->storage,
-                                                   false,
-                                                   train);
+                                                              marius_config->storage,
+                                                              false,
+                                                              train);
 
     return std::forward_as_tuple(model, storage, checkpoint_meta);
 }
@@ -164,17 +107,10 @@ CheckpointMeta Checkpointer::loadMetadata(string directory) {
     std::getline(input_file, line);
     std::istringstream(line) >> ret_meta.has_model;
 
-    std::getline(input_file, line);
-    std::istringstream(line) >> ret_meta.has_edges;
-
-    std::getline(input_file, line);
-    std::istringstream(line) >> ret_meta.has_features;
-
     return ret_meta;
 }
 
 void Checkpointer::saveMetadata(string directory, CheckpointMeta checkpoint_meta) {
-
     std::ofstream output_file;
     output_file.open(directory + PathConstants::checkpoint_metadata_file);
 
@@ -185,6 +121,4 @@ void Checkpointer::saveMetadata(string directory, CheckpointMeta checkpoint_meta
     output_file << checkpoint_meta.has_state << "\n";
     output_file << checkpoint_meta.has_encoded << "\n";
     output_file << checkpoint_meta.has_model << "\n";
-    output_file << checkpoint_meta.has_edges << "\n";
-    output_file << checkpoint_meta.has_features << "\n";
 }
