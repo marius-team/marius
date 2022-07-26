@@ -7,5 +7,6 @@ Model Export and Inference
     :maxdepth: 2
 
     marius_predict
+    marius_postprocess
 
 

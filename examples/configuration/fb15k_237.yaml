@@ -21,7 +21,7 @@ model:
       options:
         learning_rate: 0.1
 storage:
-  device_type: cuda
+  device_type: cpu
   dataset:
     dataset_dir: ./datasets/fb15k_237_example/
   edges:
