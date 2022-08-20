@@ -34,7 +34,7 @@ std::tuple<Storage *, Storage *, Storage *, Storage *> initializeEdges(shared_pt
                                      + PathConstants::edges_file
                                      + "_dst_sort"
                                      + PathConstants::file_ext;
-    copyFile(train_filename, train_dst_sort_filename);
+//    copyFile(train_filename, train_dst_sort_filename);
 
     Storage *train_edge_storage;
     Storage *train_edge_storage_dst_sort;
@@ -66,21 +66,21 @@ std::tuple<Storage *, Storage *, Storage *, Storage *> initializeEdges(shared_pt
         }
         case StorageBackend::FLAT_FILE: {
             train_edge_storage = new FlatFile(train_filename, num_train, num_columns, dtype);
-            train_edge_storage_dst_sort = new FlatFile(train_dst_sort_filename, num_train, num_columns, dtype);
+//            train_edge_storage_dst_sort = new FlatFile(train_dst_sort_filename, num_train, num_columns, dtype);
             valid_edge_storage = new FlatFile(valid_filename, num_valid, num_columns, dtype);
             test_edge_storage = new FlatFile(test_filename, num_test, num_columns, dtype);
             break;
         }
         case StorageBackend::HOST_MEMORY: {
             train_edge_storage = new InMemory(train_filename, num_train, num_columns, dtype, torch::kCPU);
-            train_edge_storage_dst_sort = new InMemory(train_dst_sort_filename, num_train, num_columns, dtype, torch::kCPU);
+//            train_edge_storage_dst_sort = new InMemory(train_dst_sort_filename, num_train, num_columns, dtype, torch::kCPU);
             valid_edge_storage = new InMemory(valid_filename, num_valid, num_columns, dtype, torch::kCPU);
             test_edge_storage = new InMemory(test_filename, num_test, num_columns, dtype, torch::kCPU);
             break;
         }
         case StorageBackend::DEVICE_MEMORY: {
             train_edge_storage = new InMemory(train_filename, num_train, num_columns, dtype, storage_config->device_type);
-            train_edge_storage_dst_sort = new InMemory(train_dst_sort_filename, num_train, num_columns, dtype, storage_config->device_type);
+//            train_edge_storage_dst_sort = new InMemory(train_dst_sort_filename, num_train, num_columns, dtype, storage_config->device_type);
             valid_edge_storage = new InMemory(valid_filename, num_valid, num_columns, dtype, storage_config->device_type);
             test_edge_storage = new InMemory(test_filename, num_test, num_columns, dtype, storage_config->device_type);
             break;
@@ -118,13 +118,13 @@ std::tuple<Storage *, Storage *, Storage *, Storage *> initializeEdges(shared_pt
                                        + PathConstants::edge_partition_offsets_file;
 
         train_edge_storage->readPartitionSizes(train_edges_partitions);
-        train_edge_storage_dst_sort->readPartitionSizes(train_edges_partitions);
+//        train_edge_storage_dst_sort->readPartitionSizes(train_edges_partitions);
         valid_edge_storage->readPartitionSizes(validation_edges_partitions);
         test_edge_storage->readPartitionSizes(test_edges_partitions);
     }
 
-    train_edge_storage->sort(true);
-    train_edge_storage_dst_sort->sort(false);
+//    train_edge_storage->sort(true);
+//    train_edge_storage_dst_sort->sort(false);
 
     if (storage_config->shuffle_input) {
 //        train_edge_storage->shuffle();
@@ -132,7 +132,8 @@ std::tuple<Storage *, Storage *, Storage *, Storage *> initializeEdges(shared_pt
         test_edge_storage->shuffle();
     }
 
-    return std::forward_as_tuple(train_edge_storage, train_edge_storage_dst_sort, valid_edge_storage, test_edge_storage);
+//    return std::forward_as_tuple(train_edge_storage, train_edge_storage_dst_sort, valid_edge_storage, test_edge_storage);
+    return std::forward_as_tuple(train_edge_storage, nullptr, valid_edge_storage, test_edge_storage);
 }
 
 std::tuple<Storage *, Storage *> initializeNodeEmbeddings(std::shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config) {

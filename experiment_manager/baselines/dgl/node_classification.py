@@ -128,6 +128,8 @@ def run(proc_id, devices, num_gpus, data, all_args):
         device = torch.device('cuda:' + str(device_id))
         torch.distributed.init_process_group(backend="nccl", init_method=dist_init_method, world_size=num_gpus,
                                              rank=proc_id)
+    elif num_gpus == 0:
+        device = CPU
     else:
         device = GPU
 

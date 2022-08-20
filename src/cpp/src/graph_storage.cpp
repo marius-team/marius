@@ -112,7 +112,7 @@ GraphModelStorage::~GraphModelStorage() {
     unload(false);
 
     delete storage_ptrs_.train_edges;
-    delete storage_ptrs_.train_edges_dst_sort;
+//    delete storage_ptrs_.train_edges_dst_sort;
     delete storage_ptrs_.train_edges_features;
     delete storage_ptrs_.validation_edges;
     delete storage_ptrs_.validation_edges_features;
@@ -172,7 +172,7 @@ void GraphModelStorage::_unload(Storage *storage, bool write) {
 void GraphModelStorage::load() {
     _load(storage_ptrs_.edges);
     _load(storage_ptrs_.train_edges);
-    _load(storage_ptrs_.train_edges_dst_sort);
+//    _load(storage_ptrs_.train_edges_dst_sort);
     _load(storage_ptrs_.edge_features);
     _load(storage_ptrs_.nodes);
 
@@ -203,22 +203,29 @@ void GraphModelStorage::load() {
 }
 
 void GraphModelStorage::unload(bool write) {
-    _unload(storage_ptrs_.edges, false);
+    // only unload features/embeddings etc if using the partition buffer
+    if (storage_config_->embeddings != nullptr || storage_config_->features != nullptr) {
+        if (storage_config_->embeddings->type == StorageBackend::PARTITION_BUFFER ||
+            storage_config_->features->type == StorageBackend::PARTITION_BUFFER) {
+            _unload(storage_ptrs_.edges, false);
+            _unload(storage_ptrs_.train_edges, false);
+//            _unload(storage_ptrs_.train_edges_dst_sort, false);
+            _unload(storage_ptrs_.validation_edges, false);
+            _unload(storage_ptrs_.test_edges, false);
+            _unload(storage_ptrs_.nodes, false);
+            _unload(storage_ptrs_.train_nodes, false);
+            _unload(storage_ptrs_.valid_nodes, false);
+            _unload(storage_ptrs_.test_nodes, false);
+            _unload(storage_ptrs_.node_embeddings, write);
+            _unload(storage_ptrs_.node_optimizer_state, write);
+            _unload(storage_ptrs_.node_features, false);
+        }
+    }
+
     _unload(storage_ptrs_.edge_features, false);
-    _unload(storage_ptrs_.train_edges, false);
-    _unload(storage_ptrs_.train_edges_dst_sort, false);
     _unload(storage_ptrs_.train_edges_features, false);
-    _unload(storage_ptrs_.validation_edges, false);
     _unload(storage_ptrs_.validation_edges_features, false);
-    _unload(storage_ptrs_.test_edges, false);
     _unload(storage_ptrs_.test_edges_features, false);
-    _unload(storage_ptrs_.nodes, false);
-    _unload(storage_ptrs_.train_nodes, false);
-    _unload(storage_ptrs_.valid_nodes, false);
-    _unload(storage_ptrs_.test_nodes, false);
-    _unload(storage_ptrs_.node_embeddings, write);
-    _unload(storage_ptrs_.node_optimizer_state, write);
-    _unload(storage_ptrs_.node_features, false);
     _unload(storage_ptrs_.relation_features, false);
 
     _unload(in_memory_embeddings_, false);
@@ -475,17 +482,17 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
         torch::Tensor in_mem_edge_bucket_sizes = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
         torch::Tensor global_edge_bucket_starts = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
 
-        torch::Tensor in_mem_edge_bucket_ids_dst = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
-        torch::Tensor in_mem_edge_bucket_sizes_dst = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
-        torch::Tensor global_edge_bucket_starts_dst = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
+//        torch::Tensor in_mem_edge_bucket_ids_dst = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
+//        torch::Tensor in_mem_edge_bucket_sizes_dst = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
+//        torch::Tensor global_edge_bucket_starts_dst = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
 
         auto in_mem_edge_bucket_ids_accessor = in_mem_edge_bucket_ids.accessor<int64_t, 1>();
         auto in_mem_edge_bucket_sizes_accessor = in_mem_edge_bucket_sizes.accessor<int64_t, 1>();
         auto global_edge_bucket_starts_accessor = global_edge_bucket_starts.accessor<int64_t, 1>();
 
-        auto in_mem_edge_bucket_ids_dst_accessor = in_mem_edge_bucket_ids_dst.accessor<int64_t, 1>();
-        auto in_mem_edge_bucket_sizes_dst_accessor = in_mem_edge_bucket_sizes_dst.accessor<int64_t, 1>();
-        auto global_edge_bucket_starts_dst_accessor = global_edge_bucket_starts_dst.accessor<int64_t, 1>();
+//        auto in_mem_edge_bucket_ids_dst_accessor = in_mem_edge_bucket_ids_dst.accessor<int64_t, 1>();
+//        auto in_mem_edge_bucket_sizes_dst_accessor = in_mem_edge_bucket_sizes_dst.accessor<int64_t, 1>();
+//        auto global_edge_bucket_starts_dst_accessor = global_edge_bucket_starts_dst.accessor<int64_t, 1>();
 
         //TODO we don't need to do this every time
         std::vector<int64_t> edge_bucket_sizes_ = storage_ptrs_.edges->getEdgeBucketSizes();
@@ -507,10 +514,10 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
                 in_mem_edge_bucket_sizes_accessor[idx] = edge_bucket_size;
                 global_edge_bucket_starts_accessor[idx] = edge_bucket_start;
 
-                idx = j * buffer_size + i;
-                in_mem_edge_bucket_ids_dst_accessor[idx] = edge_bucket_id;
-                in_mem_edge_bucket_sizes_dst_accessor[idx] = edge_bucket_size;
-                global_edge_bucket_starts_dst_accessor[idx] = edge_bucket_start;
+//                idx = j * buffer_size + i;
+//                in_mem_edge_bucket_ids_dst_accessor[idx] = edge_bucket_id;
+//                in_mem_edge_bucket_sizes_dst_accessor[idx] = edge_bucket_size;
+//                global_edge_bucket_starts_dst_accessor[idx] = edge_bucket_start;
             }
         }
 
@@ -518,14 +525,14 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
         int64_t total_size = in_mem_edge_bucket_starts[-1].item<int64_t>();
         in_mem_edge_bucket_starts = in_mem_edge_bucket_starts - in_mem_edge_bucket_sizes;
 
-        torch::Tensor in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_sizes_dst.cumsum(0);
-        in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_starts_dst - in_mem_edge_bucket_sizes_dst;
+//        torch::Tensor in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_sizes_dst.cumsum(0);
+//        in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_starts_dst - in_mem_edge_bucket_sizes_dst;
 
         auto in_mem_edge_bucket_starts_accessor = in_mem_edge_bucket_starts.accessor<int64_t, 1>();
-        auto in_mem_edge_bucket_starts_dst_accessor = in_mem_edge_bucket_starts_dst.accessor<int64_t, 1>();
+//        auto in_mem_edge_bucket_starts_dst_accessor = in_mem_edge_bucket_starts_dst.accessor<int64_t, 1>();
 
         current_subgraph_state_->all_in_memory_edges_ = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
-        current_subgraph_state_->all_in_memory_edges_dst_sort_ = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+//        current_subgraph_state_->all_in_memory_edges_dst_sort_ = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
 
         #pragma omp parallel for
         for (int i = 0; i < num_edge_buckets_in_mem; i++) {
@@ -535,10 +542,10 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
 
             current_subgraph_state_->all_in_memory_edges_.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges->range(edge_bucket_start, edge_bucket_size);
 
-            edge_bucket_size = in_mem_edge_bucket_sizes_dst_accessor[i];
-            edge_bucket_start = global_edge_bucket_starts_dst_accessor[i];
-            local_offset = in_mem_edge_bucket_starts_dst_accessor[i];
-            current_subgraph_state_->all_in_memory_edges_dst_sort_.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges_dst_sort->range(edge_bucket_start, edge_bucket_size);
+//            edge_bucket_size = in_mem_edge_bucket_sizes_dst_accessor[i];
+//            edge_bucket_start = global_edge_bucket_starts_dst_accessor[i];
+//            local_offset = in_mem_edge_bucket_starts_dst_accessor[i];
+//            current_subgraph_state_->all_in_memory_edges_dst_sort_.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges_dst_sort->range(edge_bucket_start, edge_bucket_size);
         }
 
         if (storage_ptrs_.node_embeddings != nullptr) {
@@ -556,21 +563,21 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, -1))
             }).transpose(0, 1);
 
-            mapped_edges_dst_sort = torch::stack({
-                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, 0)),
-                   current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, 1),
-                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, -1))
-           }).transpose(0, 1);
+//            mapped_edges_dst_sort = torch::stack({
+//                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, 0)),
+//                   current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, 1),
+//                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, -1))
+//           }).transpose(0, 1);
         } else if (storage_ptrs_.edges->dim1_size_ == 2) {
             mapped_edges = torch::stack({
                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, 0)),
                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, -1))
             }).transpose(0, 1);
 
-            mapped_edges_dst_sort = torch::stack({
-                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, 0)),
-                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, -1))
-            }).transpose(0, 1);
+//            mapped_edges_dst_sort = torch::stack({
+//                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, 0)),
+//                   current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_dst_sort_.select(1, -1))
+//            }).transpose(0, 1);
         } else {
             // TODO use a function for logging errors and throwing expections
             SPDLOG_ERROR("Unexpected number of edge columns");
@@ -584,7 +591,8 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
         current_subgraph_state_->all_in_memory_mapped_edges_ = mapped_edges;
 
         mapped_edges = merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, true);
-        mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges_dst_sort, in_mem_edge_bucket_starts_dst, buffer_size, false);
+//        mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges_dst_sort, in_mem_edge_bucket_starts_dst, buffer_size, false);
+        mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, false);
 
         mapped_edges = mapped_edges.to(torch::kInt64);
         mapped_edges_dst_sort = mapped_edges_dst_sort.to(torch::kInt64);
@@ -599,9 +607,9 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
         current_subgraph_state_->in_memory_edge_bucket_ids_ = in_mem_edge_bucket_ids;
         current_subgraph_state_->in_memory_edge_bucket_sizes_ = in_mem_edge_bucket_sizes;
         current_subgraph_state_->in_memory_edge_bucket_starts_ = in_mem_edge_bucket_starts;
-        current_subgraph_state_->in_memory_edge_bucket_ids_dst_ = in_mem_edge_bucket_ids_dst;
-        current_subgraph_state_->in_memory_edge_bucket_sizes_dst_ = in_mem_edge_bucket_sizes_dst;
-        current_subgraph_state_->in_memory_edge_bucket_starts_dst_ = in_mem_edge_bucket_starts_dst;
+//        current_subgraph_state_->in_memory_edge_bucket_ids_dst_ = in_mem_edge_bucket_ids_dst;
+//        current_subgraph_state_->in_memory_edge_bucket_sizes_dst_ = in_mem_edge_bucket_sizes_dst;
+//        current_subgraph_state_->in_memory_edge_bucket_starts_dst_ = in_mem_edge_bucket_starts_dst;
 
         if (prefetch_) {
             if (hasSwap()) {
@@ -626,14 +634,17 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
         }
 
         EdgeList src_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
-        EdgeList dst_sort = storage_ptrs_.train_edges_dst_sort->range(0, storage_ptrs_.train_edges_dst_sort->getDim0()).to(torch::kInt64);
+//        EdgeList dst_sort = storage_ptrs_.train_edges_dst_sort->range(0, storage_ptrs_.train_edges_dst_sort->getDim0()).to(torch::kInt64);
+
+        src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0)));
+        EdgeList dst_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, -1)));
 
         if (!embeddings_buffered && !features_buffered) {
 
         } else if (!train_ && full_graph_evaluation_) {
             // TODO: need to merge to sorted edge buckets
-            src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0)));
-            dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1)));
+//            src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0)));
+//            dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1)));
         } else {
             SPDLOG_ERROR("Unsure how to create in memory subgraph.");
             throw std::runtime_error("");
@@ -713,17 +724,17 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
         int64_t src_partition = edge_bucket_id / num_partitions;
         int64_t dst_partition = edge_bucket_id % num_partitions;
 
-        edge_bucket_id = accessor_in_memory_edge_bucket_ids_dst_[i];
-        int64_t src_partition_dst = edge_bucket_id / num_partitions;
-        int64_t dst_partition_dst = edge_bucket_id % num_partitions;
+//        edge_bucket_id = accessor_in_memory_edge_bucket_ids_dst_[i];
+//        int64_t src_partition_dst = edge_bucket_id / num_partitions;
+//        int64_t dst_partition_dst = edge_bucket_id % num_partitions;
 
         for (int j = 0; j < num_swap_partitions; j++) {
             if (src_partition == evict_partition_ids[j] || dst_partition == evict_partition_ids[j]) {
                 accessor_keep_mask[i] = false;
             }
-            if (src_partition_dst == evict_partition_ids[j] || dst_partition_dst == evict_partition_ids[j]) {
-                accessor_keep_mask_dst[i] = false;
-            }
+//            if (src_partition_dst == evict_partition_ids[j] || dst_partition_dst == evict_partition_ids[j]) {
+//                accessor_keep_mask_dst[i] = false;
+//            }
         }
     }
 
@@ -731,9 +742,9 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
     torch::Tensor in_mem_edge_bucket_sizes = current_subgraph_state_->in_memory_edge_bucket_sizes_.masked_select(keep_mask);
     torch::Tensor local_or_global_edge_bucket_starts = current_subgraph_state_->in_memory_edge_bucket_starts_.masked_select(keep_mask);
 
-    torch::Tensor in_mem_edge_bucket_ids_dst = current_subgraph_state_->in_memory_edge_bucket_ids_dst_.masked_select(keep_mask_dst);
-    torch::Tensor in_mem_edge_bucket_sizes_dst = current_subgraph_state_->in_memory_edge_bucket_sizes_dst_.masked_select(keep_mask_dst);
-    torch::Tensor local_or_global_edge_bucket_starts_dst = current_subgraph_state_->in_memory_edge_bucket_starts_dst_.masked_select(keep_mask_dst);
+//    torch::Tensor in_mem_edge_bucket_ids_dst = current_subgraph_state_->in_memory_edge_bucket_ids_dst_.masked_select(keep_mask_dst);
+//    torch::Tensor in_mem_edge_bucket_sizes_dst = current_subgraph_state_->in_memory_edge_bucket_sizes_dst_.masked_select(keep_mask_dst);
+//    torch::Tensor local_or_global_edge_bucket_starts_dst = current_subgraph_state_->in_memory_edge_bucket_starts_dst_.masked_select(keep_mask_dst);
 
     // get new in memory partition ids
     keep_mask = torch::ones({buffer_size}, torch::kBool);
@@ -811,19 +822,19 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
     in_mem_edge_bucket_sizes = torch::cat({in_mem_edge_bucket_sizes, new_edge_bucket_sizes});
     local_or_global_edge_bucket_starts = torch::cat({local_or_global_edge_bucket_starts, new_global_edge_bucket_starts});
 
-    in_mem_edge_bucket_ids_dst = torch::cat({in_mem_edge_bucket_ids_dst, new_edge_bucket_ids});
-    in_mem_edge_bucket_sizes_dst = torch::cat({in_mem_edge_bucket_sizes_dst, new_edge_bucket_sizes});
-    local_or_global_edge_bucket_starts_dst = torch::cat({local_or_global_edge_bucket_starts_dst, new_global_edge_bucket_starts});
+//    in_mem_edge_bucket_ids_dst = torch::cat({in_mem_edge_bucket_ids_dst, new_edge_bucket_ids});
+//    in_mem_edge_bucket_sizes_dst = torch::cat({in_mem_edge_bucket_sizes_dst, new_edge_bucket_sizes});
+//    local_or_global_edge_bucket_starts_dst = torch::cat({local_or_global_edge_bucket_starts_dst, new_global_edge_bucket_starts});
 
     torch::Tensor in_mem_mask = torch::ones({num_edge_buckets_in_mem - num_new_edge_buckets}, torch::kBool);
     in_mem_mask = torch::cat({in_mem_mask, torch::zeros({num_new_edge_buckets}, torch::kBool)});
-    torch::Tensor in_mem_mask_dst = in_mem_mask.clone();
+//    torch::Tensor in_mem_mask_dst = in_mem_mask.clone();
 
     // put the ids in the correct order so the mapped edges remain sorted
     torch::Tensor src_ids_order = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
-    torch::Tensor dst_ids_order = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
+//    torch::Tensor dst_ids_order = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
     auto src_ids_order_accessor = src_ids_order.accessor<int64_t, 1>();
-    auto dst_ids_order_accessor = dst_ids_order.accessor<int64_t, 1>();
+//    auto dst_ids_order_accessor = dst_ids_order.accessor<int64_t, 1>();
 
     #pragma omp parallel for
     for (int i = 0; i < buffer_size; i++) {
@@ -833,8 +844,8 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
             int idx = i * buffer_size + j;
             src_ids_order_accessor[idx] = edge_bucket_id;
 
-            idx = j * buffer_size + i;
-            dst_ids_order_accessor[idx] = edge_bucket_id;
+//            idx = j * buffer_size + i;
+//            dst_ids_order_accessor[idx] = edge_bucket_id;
         }
     }
 
@@ -846,33 +857,33 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
     local_or_global_edge_bucket_starts = (local_or_global_edge_bucket_starts.index_select(0, arg_sort));
     in_mem_mask = (in_mem_mask.index_select(0, arg_sort));
 
-    arg_sort = torch::argsort(in_mem_edge_bucket_ids_dst);
-    arg_sort = (arg_sort.index_select(0, torch::argsort(torch::argsort(dst_ids_order))));
-    in_mem_edge_bucket_ids_dst = (in_mem_edge_bucket_ids_dst.index_select(0, arg_sort));
-    in_mem_edge_bucket_sizes_dst = (in_mem_edge_bucket_sizes_dst.index_select(0, arg_sort));
-    local_or_global_edge_bucket_starts_dst = (local_or_global_edge_bucket_starts_dst.index_select(0, arg_sort));
-    in_mem_mask_dst = (in_mem_mask_dst.index_select(0, arg_sort));
+//    arg_sort = torch::argsort(in_mem_edge_bucket_ids_dst);
+//    arg_sort = (arg_sort.index_select(0, torch::argsort(torch::argsort(dst_ids_order))));
+//    in_mem_edge_bucket_ids_dst = (in_mem_edge_bucket_ids_dst.index_select(0, arg_sort));
+//    in_mem_edge_bucket_sizes_dst = (in_mem_edge_bucket_sizes_dst.index_select(0, arg_sort));
+//    local_or_global_edge_bucket_starts_dst = (local_or_global_edge_bucket_starts_dst.index_select(0, arg_sort));
+//    in_mem_mask_dst = (in_mem_mask_dst.index_select(0, arg_sort));
 
     // with everything in order grab the edge buckets
     torch::Tensor in_mem_edge_bucket_starts = in_mem_edge_bucket_sizes.cumsum(0);
     int64_t total_size = in_mem_edge_bucket_starts[-1].item<int64_t>();
     in_mem_edge_bucket_starts = in_mem_edge_bucket_starts - in_mem_edge_bucket_sizes;
 
-    torch::Tensor in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_sizes_dst.cumsum(0);
-    in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_starts_dst - in_mem_edge_bucket_sizes_dst;
+//    torch::Tensor in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_sizes_dst.cumsum(0);
+//    in_mem_edge_bucket_starts_dst = in_mem_edge_bucket_starts_dst - in_mem_edge_bucket_sizes_dst;
 
     auto in_mem_edge_bucket_sizes_accessor = in_mem_edge_bucket_sizes.accessor<int64_t, 1>();
     auto local_or_global_edge_bucket_starts_accessor = local_or_global_edge_bucket_starts.accessor<int64_t, 1>();
     auto in_mem_mask_accessor = in_mem_mask.accessor<bool, 1>();
     auto in_mem_edge_bucket_starts_accessor = in_mem_edge_bucket_starts.accessor<int64_t, 1>();
 
-    auto in_mem_edge_bucket_sizes_dst_accessor = in_mem_edge_bucket_sizes_dst.accessor<int64_t, 1>();
-    auto local_or_global_edge_bucket_starts_dst_accessor = local_or_global_edge_bucket_starts_dst.accessor<int64_t, 1>();
-    auto in_mem_mask_dst_accessor = in_mem_mask_dst.accessor<bool, 1>();
-    auto in_mem_edge_bucket_starts_dst_accessor = in_mem_edge_bucket_starts_dst.accessor<int64_t, 1>();
+//    auto in_mem_edge_bucket_sizes_dst_accessor = in_mem_edge_bucket_sizes_dst.accessor<int64_t, 1>();
+//    auto local_or_global_edge_bucket_starts_dst_accessor = local_or_global_edge_bucket_starts_dst.accessor<int64_t, 1>();
+//    auto in_mem_mask_dst_accessor = in_mem_mask_dst.accessor<bool, 1>();
+//    auto in_mem_edge_bucket_starts_dst_accessor = in_mem_edge_bucket_starts_dst.accessor<int64_t, 1>();
 
     torch::Tensor new_all_in_memory_edges = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
-    torch::Tensor new_all_in_memory_edges_dst_sort = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+//    torch::Tensor new_all_in_memory_edges_dst_sort = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
 
     // get the edges
     #pragma omp parallel for
@@ -888,20 +899,20 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
             new_all_in_memory_edges.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges->range(edge_bucket_start, edge_bucket_size);
         }
 
-        edge_bucket_size = in_mem_edge_bucket_sizes_dst_accessor[i];
-        edge_bucket_start = local_or_global_edge_bucket_starts_dst_accessor[i];
-        in_mem = in_mem_mask_dst_accessor[i];
-        local_offset = in_mem_edge_bucket_starts_dst_accessor[i];
+//        edge_bucket_size = in_mem_edge_bucket_sizes_dst_accessor[i];
+//        edge_bucket_start = local_or_global_edge_bucket_starts_dst_accessor[i];
+//        in_mem = in_mem_mask_dst_accessor[i];
+//        local_offset = in_mem_edge_bucket_starts_dst_accessor[i];
 
-        if (in_mem) {
-            new_all_in_memory_edges_dst_sort.narrow(0, local_offset, edge_bucket_size) = current_subgraph_state_->all_in_memory_edges_dst_sort_.narrow(0, edge_bucket_start, edge_bucket_size);
-        } else {
-            new_all_in_memory_edges_dst_sort.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges_dst_sort->range(edge_bucket_start, edge_bucket_size);
-        }
+//        if (in_mem) {
+//            new_all_in_memory_edges_dst_sort.narrow(0, local_offset, edge_bucket_size) = current_subgraph_state_->all_in_memory_edges_dst_sort_.narrow(0, edge_bucket_start, edge_bucket_size);
+//        } else {
+//            new_all_in_memory_edges_dst_sort.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges_dst_sort->range(edge_bucket_start, edge_bucket_size);
+//        }
     }
 
     subgraph->all_in_memory_edges_ = new_all_in_memory_edges;
-    subgraph->all_in_memory_edges_dst_sort_ = new_all_in_memory_edges_dst_sort;
+//    subgraph->all_in_memory_edges_dst_sort_ = new_all_in_memory_edges_dst_sort;
 
     if (storage_ptrs_.node_embeddings != nullptr) {
         subgraph->global_to_local_index_map_ = ((PartitionBufferStorage *) storage_ptrs_.node_embeddings)->getGlobalToLocalMap(!prefetch_);
@@ -919,21 +930,21 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
             subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, -1))
         }).transpose(0, 1);
 
-        mapped_edges_dst_sort = torch::stack({
-            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, 0)),
-            subgraph->all_in_memory_edges_dst_sort_.select(1, 1),
-            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, -1))
-         }).transpose(0, 1);
+//        mapped_edges_dst_sort = torch::stack({
+//            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, 0)),
+//            subgraph->all_in_memory_edges_dst_sort_.select(1, 1),
+//            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, -1))
+//         }).transpose(0, 1);
     } else if (storage_ptrs_.edges->dim1_size_ == 2) {
         mapped_edges = torch::stack({
             subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, 0)),
             subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, -1))
         }).transpose(0, 1);
 
-        mapped_edges_dst_sort = torch::stack({
-            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, 0)),
-            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, -1))
-         }).transpose(0, 1);
+//        mapped_edges_dst_sort = torch::stack({
+//            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, 0)),
+//            subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_dst_sort_.select(1, -1))
+//         }).transpose(0, 1);
     } else {
         // TODO use a function for logging errors and throwing expections
         SPDLOG_ERROR("Unexpected number of edge columns");
@@ -946,7 +957,8 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
     subgraph->all_in_memory_mapped_edges_ = mapped_edges;
 
     mapped_edges = merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, true);
-    mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges_dst_sort, in_mem_edge_bucket_starts_dst, buffer_size, false);
+//    mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges_dst_sort, in_mem_edge_bucket_starts_dst, buffer_size, false);
+    mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, false);
 
     mapped_edges = mapped_edges.to(torch::kInt64);
     mapped_edges_dst_sort = mapped_edges_dst_sort.to(torch::kInt64);
@@ -963,9 +975,9 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
     subgraph->in_memory_edge_bucket_ids_ = in_mem_edge_bucket_ids;
     subgraph->in_memory_edge_bucket_sizes_ = in_mem_edge_bucket_sizes;
     subgraph->in_memory_edge_bucket_starts_ = in_mem_edge_bucket_starts;
-    subgraph->in_memory_edge_bucket_ids_dst_ = in_mem_edge_bucket_ids_dst;
-    subgraph->in_memory_edge_bucket_sizes_dst_ = in_mem_edge_bucket_sizes_dst;
-    subgraph->in_memory_edge_bucket_starts_dst_ = in_mem_edge_bucket_starts_dst;
+//    subgraph->in_memory_edge_bucket_ids_dst_ = in_mem_edge_bucket_ids_dst;
+//    subgraph->in_memory_edge_bucket_sizes_dst_ = in_mem_edge_bucket_sizes_dst;
+//    subgraph->in_memory_edge_bucket_starts_dst_ = in_mem_edge_bucket_starts_dst;
 
     if (prefetch_) {
         prefetch_complete_ = true;

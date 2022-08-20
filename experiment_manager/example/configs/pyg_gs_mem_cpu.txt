@@ -1,0 +1,29 @@
+python3
+experiment_manager/baselines/pyg/run_pyg.py
+--dataset datasets/fb15k237/
+--learning_task link_prediction
+--model_encoder GRAPH_SAGE
+--model_decoder DistMult
+--model_loss Softmax
+--add_reverse_edges
+--num_workers 1
+
+--dims 50 50
+--edge_storage CPU
+--node_storage CPU
+--compute CPU
+--neighbors 20
+
+--training_batch_size 1000
+--training_num_chunks 10
+--training_num_negs 500
+--training_degree_fraction 0.0
+--num_epochs 10
+--encoder_optimizer Adagrad
+--encoder_lr .1
+--decoder_optimizer Adagrad
+--decoder_lr .1
+--num_gpus 1
+
+--eval_filtered
+--eval_batch_size 1000
