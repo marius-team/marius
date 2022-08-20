@@ -1,0 +1,45 @@
+python3
+experiment_manager/baselines/dgl/run_dgl.py
+--base_directory datasets/fb15k_237/
+--learning_task link_prediction
+
+--emb_dim 50
+--emb_storage_device CPU
+--emb_storage_backend dgl_sparse
+
+--encode False
+--model graph_sage
+--outgoing_nbrs True
+--num_layers 1
+--h_dim 50
+--out_dim 50
+
+--graph_sage_aggregator mean
+--graph_sage_dropout 0.0
+--gat_num_heads 10
+--gat_feat_drop 0.0
+--gat_attn_drop 0.0
+--gat_negative_slope 0.2
+
+--train_batch_size 1000
+--num_gpus 1
+--sample_device CPU
+--num_epochs 1
+--learning_rate 0.1
+--optimizer Adagrad
+--num_train_nbrs -1
+--num_train_chunks 10
+--num_train_uniform_negs 1000
+--num_train_deg_negs 0.0
+
+--epochs_per_eval 1
+--eval_batch_size 1000
+--filtered_mrr True
+--num_eval_nbrs -1
+--num_eval_chunks 10
+--num_eval_uniform_negs 1000
+--num_eval_deg_negs 0.0
+
+--num_workers 0
+--prefetch_factor 1
+--persistent_workers False

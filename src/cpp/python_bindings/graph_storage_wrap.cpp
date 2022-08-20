@@ -1,0 +1,98 @@
+#include <torch/extension.h>
+
+#include "graph_storage.h"
+
+namespace py = pybind11;
+
+void init_graph_storage(py::module &m) {
+
+    py::class_<GraphModelStoragePtrs>(m, "GraphModelStoragePtrs")
+        .def_readwrite("edges", &GraphModelStoragePtrs::edges)
+        .def_readwrite("edge_features", &GraphModelStoragePtrs::edge_features)
+        .def_readwrite("train_edges", &GraphModelStoragePtrs::train_edges)
+        .def_readwrite("train_edges_features", &GraphModelStoragePtrs::train_edges_features)
+        .def_readwrite("validation_edges", &GraphModelStoragePtrs::validation_edges)
+        .def_readwrite("validation_edges_features", &GraphModelStoragePtrs::validation_edges_features)
+        .def_readwrite("test_edges", &GraphModelStoragePtrs::test_edges)
+        .def_readwrite("test_edges_features", &GraphModelStoragePtrs::test_edges_features)
+        .def_readwrite("nodes", &GraphModelStoragePtrs::nodes)
+        .def_readwrite("train_nodes", &GraphModelStoragePtrs::train_nodes)
+        .def_readwrite("valid_nodes", &GraphModelStoragePtrs::valid_nodes)
+        .def_readwrite("test_nodes", &GraphModelStoragePtrs::test_nodes)
+        .def_readwrite("node_features", &GraphModelStoragePtrs::node_features)
+        .def_readwrite("node_labels", &GraphModelStoragePtrs::node_labels)
+        .def_readwrite("relation_features", &GraphModelStoragePtrs::relation_features)
+        .def_readwrite("relation_labels", &GraphModelStoragePtrs::relation_labels)
+        .def_readwrite("node_embeddings", &GraphModelStoragePtrs::node_embeddings)
+        .def_readwrite("node_optimizer_state", &GraphModelStoragePtrs::node_optimizer_state);
+
+    py::class_<InMemorySubgraphState>(m, "InMemorySubgraphState")
+        .def_readwrite("all_in_memory_edges", &InMemorySubgraphState::all_in_memory_edges_)
+        .def_readwrite("all_in_memory_edges_dst_sort", &InMemorySubgraphState::all_in_memory_edges_dst_sort_)
+        .def_readwrite("all_in_memory_mapped_edges", &InMemorySubgraphState::all_in_memory_mapped_edges_)
+        .def_readwrite("in_memory_partition_ids", &InMemorySubgraphState::in_memory_partition_ids_)
+        .def_readwrite("in_memory_edge_bucket_ids", &InMemorySubgraphState::in_memory_edge_bucket_ids_)
+        .def_readwrite("in_memory_edge_bucket_starts", &InMemorySubgraphState::in_memory_edge_bucket_starts_)
+        .def_readwrite("in_memory_edge_bucket_sizes", &InMemorySubgraphState::in_memory_edge_bucket_sizes_)
+        .def_readwrite("in_memory_edge_bucket_ids_dst", &InMemorySubgraphState::in_memory_edge_bucket_ids_dst_)
+        .def_readwrite("in_memory_edge_bucket_sizes_dst", &InMemorySubgraphState::in_memory_edge_bucket_sizes_dst_)
+        .def_readwrite("in_memory_edge_bucket_starts_dst", &InMemorySubgraphState::in_memory_edge_bucket_starts_dst_)
+        .def_readwrite("global_to_local_index_map", &InMemorySubgraphState::global_to_local_index_map_)
+        .def_readwrite("in_memory_subgraph", &InMemorySubgraphState::in_memory_subgraph_);
+
+    py::class_<GraphModelStorage>(m, "GraphModelStorage")
+        .def_readwrite("active_edges", &GraphModelStorage::active_edges_)
+        .def_readwrite("active_nodes", &GraphModelStorage::active_nodes_)
+        .def_readwrite("storage_ptrs", &GraphModelStorage::storage_ptrs_)
+        .def_readwrite("storage_config", &GraphModelStorage::storage_config_)
+        .def_readwrite("learning_task", &GraphModelStorage::learning_task_)
+        .def_readwrite("full_graph_evaluation", &GraphModelStorage::full_graph_evaluation_)
+        .def_readwrite("current_subgraph_state", &GraphModelStorage::current_subgraph_state_)
+        .def_readwrite("next_subgraph_state", &GraphModelStorage::next_subgraph_state_)
+        .def_readwrite("filtered_eval", &GraphModelStorage::filtered_eval_)
+        .def(py::init<GraphModelStoragePtrs, shared_ptr<StorageConfig>, LearningTask, bool>(),
+            py::arg("storage_ptrs"),
+            py::arg("storage_config"),
+            py::arg("learning_task"),
+            py::arg("filtered_eval"))
+        .def("load", &GraphModelStorage::load)
+        .def("unload", &GraphModelStorage::unload, py::arg("write"))
+        .def("initializeInMemorySubGraph", &GraphModelStorage::initializeInMemorySubGraph, py::arg("buffer_state"))
+        .def("updateInMemorySubGraph", &GraphModelStorage::updateInMemorySubGraph)
+        .def("setEvalFilter", &GraphModelStorage::setEvalFilter, py::arg("batch"))
+        .def("setEdgesStorage", &GraphModelStorage::setEdgesStorage, py::arg("edge_storage"))
+        .def("setNodesStorage", &GraphModelStorage::setNodesStorage, py::arg("node_storage"))
+        .def("getEdges", &GraphModelStorage::getEdges, py::arg("indices"))
+        .def("getEdgesRange", &GraphModelStorage::getEdgesRange, py::arg("start"), py::arg("size"))
+        .def("getRandomNodeIds", &GraphModelStorage::getRandomNodeIds, py::arg("size"))
+        .def("getNodeIdsRange", &GraphModelStorage::getNodeIdsRange, py::arg("start"), py::arg("size"))
+        .def("shuffleEdges", &GraphModelStorage::shuffleEdges)
+        .def("getNodeEmbeddings", &GraphModelStorage::getNodeEmbeddings, py::arg("indices"))
+        .def("getNodeEmbeddingsRange", &GraphModelStorage::getNodeEmbeddingsRange, py::arg("start"), py::arg("size"))
+        .def("getNodeFeatures", &GraphModelStorage::getNodeFeatures, py::arg("indices"))
+        .def("getNodeFeaturesRange", &GraphModelStorage::getNodeFeaturesRange, py::arg("start"), py::arg("size"))
+        .def("getNodeLabels", &GraphModelStorage::getNodeLabels, py::arg("indices"))
+        .def("getNodeLabelsRange", &GraphModelStorage::getNodeLabelsRange, py::arg("start"), py::arg("size"))
+        .def("updatePutNodeEmbeddings", &GraphModelStorage::updatePutNodeEmbeddings, py::arg("indices"), py::arg("embeddings"))
+        .def("updateAddNodeEmbeddings", &GraphModelStorage::updateAddNodeEmbeddings, py::arg("indices"), py::arg("values"))
+        .def("getNodeEmbeddingState", &GraphModelStorage::getNodeEmbeddingState, py::arg("indices"))
+        .def("getNodeEmbeddingStateRange", &GraphModelStorage::getNodeEmbeddingStateRange, py::arg("start"), py::arg("size"))
+        .def("updatePutNodeEmbeddingState", &GraphModelStorage::updatePutNodeEmbeddingState, py::arg("indices"), py::arg("state"))
+        .def("updateAddNodeEmbeddingState", &GraphModelStorage::updateAddNodeEmbeddingState, py::arg("indices"), py::arg("values"))
+        .def("embeddingsOffDevice", &GraphModelStorage::embeddingsOffDevice)
+        .def("getNumPartitions", &GraphModelStorage::getNumPartitions)
+        .def("useInMemorySubGraph", &GraphModelStorage::useInMemorySubGraph)
+        .def("hasSwap", &GraphModelStorage::hasSwap)
+        .def("performSwap", &GraphModelStorage::performSwap)
+        .def("setBufferOrdering", &GraphModelStorage::setBufferOrdering, py::arg("buffer_states"))
+        .def("setActiveEdges", &GraphModelStorage::setActiveEdges, py::arg("active_edges"))
+        .def("setActiveNodes", &GraphModelStorage::setActiveNodes, py::arg("node_ids"))
+        .def("getNumActiveEdges", &GraphModelStorage::getNumActiveEdges)
+        .def("getNumActiveNodes", &GraphModelStorage::getNumActiveNodes)
+        .def("getNumEdges", &GraphModelStorage::getNumEdges)
+        .def("getNumNodes", &GraphModelStorage::getNumNodes)
+        .def("getNumNodesInMemory", &GraphModelStorage::getNumNodesInMemory)
+        .def("setTrainSet", &GraphModelStorage::setTrainSet)
+        .def("setValidationSet", &GraphModelStorage::setValidationSet)
+        .def("setTestSet", &GraphModelStorage::setTestSet);
+}
