@@ -18,7 +18,7 @@ experiment_manager/baselines/pyg/run_pyg.py
 --training_num_chunks 10
 --training_num_negs 500
 --training_degree_fraction 0.0
---num_epochs 10
+--num_epochs 5
 --encoder_optimizer Adagrad
 --encoder_lr .1
 --decoder_optimizer Adagrad

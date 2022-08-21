@@ -66,7 +66,9 @@ void SynchronousEvaluator::evaluate(bool validation) {
 
     while (dataloader_->hasNextBatch()) {
         Batch *batch = dataloader_->getBatch();
-        batch->to(model_->current_device_);
+        if (dataloader_->graph_storage_->embeddingsOffDevice()) {
+            batch->to(model_->current_device_);
+        }
         dataloader_->loadGPUParameters(batch);
         model_->evaluate(batch, dataloader_->graph_storage_->filtered_eval_);
         dataloader_->finishedBatch();

@@ -21,7 +21,7 @@ experiment_manager/baselines/dgl/run_dgl.py
 --single_format False
 --num_gpus 0
 --sample_device CPU
---num_epochs 10
+--num_epochs 5
 --learning_rate 0.1
 --optimizer Adagrad
 --num_train_nbrs 20

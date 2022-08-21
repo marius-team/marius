@@ -3,10 +3,10 @@ import os
 from pathlib import Path
 
 from setup_dgl.setup_dgl import run_setup_dgl
-from examples.fb15k237_disk_cpu import run_fb15k237_disk_cpu
-from examples.fb15k237_disk_gpu import run_fb15k237_disk_gpu
-from examples.fb15k237_mem_cpu import run_fb15k237_mem_cpu
-from examples.fb15k237_mem_gpu import run_fb15k237_mem_gpu
+from example.fb15k237_disk_cpu import run_fb15k237_disk_cpu
+from example.fb15k237_disk_gpu import run_fb15k237_disk_gpu
+from example.fb15k237_mem_cpu import run_fb15k237_mem_cpu
+from example.fb15k237_mem_gpu import run_fb15k237_mem_gpu
 
 # from system_comparisons.fb15k_237 import run_fb15k_237
 # from system_comparisons.livejournal import run_livejournal

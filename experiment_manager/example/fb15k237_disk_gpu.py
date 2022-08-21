@@ -12,7 +12,7 @@ def run_fb15k237_disk_gpu(dataset_dir, results_dir, overwrite, enable_dstat, ena
     Systems: Marius, DGL, PyG
     """
 
-    dataset_name = "fb15k237"
+    dataset_name = "fb15k237_32"
 
     marius_gs_config = BASE_PATH / Path("marius_gs_disk_gpu.yaml")
 

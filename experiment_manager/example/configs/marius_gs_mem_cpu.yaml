@@ -72,13 +72,13 @@ training:
     negatives_per_positive: 500
     degree_fraction: 0.0
     filtered: false
-  num_epochs: 10
+  num_epochs: 5
   pipeline:
     sync: true
   epochs_per_shuffle: 1
   logs_per_epoch: 10
 evaluation:
-  batch_size: 10000
+  batch_size: 1000
   negative_sampling:
     filtered: true
   pipeline:

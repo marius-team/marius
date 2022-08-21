@@ -12,7 +12,7 @@ def run_setup_dgl(dataset_dir, results_dir, overwrite, enable_dstat, enable_nvid
     Systems: Marius, DGL, PyG
     """
 
-    dataset_name = "fb15k_237"
+    dataset_name = "fb15k237"
 
     dgl_dm_config = BASE_PATH / Path("dgl_dm.txt")
 
@@ -27,11 +27,5 @@ def run_setup_dgl(dataset_dir, results_dir, overwrite, enable_dstat, enable_nvid
     for i in range(1):
 
         # Run DGL
-        e.run_config(dgl_dm_config,
-                     results_dir / Path("DGL_SETUP"),
-                     overwrite,
-                     enable_dstat,
-                     enable_nvidia_smi,
-                     show_output,
-                     i,
-                     "dgl")
+        e.run_config(dgl_dm_config, results_dir / Path("DGL_SETUP"), overwrite, enable_dstat, enable_nvidia_smi,
+                     show_output, i, "dgl")

@@ -728,7 +728,7 @@ def load_config(input_config_path):
     config_name = input_config_path.name
 
     # get user defined config
-    with hydra.initialize_config_dir(config_dir=config_dir.__str__()):
+    with hydra.initialize_config_dir(config_dir=config_dir.__str__(), version_base="1.1"):
         input_cfg = hydra.compose(config_name=config_name)
 
     # merge the underspecified input configuration with the fully specified default configuration
@@ -740,7 +740,7 @@ def load_config(input_config_path):
     return output_config
 
 
-@hydra.main(config_path="config_templates", config_name="marius_config")
+@hydra.main(config_path="config_templates", config_name="marius_config", version_base="1.1")
 def my_app(cfg: MariusConfig) -> None:
 
     yaml_file = OmegaConf.to_yaml(cfg)

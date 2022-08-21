@@ -204,22 +204,31 @@ void GraphModelStorage::load() {
 
 void GraphModelStorage::unload(bool write) {
     // only unload features/embeddings etc if using the partition buffer
-    if (storage_config_->embeddings != nullptr || storage_config_->features != nullptr) {
-        if (storage_config_->embeddings->type == StorageBackend::PARTITION_BUFFER ||
-            storage_config_->features->type == StorageBackend::PARTITION_BUFFER) {
-            _unload(storage_ptrs_.edges, false);
-            _unload(storage_ptrs_.train_edges, false);
-//            _unload(storage_ptrs_.train_edges_dst_sort, false);
-            _unload(storage_ptrs_.validation_edges, false);
-            _unload(storage_ptrs_.test_edges, false);
-            _unload(storage_ptrs_.nodes, false);
-            _unload(storage_ptrs_.train_nodes, false);
-            _unload(storage_ptrs_.valid_nodes, false);
-            _unload(storage_ptrs_.test_nodes, false);
-            _unload(storage_ptrs_.node_embeddings, write);
-            _unload(storage_ptrs_.node_optimizer_state, write);
-            _unload(storage_ptrs_.node_features, false);
+    bool should_unload = false;
+    if (storage_config_->embeddings != nullptr) {
+        if (storage_config_->embeddings->type == StorageBackend::PARTITION_BUFFER) {
+            should_unload = true;
         }
+    }
+    if (storage_config_->features != nullptr) {
+        if (storage_config_->features->type == StorageBackend::PARTITION_BUFFER) {
+            should_unload = true;
+        }
+    }
+
+    if (should_unload) {
+        _unload(storage_ptrs_.edges, false);
+        _unload(storage_ptrs_.train_edges, false);
+//        _unload(storage_ptrs_.train_edges_dst_sort, false);
+        _unload(storage_ptrs_.validation_edges, false);
+        _unload(storage_ptrs_.test_edges, false);
+        _unload(storage_ptrs_.nodes, false);
+        _unload(storage_ptrs_.train_nodes, false);
+        _unload(storage_ptrs_.valid_nodes, false);
+        _unload(storage_ptrs_.test_nodes, false);
+        _unload(storage_ptrs_.node_embeddings, write);
+        _unload(storage_ptrs_.node_optimizer_state, write);
+        _unload(storage_ptrs_.node_features, false);
     }
 
     _unload(storage_ptrs_.edge_features, false);
@@ -714,9 +723,9 @@ void GraphModelStorage::updateInMemorySubGraph_(InMemorySubgraphState *subgraph,
     auto accessor_keep_mask = keep_mask.accessor<bool, 1>();
     auto accessor_in_memory_edge_bucket_ids_ = current_subgraph_state_->in_memory_edge_bucket_ids_.accessor<int64_t, 1>();
 
-    torch::Tensor keep_mask_dst = torch::ones({num_edge_buckets_in_mem}, torch::kBool);
-    auto accessor_keep_mask_dst = keep_mask_dst.accessor<bool, 1>();
-    auto accessor_in_memory_edge_bucket_ids_dst_ = current_subgraph_state_->in_memory_edge_bucket_ids_dst_.accessor<int64_t, 1>();
+//    torch::Tensor keep_mask_dst = torch::ones({num_edge_buckets_in_mem}, torch::kBool);
+//    auto accessor_keep_mask_dst = keep_mask_dst.accessor<bool, 1>();
+//    auto accessor_in_memory_edge_bucket_ids_dst_ = current_subgraph_state_->in_memory_edge_bucket_ids_dst_.accessor<int64_t, 1>();
 
     #pragma omp parallel for
     for (int i = 0; i < num_edge_buckets_in_mem; i++) {

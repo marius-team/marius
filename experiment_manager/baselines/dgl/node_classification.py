@@ -121,8 +121,8 @@ def eval_one_epoch(encoder, data_loader, split):
 
 
 def run(proc_id, devices, num_gpus, data, all_args):
-    device_id = devices[proc_id]
     if num_gpus > 1:
+        device_id = devices[proc_id]
         dist_init_method = 'tcp://{master_ip}:{master_port}'.format(master_ip='127.0.0.1', master_port='12345')
         torch.cuda.set_device(device_id)
         device = torch.device('cuda:' + str(device_id))
@@ -213,12 +213,16 @@ def run(proc_id, devices, num_gpus, data, all_args):
         if num_gpus > 1:
             train_dl.set_epoch(epoch - 1)
 
+        num_batches = (train_node_ids.shape[0] // args.train_batch_size + 1)
+        if num_gpus > 1:
+            num_batches = num_batches // num_gpus
+        num_batches = num_batches + 1
+
         if all_args[2].print_timing:
-            train_trace_one_epoch(encoder, loss_fxn, model_optimizer, train_dl, epoch,
-                                  (train_node_ids.shape[0] // args.train_batch_size + 1) // num_gpus + 1, proc_id, no_compute=all_args[2].no_compute)
+            train_trace_one_epoch(encoder, loss_fxn, model_optimizer, train_dl, epoch, num_batches,
+                                  proc_id, no_compute=all_args[2].no_compute)
         else:
-            train_one_epoch(encoder, loss_fxn, model_optimizer, train_dl, epoch,
-                            (train_node_ids.shape[0] // args.train_batch_size + 1) // num_gpus + 1, proc_id)
+            train_one_epoch(encoder, loss_fxn, model_optimizer, train_dl, epoch, num_batches, proc_id)
 
         if proc_id == 0:
             eval_one_epoch(encoder, valid_dl, 'valid')
@@ -287,7 +291,7 @@ def run_nc(args):
 
     # run training
     devices = list(range(args.num_gpus))
-    if args.num_gpus == 1:
+    if args.num_gpus <= 1:
         run(0, devices, args.num_gpus, data, all_args)
     else:
         procs = []
