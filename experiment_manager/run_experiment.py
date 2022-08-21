@@ -3,10 +3,16 @@ import os
 from pathlib import Path
 
 from setup_dgl.setup_dgl import run_setup_dgl
+
 from example.fb15k237_disk_cpu import run_fb15k237_disk_cpu
 from example.fb15k237_disk_gpu import run_fb15k237_disk_gpu
 from example.fb15k237_mem_cpu import run_fb15k237_mem_cpu
 from example.fb15k237_mem_gpu import run_fb15k237_mem_gpu
+
+from example.arxiv_disk_cpu import run_ogbn_arxiv_disk_cpu
+from example.arxiv_disk_gpu import run_ogbn_arxiv_disk_gpu
+from example.arxiv_mem_cpu import run_ogbn_arxiv_mem_cpu
+from example.arxiv_mem_gpu import run_ogbn_arxiv_mem_gpu
 
 # from system_comparisons.fb15k_237 import run_fb15k_237
 # from system_comparisons.livejournal import run_livejournal
@@ -42,7 +48,11 @@ if __name__ == "__main__":
         "fb15k237_disk_cpu": run_fb15k237_disk_cpu,
         "fb15k237_disk_gpu": run_fb15k237_disk_gpu,
         "fb15k237_mem_cpu": run_fb15k237_mem_cpu,
-        "fb15k237_mem_gpu": run_fb15k237_mem_gpu
+        "fb15k237_mem_gpu": run_fb15k237_mem_gpu,
+        "arxiv_disk_cpu": run_ogbn_arxiv_disk_cpu,
+        "arxiv_disk_gpu": run_ogbn_arxiv_disk_gpu,
+        "arxiv_mem_cpu": run_ogbn_arxiv_mem_cpu,
+        "arxiv_mem_gpu": run_ogbn_arxiv_mem_gpu
         # "fb15k_237": run_fb15k_237,
         # "livejournal": run_livejournal,
         # "freebase86m": run_freebase86m,

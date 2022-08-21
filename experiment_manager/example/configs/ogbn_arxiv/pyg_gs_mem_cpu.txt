@@ -1,0 +1,19 @@
+python3
+experiment_manager/baselines/pyg/run_pyg.py
+--dataset datasets/ogbn_arxiv/
+--learning_task node_classification
+--model_encoder GRAPH_SAGE
+--model_decoder None
+--add_reverse_edges
+--num_workers 1
+--dims 128 128 128 40
+--edge_storage CPU
+--node_storage CPU
+--compute CPU
+--neighbors 30 20 10
+--training_batch_size 1000
+--num_epochs 5
+--encoder_optimizer Adam
+--encoder_lr .003
+--num_gpus 1
+--eval_batch_size 1000

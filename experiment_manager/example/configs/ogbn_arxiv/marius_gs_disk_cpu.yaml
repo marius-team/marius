@@ -1,0 +1,108 @@
+model:
+  learning_task: NODE_CLASSIFICATION
+  encoder:
+    use_hashmap_sets: true
+    use_incoming_nbrs: true
+    use_outgoing_nbrs: true
+    layers:
+      - train_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 15
+        eval_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 15
+        init:
+          type: GLOROT_NORMAL
+        type: GRAPH_SAGE
+        options:
+          input_dim: 128
+          output_dim: 128
+          aggregator: MEAN
+        bias: true
+        bias_init:
+          type: ZEROS
+        activation: RELU
+      - train_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 10
+        eval_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 10
+        init:
+          type: GLOROT_NORMAL
+        type: GRAPH_SAGE
+        options:
+          input_dim: 128
+          output_dim: 128
+          aggregator: MEAN
+        bias: true
+        bias_init:
+          type: ZEROS
+        activation: RELU
+      - train_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 5
+        eval_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 5
+        init:
+          type: GLOROT_NORMAL
+        type: GRAPH_SAGE
+        options:
+          input_dim: 128
+          output_dim: 40
+          aggregator: MEAN
+        bias: true
+        bias_init:
+          type: ZEROS
+        activation: NONE
+    optimizer:
+      type: ADAM
+      options:
+        learning_rate: 0.003
+storage:
+  device_type: cpu
+  dataset:
+    base_directory: datasets/ogbn_arxiv_32/
+    num_edges: 1166242
+    num_nodes: 169343
+    num_relations: 1
+    num_train: 90941
+    num_valid: 29799
+    num_test: 48603
+    feature_dim: 128
+    num_classes: 40
+  edges:
+    type: FLAT_FILE
+  nodes:
+    type: HOST_MEMORY
+  features:
+    type: PARTITION_BUFFER
+    options:
+      num_partitions: 32
+      buffer_capacity: 8
+      prefetching: true
+      fine_to_coarse_ratio: 8
+      num_cache_partitions: 0
+      node_partition_ordering: SEQUENTIAL
+  prefetch: true
+  shuffle_input: true
+  full_graph_evaluation: true
+training:
+  batch_size: 1000
+  num_epochs: 5
+  pipeline:
+    sync: true
+  epochs_per_shuffle: 1
+  logs_per_epoch: 10
+evaluation:
+  batch_size: 1000
+  pipeline:
+    sync: true
+  epochs_per_eval: 1

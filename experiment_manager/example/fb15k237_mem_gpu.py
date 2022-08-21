@@ -3,7 +3,7 @@ import executor as e
 import reporting
 from pathlib import Path
 
-BASE_PATH = Path("experiment_manager/example/configs/")
+BASE_PATH = Path("experiment_manager/example/configs/fb15k237/")
 
 
 def run_fb15k237_mem_gpu(dataset_dir, results_dir, overwrite, enable_dstat, enable_nvidia_smi, show_output, short, num_runs=1):
@@ -30,17 +30,17 @@ def run_fb15k237_mem_gpu(dataset_dir, results_dir, overwrite, enable_dstat, enab
 
     for i in range(num_runs):
         # Run Marius
-        e.run_config(marius_gs_config, results_dir / Path("marius_gs_mem_gpu"), overwrite, enable_dstat,
+        e.run_config(marius_gs_config, results_dir / Path("fb15k237/marius_gs_mem_gpu"), overwrite, enable_dstat,
                      enable_nvidia_smi, show_output, i, "marius")
 
         # Run DGL
-        e.run_config(dgl_gs_config, results_dir / Path("dgl_gs_mem_gpu"), overwrite, enable_dstat, enable_nvidia_smi,
+        e.run_config(dgl_gs_config, results_dir / Path("fb15k237/dgl_gs_mem_gpu"), overwrite, enable_dstat, enable_nvidia_smi,
                      show_output, i, "dgl")
 
         # Run PyG
-        e.run_config(pyg_gs_config, results_dir / Path("pyg_gs_mem_gpu"), overwrite, enable_dstat, enable_nvidia_smi,
+        e.run_config(pyg_gs_config, results_dir / Path("fb15k237/pyg_gs_mem_gpu"), overwrite, enable_dstat, enable_nvidia_smi,
                      show_output, i, "pyg")
 
-    reporting.print_results_summary([results_dir / Path("marius_gs_mem_gpu"),
-                                     results_dir / Path("dgl_gs_mem_gpu"),
-                                     results_dir / Path("pyg_gs_mem_gpu")])
+    reporting.print_results_summary([results_dir / Path("fb15k237/marius_gs_mem_gpu"),
+                                     results_dir / Path("fb15k237/dgl_gs_mem_gpu"),
+                                     results_dir / Path("fb15k237/pyg_gs_mem_gpu")])

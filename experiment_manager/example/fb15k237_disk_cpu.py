@@ -3,13 +3,13 @@ import executor as e
 import reporting
 from pathlib import Path
 
-BASE_PATH = Path("experiment_manager/example/configs/")
+BASE_PATH = Path("experiment_manager/example/configs/fb15k237/")
 
 
 def run_fb15k237_disk_cpu(dataset_dir, results_dir, overwrite, enable_dstat, enable_nvidia_smi, show_output, short, num_runs=1):
     """
     Models: GraphSage
-    Systems: Marius, DGL, PyG
+    Systems: Marius
     """
 
     dataset_name = "fb15k237_32"
@@ -26,5 +26,7 @@ def run_fb15k237_disk_cpu(dataset_dir, results_dir, overwrite, enable_dstat, ena
 
     for i in range(num_runs):
         # Run Marius
-        e.run_config(marius_gs_config, results_dir / Path("marius_gs_disk_cpu"), overwrite, enable_dstat,
+        e.run_config(marius_gs_config, results_dir / Path("fb15k237/marius_gs_disk_cpu"), overwrite, enable_dstat,
                      enable_nvidia_smi, show_output, i, "marius")
+
+    reporting.print_results_summary([results_dir / Path("fb15k237/marius_gs_disk_cpu")])

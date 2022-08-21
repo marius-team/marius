@@ -24,11 +24,11 @@ RUN mkdir /opt/cmake
 RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
-# install pytorch
+# install PyTorch
 RUN python3 -m pip install torch==1.9.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 
 # install DGL
-RUN pip3 install dgl-cu111 -f https://data.dgl.ai/wheels/repo.html
+RUN pip3 install dgl-cu111==0.7.0 -f https://data.dgl.ai/wheels/repo.html
 
 # install PyG
 RUN pip3 install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.1+cu111.html
