@@ -111,6 +111,7 @@ Python scripts automatically pass the corresponding configuration files for each
 
 ## Artifact Minimal Working Example ##
 
+### Link Prediction ###
 We provide a minimal working example which trains a GraphSage GNN on the (small) FB15k-237 graph for the task of link 
 prediction using MariusGNN and our two baselines DGL and PyG. MariusGNN training contains two configurations: 
 one with the graph stored in memory 
@@ -138,6 +139,18 @@ are reported for all systems. A summary of the five epochs for each system is pr
 The second script runs MariusGNN with graph data stored on disk (again for five epochs). 
 Disk-based training support is a key property of MariusGNN which allows for up to 64x cheaper GNN training over
 large-scale graphs compared to DGL and PyG.
+
+### Node Classification ###
+We also provide a minimal working example for the task of node classification. We train a three layer GraphSage GNN
+on the ogbn-arxiv graph. The format for running the experiments is the same as in the above, 
+except the `fb15k237` in the experiment name is replaced by `arxiv`:
+```
+python3 experiment_manager/run_experiment.py --experiment arxiv_mem_cpu --show_output
+python3 experiment_manager/run_experiment.py --experiment arxiv_disk_cpu --show_output
+
+python3 experiment_manager/run_experiment.py --experiment arxiv_mem_gpu --show_output
+python3 experiment_manager/run_experiment.py --experiment arxiv_disk_gpu --show_output
+```
 
 
 
@@ -187,7 +200,7 @@ experiment directories.
 
 The list of paper experiments is provided in the following section. 
 
-### Experiment runner flags ###
+### Experiment Runner Flags ###
 The following are additional flags for the `experiment_manager/run_experiment.py` script:
 
 `--overwrite`: Will overwrite previous experiment results. Can be used in case the experiment results get in an 
@@ -236,8 +249,11 @@ Useful for monitoring the experiment, but may print out a lot of info.
 
 
 
-
 ## Hit An Issue? ##
 If you have hit an issue with the system, the scripts, or the results, please let us know 
 (contact: waleffe@wisc.edu, or open an issue) and we will investigate and fix the issue if needed.
+
+
+
+[comment]: <> (## Citing MariusGNN ##)
 
