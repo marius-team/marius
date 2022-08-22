@@ -86,9 +86,9 @@ storage:
     type: PARTITION_BUFFER
     options:
       num_partitions: 32
-      buffer_capacity: 8
+      buffer_capacity: 24
       prefetching: true
-      fine_to_coarse_ratio: 8
+      fine_to_coarse_ratio: 1
       num_cache_partitions: 0
       node_partition_ordering: SEQUENTIAL
   prefetch: true

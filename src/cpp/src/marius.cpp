@@ -49,6 +49,8 @@ void marius(int argc, char *argv[]) {
 
     if (marius_config->evaluation->negative_sampling != nullptr) {
         model->filtered_eval_ = marius_config->evaluation->negative_sampling->filtered;
+    } else {
+        model->filtered_eval_ = false;
     }
 
     GraphModelStorage *graph_model_storage = initializeStorage(model, marius_config->storage);

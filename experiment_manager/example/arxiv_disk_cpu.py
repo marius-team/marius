@@ -3,7 +3,7 @@ import executor as e
 import reporting
 from pathlib import Path
 
-BASE_PATH = Path("experiment_manager/example/configs/arxiv/")
+BASE_PATH = Path("experiment_manager/example/configs/ogbn_arxiv/")
 
 
 def run_ogbn_arxiv_disk_cpu(dataset_dir, results_dir, overwrite, enable_dstat, enable_nvidia_smi, show_output, short, num_runs=1):
