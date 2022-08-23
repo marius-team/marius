@@ -103,8 +103,8 @@ CPU: `marius_train experiment_manager/example/configs/marius_gs_mem_cpu.yaml`
 GPU: `marius_train experiment_manager/example/configs/marius_gs_mem_gpu.yaml`
 
 **However, instead of directly running the MariusGNN executable on configuration files, for this artifact we have 
-provided Python scripts which handle running each experiment (MariusGNN and baselines DGL/PyG).** 
-These Python scripts are contained in the `experiment_manager` and are described in the following sections. The
+provided Python scripts which handle running each experiment (MariusGNN and baselines DGL/PyG). 
+These Python scripts are contained in the `experiment_manager` and are described in the following sections.** The
 Python scripts automatically pass the corresponding configuration files for each experiment to the corresponding system.
 
 
@@ -161,31 +161,29 @@ Here we provide documentation with respect to using and running the experiment m
 This artifact is organized as follows:
 
 ```
-datasets/                                    // directory created to download and store preprocessed datasets
+datasets/                       // directory created to download and store preprocessed datasets
 
-docs/
+examples/docker/                // contains the example Dockerfile for installation
 
-examples/docker/                             // contains the example Dockerfile for installation
-
-experiment_manager/                          // suit of python scripts for running paper experiments and baseline systems
+experiment_manager/             // suit of python scripts for running paper experiments and baseline systems
    baselines/
-      dgl/                                   // contains the code for running GNNs using the DGL baseline
-      pyg/                                   // contains the code for running GNNs using the PyG baseline
-   disk/                                     // contains python scripts and configs for out-of-core microbenchmarks (Table 7, Figure 8)
-   example/                                  // contains the python scripts and configs for the minimal working example
-   sampling/                                 // contains the python scripts and configs for neighborhood sampling experiments (Table 6)
-   setup_dgl/                                // contains a single experiment to import dgl and allow for typo fixing (used during install)
-   system_comparisons/                       // contains the python scripts and configs for the system comparisons (Tables 3-5, Figure 7)
+      dgl/                      // contains the code for running GNNs using the DGL baseline
+      pyg/                      // contains the code for running GNNs using the PyG baseline
+   disk/                        // contains python scripts and configs for out-of-core microbenchmarks (Table 7, Figure 8)
+   example/                     // contains the python scripts and configs for the minimal working example
+   sampling/                    // contains the python scripts and configs for neighborhood sampling experiments (Table 6)
+   setup_dgl/                   // contains a single experiment to import dgl and allow for typo fixing (used during install)
+   system_comparisons/          // contains the python scripts and configs for the system comparisons (Tables 3-5, Figure 7)
    
-   executor.py                               // executes training for each system and starts/stop results collection
-   parsing.py                                // parses the output of each system, dstat, and nvidia-smi
-   reporting.py                              // prints experiment summaries
-   run_experiment.py                         // entry script which runs each experiment with desired flags
-   tracing.py                                // runs dstat and nvidia-smi during experiments for tracing
+   executor.py                  // executes training for each system and starts/stop results collection
+   parsing.py                   // parses the output of each system, dstat, and nvidia-smi
+   reporting.py                 // prints experiment summaries
+   run_experiment.py            // entry script which runs each experiment with desired flags
+   tracing.py                   // runs dstat and nvidia-smi during experiments for tracing
 
-results/                                     // directory created to store experiment results and outpur files
+results/                        // directory created to store experiment results and outpur files
 
-src/                                         // MariusGNN artifact source code
+src/                            // MariusGNN artifact source code
 ```
 
 

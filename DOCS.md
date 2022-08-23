@@ -123,7 +123,7 @@ Here is the directory layout of the C++ headers/sources:
 
 
 ## Important Files
-The .cpp/.h files with the following names contain core pieces of MariusGNN;
+The .cpp/.h files with the following names contain core pieces of MariusGNN:
 
 ### marius
 This is the entrypoint to the system for the `marius_train` and `marius_eval` executables. The function `void marius(int argc, char *argv[])` operates at a high level to define the training/evaluation process. The flow of this function is as follows:
