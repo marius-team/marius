@@ -50,6 +50,17 @@ requires Docker to be installed (Docker can generally be installed easily using 
 manager), as well as the NVIDIA drivers for GPU support
 (check by running `nvidia-smi` and verify it can detect the GPUs).
 
+**Notes**: 
+
+1. The installation requires Docker to have at least 8GB of memory to work with. This is generally satisfied by 
+default, but if not (often on Mac), the `docker build` command may throw an error code 137. See
+[here](https://stackoverflow.com/questions/44533319/how-to-assign-more-memory-to-docker-container/44533437#44533437),
+[here](https://stackoverflow.com/questions/34674325/error-build-process-returned-exit-code-137-during-docker-build-on-tutum), and 
+[here](https://stackoverflow.com/questions/57291806/docker-build-failed-after-pip-installed-requirements-with-exit-code-137) 
+for StackOverflow threads on how to increase Docker available memory or fix this issue.
+2. For the `docker run` command below, if you have created for example, `~/directory/marius_artifact` then pass
+`~/directory/` as the `<path to parent directory of marius_artifact>`.
+
 **CPU Only Installation**: If your machine does not have a GPU, remove the `--gpus all` from the `docker run` command 
 in the GPU installation instructions.
 
@@ -61,7 +72,7 @@ cd marius_artifact
 git checkout eurosys_2023_artifact
 cd examples/docker/
 docker build -t marius:artifact .
-docker run --gpus all -it --ipc=host -v <path to directory containing marius_artifact>:/working_dir/ marius:artifact bash
+docker run --gpus all -it --ipc=host -v <path to parent directory of marius_artifact>:/working_dir/ marius:artifact bash
 cd marius_artifact
 pip3 install .
 python3 experiment_manager/run_experiment.py --experiment setup_dgl
