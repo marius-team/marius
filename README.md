@@ -155,6 +155,9 @@ python3 experiment_manager/run_experiment.py --experiment arxiv_disk_gpu --show_
 
 
 ## Artifact Documentation ##
+Here we provide documentation with respect to using and running the experiment manager. 
+**For documentation regarding the MariusGNN source code contained in this artifact see the DOCS.md file.**
+
 This artifact is organized as follows:
 
 ```
