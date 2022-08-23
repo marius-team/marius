@@ -6,17 +6,17 @@ artifact.
 ## Table of Contents ##
 *   [Recommended Reading Order](#recommended-reading-order)
 *   [Layout](#layout)
-*   [Important Files, Classes, and Functions](#important-files,-classes,-and-functions)
-    * [marius.cpp](#marius.cpp)
-    * [configuration.h/.cpp](#configuration.h/.cpp)
-    * [graph_storage.h/.cpp](#graph_storage.h/.cpp)
-    * [dataloader.h/.cpp](#dataloader.h/.cpp)
-    * [model.h/.cpp](#model.h/.cpp)
-    * [trainer.h/.cpp](#trainer.h/.cpp)
-    * [graph.h/.cpp](#graph.h/.cpp)
-    * [graph_samplers.h/.cpp](#graph_samplers.h/.cpp)
-    * [buffer.h/.cpp](#buffer.h/.cpp)
-    * [ordering.h/.cpp](#ordering.h/.cpp)
+*   [Important Files](#important-files)
+    * [marius](#marius)
+    * [configuration](#configuration)
+    * [graph_storage](#graph_storage)
+    * [dataloader](#dataloader)
+    * [model](#model)
+    * [trainer](#trainer)
+    * [graph](#graph)
+    * [graph_samplers](#graph_samplers)
+    * [buffer](#buffer)
+    * [ordering](#ordering)
 
 
 
@@ -122,9 +122,10 @@ Here is the directory layout of the C++ headers/sources:
 
 
 
-## Important Files, Classes, and Functions
+## Important Files
+The .cpp/.h files with the following names contain core pieces of MariusGNN;
 
-### marius.cpp
+### marius
 This is the entrypoint to the system for the `marius_train` and `marius_eval` executables. The function `void marius(int argc, char *argv[])` operates at a high level to define the training/evaluation process. The flow of this function is as follows:
 
 1.  Parse the input configuration file: `initConfig`
@@ -143,7 +144,7 @@ objects: Model, GraphModelStorage, DataLoader, and Trainer/Evaluator. So any use
 Python API will largely follow these 5 steps, where each of the 5 steps can be extended or customized by 
 extending/override the API objects.
 
-### configuration.h/.cpp
+### configuration
 Marius is driven by configuration objects which define nearly everything about program execution.
 
 These files define the configuration schema and how to convert python configuration objects into the corresponding C++ 
@@ -209,7 +210,7 @@ shared_ptr<TrainingConfig> initTrainingConfig(pyobj python_config) {
 
 The conversion process requires casting from a pybind object (pyobj) to the appropriate datatype.
 
-### graph_storage.h/.cpp
+### graph_storage
 This class manages storage and access for the edges, nodes, features, embeddings, and embedding optimizer state for 
 the current configuration. This class is backed by a set of pointers to abstract tensor storage objects (`storage.cpp`), 
 where the storage backend can be independently set for each storage object.
@@ -247,7 +248,7 @@ When using the partition buffer to store the embeddings, this class (graph_stora
 in the partition buffer. This subgraph is structured in CSR format, with support for fast neighborhood 
 lookups and sampling.
 
-### dataloader.h/.cpp
+### dataloader
 The dataloader provides a batching interface over the edges/nodes of the graph 
 (depending on if using link prediction or node classification).
 
@@ -259,7 +260,7 @@ For disk-based training, once `getBatch` has exhausted all the training examples
 memory, it will trigger a partition swap to load new graph data from disk into CPU memory. It will then prepare start
 creating batches from the new training data associated with the new in-memory subgraph.
 
-### model.h/.cpp
+### model
 The Model class defines initialization and forward pass for each task and is composed of the following modules:
 
 Inputs and outputs are defined on a node level here, but in the code the modules operate at a batch level.
@@ -312,7 +313,7 @@ Batch → Encoder → Loss
 
 Each module is a `torch::nn::module` which provides support to save/load and clone models and their parameters.
 
-### trainer.h/.cpp
+### trainer
 The Trainer class defines one epoch of training and the iteration for each batch.
 
 **SynchronousTrainer**
@@ -435,7 +436,7 @@ gradient_transfer_threads: int = 2      // Number of D2H transfer workers
 gradient_update_threads: int = 4        // Number of update workers 
 ```
 
-### graph.h/.cpp
+### graph
 These files contain a number of methods and classes related to the **DENSE** data structure and neighborhood sampling. 
 
 `MariusGraph` stores the two sorted versions of the edge list (required for single-hop sampling) for the in-memory 
@@ -447,17 +448,17 @@ in the graph.
 
 `GNNGraph` stores the DENSE data structure output from multi-hop neighborhood sampling.
 
-### graph_samplers.h/.cpp
+### graph_samplers
 These files contain graph samplers used to create mini batches for training.
 
 In particular, `LayeredNeighborSampler::getNeighbors()` samples multi-hop neighbors for a set of node IDs and returns 
 the DENSE data structure.
 
-### buffer.h/.cpp
+### buffer
 The `PartitionBuffer` class is responsible for storing node partitions in CPU memory during disk-based training. It
 also handles swapping partitions from disk to CPU memory.
 
-### ordering.h/.cpp
+### ordering
 The `ordering.cpp` file contains the partition replacement and training example selection policies used by MariusGNN
 (e.g., COMET (called Two_Level_Beta in the code)). These policies decide what partitions will be loaded into memory 
 and in what order for each epoch and  which training examples will be used to create batches for each in-memory 
