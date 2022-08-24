@@ -275,6 +275,23 @@ provided to the `run_experiment.py` script with any additional desired arguments
 | freebase86m_gs_disk_time | P3.2xLarge | Table 4 | C2 | 3 hours; $10 | Freebase86M disk-based training epoch time for MariusGNN | See disk-based training note below |
 | | | | | | | |
 
+Notes:
+1. **Disk-based training**: For disk-based training system comparisons, we report runtime using the smaller P3.2xLarge
+machine which does not have enough memory to store the full graphs in CPU memory. However, to measure accuracy/MRR, we
+compute evaluation metrics using the full graph in main memory (for an apples-to-apples comparison to in-memory 
+training). To do this, we run the exact same training setup on a larger machine and in between each epoch 
+(during evaluation only) load the full graph into main memory to compute accuracy/MRR. Alternatively, one could train on
+the P3.2xLarge machine without evaluation and then export the final embeddings to a larger machine for full graph
+evaluation (although this would prevent access to the per-epoch validation set metrics).
+
+
+2. We report validation set accuracy in the paper as test sets are not expected to be publicly available for all
+datasets.
+
+[comment]: <> (2. For multi-layer GNNs &#40;on Papers100M and Mag240M, extra eval&#41;, )
+
+[comment]: <> (only include optimal configs &#40;not all the hyperparameter tuning&#41;, multi gpu training bs)
+
 
 ## Hit An Issue? ##
 If you have hit an issue with the system, the scripts, or the results, please let us know 
