@@ -1,6 +1,7 @@
 # EuroSys 23' MariusGNN Artifact #
 
-MariusGNN is a system for resource-efficient training of graph neural networks (GNNs) over large-scale 
+MariusGNN (called SystemX for the paper double-blind submission) is a system for resource-efficient training of 
+graph neural networks (GNNs) over large-scale 
 graphs on a single machine. To support such training, MariusGNN uses two main techniques as described in our
 [EuroSys '23 Paper]():
 
@@ -57,8 +58,13 @@ default, but if not (often on Mac), the `docker build` command may throw an erro
 [here](https://stackoverflow.com/questions/44533319/how-to-assign-more-memory-to-docker-container/44533437#44533437),
 [here](https://stackoverflow.com/questions/34674325/error-build-process-returned-exit-code-137-during-docker-build-on-tutum), and 
 [here](https://stackoverflow.com/questions/57291806/docker-build-failed-after-pip-installed-requirements-with-exit-code-137) 
-for StackOverflow threads on how to increase Docker available memory or fix this issue.
-2. For the `docker run` command below, if you have created for example, `~/directory/marius_artifact` then pass
+for StackOverflow threads on how to increase Docker available memory or fix this issue. The `pip3 install .` command
+may also cause Docker memory issues. Increase the memory available to Docker or decrease the number of threads used for building
+MariusGNN (to decrease the number of threads change `-j16` in line 42 of `setup.py` to `-j1` for example). One thread
+should build with 8GB of memory but may take some time (~30mins).
+2. For the experiments, Docker should have access to the full available machine memory. Artifact minimal working 
+examples should run with 8GB.
+5. For the `docker run` command below, if you have created for example, `~/directory/marius_artifact` then pass
 `~/directory/` as the `<path to parent directory of marius_artifact>`.
 
 **CPU Only Installation**: If your machine does not have a GPU, remove the `--gpus all` from the `docker run` command 
@@ -156,6 +162,12 @@ The second script runs MariusGNN with graph data stored on disk (again for five 
 Disk-based training support is a key property of MariusGNN which allows for up to 64x cheaper GNN training over
 large-scale graphs compared to DGL and PyG.
 
+MariusGNN MRR on FB15k-237 for in-memory training should be roughly between 0.27-0.28 (as shown in Table 7 for GS 237). 
+Disk-based MRR should be roughly between 0.26-0.27 (as shown for COMET in Table 7 for GS 237). 
+In general, variance of 0.01 MRR is
+to be expected and MRRs in Table 7 will be slightly higher (as those experiments were run for ten epochs instead of 
+five).
+
 ### Node Classification ###
 We also provide a minimal working example for the task of node classification. We train a three layer GraphSage GNN
 on the ogbn-arxiv graph. The format for running the experiments is the same as in the above, 
@@ -167,6 +179,14 @@ python3 experiment_manager/run_experiment.py --experiment arxiv_disk_cpu --show_
 python3 experiment_manager/run_experiment.py --experiment arxiv_mem_gpu --show_output
 python3 experiment_manager/run_experiment.py --experiment arxiv_disk_gpu --show_output
 ```
+
+MariusGNN accuracy on ogbn-arxiv for in-memory training should be roughly 66-67%. Disk-based accuracy should be roughly
+66%. In general, variance of 1-2% is to be expected.
+
+**Notes**:
+1. Minimal working example experiments can be run multiple times by passing `--num_runs <X>` to the Python
+script, or by overwriting existing runs by passing `--overwrite` as described below.
+2. PyG CPU-only training on ogbn-arxiv can be considerably slower than the other experiments, taking ~10mins per epoch.
 
 
 
@@ -241,34 +261,19 @@ Useful for monitoring the experiment, but may print out a lot of info.
 
 
 ## Reproducing Experimental Results ##
-[comment]: <> (| Experiment | Corresponding Figure | Est. Runtime | Est. Runtime with `--short` |)
+In this section we include a list of experiments to reproduce the experimental results reported in the paper. All
+experiments are run using the experiment manager as described above. That is, the  experiment name is 
+provided to the `run_experiment.py` script with any additional desired arguments.
 
-[comment]: <> (| --- | ----------- | -------- | ---------- |)
-
-[comment]: <> (| fb15k | Table 2 | 20 mins | - |)
-
-[comment]: <> (| livejournal | Table 3 | 2 hours | - |)
-
-[comment]: <> (| twitter | Table 4 | 10 hours | - |)
-
-[comment]: <> (| freebase86m | Table 5 | 12 hours | - |)
-
-[comment]: <> (| buffer_simulator | Figure 7 | ~ 1 minute | - |)
-
-[comment]: <> (| utilization | Figure 8 | 2 hours | - |)
-
-[comment]: <> (| orderings_total_io | Figure 9 | 2 hours | - |)
-
-[comment]: <> (| orderings_freebase86m | Figure 10 | ~1 day | 2 hours |)
-
-[comment]: <> (| orderings_twitter | Figure 11 | ~2 days | 4 hours |)
-
-[comment]: <> (| staleness_bound | Figure 12 | ~2 days | 8 hours |)
-
-[comment]: <> (| prefetching | Figure 13 | 30 mins | - |)
-
-[comment]: <> (| big_embeddings | Table 6 | 5 hours | - |)
-
+| Experiment Name | Expected Machine | Paper Table Ref. | A.4.2 Major Claim | Estimated Cost (One Run) | Short Explanation | Additional Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| papers100m | P3.8xLarge | Table 3 | C1 | 4 hours; $50 | Papers100M epoch time and accuracy for all three systems with graph data stored in CPU memory | Table 3 reports three run average |
+| papers100m_disk_acc | P3.8xLarge | Table 3 | C1 | 4 hours; $50 | Papers100M disk-based training accuracy for MariusGNN | See disk-based training note below; Table 3 reports three run average|
+| papers100m_disk_time| P3.2xLarge | Table 3 | C1 | <1 hour; <$1 | Papers100M disk-based training epoch time for MariusGNN | See disk-based training note below; Table 3 reports three run average|
+| freebase86m_gs | P3.8xLarge | Table 4 | C2 | 30 hours; $350 | Freebase86M epoch time and accuracy for all three systems with graph data stored in CPU memory | - |
+| freebase86m_gs_disk_acc | P3.8xLarge  | Table 4 | C2 | 4 hours; $50 | Freebase86M disk-based training accuracy for MariusGNN | See disk-based training note below |
+| freebase86m_gs_disk_time | P3.2xLarge | Table 4 | C2 | 3 hours; $10 | Freebase86M disk-based training epoch time for MariusGNN | See disk-based training note below |
+| | | | | | | |
 
 
 ## Hit An Issue? ##

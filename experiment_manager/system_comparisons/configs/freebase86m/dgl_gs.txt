@@ -1,0 +1,42 @@
+python3
+experiment_manager/baselines/dgl/run_dgl.py
+--base_directory datasets/freebase86m/
+--learning_task link_prediction
+
+--emb_dim 100
+--emb_storage_device CPU
+--emb_storage_backend dgl_sparse
+
+--encode True
+--model graph_sage
+--outgoing_nbrs True
+--num_layers 1
+--h_dim 100
+--out_dim 100
+
+--graph_sage_aggregator mean
+--graph_sage_dropout 0.0
+
+--train_batch_size 50000
+--single_format False
+--num_gpus 1
+--sample_device CPU
+--num_epochs 5
+--learning_rate 0.1
+--optimizer Adagrad
+--num_train_nbrs 20
+--num_train_chunks 10
+--num_train_uniform_negs 50
+--num_train_deg_negs 50
+
+--epochs_per_eval 1
+--eval_batch_size 10000
+--filtered_mrr False
+--num_eval_nbrs 20
+--num_eval_chunks 1
+--num_eval_uniform_negs 1000
+--num_eval_deg_negs 1000
+
+--num_workers 16
+--prefetch_factor 2
+--persistent_workers False
