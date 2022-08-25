@@ -273,7 +273,10 @@ provided to the `run_experiment.py` script with any additional desired arguments
 | freebase86m_gs | P3.8xLarge | Table 4 | C2 | 30 hours; $350 | Freebase86M epoch time and accuracy for all three systems with graph data stored in CPU memory | - |
 | freebase86m_gs_disk_acc | P3.8xLarge  | Table 4 | C2 | 4 hours; $50 | Freebase86M disk-based training accuracy for MariusGNN | See disk-based training note below |
 | freebase86m_gs_disk_time | P3.2xLarge | Table 4 | C2 | 3 hours; $10 | Freebase86M disk-based training epoch time for MariusGNN | See disk-based training note below |
-| | | | | | | |
+| training_trace | P3.8xLarge | Table 6 | C3 | 6 hours; $75 | Breakdown of timing operations during training on Papers100M for MariusGNN, DGL, and PyG during in-memory training | See sampling note below  |
+| freebase86m_beta_battles | P3.8xLarge | Table 7 | C4 | 37 hours; $450 | Freebase86M results in Table 7 for in-memory training, COMET, and BETA using DistMult, GraphSage, and GAT models | See disk-based training microbenchmark note below |
+
+[comment]: <> (| | | | | | | |)
 
 Notes:
 1. **Disk-based training**: For disk-based training system comparisons, we report runtime using the smaller P3.2xLarge
@@ -285,12 +288,40 @@ the P3.2xLarge machine without evaluation and then export the final embeddings t
 evaluation (although this would prevent access to the per-epoch validation set metrics).
 
 
-2. We report validation set accuracy in the paper as test sets are not expected to be publicly available for all
+2. Disk-based training microbenchmarks: Unlike for the system comparisons, for simplicity, for the disk-based 
+training microbenchmarks
+(e.g., Table 7 and Figure 8), we do not use a separate machine for measuring accuracy and throughput. Instead we 
+use a single machine with sufficient memory for full graph evaluation, but during disk-based training using COMET or
+BETA, the full graph is loaded into memory only during evaluation. Training proceeds using the partition buffer and
+partition replacement policy and only a fraction of the graph is in memory at a given time. Using a single machine 
+reduces the number of experiments and machines that needed to be managed. Further, while the throughput numbers for 
+COMET/BETA reported by this method may not match the throughput these methods would achieve on a machine without 
+sufficient memory to store the full graph (e.g., a P3.2xLarge), the throughput numbers are sufficient for comparing the
+two methods (as the throughput numbers for both COMET and BETA were generated using the same hardware).
+
+
+3. Sampling: In Table 6 we report CPU sampling time as the total time required to sample multi-hop neighborhoods. This
+includes 1) identifying the multi-hop neighborhood and then 2) loading the features for the unique nodes in the 
+neighborhood into the mini batch (to prepare the mini batch for transfer to the GPU). The `training_trace` experiment 
+attempts to measure these two separately and output the results under the names "sampling" and "loading" times, 
+however this separation can only be done
+for MariusGNN (due to the dataloaders in DGL and PyG). Thus, in Table 6 we report the sum of the outputs
+"sampling" and "loading" 
+as the CPU Sampling Time for MariusGNN and report the outputs of "loading" (which includes "sampling") for DGL and PyG.
+
+
+4. We report validation set accuracy in the paper as test sets are not expected to be publicly available for all
 datasets.
 
 [comment]: <> (2. For multi-layer GNNs &#40;on Papers100M and Mag240M, extra eval&#41;, )
 
 [comment]: <> (only include optimal configs &#40;not all the hyperparameter tuning&#41;, multi gpu training bs)
+
+[comment]: <> (how paper cost numbers are calculated)
+
+[comment]: <> (disk based training comment for microbenchmarks)
+
+[comment]: <> (how to parse the train_trace results)
 
 
 ## Hit An Issue? ##

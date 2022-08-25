@@ -1,0 +1,99 @@
+model:
+  learning_task: LINK_PREDICTION
+  embeddings:
+    dimension: 50
+    init:
+      type: NORMAL
+      options:
+        mean: 0
+        std: 0.001
+  encoder:
+    use_hashmap_sets: false
+    use_incoming_nbrs: true
+    use_outgoing_nbrs: true
+    layers:
+      - train_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 200
+        eval_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 200
+        init:
+          type: GLOROT_NORMAL
+        type: GRAPH_SAGE
+        options:
+          input_dim: 50
+          output_dim: 50
+          aggregator: MEAN
+        bias: true
+        bias_init:
+          type: ZEROS
+        activation: NONE
+    optimizer:
+      type: ADAGRAD
+      options:
+        learning_rate: 0.1
+  decoder:
+    type: DISTMULT
+    options:
+      input_dim: 50
+      inverse_edges: true
+    optimizer:
+      type: ADAGRAD
+      options:
+        learning_rate: 0.1
+  loss:
+    type: SOFTMAX
+    options:
+      reduction: SUM
+storage:
+  device_type: cuda
+  dataset:
+    base_directory: datasets/freebase86m_beta_battles/
+    num_edges: 304727650
+    num_train: 304727650
+    num_nodes: 86054151
+    num_relations: 14824
+    num_valid: 16929318
+    num_test: 16929308
+  edges:
+    type: HOST_MEMORY
+  embeddings:
+    type: HOST_MEMORY
+  prefetch: true
+  shuffle_input: true
+  full_graph_evaluation: true
+training:
+  batch_size: 50000
+  negative_sampling:
+    num_chunks: 10
+    negatives_per_positive: 5000
+    degree_fraction: 0.5
+    filtered: false
+  num_epochs: 5
+  pipeline:
+    sync: true
+#    staleness_bound: 32
+#    batch_host_queue_size: 16
+#    batch_device_queue_size: 16
+#    gradients_device_queue_size: 16
+#    gradients_host_queue_size: 16
+#    batch_loader_threads: 8
+#    batch_transfer_threads: 4
+#    compute_threads: 1
+#    gradient_transfer_threads: 4
+#    gradient_update_threads: 8
+  epochs_per_shuffle: 1
+  logs_per_epoch: 10
+evaluation:
+  batch_size: 10000
+  negative_sampling:
+    num_chunks: 1
+    negatives_per_positive: 2000
+    degree_fraction: 0.5
+    filtered: false
+  pipeline:
+    sync: true
+  epochs_per_eval: 1

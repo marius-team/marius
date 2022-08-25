@@ -28,10 +28,10 @@ from system_comparisons.freebase86m_gs_disk_time import run_freebase86m_gs_disk_
 # from system_comparisons.ogb_wikikg90mv2 import run_ogb_wikikg90mv2
 # from system_comparisons.ogb_wikikg90mv2_disk import run_ogb_wikikg90mv2_disk
 
-# from sampling.train_trace import run_train_trace
+from sampling.train_trace import run_train_trace
 # from sampling.sampling import run_sampling_obgn_papers100m
 
-# from disk.freebase86m_beta_battles import run_freebase86m_beta_battles
+from disk.freebase86m_beta_battles import run_freebase86m_beta_battles
 # from disk.freebase86m_scans import run_freebase86m_scans
 # from disk.fb15k237 import run_fb15k237_disk
 
@@ -64,10 +64,10 @@ if __name__ == "__main__":
         # "ogb_wikikg90mv2": run_ogb_wikikg90mv2,
         # "ogb_wikikg90mv2_disk": run_ogb_wikikg90mv2_disk,
 
-        # "training_trace": run_train_trace,
+        "training_trace": run_train_trace,
         # "sampling_papers100m": run_sampling_obgn_papers100m,
 
-        # "freebase86m_beta_battles": run_freebase86m_beta_battles,
+        "freebase86m_beta_battles": run_freebase86m_beta_battles,
         # "freebase86m_scans": run_freebase86m_scans,
         # "fb15k237_disk": run_fb15k237_disk,
     }

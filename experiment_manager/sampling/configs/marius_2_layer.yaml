@@ -1,0 +1,81 @@
+model:
+  learning_task: NODE_CLASSIFICATION
+  encoder:
+    use_hashmap_sets: false
+    use_incoming_nbrs: true
+    use_outgoing_nbrs: true
+    layers:
+      - train_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 10
+        eval_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 10
+        init:
+          type: GLOROT_NORMAL
+        type: GRAPH_SAGE
+        options:
+          input_dim: 128
+          output_dim: 128
+          aggregator: MEAN
+        bias: true
+        bias_init:
+          type: ZEROS
+        activation: RELU
+      - train_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 10
+        eval_neighbor_sampling:
+          type: UNIFORM
+          options:
+            max_neighbors: 10
+        init:
+          type: GLOROT_NORMAL
+        type: GRAPH_SAGE
+        options:
+          input_dim: 128
+          output_dim: 172
+          aggregator: MEAN
+        bias: true
+        bias_init:
+          type: ZEROS
+        activation: NONE
+    optimizer:
+      type: ADAM
+      options:
+        learning_rate: 0.003
+storage:
+  device_type: cuda
+  dataset:
+    base_directory: datasets/ogbn_papers100m/
+    num_edges: 1615685872
+    num_nodes: 111059956
+    num_relations: 1
+    num_train: 1207179
+    num_valid: 125265
+    num_test: 214338
+    feature_dim: 128
+    num_classes: 172
+  edges:
+    type: HOST_MEMORY
+  nodes:
+    type: HOST_MEMORY
+  features:
+    type: HOST_MEMORY
+  prefetch: false
+  shuffle_input: true
+  full_graph_evaluation: true
+training:
+  batch_size: 1000
+  num_epochs: 1
+  pipeline:
+    sync: true
+  logs_per_epoch: 10
+evaluation:
+  batch_size: 1000
+  pipeline:
+    sync: true
+  epochs_per_eval: 1

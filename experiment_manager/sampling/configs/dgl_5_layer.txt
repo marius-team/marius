@@ -1,0 +1,32 @@
+python3
+experiment_manager/baselines/dgl/run_dgl.py
+--base_directory datasets/ogbn_papers100m/
+--learning_task node_classification
+
+--encode True
+--model graph_sage
+--outgoing_nbrs True
+--num_layers 5
+--h_dim 128
+--out_dim 172
+
+--graph_sage_aggregator mean
+--graph_sage_dropout 0.0
+
+--train_batch_size 1000
+--single_format True
+--num_gpus 1
+--sample_device CPU
+--num_epochs 1
+--learning_rate 0.003
+--optimizer Adam
+--num_train_nbrs 20 20 20 20 20
+
+--epochs_per_eval 10
+--eval_batch_size 1000
+--num_eval_nbrs 20 20 20 20 20
+
+--num_workers 0
+--prefetch_factor 1
+--persistent_workers False
+--print_timing
