@@ -9,3 +9,7 @@ line_length = 120
 pythonpath = [
     "."
 ]
+
+[build-system]
+requires = ["setuptools==44.0"]
+build-backend = "setuptools.build_meta"
