@@ -112,7 +112,7 @@ GraphModelStorage::~GraphModelStorage() {
     unload(false);
 
     delete storage_ptrs_.train_edges;
-//    delete storage_ptrs_.train_edges_dst_sort;
+    delete storage_ptrs_.train_edges_dst_sort;
     delete storage_ptrs_.train_edges_features;
     delete storage_ptrs_.validation_edges;
     delete storage_ptrs_.validation_edges_features;
@@ -172,7 +172,7 @@ void GraphModelStorage::_unload(Storage *storage, bool write) {
 void GraphModelStorage::load() {
     _load(storage_ptrs_.edges);
     _load(storage_ptrs_.train_edges);
-//    _load(storage_ptrs_.train_edges_dst_sort);
+    _load(storage_ptrs_.train_edges_dst_sort);
     _load(storage_ptrs_.edge_features);
     _load(storage_ptrs_.nodes);
 
@@ -219,7 +219,7 @@ void GraphModelStorage::unload(bool write) {
     if (should_unload) {
         _unload(storage_ptrs_.edges, false);
         _unload(storage_ptrs_.train_edges, false);
-//        _unload(storage_ptrs_.train_edges_dst_sort, false);
+        _unload(storage_ptrs_.train_edges_dst_sort, false);
         _unload(storage_ptrs_.validation_edges, false);
         _unload(storage_ptrs_.test_edges, false);
         _unload(storage_ptrs_.nodes, false);
@@ -642,25 +642,27 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
             features_buffered = (features_backend == StorageBackend::PARTITION_BUFFER);
         }
 
-        EdgeList src_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
+        EdgeList src_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0());
+        EdgeList dst_sort;
 //        EdgeList dst_sort = storage_ptrs_.train_edges_dst_sort->range(0, storage_ptrs_.train_edges_dst_sort->getDim0()).to(torch::kInt64);
 
-        src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0)));
-        EdgeList dst_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, -1)));
+//        src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0)));
+//        EdgeList dst_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, -1)));
 
         if (!embeddings_buffered && !features_buffered) {
+            dst_sort = storage_ptrs_.train_edges_dst_sort->range(0, storage_ptrs_.train_edges_dst_sort->getDim0());
 
         } else if (!train_ && full_graph_evaluation_) {
             // TODO: need to merge to sorted edge buckets
-//            src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0)));
-//            dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1)));
+            src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0)));
+            dst_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, -1)));
         } else {
             SPDLOG_ERROR("Unsure how to create in memory subgraph.");
             throw std::runtime_error("");
         }
 
         src_sort = src_sort.to(torch::kInt64);
-        src_sort = src_sort.to(torch::kInt64);
+        dst_sort = dst_sort.to(torch::kInt64);
 
         current_subgraph_state_->in_memory_subgraph_ = new MariusGraph(src_sort, dst_sort, getNumNodesInMemory());
     }
