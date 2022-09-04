@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM ubuntu:18.04
 RUN apt update
 
 RUN apt install -y g++ \
@@ -7,6 +7,7 @@ RUN apt install -y g++ \
          unzip \
          vim \
          git \
+         dstat \
          python3-pip
 
 # install gcc-9
@@ -24,4 +25,4 @@ RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
 # install pytorch
-RUN python3 -m pip install torch==1.7.1+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+RUN python3 -m pip install torch==1.9.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
