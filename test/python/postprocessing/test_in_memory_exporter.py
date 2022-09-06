@@ -1,18 +1,17 @@
-import unittest
-import shutil
-import os
 import glob
-import numpy as np
+import os
+import shutil
+import unittest
 from pathlib import Path
-
-import pandas as pd
-from ast import literal_eval
-
-from test.test_data.generate import generate_random_dataset
-from test.test_configs.generate_test_configs import generate_configs_for_dataset
 from test.python.constants import TMP_TEST_DIR
-from marius.tools.postprocess.in_memory_exporter import InMemoryExporter
+from test.test_configs.generate_test_configs import generate_configs_for_dataset
+from test.test_data.generate import generate_random_dataset
+
+import numpy as np
+import pandas as pd
+
 import marius as m
+from marius.tools.postprocess.in_memory_exporter import InMemoryExporter
 
 
 def check_output(output_dir, fmt, has_rels=False):
@@ -23,12 +22,15 @@ def check_output(output_dir, fmt, has_rels=False):
 
     # check embeddings
     if fmt == "csv":
-        base_embeddings_df = pd.read_csv(output_dir / ("embeddings." + fmt), header=0,
-                                         converters={'embedding': lambda x: x.strip("[]").strip().split()})
+        base_embeddings_df = pd.read_csv(
+            output_dir / ("embeddings." + fmt),
+            header=0,
+            converters={"embedding": lambda x: x.strip("[]").strip().split()},
+        )
 
         assert base_embeddings_df.shape[0] == 100  # check matches number of nodes
         assert base_embeddings_df.shape[1] == 2  # has two columns
-        assert len(base_embeddings_df['embedding'][0]) == 10
+        assert len(base_embeddings_df["embedding"][0]) == 10
     elif fmt == "parquet":
         base_embeddings_df = pd.read_parquet(output_dir / ("embeddings." + fmt))
         assert base_embeddings_df.shape[0] == 100  # check matches number of nodes
@@ -38,9 +40,12 @@ def check_output(output_dir, fmt, has_rels=False):
         raise RuntimeError("Unknown format")
 
     if fmt == "csv":
-        encoded_nodes_df = pd.read_csv(output_dir / ("encoded_nodes." + fmt), header=0,
-                                       converters={'embedding': lambda x: x.strip("[]").strip().split()})
-        encoded_nodes_df['embedding'] = encoded_nodes_df['embedding'].map(np.array)
+        encoded_nodes_df = pd.read_csv(
+            output_dir / ("encoded_nodes." + fmt),
+            header=0,
+            converters={"embedding": lambda x: x.strip("[]").strip().split()},
+        )
+        encoded_nodes_df["embedding"] = encoded_nodes_df["embedding"].map(np.array)
 
         assert encoded_nodes_df.shape[0] == 100
         assert encoded_nodes_df.shape[1] == 2
@@ -53,17 +58,23 @@ def check_output(output_dir, fmt, has_rels=False):
 
     if has_rels:
         if fmt == "csv":
-            rel_embs_df = pd.read_csv(output_dir / ("relation_embeddings." + fmt), header=0,
-                                      converters={'embedding': lambda x: x.strip("[]").strip().split()})
-            rel_embs_df['embedding'] = pd.eval(rel_embs_df['embedding'])
+            rel_embs_df = pd.read_csv(
+                output_dir / ("relation_embeddings." + fmt),
+                header=0,
+                converters={"embedding": lambda x: x.strip("[]").strip().split()},
+            )
+            rel_embs_df["embedding"] = pd.eval(rel_embs_df["embedding"])
 
             assert rel_embs_df.shape[0] == 10
             assert rel_embs_df.shape[1] == 2
             assert len(rel_embs_df.iloc[0, 1]) == 10
 
-            rel_embs_df = pd.read_csv(output_dir / ("inverse_relation_embeddings." + fmt), header=0,
-                                      converters={'embedding': lambda x: x.strip("[]").strip().split()})
-            rel_embs_df['embedding'] = pd.eval(rel_embs_df['embedding'])
+            rel_embs_df = pd.read_csv(
+                output_dir / ("inverse_relation_embeddings." + fmt),
+                header=0,
+                converters={"embedding": lambda x: x.strip("[]").strip().split()},
+            )
+            rel_embs_df["embedding"] = pd.eval(rel_embs_df["embedding"])
 
             assert rel_embs_df.shape[0] == 10
             assert rel_embs_df.shape[1] == 2
@@ -85,7 +96,6 @@ class TestLP(unittest.TestCase):
 
     @classmethod
     def setUp(self):
-
         if not Path(TMP_TEST_DIR).exists():
             Path(TMP_TEST_DIR).mkdir()
 
@@ -96,19 +106,23 @@ class TestLP(unittest.TestCase):
         num_edges = 1000
 
         name = "export_lp"
-        generate_random_dataset(output_dir=base_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                splits=[.9, .05, .05],
-                                task="lp")
+        generate_random_dataset(
+            output_dir=base_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            splits=[0.9, 0.05, 0.05],
+            task="lp",
+        )
 
-        generate_configs_for_dataset(base_dir / Path(name),
-                                     model_names=["gs_1_layer"],
-                                     storage_names=["in_memory"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            base_dir / Path(name),
+            model_names=["gs_1_layer"],
+            storage_names=["in_memory"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         self.model_dir = Path(base_dir) / name / "model_0"
 
@@ -126,7 +140,6 @@ class TestLP(unittest.TestCase):
             shutil.rmtree(Path(TMP_TEST_DIR))
 
     def test_export_csv(self):
-
         assert self.model_dir.exists()
         exporter = InMemoryExporter(self.model_dir, fmt="csv")
 
@@ -137,7 +150,6 @@ class TestLP(unittest.TestCase):
         check_output(self.model_dir.parent / "model_tmp", fmt="csv", has_rels=True)
 
     def test_export_binary(self):
-
         assert self.model_dir.exists()
         exporter = InMemoryExporter(self.model_dir, fmt="bin")
 
@@ -153,7 +165,6 @@ class TestLP(unittest.TestCase):
         assert len(input_files) == len(output_files)
 
     def test_export_parquet(self):
-
         assert self.model_dir.exists()
         exporter = InMemoryExporter(self.model_dir, fmt="parquet")
 
@@ -170,7 +181,6 @@ class TestLP(unittest.TestCase):
     #     exporter.export(s3_path)
 
     def test_export_no_model(self):
-
         try:
             InMemoryExporter(Path("TEST_NOT_A_DIR"))
             raise RuntimeError("Exception not thrown")
@@ -178,7 +188,6 @@ class TestLP(unittest.TestCase):
             pass
 
     def test_export_overwrite(self):
-
         test_dir = self.model_dir.parent / "model_tmp"
         exporter = InMemoryExporter(self.model_dir, fmt="csv", overwrite=False)
         exporter.export(test_dir)
@@ -200,7 +209,6 @@ class TestNC(unittest.TestCase):
 
     @classmethod
     def setUp(self):
-
         if not Path(TMP_TEST_DIR).exists():
             Path(TMP_TEST_DIR).mkdir()
 
@@ -211,20 +219,24 @@ class TestNC(unittest.TestCase):
         num_edges = 1000
 
         name = "nc_export"
-        generate_random_dataset(output_dir=base_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                feature_dim=10,
-                                splits=[.9, .05, .05],
-                                task="nc")
+        generate_random_dataset(
+            output_dir=base_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            feature_dim=10,
+            splits=[0.9, 0.05, 0.05],
+            task="nc",
+        )
 
-        generate_configs_for_dataset(base_dir / Path(name),
-                                     model_names=["gs_1_layer_emb"],
-                                     storage_names=["in_memory"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="nc")
+        generate_configs_for_dataset(
+            base_dir / Path(name),
+            model_names=["gs_1_layer_emb"],
+            storage_names=["in_memory"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="nc",
+        )
 
         self.model_dir = Path(base_dir) / name / "model_0"
 
@@ -242,7 +254,6 @@ class TestNC(unittest.TestCase):
             shutil.rmtree(Path(TMP_TEST_DIR))
 
     def test_export_csv(self):
-
         assert self.model_dir.exists()
         exporter = InMemoryExporter(self.model_dir, fmt="csv")
 
@@ -253,7 +264,6 @@ class TestNC(unittest.TestCase):
         check_output(self.model_dir.parent / "model_tmp", fmt="csv")
 
     def test_export_binary(self):
-
         assert self.model_dir.exists()
         exporter = InMemoryExporter(self.model_dir, fmt="bin")
 
@@ -269,7 +279,6 @@ class TestNC(unittest.TestCase):
         assert len(input_files) == len(output_files)
 
     def test_export_parquet(self):
-
         assert self.model_dir.exists()
         exporter = InMemoryExporter(self.model_dir, fmt="parquet")
 
@@ -286,7 +295,6 @@ class TestNC(unittest.TestCase):
     #     exporter.export(s3_path)
 
     def test_export_no_model(self):
-
         try:
             InMemoryExporter(Path("TEST_NOT_A_DIR"))
             raise RuntimeError("Exception not thrown")
@@ -294,7 +302,6 @@ class TestNC(unittest.TestCase):
             pass
 
     def test_export_overwrite(self):
-
         test_dir = self.model_dir.parent / "model_tmp"
         exporter = InMemoryExporter(self.model_dir, fmt="csv", overwrite=False)
         exporter.export(test_dir)
