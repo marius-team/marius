@@ -1,0 +1,15 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Tox
+      run: pip3 install tox
+    - name: Update clang-format
+      run: pip3 install --upgrade pip; pip3 install clang-format
+    - name: Check linting with Flake8
+      run: tox -e check_lint

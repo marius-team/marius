@@ -9,14 +9,14 @@
 #include "queue.h"
 
 class BatchToDeviceWorker : public Worker {
-public:
+   public:
     BatchToDeviceWorker(Pipeline *pipeline) : Worker{pipeline} {};
 
     void run() override;
 };
 
 class ComputeWorkerGPU : public Worker {
-public:
+   public:
     int gpu_id_;
 
     ComputeWorkerGPU(Pipeline *pipeline, int gpu_id) : Worker{pipeline}, gpu_id_{gpu_id} {}
@@ -25,7 +25,7 @@ public:
 };
 
 class EncodeNodesWorkerGPU : public Worker {
-public:
+   public:
     int gpu_id_;
 
     EncodeNodesWorkerGPU(Pipeline *pipeline, int gpu_id) : Worker{pipeline}, gpu_id_{gpu_id} {}
@@ -34,7 +34,7 @@ public:
 };
 
 class BatchToHostWorker : public Worker {
-public:
+   public:
     int gpu_id_;
 
     BatchToHostWorker(Pipeline *pipeline, int gpu_id) : Worker{pipeline}, gpu_id_{gpu_id} {};
@@ -43,11 +43,11 @@ public:
 };
 
 class PipelineGPU : public Pipeline {
-public:
+   public:
     vector<shared_ptr<Worker>> pool_[GPU_NUM_WORKER_TYPES];
 
-    std::vector<shared_ptr<Queue<shared_ptr<Batch>>>> device_loaded_batches_;   // one queue per GPU
-    std::vector<shared_ptr<Queue<shared_ptr<Batch>>>> device_update_batches_;   // one queue per GPU
+    std::vector<shared_ptr<Queue<shared_ptr<Batch>>>> device_loaded_batches_;  // one queue per GPU
+    std::vector<shared_ptr<Queue<shared_ptr<Batch>>>> device_update_batches_;  // one queue per GPU
 
     // these variables should only be accessed/updated when the model->lock is acquired
     std::mutex *gpu_sync_lock_;
@@ -55,12 +55,8 @@ public:
     int batches_since_last_sync_;
     int gpu_sync_interval_;
 
-    PipelineGPU(shared_ptr<DataLoader> dataloader,
-                shared_ptr<Model> model,
-                bool train,
-                shared_ptr<ProgressReporter> reporter,
-                shared_ptr<PipelineConfig> pipeline_config,
-                bool encode_only = false);
+    PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, bool train, shared_ptr<ProgressReporter> reporter,
+                shared_ptr<PipelineConfig> pipeline_config, bool encode_only = false);
 
     ~PipelineGPU();
 
@@ -77,4 +73,4 @@ public:
     void setQueueExpectingData(bool expecting_data) override;
 };
 
-#endif //MARIUS_PIPELINE_GPU_H
+#endif  // MARIUS_PIPELINE_GPU_H

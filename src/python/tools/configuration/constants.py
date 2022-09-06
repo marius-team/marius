@@ -39,4 +39,3 @@ class PathConstants:
 
     node_mapping_path: str = nodes_directory + node_mapping_file
     relation_mapping_path: str = edges_directory + relation_mapping_file
-

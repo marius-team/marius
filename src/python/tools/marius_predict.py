@@ -1,179 +1,225 @@
-import pathlib
-import os
 import argparse
+import os
+import pathlib
 from argparse import RawDescriptionHelpFormatter
 
 import numpy as np
 import pandas as pd
 import torch
-import marius as m
 
+import marius as m
+from marius.tools.configuration.constants import PathConstants
 from marius.tools.prediction.link_prediction import infer_lp
 from marius.tools.prediction.node_classification import infer_nc
-
-from marius.tools.preprocess.converters.torch_converter import apply_mapping_edges, apply_mapping1d, dataframe_to_tensor, SUPPORTED_DELIM_FORMATS
 from marius.tools.preprocess.converters.partitioners.torch_partitioner import partition_edges
-from marius.tools.configuration.constants import PathConstants
 from marius.tools.preprocess.converters.readers.pandas_readers import PandasDelimitedFileReader
+from marius.tools.preprocess.converters.torch_converter import (
+    SUPPORTED_DELIM_FORMATS,
+    apply_mapping1d,
+    apply_mapping_edges,
+    dataframe_to_tensor,
+)
 
 
 def str2bool(v):
     if isinstance(v, bool):
         return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+    if v.lower() in ("yes", "true", "t", "y", "1"):
         return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    elif v.lower() in ("no", "false", "f", "n", "0"):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def set_args():
     parser = argparse.ArgumentParser(
-        description='Tool for performing link prediction or node classification inference with trained models.\n\n'
-                    'Link prediction example usage: \n'
-                    'marius_predict <trained_config> --output_dir results/ --metrics mrr mean_rank hits1 hits10 hits50 --save_scores --save_ranks \n'
-                    'Assuming <trained_config> contains a link prediction model, this command will perform link prediction evaluation over the test set of edges provided in the config file. '
-                    'Metrics are saved to results/metrics.txt and scores and ranks for each test edge are saved to results/scores.csv \n\n'
-                    'Node classification example usage: \n'
-                    'marius_predict <trained_config> --output_dir results/ --metrics accuracy --save_labels \n'
-                    'This command will perform node classification evaluation over the test set of nodes provided in the config file. '
-                    'Metrics are saved to results/metrics.txt and labels for each test node are saved to results/labels.csv \n\n'
-                    'Custom inputs: \n'
-                    'The test set can be directly specified setting --input_file <test_set_file>. '
-                    'If the test set has not been preprocessed, then --preprocess_input should be enabled. '
-                    'The default format is a binary file, but additional formats can be specified with --input_format.',
-        prog='predict',
-        formatter_class=RawDescriptionHelpFormatter
+        description=(
+            "Tool for performing link prediction or node classification inference with trained models.\n\nLink"
+            " prediction example usage: \nmarius_predict <trained_config> --output_dir results/ --metrics mrr mean_rank"
+            " hits1 hits10 hits50 --save_scores --save_ranks \nAssuming <trained_config> contains a link prediction"
+            " model, this command will perform link prediction evaluation over the test set of edges provided in the"
+            " config file. Metrics are saved to results/metrics.txt and scores and ranks for each test edge are saved"
+            " to results/scores.csv \n\nNode classification example usage: \nmarius_predict <trained_config>"
+            " --output_dir results/ --metrics accuracy --save_labels \nThis command will perform node classification"
+            " evaluation over the test set of nodes provided in the config file. Metrics are saved to"
+            " results/metrics.txt and labels for each test node are saved to results/labels.csv \n\nCustom inputs:"
+            " \nThe test set can be directly specified setting --input_file <test_set_file>. If the test set has not"
+            " been preprocessed, then --preprocess_input should be enabled. The default format is a binary file, but"
+            " additional formats can be specified with --input_format."
+        ),
+        prog="predict",
+        formatter_class=RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--config',
-                        metavar='config',
-                        required=True,
-                        type=str,
-                        help='Configuration file for trained model')
+    parser.add_argument(
+        "--config", metavar="config", required=True, type=str, help="Configuration file for trained model"
+    )
 
-    parser.add_argument('--output_dir',
-                        metavar='output_dir',
-                        type=str,
-                        default="",
-                        help='Path to output directory')
+    parser.add_argument("--output_dir", metavar="output_dir", type=str, default="", help="Path to output directory")
 
-    parser.add_argument('--metrics',
-                        metavar='metrics',
-                        type=str,
-                        nargs='*',
-                        default=[],
-                        help='List of metrics to report')
+    parser.add_argument(
+        "--metrics", metavar="metrics", type=str, nargs="*", default=[], help="List of metrics to report"
+    )
 
-    parser.add_argument('--save_labels',
-                        action='store_true',
-                        default=False,
-                        help='(Node Classification) If true, the node classification labels of each test node will be saved to <output_dir>/labels.csv')
+    parser.add_argument(
+        "--save_labels",
+        action="store_true",
+        default=False,
+        help=(
+            "(Node Classification) If true, the node classification labels of each test node will be saved to"
+            " <output_dir>/labels.csv"
+        ),
+    )
 
-    parser.add_argument('--save_scores',
-                        action='store_true',
-                        default=False,
-                        help='(Link Prediction) If true, the link prediction scores of each test edge will be saved to <output_dir>/scores.csv')
+    parser.add_argument(
+        "--save_scores",
+        action="store_true",
+        default=False,
+        help=(
+            "(Link Prediction) If true, the link prediction scores of each test edge will be saved to"
+            " <output_dir>/scores.csv"
+        ),
+    )
 
-    parser.add_argument('--save_ranks',
-                        action='store_true',
-                        default=False,
-                        help='(Link Prediction) If true, the link prediction ranks of each test edge will be saved to <output_dir>/scores.csv')
+    parser.add_argument(
+        "--save_ranks",
+        action="store_true",
+        default=False,
+        help=(
+            "(Link Prediction) If true, the link prediction ranks of each test edge will be saved to"
+            " <output_dir>/scores.csv"
+        ),
+    )
 
-    parser.add_argument('--batch_size',
-                        metavar="batch_size",
-                        type=int,
-                        default=10000,
-                        help='Number of examples to evaluate at a time.')
+    parser.add_argument(
+        "--batch_size", metavar="batch_size", type=int, default=10000, help="Number of examples to evaluate at a time."
+    )
 
-    parser.add_argument('--num_nbrs',
-                        metavar="num_nbrs",
-                        type=list,
-                        default=None,
-                        help='Number of neighbors to sample for each GNN layer.'
-                             "If not provided, then the module will check if the output of the encoder has been saved after training (see storage.export_encoded_nodes). "
-                             "If the encoder outputs exist, the the module will skip the encode step (incl. neighbor sampling) and only perform the decode over the saved inputs."
-                             'If encoder outputs are not saved, model.encoder.eval_neighbor_sampling will be used for the neighbor sampling configuration.'
-                             'If model.encoder.eval_neighbor_sampling does not exist, then model.encoder.train_neighbor_sampling will be used.'
-                             'If none of the above are given, then the model is assumed to not require neighbor sampling.')
+    parser.add_argument(
+        "--num_nbrs",
+        metavar="num_nbrs",
+        type=list,
+        default=None,
+        help=(
+            "Number of neighbors to sample for each GNN layer.If not provided, then the module will check if the output"
+            " of the encoder has been saved after training (see storage.export_encoded_nodes). If the encoder outputs"
+            " exist, the the module will skip the encode step (incl. neighbor sampling) and only perform the decode"
+            " over the saved inputs.If encoder outputs are not saved, model.encoder.eval_neighbor_sampling will be used"
+            " for the neighbor sampling configuration.If model.encoder.eval_neighbor_sampling does not exist, then"
+            " model.encoder.train_neighbor_sampling will be used.If none of the above are given, then the model is"
+            " assumed to not require neighbor sampling."
+        ),
+    )
 
-    parser.add_argument('--num_negs',
-                        metavar="num_negs",
-                        type=int,
-                        default=None,
-                        help='(Link Prediction) Number of negatives to compare per positive edge for link prediction. '
-                             'If -1, then all nodes are used as negatives. '
-                             'Otherwise, num_neg*num_chunks nodes will be sampled and used as negatives.'
-                             'If not provided, the evaluation.negative_sampling configuration will be used.'
-                             'if evaluation.negative_sampling is not provided, then negative sampling will not occur and only the scores for the input edges will be computed, this means that any ranking metrics cannot be calculated.')
+    parser.add_argument(
+        "--num_negs",
+        metavar="num_negs",
+        type=int,
+        default=None,
+        help=(
+            "(Link Prediction) Number of negatives to compare per positive edge for link prediction. If -1, then all"
+            " nodes are used as negatives. Otherwise, num_neg*num_chunks nodes will be sampled and used as negatives.If"
+            " not provided, the evaluation.negative_sampling configuration will be used.if evaluation.negative_sampling"
+            " is not provided, then negative sampling will not occur and only the scores for the input edges will be"
+            " computed, this means that any ranking metrics cannot be calculated."
+        ),
+    )
 
-    parser.add_argument('--num_chunks',
-                        metavar="num_chunks",
-                        type=int,
-                        default=1,
-                        help='(Link Prediction) Specifies the amount of reuse of negative samples. '
-                             'A given set of num_neg sampled nodes will be reused to corrupt (batch_size // num_chunks) edges.')
+    parser.add_argument(
+        "--num_chunks",
+        metavar="num_chunks",
+        type=int,
+        default=1,
+        help=(
+            "(Link Prediction) Specifies the amount of reuse of negative samples. "
+            "A given set of num_neg sampled nodes will be reused to corrupt (batch_size // num_chunks) edges."
+        ),
+    )
 
-    parser.add_argument('--deg_frac',
-                        metavar="deg_frac",
-                        type=float,
-                        default=0.0,
-                        help='(Link Prediction) Specifies the fraction of the num_neg nodes sampled as negatives that should be sampled according to their degree. '
-                             'This sampling procedure approximates degree based sampling by sampling nodes that appear in the current batch of edges.')
+    parser.add_argument(
+        "--deg_frac",
+        metavar="deg_frac",
+        type=float,
+        default=0.0,
+        help=(
+            "(Link Prediction) Specifies the fraction of the num_neg nodes sampled as negatives that should be sampled"
+            " according to their degree. This sampling procedure approximates degree based sampling by sampling nodes"
+            " that appear in the current batch of edges."
+        ),
+    )
 
-    parser.add_argument('--filtered',
-                        metavar="filtered",
-                        type=str2bool,
-                        default=True,
-                        help='(Link Prediction) If true, then false negative samples will be filtered out. '
-                             'This is only supported when evaluating with all nodes.')
+    parser.add_argument(
+        "--filtered",
+        metavar="filtered",
+        type=str2bool,
+        default=True,
+        help=(
+            "(Link Prediction) If true, then false negative samples will be filtered out. "
+            "This is only supported when evaluating with all nodes."
+        ),
+    )
 
-    parser.add_argument('--input_file',
-                        metavar='input_file',
-                        type=str,
-                        default="",
-                        help='Path to input file containing the test set, '
-                             'if not provided then the test set described in the configuration file will be used.')
+    parser.add_argument(
+        "--input_file",
+        metavar="input_file",
+        type=str,
+        default="",
+        help=(
+            "Path to input file containing the test set, "
+            "if not provided then the test set described in the configuration file will be used."
+        ),
+    )
 
-    parser.add_argument('--input_format',
-                        metavar="input_format",
-                        type=str,
-                        default="binary",
-                        help='Format of the input file to test. '
-                             'Options are [BINARY, CSV, TSV, DELIMITED] files. If DELIMITED, then --delim must be specified.')
+    parser.add_argument(
+        "--input_format",
+        metavar="input_format",
+        type=str,
+        default="binary",
+        help=(
+            "Format of the input file to test. "
+            "Options are [BINARY, CSV, TSV, DELIMITED] files. If DELIMITED, then --delim must be specified."
+        ),
+    )
 
-    parser.add_argument('--preprocess_input',
-                        metavar='preprocess_input',
-                        type=str2bool,
-                        default=False,
-                        help='If true, the input file (if provided) will be preprocessed before evaluation.')
+    parser.add_argument(
+        "--preprocess_input",
+        metavar="preprocess_input",
+        type=str2bool,
+        default=False,
+        help="If true, the input file (if provided) will be preprocessed before evaluation.",
+    )
 
-    parser.add_argument('--columns',
-                        metavar='columns',
-                        type=list,
-                        default=[],
-                        help='List of column ids of input delimited file which denote the src node, edge-type, and dst node of edges.'
-                             'E.g. columns=[0, 2, 1] means that the source nodes are found in the first column of the file, the edge-types are found in the third column, and the destination nodes are found in the second column.'
-                             'For graphs without edge types, only the location node columns need to be provided. E.g. [0, 1]'
-                             'If the input file contains node ids rather than edges, then only a single id is needed. E.g. [2]')
+    parser.add_argument(
+        "--columns",
+        metavar="columns",
+        type=list,
+        default=[],
+        help=(
+            "List of column ids of input delimited file which denote the src node, edge-type, and dst node of"
+            " edges.E.g. columns=[0, 2, 1] means that the source nodes are found in the first column of the file, the"
+            " edge-types are found in the third column, and the destination nodes are found in the second column.For"
+            " graphs without edge types, only the location node columns need to be provided. E.g. [0, 1]If the input"
+            " file contains node ids rather than edges, then only a single id is needed. E.g. [2]"
+        ),
+    )
 
-    parser.add_argument('--header_length',
-                        metavar='header_length',
-                        type=int,
-                        default=0,
-                        help='Length of the header for input delimited file')
+    parser.add_argument(
+        "--header_length",
+        metavar="header_length",
+        type=int,
+        default=0,
+        help="Length of the header for input delimited file",
+    )
 
-    parser.add_argument('--delim',
-                        metavar='delim',
-                        type=str,
-                        default=None,
-                        help='Delimiter for input file')
+    parser.add_argument("--delim", metavar="delim", type=str, default=None, help="Delimiter for input file")
 
-    parser.add_argument('--dtype',
-                        metavar='dtype',
-                        type=str,
-                        default="",
-                        help='Datatype of input file elements. Defaults to the dataset specified in the configuration file.')
+    parser.add_argument(
+        "--dtype",
+        metavar="dtype",
+        type=str,
+        default="",
+        help="Datatype of input file elements. Defaults to the dataset specified in the configuration file.",
+    )
 
     return parser
 
@@ -181,7 +227,6 @@ def set_args():
 def get_metrics(config, args):
     metrics = []
     if config.model.learning_task == m.config.LearningTask.LINK_PREDICTION:
-
         # setup metrics
         for metric in args.metrics:
             metric = metric.upper()
@@ -191,7 +236,6 @@ def get_metrics(config, args):
             elif metric == "MR" or metric == "MEANRANK" or metric == "MEAN_RANK":
                 metrics.append(m.report.MeanRank())
             elif metric.startswith("HITS"):
-
                 str_offset = 4
                 if metric.startswith("HITS@K"):
                     str_offset = 6
@@ -199,17 +243,23 @@ def get_metrics(config, args):
                     k = int(metric[str_offset:])
                     metrics.append(m.report.Hitsk(k))
                 except RuntimeError as err:
-                    raise RuntimeWarning("Unable to parse k value for hits@k metric: " + metric + "\nError: " + err.__str__())
+                    raise RuntimeWarning(
+                        "Unable to parse k value for hits@k metric: " + metric + "\nError: " + err.__str__()
+                    )
 
             else:
                 raise RuntimeWarning("Unsupported metric for link prediction: " + metric)
 
     elif config.model.learning_task == m.config.LearningTask.NODE_CLASSIFICATION:
-
         for metric in args.metrics:
             metric = metric.upper()
 
-            if metric == "ACC" or metric == "ACCURACY" or metric == "CATEGORICAL_ACCURACY" or metric == "CATEGORICALACCURACY":
+            if (
+                metric == "ACC"
+                or metric == "ACCURACY"
+                or metric == "CATEGORICAL_ACCURACY"
+                or metric == "CATEGORICALACCURACY"
+            ):
                 metrics.append(m.report.CategoricalAccuracy())
             else:
                 raise RuntimeWarning("Unsupported metric for node classification: " + metric)
@@ -288,7 +338,6 @@ def infer_input_shape(config, args):
             assert shape[0] * numpy_dtype.itemsize == file_size
 
     elif args.input_format.upper() in SUPPORTED_DELIM_FORMATS:
-
         line_count = None
         with open(args.input_format) as f:
             line_count = sum(1 for _ in f)
@@ -310,7 +359,6 @@ def infer_input_shape(config, args):
 
 
 def get_nbrs_config(config, args):
-
     nbrs = args.num_nbrs
     if nbrs is None:
         if config.storage.export_encoded_nodes and config.model.learning_task == m.config.LearningTask.LINK_PREDICTION:
@@ -397,11 +445,7 @@ def preprocess_input_file(config, args):
                 raise RuntimeError("Delimiter must be specified.")
 
         reader = PandasDelimitedFileReader(
-            args.input_file,
-            columns=columns,
-            header_length=args.header_length,
-            delim=delim,
-            dtype=str_dtype
+            args.input_file, columns=columns, header_length=args.header_length, delim=delim, dtype=str_dtype
         )
 
         input_df, _, _ = reader.read()
@@ -419,9 +463,14 @@ def preprocess_input_file(config, args):
     input_file_offsets = None
 
     num_partitions = 1
-    if config.storage.embeddings is not None and config.storage.embeddings.type == m.config.StorageBackend.PARTITION_BUFFER:
+    if (
+        config.storage.embeddings is not None
+        and config.storage.embeddings.type == m.config.StorageBackend.PARTITION_BUFFER
+    ):
         num_partitions = config.storage.embeddings.options.num_partitions
-    elif config.storage.features is not None and config.storage.features.type == m.config.StorageBackend.PARTITION_BUFFER:
+    elif (
+        config.storage.features is not None and config.storage.features.type == m.config.StorageBackend.PARTITION_BUFFER
+    ):
         num_partitions = config.storage.features.options.num_partitions
 
     if num_partitions > 1 and len(input_tensor.shape) == 2:
@@ -498,27 +547,31 @@ def run_predict(args):
 
     if config.model.learning_task == m.config.LearningTask.LINK_PREDICTION:
         num_negs, num_chunks, deg_frac, filtered = get_neg_config(config, args)
-        infer_lp(model=model,
-                 graph_storage=graph_storage,
-                 output_dir=output_dir,
-                 metrics=metrics,
-                 save_scores=args.save_scores,
-                 save_ranks=args.save_ranks,
-                 batch_size=args.batch_size,
-                 num_nbrs=nbrs,
-                 num_negs=num_negs,
-                 num_chunks=num_chunks,
-                 deg_frac=deg_frac,
-                 filtered=filtered)
+        infer_lp(
+            model=model,
+            graph_storage=graph_storage,
+            output_dir=output_dir,
+            metrics=metrics,
+            save_scores=args.save_scores,
+            save_ranks=args.save_ranks,
+            batch_size=args.batch_size,
+            num_nbrs=nbrs,
+            num_negs=num_negs,
+            num_chunks=num_chunks,
+            deg_frac=deg_frac,
+            filtered=filtered,
+        )
 
     elif config.model.learning_task == m.config.LearningTask.NODE_CLASSIFICATION:
-        infer_nc(model=model,
-                 graph_storage=graph_storage,
-                 output_dir=output_dir,
-                 metrics=metrics,
-                 save_labels=args.save_labels,
-                 batch_size=args.batch_size,
-                 num_nbrs=nbrs)
+        infer_nc(
+            model=model,
+            graph_storage=graph_storage,
+            output_dir=output_dir,
+            metrics=metrics,
+            save_labels=args.save_labels,
+            batch_size=args.batch_size,
+            num_nbrs=nbrs,
+        )
     else:
         raise RuntimeError("Unsupported learning task for inference.")
 
@@ -531,5 +584,5 @@ def main():
     run_predict(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

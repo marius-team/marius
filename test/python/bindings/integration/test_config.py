@@ -1,17 +1,14 @@
-import shutil
 import os
+import shutil
 import unittest
 from pathlib import Path
+from test.python.constants import TMP_TEST_DIR
+from test.test_configs.generate_test_configs import generate_configs_for_dataset
 
-import marius.tools.configuration.marius_config
-import pytest
-
-from test.python.constants import TMP_TEST_DIR, TESTING_CONFIG_DIR
-from test.test_configs.generate_test_configs import get_config
 from omegaconf import OmegaConf
 
+import marius.tools.configuration.marius_config
 from marius.config import loadConfig
-from test.test_configs.generate_test_configs import generate_configs_for_dataset
 
 
 class TestConfig(unittest.TestCase):
@@ -51,53 +48,57 @@ class TestConfig(unittest.TestCase):
             assert "No such file or directory" in e.__str__()
 
     def test_missing_dataset_yaml(self):
-        generate_configs_for_dataset(self.output_dir,
-                                     model_names=["distmult"],
-                                     storage_names=["in_memory"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
-        
-        os.system("rm {}".format(self.output_dir / Path("dataset.yaml"))) 
-        for filename in os.listdir(self.output_dir):
-            if filename.startswith("M-"):
-                try:
-                    config_file = self.output_dir / Path(filename)
-                    config = loadConfig(config_file.__str__(), save=True)
-                    raise RuntimeError("Exception not thrown")
-                except Exception as e:
-                    assert "expected to see dataset.yaml file" in e.__str__()
-        
+        generate_configs_for_dataset(
+            self.output_dir,
+            model_names=["distmult"],
+            storage_names=["in_memory"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
-        shutil.rmtree(self.output_dir)
-        os.makedirs(self.output_dir)
-        OmegaConf.save(self.ds_config, self.output_dir / Path("dataset.yaml"))
-
-        generate_configs_for_dataset(self.output_dir,
-                                     model_names=["gs_1_layer"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="nc")
-        
         os.system("rm {}".format(self.output_dir / Path("dataset.yaml")))
         for filename in os.listdir(self.output_dir):
             if filename.startswith("M-"):
                 try:
                     config_file = self.output_dir / Path(filename)
-                    config = loadConfig(config_file.__str__(), save=True)
+                    _ = loadConfig(config_file.__str__(), save=True)
+                    raise RuntimeError("Exception not thrown")
+                except Exception as e:
+                    assert "expected to see dataset.yaml file" in e.__str__()
+
+        shutil.rmtree(self.output_dir)
+        os.makedirs(self.output_dir)
+        OmegaConf.save(self.ds_config, self.output_dir / Path("dataset.yaml"))
+
+        generate_configs_for_dataset(
+            self.output_dir,
+            model_names=["gs_1_layer"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="nc",
+        )
+
+        os.system("rm {}".format(self.output_dir / Path("dataset.yaml")))
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("M-"):
+                try:
+                    config_file = self.output_dir / Path(filename)
+                    _ = loadConfig(config_file.__str__(), save=True)
                     raise RuntimeError("Exception not thrown")
                 except Exception as e:
                     assert "expected to see dataset.yaml file" in e.__str__()
 
     def test_load_config(self):
-
-        generate_configs_for_dataset(self.output_dir,
-                                     model_names=["distmult, gs_1_layer, gs_3_layer, gat_1_layer, gat_3_layer"],
-                                     storage_names=["in_memory, part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir,
+            model_names=["distmult, gs_1_layer, gs_3_layer, gat_1_layer, gat_3_layer"],
+            storage_names=["in_memory, part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         # check that each generated config can be parsed and it's members accessed.
         for filename in os.listdir(self.output_dir):
@@ -135,12 +136,14 @@ class TestConfig(unittest.TestCase):
         os.makedirs(self.output_dir)
         OmegaConf.save(self.ds_config, self.output_dir / Path("dataset.yaml"))
 
-        generate_configs_for_dataset(self.output_dir,
-                                     model_names=["gs_1_layer", "gs_3_layer", "gat_1_layer", "gat_3_layer"],
-                                     storage_names=["in_memory", "part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="nc")
+        generate_configs_for_dataset(
+            self.output_dir,
+            model_names=["gs_1_layer", "gs_3_layer", "gat_1_layer", "gat_3_layer"],
+            storage_names=["in_memory", "part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="nc",
+        )
 
         # check that each generated config can be parsed and it's members accessed.
         for filename in os.listdir(self.output_dir):

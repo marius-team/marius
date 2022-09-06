@@ -6,24 +6,25 @@
 #define MARIUS_LOGGER_H
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 
-#include <string>
-
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-using std::string;
+#include <string>
+
 using std::shared_ptr;
+using std::string;
 
 class MariusLogger {
-  private:
+   private:
     shared_ptr<spdlog::sinks::basic_file_sink_mt> trace_sink_;
     shared_ptr<spdlog::sinks::basic_file_sink_mt> debug_sink_;
     shared_ptr<spdlog::sinks::basic_file_sink_mt> info_sink_;
     shared_ptr<spdlog::sinks::basic_file_sink_mt> warn_sink_;
     shared_ptr<spdlog::sinks::basic_file_sink_mt> error_sink_;
     shared_ptr<spdlog::sinks::stdout_color_sink_mt> console_sink_;
-  public:
+
+   public:
     shared_ptr<spdlog::logger> main_logger_;
 
     MariusLogger(string model_dir) {
@@ -62,8 +63,6 @@ class MariusLogger {
         spdlog::flush_every(std::chrono::seconds(1));
     }
 
-    void setConsoleLogLevel(spdlog::level::level_enum level) {
-        console_sink_->set_level(level);
-    }
+    void setConsoleLogLevel(spdlog::level::level_enum level) { console_sink_->set_level(level); }
 };
-#endif //MARIUS_LOGGER_H
+#endif  // MARIUS_LOGGER_H

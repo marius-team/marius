@@ -1,13 +1,14 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import torch
-from pathlib import Path
-from marius.tools.preprocess.converters.readers.pandas_readers import PandasDelimitedFileReader
-from marius.tools.preprocess.converters.partitioners.torch_partitioner import TorchPartitioner
-from marius.tools.preprocess.converters.writers.torch_writer import TorchWriter
+
 from marius.tools.configuration.constants import PathConstants
+from marius.tools.preprocess.converters.partitioners.torch_partitioner import TorchPartitioner
+from marius.tools.preprocess.converters.readers.pandas_readers import PandasDelimitedFileReader
+from marius.tools.preprocess.converters.writers.torch_writer import TorchWriter
 
 SUPPORTED_DELIM_FORMATS = ["CSV", "TSV", "TXT", "DELIM", "DELIMITED"]
 SUPPORTED_IN_MEMORY_FORMATS = ["NUMPY", "NP", "PYTORCH", "TORCH"]
@@ -86,7 +87,6 @@ def map_edge_list_dfs(edge_lists: list, known_node_ids=None, sequential_train_no
     if known_node_ids is None:
         unique_nodes = np.unique(np.concatenate([unique_src.astype(str), unique_dst.astype(str)]))
     else:
-
         node_ids = [unique_src.astype(str), unique_dst.astype(str)]
         for n in known_node_ids:
             node_ids.append(n.numpy().astype(str))
@@ -97,7 +97,6 @@ def map_edge_list_dfs(edge_lists: list, known_node_ids=None, sequential_train_no
     mapped_node_ids = np.random.permutation(num_nodes)
     nodes_dict = dict(zip(list(unique_nodes), list(mapped_node_ids)))
 
-    output_dtype = np.int32
     has_rels = False
     unique_rels = torch.empty([0])
     mapped_rel_ids = torch.empty([0])
@@ -131,7 +130,9 @@ def map_edge_list_dfs(edge_lists: list, known_node_ids=None, sequential_train_no
     return output_edge_lists, node_mapping, rel_mapping
 
 
-def map_edge_lists(edge_lists: list, perform_unique=True, known_node_ids=None, sequential_train_nodes=False, sequential_deg_nodes=0):
+def map_edge_lists(
+    edge_lists: list, perform_unique=True, known_node_ids=None, sequential_train_nodes=False, sequential_deg_nodes=0
+):
     print("Remapping Edges")
 
     defined_edges = []
@@ -191,13 +192,41 @@ def map_edge_lists(edge_lists: list, perform_unique=True, known_node_ids=None, s
             print("Sequential Train Nodes")
             seq_nodes = known_node_ids[0]
         else:
-            out_degrees = torch.zeros([num_nodes, ], dtype=torch.int32)
-            out_degrees = torch.scatter_add(out_degrees, 0, torch.squeeze(edge_lists[0][:, 0]).to(torch.int64),
-                                            torch.ones([edge_lists[0].shape[0], ], dtype=torch.int32))
+            out_degrees = torch.zeros(
+                [
+                    num_nodes,
+                ],
+                dtype=torch.int32,
+            )
+            out_degrees = torch.scatter_add(
+                out_degrees,
+                0,
+                torch.squeeze(edge_lists[0][:, 0]).to(torch.int64),
+                torch.ones(
+                    [
+                        edge_lists[0].shape[0],
+                    ],
+                    dtype=torch.int32,
+                ),
+            )
 
-            in_degrees = torch.zeros([num_nodes, ], dtype=torch.int32)
-            in_degrees = torch.scatter_add(in_degrees, 0, torch.squeeze(edge_lists[0][:, -1]).to(torch.int64),
-                                           torch.ones([edge_lists[0].shape[0], ], dtype=torch.int32))
+            in_degrees = torch.zeros(
+                [
+                    num_nodes,
+                ],
+                dtype=torch.int32,
+            )
+            in_degrees = torch.scatter_add(
+                in_degrees,
+                0,
+                torch.squeeze(edge_lists[0][:, -1]).to(torch.int64),
+                torch.ones(
+                    [
+                        edge_lists[0].shape[0],
+                    ],
+                    dtype=torch.int32,
+                ),
+            )
 
             degrees = in_degrees + out_degrees
 
@@ -222,7 +251,9 @@ def map_edge_lists(edge_lists: list, perform_unique=True, known_node_ids=None, s
 
         mapped_node_ids = -1 * torch.ones(num_nodes, dtype=output_dtype)
         mapped_node_ids[seq_nodes.to(torch.int64)] = torch.arange(seq_nodes.shape[0], dtype=output_dtype)
-        mapped_node_ids[all_other_nodes.to(torch.int64)] = seq_nodes.shape[0] + torch.randperm(num_nodes - seq_nodes.shape[0], dtype=output_dtype)
+        mapped_node_ids[all_other_nodes.to(torch.int64)] = seq_nodes.shape[0] + torch.randperm(
+            num_nodes - seq_nodes.shape[0], dtype=output_dtype
+        )
     else:
         mapped_node_ids = torch.randperm(num_nodes, dtype=output_dtype)
 
@@ -273,22 +304,19 @@ def split_edges(edges, splits):
         valid_split = splits[1]
         test_split = splits[2]
 
-        print("Splitting into: {}/{}/{} fractions".format(train_split,
-                                                          valid_split,
-                                                          test_split))
+        print("Splitting into: {}/{}/{} fractions".format(train_split, valid_split, test_split))
 
         num_train = int(num_total_edges * train_split)
         num_valid = int(num_total_edges * valid_split)
 
         train_edges_tens = edges[rand_perm[:num_train]]
-        valid_edges_tens = edges[rand_perm[num_train:num_train + num_valid]]
-        test_edges_tens = edges[rand_perm[num_train + num_valid:total_split_edges]]
+        valid_edges_tens = edges[rand_perm[num_train : num_train + num_valid]]
+        test_edges_tens = edges[rand_perm[num_train + num_valid : total_split_edges]]
     elif len(splits) == 2:
         train_split = splits[0]
         test_split = splits[1]
 
-        print("Splitting into: {}/{} fractions".format(train_split,
-                                                       test_split))
+        print("Splitting into: {}/{} fractions".format(train_split, test_split))
 
         num_train = int(num_total_edges * train_split)
 
@@ -301,25 +329,27 @@ def split_edges(edges, splits):
 
 
 class TorchEdgeListConverter(object):
-    def __init__(self,
-                 output_dir: Path,
-                 train_edges: Path,
-                 valid_edges: Path = None,
-                 test_edges: Path = None,
-                 splits: list = None,
-                 format: str = "csv",
-                 columns: list = [0, 1, 2],
-                 header_length: int = 0,
-                 delim: str = "\t",
-                 dtype: str = "int32",
-                 num_partitions: int = 1,
-                 partitioned_evaluation: bool = False,
-                 remap_ids: bool = True,
-                 sequential_train_nodes: bool = False,
-                 sequential_deg_nodes: int = 0,
-                 num_nodes: int = None,
-                 num_rels: int = None,
-                 known_node_ids: list = None):
+    def __init__(
+        self,
+        output_dir: Path,
+        train_edges: Path,
+        valid_edges: Path = None,
+        test_edges: Path = None,
+        splits: list = None,
+        format: str = "csv",
+        columns: list = [0, 1, 2],
+        header_length: int = 0,
+        delim: str = "\t",
+        dtype: str = "int32",
+        num_partitions: int = 1,
+        partitioned_evaluation: bool = False,
+        remap_ids: bool = True,
+        sequential_train_nodes: bool = False,
+        sequential_deg_nodes: int = 0,
+        num_nodes: int = None,
+        num_rels: int = None,
+        known_node_ids: list = None,
+    ):
         """
         This converter is used to preprocess input edge lists which fit in memory. Pandas, numpy and pytorch are used to convert input edge lists that are
         stored as delimited files, numpy arrays, or pytorch tensors into the input format required by Marius.
@@ -377,7 +407,7 @@ class TorchEdgeListConverter(object):
         :param num_rels:                        Number of nodes in the dataset, this is required when remap_ids is set to false and the dataset has edge_types
         :param known_node_ids:                  List of node id arrays or tensors which contain known node ids for the dataset. Used for generating node id mappings
                                                 when some nodes may not be present in the edge list.
-        """
+        """  # noqa: E501
         self.output_dir = output_dir
         self.num_nodes = num_nodes
         self.num_rels = num_rels
@@ -385,12 +415,7 @@ class TorchEdgeListConverter(object):
         if format.upper() in SUPPORTED_DELIM_FORMATS:
             assert isinstance(train_edges, str) or isinstance(train_edges, Path)
 
-            self.reader = PandasDelimitedFileReader(train_edges,
-                                                    valid_edges,
-                                                    test_edges,
-                                                    columns,
-                                                    header_length,
-                                                    delim)
+            self.reader = PandasDelimitedFileReader(train_edges, valid_edges, test_edges, columns, header_length, delim)
 
         elif format.upper() in SUPPORTED_IN_MEMORY_FORMATS:
             self.reader = None
@@ -445,10 +470,14 @@ class TorchEdgeListConverter(object):
         self.remap_ids = remap_ids
 
         if self.num_nodes is None and not self.remap_ids:
-            raise RuntimeError("Must specify num_nodes and num_rels (if applicable) to the converter when remap_ids=False")
+            raise RuntimeError(
+                "Must specify num_nodes and num_rels (if applicable) to the converter when remap_ids=False"
+            )
 
         if self.num_rels is None and not self.remap_ids and self.has_rels:
-            raise RuntimeError("Must specify num_nodes and num_rels (if applicable) to the converter when remap_ids=False")
+            raise RuntimeError(
+                "Must specify num_nodes and num_rels (if applicable) to the converter when remap_ids=False"
+            )
 
         self.sequential_train_nodes = sequential_train_nodes
 
@@ -473,7 +502,6 @@ class TorchEdgeListConverter(object):
             self.known_node_ids = None
 
     def convert(self):
-
         train_edges_tens = None
         valid_edges_tens = None
         test_edges_tens = None
@@ -486,10 +514,12 @@ class TorchEdgeListConverter(object):
             train_edges_df, valid_edges_df, test_edges_df = self.reader.read()
 
             if self.remap_ids:
-                edge_lists, node_mapping, rel_mapping = map_edge_lists([train_edges_df, valid_edges_df, test_edges_df],
-                                                                       known_node_ids=self.known_node_ids,
-                                                                       sequential_train_nodes=self.sequential_train_nodes,
-                                                                       sequential_deg_nodes=self.sequential_deg_nodes)
+                edge_lists, node_mapping, rel_mapping = map_edge_lists(
+                    [train_edges_df, valid_edges_df, test_edges_df],
+                    known_node_ids=self.known_node_ids,
+                    sequential_train_nodes=self.sequential_train_nodes,
+                    sequential_deg_nodes=self.sequential_deg_nodes,
+                )
 
                 self.num_nodes = node_mapping.shape[0]
 
@@ -505,14 +535,31 @@ class TorchEdgeListConverter(object):
                     valid_edges_tens = edge_lists[1]
                     test_edges_tens = edge_lists[2]
 
-                print("Node mapping written to: {}".format((self.output_dir / Path(PathConstants.node_mapping_path)).__str__()))
-                np.savetxt((self.output_dir / Path(PathConstants.node_mapping_path)).__str__(), node_mapping, fmt='%s', delimiter=",")
+                print(
+                    "Node mapping written to: {}".format(
+                        (self.output_dir / Path(PathConstants.node_mapping_path)).__str__()
+                    )
+                )
+                np.savetxt(
+                    (self.output_dir / Path(PathConstants.node_mapping_path)).__str__(),
+                    node_mapping,
+                    fmt="%s",
+                    delimiter=",",
+                )
 
                 if self.num_rels > 1:
-                    print("Relation mapping written to: {}".format((self.output_dir / Path(PathConstants.relation_mapping_path)).__str__()))
-                    np.savetxt((self.output_dir / Path(PathConstants.relation_mapping_path)).__str__(), rel_mapping, fmt='%s', delimiter=",")
+                    print(
+                        "Relation mapping written to: {}".format(
+                            (self.output_dir / Path(PathConstants.relation_mapping_path)).__str__()
+                        )
+                    )
+                    np.savetxt(
+                        (self.output_dir / Path(PathConstants.relation_mapping_path)).__str__(),
+                        rel_mapping,
+                        fmt="%s",
+                        delimiter=",",
+                    )
             else:
-
                 train_edges_tens = dataframe_to_tensor(train_edges_df)
 
                 if valid_edges_df is not None:
@@ -526,10 +573,12 @@ class TorchEdgeListConverter(object):
             test_edges_tens = self.test_edges_tens
 
             if self.remap_ids:
-                edge_lists, node_mapping, rel_mapping = map_edge_lists([train_edges_tens, valid_edges_tens, test_edges_tens],
-                                                                       known_node_ids=self.known_node_ids,
-                                                                       sequential_train_nodes=self.sequential_train_nodes,
-                                                                       sequential_deg_nodes=self.sequential_deg_nodes)
+                edge_lists, node_mapping, rel_mapping = map_edge_lists(
+                    [train_edges_tens, valid_edges_tens, test_edges_tens],
+                    known_node_ids=self.known_node_ids,
+                    sequential_train_nodes=self.sequential_train_nodes,
+                    sequential_deg_nodes=self.sequential_deg_nodes,
+                )
 
                 self.num_nodes = node_mapping.shape[0]
 
@@ -545,12 +594,30 @@ class TorchEdgeListConverter(object):
                     valid_edges_tens = edge_lists[1]
                     test_edges_tens = edge_lists[2]
 
-                print("Node mapping written to: {}".format((self.output_dir / Path(PathConstants.node_mapping_path)).__str__()))
-                np.savetxt((self.output_dir / Path(PathConstants.node_mapping_path)).__str__(), node_mapping, fmt='%s', delimiter=",")
+                print(
+                    "Node mapping written to: {}".format(
+                        (self.output_dir / Path(PathConstants.node_mapping_path)).__str__()
+                    )
+                )
+                np.savetxt(
+                    (self.output_dir / Path(PathConstants.node_mapping_path)).__str__(),
+                    node_mapping,
+                    fmt="%s",
+                    delimiter=",",
+                )
 
                 if self.num_rels > 1:
-                    print("Relation mapping written to: {}".format((self.output_dir / Path(PathConstants.relation_mapping_path)).__str__()))
-                    np.savetxt((self.output_dir / Path(PathConstants.relation_mapping_path)).__str__(), rel_mapping, fmt='%s', delimiter=",")
+                    print(
+                        "Relation mapping written to: {}".format(
+                            (self.output_dir / Path(PathConstants.relation_mapping_path)).__str__()
+                        )
+                    )
+                    np.savetxt(
+                        (self.output_dir / Path(PathConstants.relation_mapping_path)).__str__(),
+                        rel_mapping,
+                        fmt="%s",
+                        delimiter=",",
+                    )
 
         train_edges_tens = train_edges_tens.to(self.dtype)
         if valid_edges_tens is not None:
@@ -563,30 +630,29 @@ class TorchEdgeListConverter(object):
 
         if self.partitioner is not None:
             print("Partition nodes into {} partitions".format(self.num_partitions))
-            train_edges_tens, \
-            train_edges_offsets, \
-            valid_edges_tens, \
-            valid_edges_offsets, \
-            test_edges_tens, \
-            test_edges_offsets = self.partitioner.partition_edges(train_edges_tens,
-                                                                  valid_edges_tens,
-                                                                  test_edges_tens,
-                                                                  self.num_nodes,
-                                                                  self.num_partitions)
+            (
+                train_edges_tens,
+                train_edges_offsets,
+                valid_edges_tens,
+                valid_edges_offsets,
+                test_edges_tens,
+                test_edges_offsets,
+            ) = self.partitioner.partition_edges(
+                train_edges_tens, valid_edges_tens, test_edges_tens, self.num_nodes, self.num_partitions
+            )
 
-            return self.writer.write_to_binary(train_edges_tens,
-                                               valid_edges_tens,
-                                               test_edges_tens,
-                                               self.num_nodes,
-                                               self.num_rels,
-                                               self.num_partitions,
-                                               train_edges_offsets,
-                                               valid_edges_offsets,
-                                               test_edges_offsets)
+            return self.writer.write_to_binary(
+                train_edges_tens,
+                valid_edges_tens,
+                test_edges_tens,
+                self.num_nodes,
+                self.num_rels,
+                self.num_partitions,
+                train_edges_offsets,
+                valid_edges_offsets,
+                test_edges_offsets,
+            )
         else:
-            return self.writer.write_to_binary(train_edges_tens,
-                                               valid_edges_tens,
-                                               test_edges_tens,
-                                               self.num_nodes,
-                                               self.num_rels,
-                                               self.num_partitions)
+            return self.writer.write_to_binary(
+                train_edges_tens, valid_edges_tens, test_edges_tens, self.num_nodes, self.num_rels, self.num_partitions
+            )

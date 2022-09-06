@@ -20,9 +20,11 @@ torch::Tensor uniform_init(float scale_factor, std::vector<int64_t> shape, torch
 
 torch::Tensor normal_init(float mean, float std, std::vector<int64_t> shape, torch::TensorOptions options);
 
-torch::Tensor initialize_tensor(shared_ptr<InitConfig> init_config, std::vector<int64_t> shape, torch::TensorOptions tensor_options, std::tuple<int64_t, int64_t> fans = {-1, -1});
+torch::Tensor initialize_tensor(shared_ptr<InitConfig> init_config, std::vector<int64_t> shape, torch::TensorOptions tensor_options,
+                                std::tuple<int64_t, int64_t> fans = {-1, -1});
 
 /** For initializing large tensors that won't fit in memory */
-torch::Tensor initialize_subtensor(shared_ptr<InitConfig> init_config, std::vector<int64_t> sub_shape, std::vector<int64_t> full_shape, torch::TensorOptions tensor_options, std::tuple<int64_t, int64_t> fans = {-1, -1});
+torch::Tensor initialize_subtensor(shared_ptr<InitConfig> init_config, std::vector<int64_t> sub_shape, std::vector<int64_t> full_shape,
+                                   torch::TensorOptions tensor_options, std::tuple<int64_t, int64_t> fans = {-1, -1});
 
-#endif //MARIUS_INITIALIZATION_H
+#endif  // MARIUS_INITIALIZATION_H

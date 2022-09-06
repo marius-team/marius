@@ -8,7 +8,7 @@
 #include "gnn_layer.h"
 
 class GATLayer : public GNNLayer {
-public:
+   public:
     shared_ptr<GATLayerOptions> options_;
     int head_dim_;
     float input_dropout_;
@@ -24,4 +24,4 @@ public:
     torch::Tensor forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train = true) override;
 };
 
-#endif //MARIUS_GAT_LAYER_H
+#endif  // MARIUS_GAT_LAYER_H

@@ -2,19 +2,18 @@
 // Created by Jason Mohoney on 8/25/21.
 //
 
-#include "common/util.h"
 #include "data/graph.h"
-#include "data/samplers/neighbor.h"
 
+#include "common/util.h"
+#include "data/samplers/neighbor.h"
 
 #ifdef MARIUS_OMP
 #include "omp.h"
 #endif
 
-MariusGraph::MariusGraph() {};
+MariusGraph::MariusGraph(){};
 
 MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory) {
-
     num_nodes_in_memory_ = num_nodes_in_memory;
 
     src_sorted_edges_ = src_sorted_edges;
@@ -44,13 +43,9 @@ MariusGraph::MariusGraph(EdgeList edges) {
     MariusGraph(src_sorted_edges, dst_sorted_edges, num_nodes_in_memory);
 }
 
-MariusGraph::~MariusGraph() {
-    clear();
-}
+MariusGraph::~MariusGraph() { clear(); }
 
-Indices MariusGraph::getNodeIDs() {
-    return node_ids_;
-}
+Indices MariusGraph::getNodeIDs() { return node_ids_; }
 
 Indices MariusGraph::getEdges(bool incoming) {
     if (incoming) {
@@ -61,7 +56,6 @@ Indices MariusGraph::getEdges(bool incoming) {
 }
 
 Indices MariusGraph::getRelationIDs(bool incoming) {
-
     if (src_sorted_edges_.size(1) == 2) {
         return torch::Tensor();
     } else {
@@ -110,7 +104,7 @@ void MariusGraph::to(torch::Device device) {
     node_ids_ = node_ids_.to(device);
     src_sorted_edges_ = src_sorted_edges_.to(device);
     dst_sorted_edges_ = dst_sorted_edges_.to(device);
-    out_sorted_uniques_= out_sorted_uniques_.to(device);
+    out_sorted_uniques_ = out_sorted_uniques_.to(device);
     out_offsets_ = out_offsets_.to(device);
     out_num_neighbors_ = out_num_neighbors_.to(device);
     in_sorted_uniques_ = in_sorted_uniques_.to(device);
@@ -118,8 +112,9 @@ void MariusGraph::to(torch::Device device) {
 }
 
 // 1 hop sampler
-std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(torch::Tensor node_ids, bool incoming, NeighborSamplingLayer neighbor_sampling_layer, int max_neighbors_size, float rate) {
-
+std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(torch::Tensor node_ids, bool incoming,
+                                                                             NeighborSamplingLayer neighbor_sampling_layer, int max_neighbors_size,
+                                                                             float rate) {
     int gpu = 0;
 
     if (node_ids.is_cuda()) {
@@ -145,7 +140,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
             auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
             auto node_ids_accessor = node_ids.accessor<int64_t, 1>();
 
-            #pragma omp parallel for
+#pragma omp parallel for
             for (int64_t i = 0; i < node_ids.size(0); i++) {
                 num_neighbors_accessor[i] = in_num_neighbors_accessor[node_ids_accessor[i]];
                 global_offsets_accessor[i] = in_offsets_accessor[node_ids_accessor[i]];
@@ -163,7 +158,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
             auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
             auto node_ids_accessor = node_ids.accessor<int64_t, 1>();
 
-            #pragma omp parallel for
+#pragma omp parallel for
             for (int64_t i = 0; i < node_ids.size(0); i++) {
                 num_neighbors_accessor[i] = out_num_neighbors_accessor[node_ids_accessor[i]];
                 global_offsets_accessor[i] = out_offsets_accessor[node_ids_accessor[i]];
@@ -222,10 +217,10 @@ void MariusGraph::sortAllEdges(EdgeList all_edges) {
     all_dst_sorted_edges_ = all_edges.index_select(0, all_edges.select(1, -1).argsort(0)).to(torch::kInt64);
 }
 
+DENSEGraph::DENSEGraph(){};
 
-DENSEGraph::DENSEGraph() {};
-
-DENSEGraph::DENSEGraph(Indices hop_offsets, Indices node_ids, Indices in_offsets, std::vector<torch::Tensor> in_neighbors_vec, Indices in_neighbors_mapping, Indices out_offsets, std::vector<torch::Tensor> out_neighbors_vec, Indices out_neighbors_mapping, int num_nodes_in_memory) {
+DENSEGraph::DENSEGraph(Indices hop_offsets, Indices node_ids, Indices in_offsets, std::vector<torch::Tensor> in_neighbors_vec, Indices in_neighbors_mapping,
+                       Indices out_offsets, std::vector<torch::Tensor> out_neighbors_vec, Indices out_neighbors_mapping, int num_nodes_in_memory) {
     hop_offsets_ = hop_offsets;
     node_ids_ = node_ids;
     in_offsets_ = in_offsets;
@@ -237,9 +232,7 @@ DENSEGraph::DENSEGraph(Indices hop_offsets, Indices node_ids, Indices in_offsets
     num_nodes_in_memory_ = num_nodes_in_memory;
 }
 
-DENSEGraph::~DENSEGraph() {
-    clear();
-}
+DENSEGraph::~DENSEGraph() { clear(); }
 
 void DENSEGraph::clear() {
     MariusGraph::clear();
@@ -280,9 +273,7 @@ void DENSEGraph::to(torch::Device device) {
     }
 }
 
-int64_t DENSEGraph::getLayerOffset() {
-    return hop_offsets_[1].item<int64_t>();
-}
+int64_t DENSEGraph::getLayerOffset() { return hop_offsets_[1].item<int64_t>(); }
 
 void DENSEGraph::prepareForNextLayer() {
     int64_t num_nodes_to_remove = (hop_offsets_[1] - hop_offsets_[0]).item<int64_t>();
@@ -294,7 +285,8 @@ void DENSEGraph::prepareForNextLayer() {
         }
         int64_t finished_out_neighbors = out_offsets_[num_finished_nodes].item<int64_t>();
         src_sorted_edges_ = src_sorted_edges_.narrow(0, finished_out_neighbors, src_sorted_edges_.size(0) - finished_out_neighbors);
-        out_neighbors_mapping_ = out_neighbors_mapping_.narrow(0, finished_out_neighbors, out_neighbors_mapping_.size(0) - finished_out_neighbors) - num_nodes_to_remove;
+        out_neighbors_mapping_ =
+            out_neighbors_mapping_.narrow(0, finished_out_neighbors, out_neighbors_mapping_.size(0) - finished_out_neighbors) - num_nodes_to_remove;
         out_offsets_ = out_offsets_.narrow(0, num_finished_nodes, out_offsets_.size(0) - num_finished_nodes) - finished_out_neighbors;
     }
     out_num_neighbors_ = out_num_neighbors_.narrow(0, num_finished_nodes, out_num_neighbors_.size(0) - num_finished_nodes);
@@ -305,7 +297,8 @@ void DENSEGraph::prepareForNextLayer() {
         }
         int64_t finished_in_neighbors = in_offsets_[num_finished_nodes].item<int64_t>();
         dst_sorted_edges_ = dst_sorted_edges_.narrow(0, finished_in_neighbors, dst_sorted_edges_.size(0) - finished_in_neighbors);
-        in_neighbors_mapping_ = in_neighbors_mapping_.narrow(0, finished_in_neighbors, in_neighbors_mapping_.size(0) - finished_in_neighbors) - num_nodes_to_remove;
+        in_neighbors_mapping_ =
+            in_neighbors_mapping_.narrow(0, finished_in_neighbors, in_neighbors_mapping_.size(0) - finished_in_neighbors) - num_nodes_to_remove;
         in_offsets_ = in_offsets_.narrow(0, num_finished_nodes, in_offsets_.size(0) - num_finished_nodes) - finished_in_neighbors;
     }
     in_num_neighbors_ = in_num_neighbors_.narrow(0, num_finished_nodes, in_num_neighbors_.size(0) - num_finished_nodes);
@@ -333,7 +326,6 @@ Indices DENSEGraph::getNeighborIDs(bool incoming, bool global_ids) {
 }
 
 void DENSEGraph::performMap() {
-
     if (!node_ids_.defined()) {
         return;
     }
@@ -369,14 +361,11 @@ void DENSEGraph::performMap() {
     }
 
     // only works for torch > 1.8
-//    in_num_neighbors_ = torch::diff(in_offsets_, 1, 0, {}, torch::tensor({dst_sorted_edges_.size(0)}, in_offsets_.device()));
-//    out_num_neighbors_ = torch::diff(out_offsets_, 1, 0, {}, torch::tensor({src_sorted_edges_.size(0)}, out_offsets_.device()));
+    //    in_num_neighbors_ = torch::diff(in_offsets_, 1, 0, {}, torch::tensor({dst_sorted_edges_.size(0)}, in_offsets_.device()));
+    //    out_num_neighbors_ = torch::diff(out_offsets_, 1, 0, {}, torch::tensor({src_sorted_edges_.size(0)}, out_offsets_.device()));
 }
 
 void DENSEGraph::setNodeProperties(torch::Tensor node_properties) {
     assert(node_properties.size(0) == node_ids_.size(0));
     node_properties_ = node_properties;
 }
-
-
-

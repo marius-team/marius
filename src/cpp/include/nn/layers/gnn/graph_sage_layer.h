@@ -8,7 +8,7 @@
 #include "gnn_layer.h"
 
 class GraphSageLayer : public GNNLayer {
-public:
+   public:
     shared_ptr<GraphSageLayerOptions> options_;
     torch::Tensor w1_;
     torch::Tensor w2_;
@@ -18,7 +18,6 @@ public:
     void reset() override;
 
     torch::Tensor forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train = true) override;
-
 };
 
-#endif //MARIUS_GRAPH_SAGE_LAYER_H
+#endif  // MARIUS_GRAPH_SAGE_LAYER_H

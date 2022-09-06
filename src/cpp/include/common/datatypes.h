@@ -17,9 +17,9 @@
 #include "torch/torch.h"
 #pragma GCC diagnostic pop
 
-using std::string;
 using std::map;
 using std::shared_ptr;
+using std::string;
 using std::unique_ptr;
 
 /** Program Constants */
@@ -29,30 +29,26 @@ using std::unique_ptr;
 /** Deployment configs */
 
 class DummyCuda {
-  public:
-    DummyCuda(int val) {
-        (void) val;
-    }
+   public:
+    DummyCuda(int val) { (void)val; }
 
-    void start() {};
+    void start(){};
 
-    void record() {};
+    void record(){};
 
-    void synchronize() {};
+    void synchronize(){};
 
-    int elapsed_time(DummyCuda) {
-        return 0;
-    }
+    int elapsed_time(DummyCuda) { return 0; }
 };
 
 #ifdef MARIUS_CUDA
-    #include <ATen/cuda/CUDAContext.h>
-    #include <c10/cuda/CUDAStream.h>
-    #include <c10/cuda/CUDAGuard.h>
-    #include <ATen/cuda/Exceptions.h>
-    #include <c10/util/Exception.h>
-    #include <ATen/cuda/CUDAEvent.h>
-    typedef at::cuda::CUDAEvent CudaEvent;
+#include <ATen/cuda/CUDAContext.h>
+#include <ATen/cuda/CUDAEvent.h>
+#include <ATen/cuda/Exceptions.h>
+#include <c10/cuda/CUDAGuard.h>
+#include <c10/cuda/CUDAStream.h>
+#include <c10/util/Exception.h>
+typedef at::cuda::CUDAEvent CudaEvent;
 #else
 typedef DummyCuda CudaEvent;
 #endif
@@ -63,7 +59,7 @@ typedef DummyCuda CudaEvent;
 //#endif
 
 #ifndef IO_FLAGS
-    #define IO_FLAGS 0
+#define IO_FLAGS 0
 #endif
 
 /** Typedefs */
@@ -87,4 +83,4 @@ typedef torch::Tensor OptimizerState;
 
 typedef std::chrono::time_point<std::chrono::steady_clock> Timestamp;
 
-#endif //MARIUS_DATATYPES_H
+#endif  // MARIUS_DATATYPES_H

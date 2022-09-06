@@ -9,7 +9,7 @@
 #include "nn/layers/layer.h"
 
 class FeatureLayer : public Layer {
-public:
+   public:
     int offset_;
 
     FeatureLayer(shared_ptr<LayerConfig> layer_config, torch::Device device, int offset = 0);
@@ -19,5 +19,4 @@ public:
     void reset() override;
 };
 
-
-#endif //MARIUS_FEATURE_H
+#endif  // MARIUS_FEATURE_H

@@ -1,37 +1,28 @@
 import unittest
+
 import torch
 
-from marius.config import EncoderConfig, LayerConfig, LossOptions, LossReduction, LayerType, ActivationFunction, InitConfig, InitDistribution, LearningTask
-from marius.data import MariusGraph, DENSEGraph, Batch
+from marius.config import LearningTask, LossOptions, LossReduction
+from marius.data import Batch, DENSEGraph, MariusGraph
 from marius.data.samplers import LayeredNeighborSampler
-from marius.nn import Model, SoftmaxCrossEntropy, SGDOptimizer, CrossEntropyLoss
-from marius.nn.encoders import GeneralEncoder
-from marius.nn.layers import EmbeddingLayer, GraphSageLayer
+from marius.nn import CrossEntropyLoss, Model, SGDOptimizer, SoftmaxCrossEntropy
 from marius.nn.decoders.edge import DistMult
 from marius.nn.decoders.node import NoOpNodeDecoder
+from marius.nn.encoders import GeneralEncoder
+from marius.nn.layers import EmbeddingLayer
 from marius.report import LinkPredictionReporter, NodeClassificationReporter
 
-edge_list = torch.tensor([
-    [0, 0, 1],
-    [0, 0, 2],
-    [1, 1, 4],
-    [2, 0, 3],
-    [3, 1, 0],
-    [4, 0, 1]
-])
-batch_edges = torch.tensor([
-    [0, 0, 1],
-    [2, 0, 3],
-    [3, 1, 0],
-])
+edge_list = torch.tensor([[0, 0, 1], [0, 0, 2], [1, 1, 4], [2, 0, 3], [3, 1, 0], [4, 0, 1]])
+batch_edges = torch.tensor(
+    [
+        [0, 0, 1],
+        [2, 0, 3],
+        [3, 1, 0],
+    ]
+)
 
 node_ids = torch.tensor([0, 1, 2, 3])
-node_embeddings = torch.tensor([
-    [1.5, 2.5],
-    [2.5, 3.5],
-    [4.25, 1.0],
-    [-1.0, .5]
-])
+node_embeddings = torch.tensor([[1.5, 2.5], [2.5, 3.5], [4.25, 1.0], [-1.0, 0.5]])
 
 full_graph = MariusGraph(edge_list, edge_list[torch.argsort(edge_list[:, -1])], 5)
 sampler = LayeredNeighborSampler(full_graph, [-1])
@@ -49,12 +40,14 @@ def get_test_model_lp():
     layers = [[embedding_layer]]
     encoder = GeneralEncoder(layers=layers)
 
-    decoder = DistMult(num_relations=num_relations,
-                       embedding_dim=embedding_dim,
-                       use_inverse_relations=False,
-                       device=device,
-                       dtype=dtype,
-                       mode="infer")
+    decoder = DistMult(
+        num_relations=num_relations,
+        embedding_dim=embedding_dim,
+        use_inverse_relations=False,
+        device=device,
+        dtype=dtype,
+        mode="infer",
+    )
 
     loss = SoftmaxCrossEntropy(reduction="sum")
 
@@ -71,12 +64,14 @@ def get_test_model_lp_neg():
     layers = [[embedding_layer]]
     encoder = GeneralEncoder(layers=layers)
 
-    decoder = DistMult(num_relations=num_relations,
-                       embedding_dim=embedding_dim,
-                       use_inverse_relations=False,
-                       device=device,
-                       dtype=dtype,
-                       mode="train")
+    decoder = DistMult(
+        num_relations=num_relations,
+        embedding_dim=embedding_dim,
+        use_inverse_relations=False,
+        device=device,
+        dtype=dtype,
+        mode="train",
+    )
 
     loss = SoftmaxCrossEntropy(reduction="sum")
 
@@ -103,7 +98,6 @@ def get_test_model_nc():
 
 class CustomModelBasic(Model):
     def __init__(self, encoder, decoder):
-
         if decoder.learning_task == LearningTask.LINK_PREDICTION:
             reporter = LinkPredictionReporter()
         else:
@@ -118,7 +112,6 @@ class CustomModelBasic(Model):
 
 class CustomModelOverrideForward(Model):
     def __init__(self, encoder, decoder):
-
         if decoder.learning_task == LearningTask.LINK_PREDICTION:
             reporter = LinkPredictionReporter()
         else:
@@ -147,7 +140,9 @@ class TestModel(unittest.TestCase):
 
     def test_forward_nc(self):
         model = get_test_model_nc()
-        output = model.forward_nc(node_embeddings=node_embeddings, node_features=torch.empty([]), dense_graph=DENSEGraph(), train=False)
+        output = model.forward_nc(
+            node_embeddings=node_embeddings, node_features=torch.empty([]), dense_graph=DENSEGraph(), train=False
+        )
         assert torch.all(torch.eq(output, node_embeddings)).item() is True
 
     def test_forward_lp(self):
@@ -160,9 +155,7 @@ class TestModel(unittest.TestCase):
 
         scores, _, _, _ = model.forward_lp(batch=batch, train=False)
 
-        expected_scores = torch.tensor(
-            [12.5, -3.75, -.25]
-        )
+        expected_scores = torch.tensor([12.5, -3.75, -0.25])
 
         assert torch.all(torch.eq(scores, expected_scores)).item() is True
 
@@ -174,11 +167,7 @@ class TestModel(unittest.TestCase):
         batch.node_embeddings = node_embeddings
         batch.node_embeddings_state = torch.zeros_like(node_embeddings)
         batch.edges = batch_edges
-        batch.dst_neg_indices_mapping = torch.tensor([
-            [2, 0],
-            [0, 1],
-            [1, 0]
-        ])
+        batch.dst_neg_indices_mapping = torch.tensor([[2, 0], [0, 1], [1, 0]])
 
         model_lp.train_batch(batch, True)
 
@@ -196,7 +185,7 @@ class TestModel(unittest.TestCase):
     def test_clear_grad(self):
         model = get_test_model_nc()
 
-        model.optimizers = [SGDOptimizer(model.named_parameters(), .1)]
+        model.optimizers = [SGDOptimizer(model.named_parameters(), 0.1)]
 
         grad = torch.tensor([-1.0, -2.0])
         model.parameters()[0].grad = grad
@@ -207,7 +196,7 @@ class TestModel(unittest.TestCase):
 
     def test_step(self):
         model = get_test_model_nc()
-        learning_rate = .1
+        learning_rate = 0.1
         model.optimizers = [SGDOptimizer(model.named_parameters(), learning_rate)]
 
         grad = torch.tensor([-1.0, -2.0])
@@ -234,9 +223,7 @@ class TestModel(unittest.TestCase):
 
         scores, _, _, _ = model.forward_lp(batch=batch, train=False)
 
-        expected_scores = torch.tensor(
-            [12.5, -3.75, -.25]
-        )
+        expected_scores = torch.tensor([12.5, -3.75, -0.25])
 
         assert torch.all(torch.eq(scores, expected_scores)).item() is True
 

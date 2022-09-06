@@ -8,16 +8,14 @@
 #include "common/datatypes.h"
 #include "configuration/config.h"
 
-
 class Optimizer {
-
-public:
+   public:
     int64_t num_steps_;
 
     torch::OrderedDict<std::string, torch::OrderedDict<std::string, torch::Tensor>> state_dict_;
     torch::OrderedDict<std::string, torch::Tensor> param_dict_;
 
-    virtual ~Optimizer() {};
+    virtual ~Optimizer(){};
 
     void save(torch::serialize::OutputArchive &output_archive);
 
@@ -30,13 +28,10 @@ public:
     virtual void step() = 0;
 
     virtual std::shared_ptr<Optimizer> clone() = 0;
-
 };
 
-
 class SGDOptimizer : public Optimizer {
-
-public:
+   public:
     float learning_rate_;
 
     SGDOptimizer(const SGDOptimizer &optim) {
@@ -52,12 +47,10 @@ public:
     void step() override;
 
     std::shared_ptr<Optimizer> clone() override;
-
 };
 
 class AdagradOptimizer : public Optimizer {
-
-public:
+   public:
     float learning_rate_;
     float eps_;
     float lr_decay_;
@@ -81,12 +74,10 @@ public:
     void step() override;
 
     std::shared_ptr<Optimizer> clone() override;
-
 };
 
 class AdamOptimizer : public Optimizer {
-
-public:
+   public:
     float learning_rate_;
     float eps_;
     float beta_1_;
@@ -114,4 +105,4 @@ public:
     std::shared_ptr<Optimizer> clone() override;
 };
 
-#endif //MARIUS_OPTIM_H
+#endif  // MARIUS_OPTIM_H

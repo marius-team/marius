@@ -54,15 +54,11 @@ void Checkpointer::save(string checkpoint_dir, CheckpointMeta checkpoint_meta) {
 }
 
 std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage>, CheckpointMeta> Checkpointer::load(string checkpoint_dir,
-                                                                                                     std::shared_ptr<MariusConfig> marius_config,
-                                                                                                     bool train) {
+                                                                                                     std::shared_ptr<MariusConfig> marius_config, bool train) {
     CheckpointMeta checkpoint_meta = loadMetadata(checkpoint_dir);
 
     std::vector<torch::Device> devices = devices_from_config(marius_config->storage);
-    std::shared_ptr<Model> model = initModelFromConfig(marius_config->model,
-                                                       devices,
-                                                       marius_config->storage->dataset->num_relations,
-                                                       train);
+    std::shared_ptr<Model> model = initModelFromConfig(marius_config->model, devices, marius_config->storage->dataset->num_relations, train);
     model->load(checkpoint_dir, train);
 
     if (checkpoint_meta.link_prediction) {
@@ -71,10 +67,7 @@ std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage>, CheckpointMeta
         model->learning_task_ = LearningTask::NODE_CLASSIFICATION;
     }
 
-    shared_ptr<GraphModelStorage> storage = initializeStorage(model,
-                                                              marius_config->storage,
-                                                              false,
-                                                              train);
+    shared_ptr<GraphModelStorage> storage = initializeStorage(model, marius_config->storage, false, train);
 
     return std::forward_as_tuple(model, storage, checkpoint_meta);
 }

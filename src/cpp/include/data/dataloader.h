@@ -19,10 +19,8 @@
 #include "storage/graph_storage.h"
 #include "storage/storage.h"
 
-
 class DataLoader {
-  public:
-
+   public:
     bool train_;
     int epochs_processed_;
     int64_t batches_processed_;
@@ -72,18 +70,11 @@ class DataLoader {
 
     LearningTask learning_task_;
 
-    DataLoader(shared_ptr<GraphModelStorage> graph_storage,
-               LearningTask learning_task,
-               shared_ptr<TrainingConfig> training_config,
-               shared_ptr<EvaluationConfig> evaluation_config,
-               shared_ptr<EncoderConfig> encoder_config);
+    DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, shared_ptr<TrainingConfig> training_config,
+               shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config);
 
-    DataLoader(shared_ptr<GraphModelStorage> graph_storage,
-               LearningTask learning_task,
-               int batch_size,
-               shared_ptr<NegativeSampler> negative_sampler = nullptr,
-               shared_ptr<NeighborSampler> neighbor_sampler = nullptr,
-               bool train = false);
+    DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler = nullptr,
+               shared_ptr<NeighborSampler> neighbor_sampler = nullptr, bool train = false);
 
     ~DataLoader();
 
@@ -172,41 +163,29 @@ class DataLoader {
      */
     void loadStorage();
 
-    bool epochComplete() {
-        return (batches_left_ == 0) && all_read_;
-    }
-    
+    bool epochComplete() { return (batches_left_ == 0) && all_read_; }
+
     /**
      * Unload graph from storage.
      * @param write Set to true to write embedding table state to disk
      */
-    void unloadStorage(bool write = false) {
-        graph_storage_->unload(write);
-    }
+    void unloadStorage(bool write = false) { graph_storage_->unload(write); }
 
     /**
      * Gets the number of edges from the graph storage.
      * @return Number of edges in the graph
      */
-    int64_t getNumEdges() {
-        return graph_storage_->getNumEdges();
-    }
+    int64_t getNumEdges() { return graph_storage_->getNumEdges(); }
 
-    int64_t getEpochsProcessed() {
-        return epochs_processed_;
-    }
+    int64_t getEpochsProcessed() { return epochs_processed_; }
 
-    int64_t getBatchesProcessed() {
-        return batches_processed_;
-    }
+    int64_t getBatchesProcessed() { return batches_processed_; }
 
-    bool isTrain() {
-        return train_;
-    }
+    bool isTrain() { return train_; }
 
     /**
      * Sets graph storage, negative sampler, and neighbor sampler to training set.
-    */
+     */
     void setTrainSet() {
         if (single_dataset_) {
             throw MariusRuntimeException("This dataloader only has a single dataset and cannot switch");
@@ -222,7 +201,7 @@ class DataLoader {
 
     /**
      * Sets graph storage, negative sampler, and neighbor sampler to validation set.
-    */
+     */
     void setValidationSet() {
         if (single_dataset_) {
             throw MariusRuntimeException("This dataloader only has a single dataset and cannot switch");
@@ -264,8 +243,4 @@ class DataLoader {
     }
 };
 
-#endif //MARIUS_DATASET_H
-
-
-
-
+#endif  // MARIUS_DATASET_H

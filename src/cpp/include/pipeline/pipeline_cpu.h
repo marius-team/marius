@@ -9,14 +9,14 @@
 #include "queue.h"
 
 class ComputeWorkerCPU : public Worker {
-public:
+   public:
     ComputeWorkerCPU(Pipeline *pipeline) : Worker{pipeline} {}
 
     void run() override;
 };
 
 class EncodeNodesWorkerCPU : public Worker {
-public:
+   public:
     int gpu_id_;
 
     EncodeNodesWorkerCPU(Pipeline *pipeline) : Worker{pipeline} {}
@@ -25,15 +25,11 @@ public:
 };
 
 class PipelineCPU : public Pipeline {
-public:
+   public:
     vector<shared_ptr<Worker>> pool_[CPU_NUM_WORKER_TYPES];
 
-    PipelineCPU(shared_ptr<DataLoader> dataloader,
-                shared_ptr<Model> model,
-                bool train,
-                shared_ptr<ProgressReporter> reporter,
-                shared_ptr<PipelineConfig> pipeline_config,
-                bool encode_only = false);
+    PipelineCPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, bool train, shared_ptr<ProgressReporter> reporter,
+                shared_ptr<PipelineConfig> pipeline_config, bool encode_only = false);
 
     ~PipelineCPU();
 
@@ -50,4 +46,4 @@ public:
     void setQueueExpectingData(bool expecting_data) override;
 };
 
-#endif //MARIUS_PIPELINE_CPU_H
+#endif  // MARIUS_PIPELINE_CPU_H

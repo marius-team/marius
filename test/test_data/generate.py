@@ -1,20 +1,12 @@
-import argparse
-from pathlib import Path
-import pandas as pd
-import numpy as np
-import itertools
 import os
+from pathlib import Path
 
-import torch
-
-import sys
-
+import numpy as np
+import pandas as pd
 from omegaconf import OmegaConf
-from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter, split_edges
-from marius.tools.configuration.constants import PathConstants
 
-from test.python.constants import TESTING_DATA_DIR
-from test.test_configs.generate_test_configs import generate_configs_for_dataset
+from marius.tools.configuration.constants import PathConstants
+from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter, split_edges
 
 
 def get_random_graph(num_nodes, num_edges, num_rels=1):
@@ -49,13 +41,7 @@ def apply_mapping(values, node_mapping):
     return random_map[values]
 
 
-def remap_nc(output_dir,
-             train_nodes,
-             labels,
-             num_nodes,
-             valid_nodes=None,
-             test_nodes=None,
-             features=None):
+def remap_nc(output_dir, train_nodes, labels, num_nodes, valid_nodes=None, test_nodes=None, features=None):
     node_mapping = np.genfromtxt(output_dir / Path(PathConstants.node_mapping_path), delimiter=",")
 
     train_nodes = apply_mapping(train_nodes, node_mapping)
@@ -77,25 +63,26 @@ def remap_nc(output_dir,
     return train_nodes, labels, valid_nodes, test_nodes, features
 
 
-def remap_lp(output_dir,
-             features=None):
+def remap_lp(output_dir, features=None):
     node_mapping = np.genfromtxt(output_dir / Path(PathConstants.node_mapping_path), delimiter=",")
     features = shuffle_with_map(features, node_mapping)
 
     return features
 
 
-def generate_random_dataset_nc(output_dir,
-                               num_nodes,
-                               num_edges,
-                               num_rels=1,
-                               splits=None,
-                               num_partitions=1,
-                               partitioned_eval=False,
-                               sequential_train_nodes=False,
-                               remap_ids=True,
-                               feature_dim=-1,
-                               num_classes=10):
+def generate_random_dataset_nc(
+    output_dir,
+    num_nodes,
+    num_edges,
+    num_rels=1,
+    splits=None,
+    num_partitions=1,
+    partitioned_eval=False,
+    sequential_train_nodes=False,
+    remap_ids=True,
+    feature_dim=-1,
+    num_classes=10,
+):
     edges = get_random_graph(num_nodes, num_edges, num_rels)
     edges_df = pd.DataFrame(data=edges)
 
@@ -115,16 +102,18 @@ def generate_random_dataset_nc(output_dir,
     if splits is not None:
         train_nodes, valid_nodes, test_nodes = split_edges(all_nodes, splits)
 
-    converter = TorchEdgeListConverter(output_dir,
-                                       train_edges=Path(raw_edges_filename),
-                                       delim=",",
-                                       remap_ids=remap_ids,
-                                       num_partitions=num_partitions,
-                                       columns=columns,
-                                       partitioned_evaluation=partitioned_eval,
-                                       sequential_train_nodes=sequential_train_nodes,
-                                       known_node_ids=[train_nodes, valid_nodes, test_nodes],
-                                       format="CSV")
+    converter = TorchEdgeListConverter(
+        output_dir,
+        train_edges=Path(raw_edges_filename),
+        delim=",",
+        remap_ids=remap_ids,
+        num_partitions=num_partitions,
+        columns=columns,
+        partitioned_evaluation=partitioned_eval,
+        sequential_train_nodes=sequential_train_nodes,
+        known_node_ids=[train_nodes, valid_nodes, test_nodes],
+        format="CSV",
+    )
 
     dataset_stats = converter.convert()
 
@@ -134,13 +123,9 @@ def generate_random_dataset_nc(output_dir,
 
     labels = generate_labels(num_nodes, num_classes)
 
-    train_nodes, labels, valid_nodes, test_nodes, features = remap_nc(output_dir,
-                                                                      train_nodes,
-                                                                      labels,
-                                                                      num_nodes,
-                                                                      valid_nodes,
-                                                                      test_nodes,
-                                                                      features)
+    train_nodes, labels, valid_nodes, test_nodes, features = remap_nc(
+        output_dir, train_nodes, labels, num_nodes, valid_nodes, test_nodes, features
+    )
 
     if features is not None:
         node_features_file = output_dir / Path(PathConstants.node_features_path)
@@ -193,16 +178,18 @@ def generate_random_dataset_nc(output_dir,
         f.writelines(yaml_file)
 
 
-def generate_random_dataset_lp(output_dir,
-                               num_nodes,
-                               num_edges,
-                               num_rels=1,
-                               splits=None,
-                               num_partitions=1,
-                               partitioned_eval=False,
-                               sequential_train_nodes=False,
-                               remap_ids=True,
-                               feature_dim=-1):
+def generate_random_dataset_lp(
+    output_dir,
+    num_nodes,
+    num_edges,
+    num_rels=1,
+    splits=None,
+    num_partitions=1,
+    partitioned_eval=False,
+    sequential_train_nodes=False,
+    remap_ids=True,
+    feature_dim=-1,
+):
     edges = get_random_graph(num_nodes, num_edges, num_rels)
     edges_df = pd.DataFrame(data=edges)
 
@@ -215,16 +202,18 @@ def generate_random_dataset_lp(output_dir,
 
     edges_df.to_csv(raw_edges_filename, ",", header=False, index=False)
 
-    converter = TorchEdgeListConverter(output_dir,
-                                       train_edges=raw_edges_filename,
-                                       delim=",",
-                                       splits=splits,
-                                       num_partitions=num_partitions,
-                                       remap_ids=remap_ids,
-                                       columns=columns,
-                                       partitioned_evaluation=partitioned_eval,
-                                       sequential_train_nodes=sequential_train_nodes,
-                                       format="CSV")
+    converter = TorchEdgeListConverter(
+        output_dir,
+        train_edges=raw_edges_filename,
+        delim=",",
+        splits=splits,
+        num_partitions=num_partitions,
+        remap_ids=remap_ids,
+        columns=columns,
+        partitioned_evaluation=partitioned_eval,
+        sequential_train_nodes=sequential_train_nodes,
+        format="CSV",
+    )
 
     dataset_stats = converter.convert()
 
@@ -244,23 +233,48 @@ def generate_random_dataset_lp(output_dir,
             f.writelines(yaml_file)
 
 
-def generate_random_dataset(output_dir,
-                            num_nodes,
-                            num_edges,
-                            num_rels=1,
-                            splits=None,
-                            num_partitions=1,
-                            partitioned_eval=False,
-                            sequential_train_nodes=False,
-                            remap_ids=True,
-                            feature_dim=-1,
-                            num_classes=10,
-                            task="lp"):
+def generate_random_dataset(
+    output_dir,
+    num_nodes,
+    num_edges,
+    num_rels=1,
+    splits=None,
+    num_partitions=1,
+    partitioned_eval=False,
+    sequential_train_nodes=False,
+    remap_ids=True,
+    feature_dim=-1,
+    num_classes=10,
+    task="lp",
+):
     os.makedirs(output_dir, exist_ok=True)
 
     if task == "lp":
-        generate_random_dataset_lp(output_dir, num_nodes, num_edges, num_rels, splits, num_partitions, partitioned_eval, sequential_train_nodes, remap_ids, feature_dim)
+        generate_random_dataset_lp(
+            output_dir,
+            num_nodes,
+            num_edges,
+            num_rels,
+            splits,
+            num_partitions,
+            partitioned_eval,
+            sequential_train_nodes,
+            remap_ids,
+            feature_dim,
+        )
     elif task == "nc":
-        generate_random_dataset_nc(output_dir, num_nodes, num_edges, num_rels, splits, num_partitions, partitioned_eval, sequential_train_nodes, remap_ids, feature_dim, num_classes)
+        generate_random_dataset_nc(
+            output_dir,
+            num_nodes,
+            num_edges,
+            num_rels,
+            splits,
+            num_partitions,
+            partitioned_eval,
+            sequential_train_nodes,
+            remap_ids,
+            feature_dim,
+            num_classes,
+        )
     else:
         raise RuntimeError("Unsupported dataset type for generator.")

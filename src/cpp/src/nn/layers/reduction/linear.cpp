@@ -3,6 +3,7 @@
 //
 
 #include "nn/layers/reduction/linear.h"
+
 #include "nn/initialization.h"
 
 LinearReduction::LinearReduction(shared_ptr<LayerConfig> layer_config, torch::Device device) {
@@ -20,9 +21,7 @@ torch::Tensor LinearReduction::forward(std::vector<torch::Tensor> inputs) {
 void LinearReduction::reset() {
     auto tensor_options = torch::TensorOptions().dtype(torch::kFloat32).device(device_);
 
-    torch::Tensor weight_mat = initialize_tensor(config_->init,
-                                                 {config_->output_dim, config_->input_dim},
-                                                 tensor_options).set_requires_grad(true);
+    torch::Tensor weight_mat = initialize_tensor(config_->init, {config_->output_dim, config_->input_dim}, tensor_options).set_requires_grad(true);
 
     weight_matrix_ = register_parameter("weight_matrix", weight_mat);
 

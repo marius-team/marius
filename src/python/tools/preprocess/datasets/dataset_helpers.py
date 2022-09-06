@@ -2,7 +2,6 @@ import numpy as np
 
 
 def remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels):
-
     num_nodes = node_mapping.shape[0]
 
     random_map = node_mapping[:, 1]
@@ -16,7 +15,7 @@ def remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, la
     features = features[random_map_argsort]
 
     if labels.shape[0] != num_nodes:
-        labels = np.concatenate((labels, -np.ones([num_nodes-labels.shape[0]], dtype=np.int32)))
+        labels = np.concatenate((labels, -np.ones([num_nodes - labels.shape[0]], dtype=np.int32)))
 
     labels = labels[random_map_argsort]
 

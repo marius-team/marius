@@ -1,14 +1,14 @@
-import unittest
-import shutil
-from pathlib import Path
-import pytest
 import os
-import marius as m
-import torch
-
-from test.python.constants import TMP_TEST_DIR, TESTING_DATA_DIR
-from test.test_data.generate import generate_random_dataset
+import shutil
+import unittest
+from pathlib import Path
+from test.python.constants import TMP_TEST_DIR
 from test.test_configs.generate_test_configs import generate_configs_for_dataset
+from test.test_data.generate import generate_random_dataset
+
+import pytest
+
+import marius as m
 
 
 def run_configs(directory, partitioned_eval=False):
@@ -45,19 +45,23 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "no_valid"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                splits=[.9, .1],
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            splits=[0.9, 0.1],
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["in_memory"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["in_memory"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -68,18 +72,22 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "only_train"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["in_memory"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["in_memory"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -90,19 +98,23 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "no_valid_no_relations"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                splits=[.9, .1],
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            splits=[0.9, 0.1],
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["in_memory"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["in_memory"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -113,18 +125,22 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "only_train_no_relations"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["in_memory"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["in_memory"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -135,21 +151,25 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "no_valid_buffer"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                splits=[.9, .1],
-                                num_partitions=8,
-                                partitioned_eval=True,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            splits=[0.9, 0.1],
+            num_partitions=8,
+            partitioned_eval=True,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
@@ -160,19 +180,23 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "only_train_buffer"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                num_partitions=8,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            num_partitions=8,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -183,21 +207,25 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "no_valid_buffer_no_relations"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                splits=[.9, .1],
-                                num_partitions=8,
-                                partitioned_eval=True,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            splits=[0.9, 0.1],
+            num_partitions=8,
+            partitioned_eval=True,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
@@ -208,18 +236,22 @@ class TestLPStorage(unittest.TestCase):
         num_edges = 1000
 
         name = "only_train_buffer_no_relations"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                num_partitions=8,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            num_partitions=8,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))

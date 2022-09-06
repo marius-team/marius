@@ -4,7 +4,9 @@ Comparator
 .. autoclass:: marius.nn.decoders.edge.Comparator
     :members:
     :undoc-members:
-    :special-members: __init__
+    :exclude-members: __init__
+
+    .. method:: __init__()
 
 .. autoclass:: marius.nn.decoders.edge.L2Compare
     :members:

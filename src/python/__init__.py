@@ -6,8 +6,7 @@ only_python = os.environ.get("MARIUS_NO_BINDINGS", None)
 
 if not only_python:
     try:
-
-        import torch
+        import torch  # noqa F401
 
         # load main modules
         from . import _config as config
@@ -20,11 +19,11 @@ if not only_python:
 
         # load submodules
         from ._data import samplers as samplers
-        from ._nn import encoders as encoders
         from ._nn import decoders as decoders
+        from ._nn import encoders as encoders
+        from ._nn import layers as layers
         from ._nn.decoders import edge as edge
         from ._nn.decoders import node as node
-        from ._nn import layers as layers
 
         sys.modules[f"{__name__}.config"] = config
         sys.modules[f"{__name__}.data"] = data

@@ -23,9 +23,9 @@
 #define CPU_NUM_WORKER_TYPES 3
 #define GPU_NUM_WORKER_TYPES 5
 
-#define WAIT_TIME 100000 // 100 micro seconds
+#define WAIT_TIME 100000  // 100 micro seconds
 #define NANOSECOND 1
 #define MICROSECOND 1000
 #define MILLISECOND 1000000
 
-#endif //MARIUS_PIPELINE_CONSTANTS_H
+#endif  // MARIUS_PIPELINE_CONSTANTS_H

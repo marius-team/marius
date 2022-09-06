@@ -16,7 +16,7 @@
 class Pipeline;
 
 class Worker {
-protected:
+   protected:
     Pipeline *pipeline_;
     struct timespec sleep_time_;
     std::atomic<bool> paused_;
@@ -24,22 +24,16 @@ protected:
 
     std::thread thread_;
 
-public:
+   public:
     explicit Worker(Pipeline *pipeline);
 
     virtual void run() = 0;
 
-    void spawn() {
-        thread_ = std::thread(&Worker::run, this);
-    }
+    void spawn() { thread_ = std::thread(&Worker::run, this); }
 
-    void start() {
-        paused_ = false;
-    }
+    void start() { paused_ = false; }
 
-    void pause() {
-        paused_ = true;
-    }
+    void pause() { paused_ = true; }
 
     void stop() {
         paused_ = true;
@@ -52,28 +46,28 @@ public:
 };
 
 class LoadBatchWorker : public Worker {
-public:
+   public:
     LoadBatchWorker(Pipeline *pipeline) : Worker{pipeline} {};
 
     void run() override;
 };
 
 class UpdateBatchWorker : public Worker {
-public:
+   public:
     UpdateBatchWorker(Pipeline *pipeline) : Worker{pipeline} {};
 
     void run() override;
 };
 
 class WriteNodesWorker : public Worker {
-public:
+   public:
     WriteNodesWorker(Pipeline *pipeline) : Worker{pipeline} {}
 
     void run() override;
 };
 
 class Pipeline {
-  public:
+   public:
     shared_ptr<DataLoader> dataloader_;
     shared_ptr<Model> model_;
     shared_ptr<ProgressReporter> reporter_;
@@ -124,11 +118,9 @@ class Pipeline {
 
     virtual void setQueueExpectingData(bool expecting_data) = 0;
 
-    virtual void reportQueueStatus() {};
+    virtual void reportQueueStatus(){};
 
-    virtual void reportThreadStatus() {};
+    virtual void reportThreadStatus(){};
 };
 
-#endif //MARIUS_PIPELINE_H
-
-
+#endif  // MARIUS_PIPELINE_H

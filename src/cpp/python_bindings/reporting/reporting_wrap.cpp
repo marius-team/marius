@@ -1,43 +1,37 @@
 #include "common/pybind_headers.h"
-
 #include "reporting/reporting.h"
 
 class PyReporter : Reporter {
-  public:
+   public:
     using Reporter::Reporter;
-    void report() override {
-        PYBIND11_OVERRIDE_PURE_NAME(void, Reporter, "report", report); }
+    void report() override { PYBIND11_OVERRIDE_PURE_NAME(void, Reporter, "report", report); }
 };
 
 class PyMetric : Metric {
-public:
+   public:
     using Metric::Metric;
 };
 
 void init_reporting(py::module &m) {
-    
-    py::class_<Metric, PyMetric, std::shared_ptr<Metric>>(m, "Metric")
-            .def_readwrite("name", &Metric::name_)
-            .def_readwrite("unit", &Metric::unit_);
+    py::class_<Metric, PyMetric, std::shared_ptr<Metric>>(m, "Metric").def_readwrite("name", &Metric::name_).def_readwrite("unit", &Metric::unit_);
 
     py::class_<RankingMetric, Metric, std::shared_ptr<RankingMetric>>(m, "RankingMetric")
-            .def("compute_metric", &RankingMetric::computeMetric, py::arg("ranks"));
+        .def("compute_metric", &RankingMetric::computeMetric, py::arg("ranks"));
     py::class_<HitskMetric, RankingMetric, std::shared_ptr<HitskMetric>>(m, "Hitsk")
-            .def(py::init<int>(), py::arg("k"))
-            .def("compute_metric", &HitskMetric::computeMetric, py::arg("ranks"));
+        .def(py::init<int>(), py::arg("k"))
+        .def("compute_metric", &HitskMetric::computeMetric, py::arg("ranks"));
     py::class_<MeanRankMetric, RankingMetric, std::shared_ptr<MeanRankMetric>>(m, "MeanRank")
-            .def(py::init<>())
-            .def("compute_metric", &MeanRankMetric::computeMetric, py::arg("ranks"));
+        .def(py::init<>())
+        .def("compute_metric", &MeanRankMetric::computeMetric, py::arg("ranks"));
     py::class_<MeanReciprocalRankMetric, RankingMetric, std::shared_ptr<MeanReciprocalRankMetric>>(m, "MeanReciprocalRank")
-            .def(py::init<>())
-            .def("compute_metric", &MeanReciprocalRankMetric::computeMetric, py::arg("ranks"));
+        .def(py::init<>())
+        .def("compute_metric", &MeanReciprocalRankMetric::computeMetric, py::arg("ranks"));
 
     py::class_<ClassificationMetric, Metric, std::shared_ptr<ClassificationMetric>>(m, "ClassificationMetric")
-            .def("compute_metric", &ClassificationMetric::computeMetric, py::arg("y_true"), py::arg("y_pred"));
+        .def("compute_metric", &ClassificationMetric::computeMetric, py::arg("y_true"), py::arg("y_pred"));
     py::class_<CategoricalAccuracyMetric, ClassificationMetric, std::shared_ptr<CategoricalAccuracyMetric>>(m, "CategoricalAccuracy")
-            .def(py::init<>())
-            .def("compute_metric", &CategoricalAccuracyMetric::computeMetric, py::arg("y_true"), py::arg("y_pred"));
-
+        .def(py::init<>())
+        .def("compute_metric", &CategoricalAccuracyMetric::computeMetric, py::arg("y_true"), py::arg("y_pred"));
 
     py::class_<Reporter, PyReporter, std::shared_ptr<Reporter>>(m, "Reporter")
         .def_readwrite("metrics", &Reporter::metrics_)
