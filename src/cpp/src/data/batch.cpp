@@ -16,12 +16,9 @@ Batch::Batch(bool train) : device_transfer_(0), host_transfer_(0), timer_(false)
     clear();
 }
 
-Batch::~Batch() {
-    clear();
-}
+Batch::~Batch() { clear(); }
 
 void Batch::to(torch::Device device) {
-
     device_id_ = device.index();
 
     if (device.is_cuda()) {
@@ -93,7 +90,6 @@ void Batch::to(torch::Device device) {
 }
 
 void Batch::accumulateGradients(float learning_rate) {
-
     if (node_embeddings_.defined()) {
         node_gradients_ = node_embeddings_.grad();
         SPDLOG_TRACE("Batch: {} accumulated node gradients", batch_id_);
@@ -113,8 +109,6 @@ void Batch::accumulateGradients(float learning_rate) {
 }
 
 void Batch::embeddingsToHost() {
-
-
     if (node_gradients_.defined() && node_gradients_.device().is_cuda()) {
         auto grad_opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU).pinned_memory(true);
         Gradients temp_grads = torch::empty(node_gradients_.sizes(), grad_opts);

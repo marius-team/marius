@@ -8,7 +8,7 @@
 #include "gnn_layer.h"
 
 class GCNLayer : public GNNLayer {
-public:
+   public:
     shared_ptr<GNNLayerOptions> options_;
     bool use_incoming_;
     bool use_outgoing_;
@@ -21,4 +21,4 @@ public:
     torch::Tensor forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train = true) override;
 };
 
-#endif //MARIUS_GCN_LAYER_H
+#endif  // MARIUS_GCN_LAYER_H

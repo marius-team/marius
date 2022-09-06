@@ -1,0 +1,25 @@
+#########################
+# Flake8 Configuration  #
+# (.flake8)             #
+#########################
+[flake8]
+ignore =
+    # first argument of a classmethod should be named 'cls'
+    N804
+    # line break before binary operator
+    W503
+    # whitespace before ':'
+    E203
+exclude =
+    .tox
+    .git,
+    __pycache__,
+    build,
+    *.pyc,
+    *third_party*,
+    scripts
+max-line-length = 120
+max-complexity = 25
+import-order-style = pycharm
+application-import-names =
+    marius

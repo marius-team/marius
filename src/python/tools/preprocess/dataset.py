@@ -1,14 +1,16 @@
-from pathlib import Path
+import os
 from abc import ABC, abstractmethod
+from pathlib import Path
+
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
-import os
 
 
 class Dataset(ABC):
     """
     Abstract dataset class
     """
+
     edge_list_file: Path
     edge_features_file: Path
 
@@ -27,10 +29,7 @@ class Dataset(ABC):
 
     spark: bool
 
-    def __init__(self,
-                 output_directory,
-                 spark=False):
-
+    def __init__(self, output_directory, spark=False):
         self.output_directory = output_directory
         self.spark = spark
         os.makedirs(self.output_directory / Path(PathConstants.edges_directory), exist_ok=True)
@@ -52,11 +51,7 @@ class Dataset(ABC):
 
 
 class NodeClassificationDataset(Dataset):
-
-    def __init__(self,
-                 output_directory, 
-                 spark):
-
+    def __init__(self, output_directory, spark):
         super().__init__(output_directory, spark)
 
         self.train_nodes_file = output_directory / Path(PathConstants.train_nodes_path)
@@ -67,11 +62,7 @@ class NodeClassificationDataset(Dataset):
 
 
 class LinkPredictionDataset(Dataset):
-
-    def __init__(self,
-                 output_directory,
-                 spark):
-
+    def __init__(self, output_directory, spark):
         super().__init__(output_directory, spark)
 
         self.train_edges_file = output_directory / Path(PathConstants.train_edges_path)

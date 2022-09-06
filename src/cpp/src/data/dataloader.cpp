@@ -7,13 +7,8 @@
 #include "common/util.h"
 #include "data/ordering.h"
 
-
-DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage,
-                       LearningTask learning_task,
-                       shared_ptr<TrainingConfig> training_config,
-                       shared_ptr<EvaluationConfig> evaluation_config,
-                       shared_ptr<EncoderConfig> encoder_config) {
-
+DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, shared_ptr<TrainingConfig> training_config,
+                       shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config) {
     current_edge_ = 0;
     train_ = true;
     epochs_processed_ = 0;
@@ -34,18 +29,15 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage,
     edge_sampler_ = std::make_shared<RandomEdgeSampler>(graph_storage_);
 
     if (learning_task_ == LearningTask::LINK_PREDICTION) {
+        training_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(
+            training_config_->negative_sampling->num_chunks, training_config_->negative_sampling->negatives_per_positive,
+            training_config_->negative_sampling->degree_fraction, training_config_->negative_sampling->filtered,
+            training_config_->negative_sampling->local_filter_mode);
 
-        training_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(training_config_->negative_sampling->num_chunks,
-                                                                                  training_config_->negative_sampling->negatives_per_positive,
-                                                                                  training_config_->negative_sampling->degree_fraction,
-                                                                                  training_config_->negative_sampling->filtered,
-                                                                                  training_config_->negative_sampling->local_filter_mode);
-
-        evaluation_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(evaluation_config_->negative_sampling->num_chunks,
-                                                                                    evaluation_config_->negative_sampling->negatives_per_positive,
-                                                                                    evaluation_config_->negative_sampling->degree_fraction,
-                                                                                    evaluation_config_->negative_sampling->filtered,
-                                                                                    evaluation_config_->negative_sampling->local_filter_mode);
+        evaluation_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(
+            evaluation_config_->negative_sampling->num_chunks, evaluation_config_->negative_sampling->negatives_per_positive,
+            evaluation_config_->negative_sampling->degree_fraction, evaluation_config_->negative_sampling->filtered,
+            evaluation_config_->negative_sampling->local_filter_mode);
     } else {
         training_negative_sampler_ = nullptr;
         evaluation_negative_sampler_ = nullptr;
@@ -71,13 +63,8 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage,
     }
 }
 
-DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage,
-                       LearningTask learning_task,
-                       int batch_size,
-                       shared_ptr<NegativeSampler> negative_sampler,
-                       shared_ptr<NeighborSampler> neighbor_sampler,
-                       bool train) {
-
+DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler,
+                       shared_ptr<NeighborSampler> neighbor_sampler, bool train) {
     current_edge_ = 0;
     train_ = train;
     epochs_processed_ = 0;
@@ -148,7 +135,7 @@ void DataLoader::setActiveEdges() {
         torch::Tensor in_memory_id_indices = std::get<1>(tup);
         auto in_memory_id_indices_accessor = in_memory_id_indices.accessor<int64_t, 1>();
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < in_memory_edge_bucket_idx.size(0); i++) {
             int64_t edge_bucket_id = edge_bucket_ids_accessor[i];
             int64_t idx = torch::searchsorted(sorted_in_memory_ids, edge_bucket_id).item<int64_t>();
@@ -168,22 +155,20 @@ void DataLoader::setActiveEdges() {
         active_edges = torch::empty({total_size, graph_storage_->storage_ptrs_.edges->dim1_size_},
                                     graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.options());
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < in_memory_edge_bucket_idx.size(0); i++) {
             int64_t idx = in_memory_edge_bucket_idx_accessor[i];
             int64_t edge_bucket_size = edge_bucket_sizes_accessor[i];
             int64_t edge_bucket_start = all_edge_bucket_starts_accessor[idx];
             int64_t local_offset = local_offsets_accessor[i];
 
-            active_edges.narrow(0, local_offset, edge_bucket_size) = graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.narrow(0,
-                                                                                                                                                 edge_bucket_start,
-                                                                                                                                                 edge_bucket_size);
+            active_edges.narrow(0, local_offset, edge_bucket_size) =
+                graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.narrow(0, edge_bucket_start, edge_bucket_size);
         }
 
     } else {
         active_edges = graph_storage_->storage_ptrs_.edges->range(0, graph_storage_->storage_ptrs_.edges->getDim0());
     }
-
 
     auto opts = torch::TensorOptions().dtype(torch::kInt64).device(active_edges.device());
     active_edges = (active_edges.index_select(0, torch::randperm(active_edges.size(0), opts)));
@@ -253,11 +238,9 @@ void DataLoader::initializeBatches(bool prepare_encode) {
 
     batches_left_ = batches_.size();
     batch_iterator_ = batches_.begin();
-
 }
 
 void DataLoader::setBufferOrdering() {
-
     shared_ptr<PartitionBufferOptions> options;
 
     if (instance_of<Storage, PartitionBufferStorage>(graph_storage_->storage_ptrs_.node_embeddings)) {
@@ -268,13 +251,8 @@ void DataLoader::setBufferOrdering() {
 
     if (learning_task_ == LearningTask::LINK_PREDICTION) {
         if (graph_storage_->useInMemorySubGraph()) {
-
-            auto tup = getEdgeBucketOrdering(options->edge_bucket_ordering,
-                                             options->num_partitions,
-                                             options->buffer_capacity,
-                                             options->fine_to_coarse_ratio,
-                                             options->num_cache_partitions,
-                                             options->randomly_assign_edge_buckets);
+            auto tup = getEdgeBucketOrdering(options->edge_bucket_ordering, options->num_partitions, options->buffer_capacity, options->fine_to_coarse_ratio,
+                                             options->num_cache_partitions, options->randomly_assign_edge_buckets);
             buffer_states_ = std::get<0>(tup);
             edge_buckets_per_buffer_ = std::get<1>(tup);
 
@@ -286,11 +264,9 @@ void DataLoader::setBufferOrdering() {
         if (graph_storage_->useInMemorySubGraph()) {
             graph_storage_->storage_ptrs_.train_nodes->load();
             int64_t num_train_nodes = graph_storage_->storage_ptrs_.nodes->getDim0();
-            auto tup = getNodePartitionOrdering(options->node_partition_ordering,
-                                                graph_storage_->storage_ptrs_.train_nodes->range(0, num_train_nodes).flatten(0, 1),
-                                                graph_storage_->getNumNodes(),
-                                                options->num_partitions,
-                                                options->buffer_capacity, options->fine_to_coarse_ratio, options->num_cache_partitions);
+            auto tup = getNodePartitionOrdering(
+                options->node_partition_ordering, graph_storage_->storage_ptrs_.train_nodes->range(0, num_train_nodes).flatten(0, 1),
+                graph_storage_->getNumNodes(), options->num_partitions, options->buffer_capacity, options->fine_to_coarse_ratio, options->num_cache_partitions);
             buffer_states_ = std::get<0>(tup);
             node_ids_per_buffer_ = std::get<1>(tup);
 
@@ -301,12 +277,9 @@ void DataLoader::setBufferOrdering() {
     }
 }
 
-void DataLoader::clearBatches() {
-    batches_ = std::vector<shared_ptr<Batch>>();
-}
+void DataLoader::clearBatches() { batches_ = std::vector<shared_ptr<Batch>>(); }
 
 shared_ptr<Batch> DataLoader::getNextBatch() {
-
     std::unique_lock batch_lock(*batch_lock_);
     batch_cv_->wait(batch_lock, [this] { return !waiting_for_batches_; });
 
@@ -329,7 +302,6 @@ shared_ptr<Batch> DataLoader::getNextBatch() {
         batch = nullptr;
         if (graph_storage_->useInMemorySubGraph()) {
             if (graph_storage_->hasSwap()) {
-
                 // wait for all batches to finish before swapping
                 waiting_for_batches_ = true;
                 batch_cv_->wait(batch_lock, [this] { return batches_left_ == 0; });
@@ -379,7 +351,6 @@ void DataLoader::finishedBatch() {
 }
 
 shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool perform_map) {
-
     shared_ptr<Batch> batch = getNextBatch();
     if (batch == nullptr) {
         return batch;
@@ -409,7 +380,6 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 }
 
 void DataLoader::edgeSample(shared_ptr<Batch> batch) {
-
     if (!batch->edges_.defined()) {
         batch->edges_ = edge_sampler_->getEdges(batch);
     }
@@ -436,7 +406,6 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch) {
     std::vector<torch::Tensor> mapped_tensors;
 
     if (neighbor_sampler_ != nullptr) {
-
         // get unique nodes in edges and negatives
         batch->root_node_indices_ = std::get<0>(torch::_unique(torch::cat(all_ids)));
 
@@ -464,7 +433,6 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch) {
             dst_neg_mapping = map_to_unsorted.index_select(0, mapped_tensors[3]).reshape(batch->dst_neg_indices_.sizes()) - num_nbrs_sampled;
         }
     } else {
-
         // map edges and negatives to their corresponding index in unique_node_indices_
         auto tup = map_tensors(all_ids);
         batch->unique_node_indices_ = std::get<0>(tup);
@@ -494,9 +462,7 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch) {
     batch->dst_neg_indices_mapping_ = dst_neg_mapping;
 }
 
-
 void DataLoader::nodeSample(shared_ptr<Batch> batch) {
-
     if (batch->task_ == LearningTask::ENCODE) {
         torch::TensorOptions node_opts = torch::TensorOptions().dtype(torch::kInt64).device(graph_storage_->storage_ptrs_.edges->device_);
         batch->root_node_indices_ = torch::arange(batch->start_idx_, batch->start_idx_ + batch->batch_size_, node_opts);
@@ -521,12 +487,13 @@ void DataLoader::nodeSample(shared_ptr<Batch> batch) {
 }
 
 void DataLoader::negativeSample(shared_ptr<Batch> batch) {
-    std::tie(batch->src_neg_indices_, batch->src_neg_filter_) = negative_sampler_->getNegatives(graph_storage_->current_subgraph_state_->in_memory_subgraph_, batch->edges_, true);
-    std::tie(batch->dst_neg_indices_, batch->dst_neg_filter_) = negative_sampler_->getNegatives(graph_storage_->current_subgraph_state_->in_memory_subgraph_, batch->edges_, false);
+    std::tie(batch->src_neg_indices_, batch->src_neg_filter_) =
+        negative_sampler_->getNegatives(graph_storage_->current_subgraph_state_->in_memory_subgraph_, batch->edges_, true);
+    std::tie(batch->dst_neg_indices_, batch->dst_neg_filter_) =
+        negative_sampler_->getNegatives(graph_storage_->current_subgraph_state_->in_memory_subgraph_, batch->edges_, false);
 }
 
 void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
-
     if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
         if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
             batch->node_embeddings_ = graph_storage_->getNodeEmbeddings(batch->unique_node_indices_);
@@ -562,7 +529,6 @@ void DataLoader::loadGPUParameters(shared_ptr<Batch> batch) {
 
     if (graph_storage_->storage_ptrs_.node_features != nullptr) {
         if (graph_storage_->storage_ptrs_.node_features->device_ == torch::kCUDA) {
-
             if (only_root_features_) {
                 batch->node_features_ = graph_storage_->getNodeFeatures(batch->root_node_indices_);
             } else {

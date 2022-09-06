@@ -5,9 +5,8 @@
 #ifndef MARIUS_CONFIG_H
 #define MARIUS_CONFIG_H
 
-#include "common/pybind_headers.h"
-
 #include "common/datatypes.h"
+#include "common/pybind_headers.h"
 #include "constants.h"
 #include "options.h"
 
@@ -31,8 +30,8 @@ struct InitConfig {
     InitDistribution type;
     shared_ptr<InitOptions> options = nullptr;
 
-    InitConfig() {};
-    InitConfig(InitDistribution type, shared_ptr<InitOptions> options) : type(type), options(options) {};
+    InitConfig(){};
+    InitConfig(InitDistribution type, shared_ptr<InitOptions> options) : type(type), options(options){};
 };
 
 struct LossConfig {
@@ -210,4 +209,4 @@ PYBIND11_EXPORT shared_ptr<MariusConfig> initMariusConfig(pyobj python_config);
 
 shared_ptr<MariusConfig> loadConfig(string config_path, bool save = false);
 
-#endif //MARIUS_CONFIG_H
+#endif  // MARIUS_CONFIG_H

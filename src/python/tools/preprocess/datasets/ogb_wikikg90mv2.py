@@ -1,14 +1,24 @@
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+from omegaconf import OmegaConf
+
+from marius.tools.configuration.constants import PathConstants
+from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
+from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
-from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
-from marius.tools.configuration.constants import PathConstants
-from omegaconf import OmegaConf
 
 
 class OGBWikiKG90Mv2(LinkPredictionDataset):
+    """
+    Open Graph Benchmark: wikikg2
+
+    The ogbl-wikikg2 dataset is a Knowledge Graph (KG) extracted from the Wikidata knowledge base.
+    It contains a set of triplet edges (head, relation, tail),
+    capturing the different types of relations between entities in the world, e.g.,
+    (Canada, citizen, Hinton). We retrieve all the relational statements in Wikidata and filter out rare entities.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
         super().__init__(output_directory, spark)
@@ -17,7 +27,6 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
         self.dataset_url = "https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/wikikg90m-v2.zip"
 
     def download(self, overwrite=False):
-
         self.input_train_edges_file = self.output_directory / Path("train_hrt.npy")
         self.input_valid_edges_sr_file = self.output_directory / Path("val_hr.npy")
         self.input_valid_edges_d_file = self.output_directory / Path("val_t.npy")
@@ -42,8 +51,9 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
             for file in (self.output_directory / Path("wikikg90m-v2/processed/")).iterdir():
                 file.rename(self.output_directory / Path(file.name))
 
-    def preprocess(self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False):
-
+    def preprocess(
+        self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False
+    ):
         train_edges = np.load(self.input_train_edges_file).astype(np.int32)
         valid_edges_sr = np.load(self.input_valid_edges_sr_file)
         valid_edges_d = np.load(self.input_valid_edges_d_file)
@@ -61,7 +71,7 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
             remap_ids=remap_ids,
             sequential_train_nodes=sequential_train_nodes,
             format="numpy",
-            partitioned_evaluation=partitioned_eval
+            partitioned_evaluation=partitioned_eval,
         )
 
         dataset_stats = converter.convert()
@@ -75,7 +85,7 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
             random_node_map_argsort = np.argsort(random_node_map)
 
             with open(self.node_features_file, "wb") as f:
-                chunk_size = 1E7
+                chunk_size = 1e7
                 num_chunks = np.ceil(node_mapping.shape[0] / chunk_size)
 
                 offset = 0
@@ -83,9 +93,11 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
                 for chunk_id in range(num_chunks):
                     if offset + chunk_size >= node_mapping.shape[0]:
                         chunk_size = node_mapping.shape[0] - offset
-                    f.write(bytes(node_features[random_node_map_argsort[offset:offset+chunk_size]]))
+                    f.write(bytes(node_features[random_node_map_argsort[offset : offset + chunk_size]]))
 
-            rel_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.relation_mapping_path), delimiter=",")
+            rel_mapping = np.genfromtxt(
+                self.output_directory / Path(PathConstants.relation_mapping_path), delimiter=","
+            )
             random_rel_map = rel_mapping[:, 1].astype(np.int32)
             random_rel_map_argsort = np.argsort(random_rel_map)
             rel_features = rel_features[random_rel_map_argsort]
@@ -105,17 +117,3 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
             f.writelines(yaml_file)
 
         return dataset_stats
-
-
-
-
-
-
-
-
-
-
-
-
-
-

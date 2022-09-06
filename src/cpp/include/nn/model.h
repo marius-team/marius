@@ -14,7 +14,7 @@
 #include "reporting/reporting.h"
 
 class Model : public torch::nn::Module {
-  public:
+   public:
     shared_ptr<GeneralEncoder> encoder_;
     shared_ptr<Decoder> decoder_;
     shared_ptr<LossFunction> loss_function_;
@@ -28,20 +28,14 @@ class Model : public torch::nn::Module {
     // Multi-GPU training
     std::vector<shared_ptr<Model>> device_models_;
 
-    Model(shared_ptr<GeneralEncoder> encoder,
-          shared_ptr<Decoder> decoder,
-          shared_ptr<LossFunction> loss,
-          shared_ptr<Reporter> reporter = nullptr,
+    Model(shared_ptr<GeneralEncoder> encoder, shared_ptr<Decoder> decoder, shared_ptr<LossFunction> loss, shared_ptr<Reporter> reporter = nullptr,
           std::vector<shared_ptr<Optimizer>> optimizers_ = {});
 
-    torch::Tensor forward_nc(at::optional<torch::Tensor> node_embeddings,
-                             at::optional<torch::Tensor> node_features,
-                             DENSEGraph dense_graph,
-                             bool train);
+    torch::Tensor forward_nc(at::optional<torch::Tensor> node_embeddings, at::optional<torch::Tensor> node_features, DENSEGraph dense_graph, bool train);
 
     std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> forward_lp(shared_ptr<Batch> batch, bool train);
 
-    void train_batch(shared_ptr<Batch> batch, bool call_step=true);
+    void train_batch(shared_ptr<Batch> batch, bool call_step = true);
 
     void evaluate_batch(shared_ptr<Batch> batch);
 
@@ -70,4 +64,4 @@ class Model : public torch::nn::Module {
 
 shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std::vector<torch::Device> devices, int num_relations, bool train);
 
-#endif //MARIUS_INCLUDE_MODEL_H_
+#endif  // MARIUS_INCLUDE_MODEL_H_

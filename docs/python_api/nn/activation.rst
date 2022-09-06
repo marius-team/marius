@@ -1,5 +1,5 @@
 Activation Functions
 =======================================
 
-.. autofunction:: marius.nn.apply_activation
+.. function:: marius.nn.apply_activation(activation_function: marius._config.ActivationFunction, input: torch.Tensor) -> torch.Tensor
 

@@ -21,15 +21,11 @@ void GraphSageLayer::reset() {
     auto tensor_options = torch::TensorOptions().dtype(torch::kFloat32).device(device_);
 
     // Note: need to multiply the fans by 1/2 to match DGL's initialization
-    torch::Tensor edge_mat = initialize_tensor(config_->init,
-                                               {output_dim_, input_dim_},
-                                               tensor_options).set_requires_grad(true);
+    torch::Tensor edge_mat = initialize_tensor(config_->init, {output_dim_, input_dim_}, tensor_options).set_requires_grad(true);
     w1_ = register_parameter("w1", edge_mat);
 
     if (options_->aggregator == GraphSageAggregator::MEAN) {
-        edge_mat = initialize_tensor(config_->init,
-                                     {output_dim_, input_dim_},
-                                     tensor_options).set_requires_grad(true);
+        edge_mat = initialize_tensor(config_->init, {output_dim_, input_dim_}, tensor_options).set_requires_grad(true);
         w2_ = register_parameter("w2", edge_mat);
     }
 
@@ -39,12 +35,11 @@ void GraphSageLayer::reset() {
 }
 
 torch::Tensor GraphSageLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train) {
-
     torch::Tensor total_num_neighbors;
     torch::Tensor a_i;
-//
-//    return in_neighbors_mapping_;
-//    return out_neighbors_mapping_;
+    //
+    //    return in_neighbors_mapping_;
+    //    return out_neighbors_mapping_;
 
     if (dense_graph.out_neighbors_mapping_.defined()) {
         Indices outgoing_neighbors = dense_graph.getNeighborIDs(false, false);
@@ -55,7 +50,6 @@ torch::Tensor GraphSageLayer::forward(torch::Tensor inputs, DENSEGraph dense_gra
 
         total_num_neighbors = outgoing_num;
         a_i = segmented_sum_with_offsets(outgoing_embeddings, outgoing_neighbor_offsets);
-
     }
 
     if (dense_graph.in_neighbors_mapping_.defined()) {

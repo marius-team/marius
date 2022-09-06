@@ -27,5 +27,3 @@ PYBIND11_MODULE(_data, m) {
     init_dataloader(m);
     init_graph(m);
 }
-
-

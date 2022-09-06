@@ -7,16 +7,13 @@
 #include "nn/activation.h"
 #include "nn/layers/embedding/embedding.h"
 #include "nn/layers/feature/feature.h"
-#include "nn/layers/gnn/gcn_layer.h"
-#include "nn/layers/gnn/gcn_layer.h"
 #include "nn/layers/gnn/gat_layer.h"
-#include "nn/layers/gnn/rgcn_layer.h"
+#include "nn/layers/gnn/gcn_layer.h"
 #include "nn/layers/gnn/graph_sage_layer.h"
+#include "nn/layers/gnn/rgcn_layer.h"
 #include "nn/layers/reduction/concat.h"
 #include "nn/layers/reduction/linear.h"
 #include "nn/layers/reduction/reduction_layer.h"
-
-
 
 GeneralEncoder::GeneralEncoder(shared_ptr<EncoderConfig> encoder_config, torch::Device device, int num_relations) : device_(torch::kCPU) {
     encoder_config_ = encoder_config;
@@ -37,7 +34,6 @@ GeneralEncoder::GeneralEncoder(std::vector<std::vector<shared_ptr<Layer>>> layer
     for (auto stage : layers_) {
         int layer_id = 0;
         for (auto layer : stage) {
-
             if (layer->device_ != device_) {
                 throw MariusRuntimeException("All layers of the encoder must use the same device.");
             }
@@ -148,9 +144,7 @@ shared_ptr<Layer> GeneralEncoder::initGNNLayer(std::shared_ptr<LayerConfig> laye
     return layer;
 }
 
-
 void GeneralEncoder::reset() {
-
     if (encoder_config_ != nullptr) {
         layers_.clear();
 
@@ -163,7 +157,6 @@ void GeneralEncoder::reset() {
 
         int stage_id = 0;
         for (auto stage_config : encoder_config_->layers) {
-
             std::vector<std::shared_ptr<Layer>> stage_layer;
 
             int layer_id = 0;
@@ -200,11 +193,9 @@ void GeneralEncoder::reset() {
 }
 
 torch::Tensor GeneralEncoder::forward(at::optional<torch::Tensor> embeddings, at::optional<torch::Tensor> features, DENSEGraph dense_graph, bool train) {
-
     std::vector<torch::Tensor> outputs = {};
 
     for (int i = 0; i < layers_.size(); i++) {
-
         bool use_sample = false;
         bool added_output = false;
 
@@ -225,7 +216,6 @@ torch::Tensor GeneralEncoder::forward(at::optional<torch::Tensor> embeddings, at
 
         std::vector<torch::Tensor> max_outputs(layers_[i].size());
         for (int j = 0; j < layers_[i].size(); j++) {
-
             if (instance_of<Layer, EmbeddingLayer>(layers_[i][j])) {
                 max_outputs[j] = std::dynamic_pointer_cast<EmbeddingLayer>(layers_[i][j])->forward(embeddings.value().narrow(0, 0, output_size));
                 max_outputs[j] = layers_[i][j]->post_hook(max_outputs[j]);

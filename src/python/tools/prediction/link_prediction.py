@@ -1,21 +1,20 @@
-import torch
 import marius as m
 
 
-def infer_lp(model: m.nn.Model,
-             graph_storage: m.storage.GraphModelStorage,
-             output_dir: str,
-             metrics: list = None,
-             save_scores: bool = False,
-             save_ranks: bool = False,
-             batch_size: int = 10000,
-             num_nbrs: list = None,
-             num_negs: int = None,
-             num_chunks: int = 1,
-             deg_frac: float = 0.0,
-             filtered: bool = True
-             ):
-
+def infer_lp(
+    model: m.nn.Model,
+    graph_storage: m.storage.GraphModelStorage,
+    output_dir: str,
+    metrics: list = None,
+    save_scores: bool = False,
+    save_ranks: bool = False,
+    batch_size: int = 10000,
+    num_nbrs: list = None,
+    num_negs: int = None,
+    num_chunks: int = 1,
+    deg_frac: float = 0.0,
+    filtered: bool = True,
+):
     reporter = m.report.LinkPredictionReporter()
 
     for metric in metrics:
@@ -31,10 +30,7 @@ def infer_lp(model: m.nn.Model,
         model.decoder.mode = m.config.EdgeDecoderMethod.ONLY_POS
     else:
         model.decoder.mode = m.config.EdgeDecoderMethod.CORRUPT_NODE
-        neg_sampler = m.samplers.CorruptNodeNegativeSampler(num_chunks,
-                                                            num_negs,
-                                                            deg_frac,
-                                                            filtered)
+        neg_sampler = m.samplers.CorruptNodeNegativeSampler(num_chunks, num_negs, deg_frac, filtered)
 
     nbr_sampler = None
     if num_nbrs is not None:
@@ -42,11 +38,13 @@ def infer_lp(model: m.nn.Model,
     # if not graph_storage.has_encoded() and num_nbrs is not None:
     #     nbr_sampler = m.samplers.LayeredNeighborSampler(graph_storage, num_nbrs)
 
-    dataloader = m.data.DataLoader(graph_storage=graph_storage,
-                                   neg_sampler=neg_sampler,
-                                   nbr_sampler=nbr_sampler,
-                                   batch_size=batch_size,
-                                   learning_task="lp")
+    dataloader = m.data.DataLoader(
+        graph_storage=graph_storage,
+        neg_sampler=neg_sampler,
+        nbr_sampler=nbr_sampler,
+        batch_size=batch_size,
+        learning_task="lp",
+    )
 
     dataloader.initializeBatches()
 
@@ -69,4 +67,3 @@ def infer_lp(model: m.nn.Model,
         dataloader.finishedBatch()
 
     reporter.save(output_dir, save_scores, save_ranks)
-

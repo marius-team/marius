@@ -11,10 +11,10 @@
  * Samples the edges from a given batch.
  */
 class EdgeSampler {
-public:
+   public:
     shared_ptr<GraphModelStorage> graph_storage_;
 
-    virtual ~EdgeSampler() { };
+    virtual ~EdgeSampler(){};
 
     /**
      * Get edges for a given batch.
@@ -25,7 +25,7 @@ public:
 };
 
 class RandomEdgeSampler : public EdgeSampler {
-public:
+   public:
     bool without_replacement_;
 
     RandomEdgeSampler(shared_ptr<GraphModelStorage> graph_storage, bool without_replacement = true);
@@ -33,4 +33,4 @@ public:
     EdgeList getEdges(shared_ptr<Batch> batch) override;
 };
 
-#endif //MARIUS_EDGE_H
+#endif  // MARIUS_EDGE_H

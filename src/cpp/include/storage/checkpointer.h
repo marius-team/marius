@@ -21,24 +21,25 @@ struct CheckpointMeta {
 };
 
 class Checkpointer {
-public:
+   public:
     std::shared_ptr<Model> model_;
     shared_ptr<GraphModelStorage> storage_;
     std::shared_ptr<CheckpointConfig> config_;
 
     Checkpointer(std::shared_ptr<Model> model, shared_ptr<GraphModelStorage> storage, std::shared_ptr<CheckpointConfig> config);
 
-    Checkpointer() {};
+    Checkpointer(){};
 
     void saveMetadata(string directory, CheckpointMeta checkpoint_meta);
 
     CheckpointMeta loadMetadata(string directory);
 
-    std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage> , CheckpointMeta> load(string checkpoint_dir, std::shared_ptr<MariusConfig> marius_config, bool train);
+    std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage>, CheckpointMeta> load(string checkpoint_dir, std::shared_ptr<MariusConfig> marius_config,
+                                                                                           bool train);
 
     void save(string checkpoint_dir, CheckpointMeta checkpoint_meta);
 
     void create_checkpoint(string checkpoint_dir, CheckpointMeta checkpoint_meta, int epochs);
 };
 
-#endif //MARIUS_CHECKPOINTER_H
+#endif  // MARIUS_CHECKPOINTER_H

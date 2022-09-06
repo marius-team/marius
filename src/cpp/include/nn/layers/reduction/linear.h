@@ -9,7 +9,7 @@
 #include "reduction_layer.h"
 
 class LinearReduction : public ReductionLayer {
-public:
+   public:
     torch::Tensor weight_matrix_;
 
     LinearReduction(shared_ptr<LayerConfig> layer_config, torch::Device device);
@@ -19,4 +19,4 @@ public:
     void reset() override;
 };
 
-#endif //MARIUS_LINEAR_H
+#endif  // MARIUS_LINEAR_H

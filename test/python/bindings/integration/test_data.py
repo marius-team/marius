@@ -1,7 +1,9 @@
 import unittest
+
 import torch
+
 from marius.data import Batch, DataLoader
-from marius.data.samplers import LayeredNeighborSampler, CorruptNodeNegativeSampler
+from marius.data.samplers import CorruptNodeNegativeSampler, LayeredNeighborSampler
 
 
 class TestBatch(unittest.TestCase):
@@ -33,7 +35,7 @@ class TestBatch(unittest.TestCase):
         b = Batch(train=True)
 
         b.node_embeddings = torch.tensor([2.0, 4.0])
-        b.node_embeddings.grad = torch.tensor([.5, -1.0])
+        b.node_embeddings.grad = torch.tensor([0.5, -1.0])
         b.node_embeddings_state = torch.tensor([0.0, 0.0])
 
         b.accumulateGradients(learning_rate=1.0)
@@ -48,7 +50,7 @@ class TestBatch(unittest.TestCase):
         b = Batch(train=True)
 
         b.node_embeddings = torch.tensor([2.0, 4.0])
-        b.node_embeddings.grad = torch.tensor([.5, -1.0])
+        b.node_embeddings.grad = torch.tensor([0.5, -1.0])
         b.node_embeddings_state = torch.tensor([0.0, 0.0])
 
         assert b.node_embeddings is not None
@@ -63,7 +65,6 @@ class TestBatch(unittest.TestCase):
 
 
 class TestDataloader(unittest.TestCase):
-
     def test_lp_only_edges(self):
         num_edges = 100
         num_nodes = 10
@@ -79,14 +80,16 @@ class TestDataloader(unittest.TestCase):
         nbr_sampler = None
 
         # constructor for in memory objects and tensors
-        dataloader = DataLoader(edges=edges,
-                                node_embeddings=embeddings,
-                                node_features=features,
-                                batch_size=batch_size,
-                                neg_sampler=neg_sampler,
-                                nbr_sampler=nbr_sampler,
-                                learning_task="lp",
-                                train=False)
+        dataloader = DataLoader(
+            edges=edges,
+            node_embeddings=embeddings,
+            node_features=features,
+            batch_size=batch_size,
+            neg_sampler=neg_sampler,
+            nbr_sampler=nbr_sampler,
+            learning_task="lp",
+            train=False,
+        )
 
         dataloader.initializeBatches()
 
@@ -115,23 +118,24 @@ class TestDataloader(unittest.TestCase):
 
         num_chunks = 2
         num_negatives = 4
-        degree_fraction = .5
+        degree_fraction = 0.5
 
-        neg_sampler = CorruptNodeNegativeSampler(num_chunks=num_chunks,
-                                                 num_negatives=num_negatives,
-                                                 degree_fraction=degree_fraction,
-                                                 filtered=False)
+        neg_sampler = CorruptNodeNegativeSampler(
+            num_chunks=num_chunks, num_negatives=num_negatives, degree_fraction=degree_fraction, filtered=False
+        )
         nbr_sampler = None
 
         # constructor for in memory objects and tensors
-        dataloader = DataLoader(edges=edges,
-                                node_embeddings=embeddings,
-                                node_features=features,
-                                batch_size=batch_size,
-                                neg_sampler=neg_sampler,
-                                nbr_sampler=nbr_sampler,
-                                learning_task="lp",
-                                train=False)
+        dataloader = DataLoader(
+            edges=edges,
+            node_embeddings=embeddings,
+            node_features=features,
+            batch_size=batch_size,
+            neg_sampler=neg_sampler,
+            nbr_sampler=nbr_sampler,
+            learning_task="lp",
+            train=False,
+        )
 
         dataloader.initializeBatches()
 
@@ -170,23 +174,24 @@ class TestDataloader(unittest.TestCase):
 
         num_chunks = 2
         num_negatives = 4
-        degree_fraction = .5
+        degree_fraction = 0.5
 
-        neg_sampler = CorruptNodeNegativeSampler(num_chunks=num_chunks,
-                                                 num_negatives=num_negatives,
-                                                 degree_fraction=degree_fraction,
-                                                 filtered=False)
+        neg_sampler = CorruptNodeNegativeSampler(
+            num_chunks=num_chunks, num_negatives=num_negatives, degree_fraction=degree_fraction, filtered=False
+        )
         nbr_sampler = LayeredNeighborSampler([-1])
 
         # constructor for in memory objects and tensors
-        dataloader = DataLoader(edges=edges,
-                                node_embeddings=embeddings,
-                                node_features=features,
-                                batch_size=batch_size,
-                                neg_sampler=neg_sampler,
-                                nbr_sampler=nbr_sampler,
-                                learning_task="lp",
-                                train=False)
+        dataloader = DataLoader(
+            edges=edges,
+            node_embeddings=embeddings,
+            node_features=features,
+            batch_size=batch_size,
+            neg_sampler=neg_sampler,
+            nbr_sampler=nbr_sampler,
+            learning_task="lp",
+            train=False,
+        )
 
         dataloader.initializeBatches()
 
@@ -229,14 +234,16 @@ class TestDataloader(unittest.TestCase):
         nbr_sampler = LayeredNeighborSampler([-1])
 
         # constructor for in memory objects and tensors
-        dataloader = DataLoader(edges=edges,
-                                node_embeddings=embeddings,
-                                node_features=features,
-                                batch_size=batch_size,
-                                neg_sampler=neg_sampler,
-                                nbr_sampler=nbr_sampler,
-                                learning_task="lp",
-                                train=False)
+        dataloader = DataLoader(
+            edges=edges,
+            node_embeddings=embeddings,
+            node_features=features,
+            batch_size=batch_size,
+            neg_sampler=neg_sampler,
+            nbr_sampler=nbr_sampler,
+            learning_task="lp",
+            train=False,
+        )
 
         dataloader.initializeBatches()
 
@@ -271,14 +278,16 @@ class TestDataloader(unittest.TestCase):
         nbr_sampler = LayeredNeighborSampler([-1])
 
         # constructor for in memory objects and tensors
-        dataloader = DataLoader(edges=edges,
-                                nodes=nodes,
-                                node_embeddings=embeddings,
-                                node_features=features,
-                                batch_size=batch_size,
-                                nbr_sampler=nbr_sampler,
-                                learning_task="nc",
-                                train=False)
+        dataloader = DataLoader(
+            edges=edges,
+            nodes=nodes,
+            node_embeddings=embeddings,
+            node_features=features,
+            batch_size=batch_size,
+            nbr_sampler=nbr_sampler,
+            learning_task="nc",
+            train=False,
+        )
 
         dataloader.initializeBatches()
 
@@ -310,13 +319,15 @@ class TestDataloader(unittest.TestCase):
         nodes = torch.arange(0, num_train)
 
         # constructor for in memory objects and tensors
-        dataloader = DataLoader(edges=edges,
-                                nodes=nodes,
-                                node_embeddings=embeddings,
-                                node_features=features,
-                                batch_size=batch_size,
-                                learning_task="nc",
-                                train=False)
+        dataloader = DataLoader(
+            edges=edges,
+            nodes=nodes,
+            node_embeddings=embeddings,
+            node_features=features,
+            batch_size=batch_size,
+            learning_task="nc",
+            train=False,
+        )
 
         dataloader.initializeBatches()
 

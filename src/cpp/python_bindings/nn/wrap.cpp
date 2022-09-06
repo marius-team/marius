@@ -1,6 +1,6 @@
-#include "common/pybind_headers.h"
-
 #include <pybind11/embed.h>
+
+#include "common/pybind_headers.h"
 
 namespace py = pybind11;
 
@@ -55,7 +55,6 @@ void init_linear_reduction_layer(py::module &);
 void init_reduction_layer(py::module &);
 
 PYBIND11_MODULE(_nn, m) {
-
     m.doc() = "Contains model encoders, decoders and layers.";
 
     // nn
@@ -121,5 +120,4 @@ PYBIND11_MODULE(_nn, m) {
     init_reduction_layer(layers_m);
     init_concat_reduction_layer(layers_m);
     init_linear_reduction_layer(layers_m);
-
 }

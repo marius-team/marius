@@ -4,6 +4,7 @@
 
 #include "storage/buffer.h"
 
+#include <common/util.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -11,13 +12,10 @@
 #include <future>
 #include <shared_mutex>
 
-#include <common/util.h>
 #include "configuration/constants.h"
 #include "reporting/logger.h"
 
-
 Partition::Partition(int partition_id, int64_t partition_size, int embedding_size, torch::Dtype dtype, int64_t idx_offset, int64_t file_offset) {
-
     lock_ = new std::mutex();
     cv_ = new std::condition_variable();
     data_ptr_ = nullptr;
@@ -46,13 +44,12 @@ Partition::~Partition() {
     tensor_ = torch::Tensor();
 }
 
-
 torch::Tensor Partition::indexRead(Indices indices) {
-    if(indices.sizes().size() != 1) {
+    if (indices.sizes().size() != 1) {
         // TODO: throw invalid input to func exception
         throw std::runtime_error("");
     }
-    
+
     lock_->lock();
 
     torch::Tensor ret = tensor_.index_select(0, indices - idx_offset_);
@@ -63,7 +60,8 @@ torch::Tensor Partition::indexRead(Indices indices) {
     return ret;
 }
 
-PartitionedFile::PartitionedFile(string filename, int num_partitions, int64_t partition_size, int embedding_size, int64_t total_embeddings, torch::Dtype dtype) {
+PartitionedFile::PartitionedFile(string filename, int num_partitions, int64_t partition_size, int embedding_size, int64_t total_embeddings,
+                                 torch::Dtype dtype) {
     num_partitions_ = num_partitions;
     partition_size_ = partition_size;
     embedding_size_ = embedding_size;
@@ -81,8 +79,8 @@ PartitionedFile::PartitionedFile(string filename, int num_partitions, int64_t pa
     }
 }
 
-void PartitionedFile::readPartition(void* addr, Partition *partition) {
-    if(addr == NULL || partition == NULL) {
+void PartitionedFile::readPartition(void *addr, Partition *partition) {
+    if (addr == NULL || partition == NULL) {
         // TODO: throw null ptr exception
         throw std::runtime_error("");
     }
@@ -96,10 +94,10 @@ void PartitionedFile::readPartition(void* addr, Partition *partition) {
     partition->tensor_ = torch::from_blob(addr, {partition->partition_size_, embedding_size_}, dtype_);
 }
 
-// writePartition accesses data pointed to by p->data_ptr_. Address p->data_ptr_ is expected to contain 
+// writePartition accesses data pointed to by p->data_ptr_. Address p->data_ptr_ is expected to contain
 // same data as that of p->tensor_.
 void PartitionedFile::writePartition(Partition *partition, bool clear_mem) {
-    if(partition == NULL || partition->data_ptr_ == nullptr) {
+    if (partition == NULL || partition->data_ptr_ == nullptr) {
         // TODO: throw null ptr exception
         throw std::runtime_error("");
     }
@@ -121,11 +119,10 @@ LookaheadBlock::LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_
     partitions_ = {};
     lock_ = new std::mutex();
 
-
     mems_ = std::vector<void *>(num_per_lookahead);
 
     for (int i = 0; i < num_per_lookahead; i++) {
-        if(posix_memalign(&mems_[i], 4096, total_size_)) {
+        if (posix_memalign(&mems_[i], 4096, total_size_)) {
             SPDLOG_ERROR("Unable to allocate lookahead memory\nError: {}", errno);
             throw std::runtime_error("");
         }
@@ -140,13 +137,13 @@ LookaheadBlock::LookaheadBlock(int64_t total_size, PartitionedFile *partitioned_
 LookaheadBlock::~LookaheadBlock() {
     delete lock_;
 
-    for(void *mem : mems_) {
+    for (void *mem : mems_) {
         free(mem);
     }
 }
 
 void LookaheadBlock::run() {
-    while(!done_) {
+    while (!done_) {
         // wait until block is empty
         std::unique_lock lock(*lock_);
         cv_.wait(lock, [this] { return present_ == false; });
@@ -155,11 +152,11 @@ void LookaheadBlock::run() {
             break;
         }
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < partitions_.size(); i++) {
             Partition *partition = partitions_[i];
             std::unique_lock partition_lock(*partition->lock_);
-            partition->cv_->wait(partition_lock, [partition] {return partition->evicting_ == false;});
+            partition->cv_->wait(partition_lock, [partition] { return partition->evicting_ == false; });
             partitioned_file_->readPartition(mems_[i], partition);
             partition_lock.unlock();
             partition->cv_->notify_all();
@@ -191,7 +188,7 @@ void LookaheadBlock::stop() {
 }
 
 void LookaheadBlock::move_to_buffer(std::vector<void *> buff_addrs, std::vector<int64_t> buffer_idxs, std::vector<Partition *> next_partitions) {
-    if(partitions_.size() > buff_addrs.size() || partitions_.size() > buffer_idxs.size()) {
+    if (partitions_.size() > buff_addrs.size() || partitions_.size() > buffer_idxs.size()) {
         // TODO: throw invalid inputs for function exception
         throw std::runtime_error("");
     }
@@ -199,7 +196,7 @@ void LookaheadBlock::move_to_buffer(std::vector<void *> buff_addrs, std::vector<
     std::unique_lock lock(*lock_);
     cv_.wait(lock, [this] { return present_ == true; });
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < partitions_.size(); i++) {
         Partition *partition = partitions_[i];
         void *addr = buff_addrs[i];
@@ -229,7 +226,7 @@ AsyncWriteBlock::AsyncWriteBlock(int64_t total_size, PartitionedFile *partitione
     mems_ = std::vector<void *>(num_per_evict);
 
     for (int i = 0; i < num_per_evict; i++) {
-        if(posix_memalign(&mems_[i], 4096, total_size_)) {
+        if (posix_memalign(&mems_[i], 4096, total_size_)) {
             SPDLOG_ERROR("Unable to allocate lookahead memory\nError: {}", errno);
             throw std::runtime_error("");
         }
@@ -244,14 +241,13 @@ AsyncWriteBlock::AsyncWriteBlock(int64_t total_size, PartitionedFile *partitione
 AsyncWriteBlock::~AsyncWriteBlock() {
     delete lock_;
 
-    for(void * mem : mems_) {
+    for (void *mem : mems_) {
         free(mem);
     }
 }
 
-
 void AsyncWriteBlock::run() {
-    while(!done_) {
+    while (!done_) {
         // wait until block is empty
         std::unique_lock lock(*lock_);
         cv_.wait(lock, [this] { return present_ == true; });
@@ -260,7 +256,7 @@ void AsyncWriteBlock::run() {
             return;
         }
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < partitions_.size(); i++) {
             Partition *partition = partitions_[i];
             partitioned_file_->writePartition(partition);
@@ -273,7 +269,6 @@ void AsyncWriteBlock::run() {
         lock.unlock();
         cv_.notify_all();
     }
-
 }
 
 void AsyncWriteBlock::start() {
@@ -295,7 +290,7 @@ void AsyncWriteBlock::stop() {
 }
 
 void AsyncWriteBlock::async_write(std::vector<Partition *> partitions) {
-    if(partitions.size() > mems_.size()) {
+    if (partitions.size() > mems_.size()) {
         // TODO: throw invalid inputs for function exception
         throw std::runtime_error("");
     }
@@ -306,7 +301,7 @@ void AsyncWriteBlock::async_write(std::vector<Partition *> partitions) {
 
     partitions_ = partitions;
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < partitions_.size(); i++) {
         void *mem = mems_[i];
         Partition *partition = partitions_[i];
@@ -324,16 +319,8 @@ void AsyncWriteBlock::async_write(std::vector<Partition *> partitions) {
     cv_.notify_all();
 }
 
-
-PartitionBuffer::PartitionBuffer(int capacity,
-                                 int num_partitions,
-                                 int fine_to_coarse_ratio,
-                                 int64_t partition_size,
-                                 int embedding_size,
-                                 int64_t total_embeddings,
-                                 torch::Dtype dtype,
-                                 string filename,
-                                 bool prefetching) {
+PartitionBuffer::PartitionBuffer(int capacity, int num_partitions, int fine_to_coarse_ratio, int64_t partition_size, int embedding_size,
+                                 int64_t total_embeddings, torch::Dtype dtype, string filename, bool prefetching) {
     capacity_ = capacity;
     size_ = 0;
     num_partitions_ = num_partitions;
@@ -353,7 +340,6 @@ PartitionBuffer::PartitionBuffer(int capacity,
     int64_t curr_partition_size = partition_size_;
     int64_t curr_total_size = curr_partition_size * embedding_size_ * dtype_size_;
     for (int64_t i = 0; i < num_partitions_; i++) {
-
         // the last partition might be slightly smaller
         if (i == num_partitions_ - 1) {
             curr_partition_size = total_embeddings_ - curr_idx_offset;
@@ -367,7 +353,6 @@ PartitionBuffer::PartitionBuffer(int capacity,
         curr_idx_offset += curr_partition_size;
     }
 
-
     filename_ = filename;
     partitioned_file_ = new PartitionedFile(filename_, num_partitions_, partition_size_, embedding_size_, total_embeddings_, dtype_);
 
@@ -375,7 +360,6 @@ PartitionBuffer::PartitionBuffer(int capacity,
 }
 
 PartitionBuffer::~PartitionBuffer() {
-
     unload(true);
 
     delete partitioned_file_;
@@ -386,7 +370,6 @@ PartitionBuffer::~PartitionBuffer() {
 
 void PartitionBuffer::load() {
     if (!loaded_) {
-
         if (posix_memalign(&buff_mem_, 4096, capacity_ * partition_size_ * embedding_size_ * dtype_size_)) {
             SPDLOG_ERROR("Unable to allocate buffer memory\nError: {}", errno);
             throw std::runtime_error("");
@@ -402,7 +385,7 @@ void PartitionBuffer::load() {
         for (int i = 0; i < buffer_state_.size(0); i++) {
             partition_id = buffer_state_[i].item<int>();
             Partition *partition = partition_table_[partition_id];
-            void *buff_addr = (char *) buff_mem_ + (i * partition_size_ * embedding_size_ * dtype_size_);
+            void *buff_addr = (char *)buff_mem_ + (i * partition_size_ * embedding_size_ * dtype_size_);
             partitioned_file_->readPartition(buff_addr, partition);
             partition->present_ = true;
             partition->buffer_idx_ = i;
@@ -410,15 +393,15 @@ void PartitionBuffer::load() {
         }
 
         in_buffer_ids_ = torch::empty({num_nodes}, torch::kInt64);
-//        int64_t offset = 0;
-//        for (int i = 0; i < buffer_state_.size(0); i++) {
-//            partition_id = buffer_state_[i].item<int>();
-//            Partition *partition = partition_table_[partition_id];
-//            int64_t partition_offset = partition->idx_offset_;
-//
-//            in_buffer_ids_.slice(0, offset, offset + partition->partition_size_) = torch::arange(partition_offset, partition_offset + partition->partition_size_);
-//            offset += partition->partition_size_;
-//        }
+        //        int64_t offset = 0;
+        //        for (int i = 0; i < buffer_state_.size(0); i++) {
+        //            partition_id = buffer_state_[i].item<int>();
+        //            Partition *partition = partition_table_[partition_id];
+        //            int64_t partition_offset = partition->idx_offset_;
+        //
+        //            in_buffer_ids_.slice(0, offset, offset + partition->partition_size_) = torch::arange(partition_offset, partition_offset +
+        //            partition->partition_size_); offset += partition->partition_size_;
+        //        }
 
         if (prefetching_) {
             lookahead_block_ = new LookaheadBlock(partition_size_ * embedding_size_ * dtype_size_, partitioned_file_, fine_to_coarse_ratio_);
@@ -432,7 +415,6 @@ void PartitionBuffer::load() {
 
 void PartitionBuffer::unload(bool write) {
     if (loaded_) {
-
         if (write) {
             sync();
         }
@@ -451,13 +433,11 @@ void PartitionBuffer::unload(bool write) {
     }
 }
 
-torch::Tensor PartitionBuffer::getBufferState() {
-    return buffer_state_;
-}
+torch::Tensor PartitionBuffer::getBufferState() { return buffer_state_; }
 
 // indices a relative to the local node ids
 torch::Tensor PartitionBuffer::indexRead(torch::Tensor indices) {
-    if(indices.sizes().size() != 1) {
+    if (indices.sizes().size() != 1) {
         // TODO: throw invalid input to func exception
         throw std::runtime_error("");
     }
@@ -465,13 +445,11 @@ torch::Tensor PartitionBuffer::indexRead(torch::Tensor indices) {
     return buffer_tensor_view_.index_select(0, indices);
 }
 
-Indices PartitionBuffer::getRandomIds(int64_t size) {
-    return torch::randint(in_buffer_ids_.size(0), size, torch::kInt64);
-}
+Indices PartitionBuffer::getRandomIds(int64_t size) { return torch::randint(in_buffer_ids_.size(0), size, torch::kInt64); }
 
 // indices must contain unique values, else there is a possibility of a race condition
 void PartitionBuffer::indexAdd(torch::Tensor indices, torch::Tensor values) {
-    if(!values.defined() || indices.sizes().size() != 1 || indices.size(0) != values.size(0) || buffer_tensor_view_.size(1) != values.size(1)) {
+    if (!values.defined() || indices.sizes().size() != 1 || indices.size(0) != values.size(0) || buffer_tensor_view_.size(1) != values.size(1)) {
         // TODO: throw invalid inputs for function error
         throw std::runtime_error("");
     }
@@ -484,7 +462,7 @@ void PartitionBuffer::indexAdd(torch::Tensor indices, torch::Tensor values) {
 
     int d = values.size(1);
     int64_t size = indices.size(0);
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int64_t i = 0; i < size; i++) {
         for (int j = 0; j < d; j++) {
             data_accessor[ids_accessor[i]][j] += values_accessor[i][j];
@@ -503,12 +481,9 @@ void PartitionBuffer::setBufferOrdering(std::vector<torch::Tensor> buffer_states
     }
 }
 
-bool PartitionBuffer::hasSwap() {
-    return buffer_state_iterator_ != buffer_states_.end();
-}
+bool PartitionBuffer::hasSwap() { return buffer_state_iterator_ != buffer_states_.end(); }
 
 void PartitionBuffer::performNextSwap() {
-
     if (!buffer_state_.defined() || buffer_state_iterator_ == buffer_states_.end()) {
         return;
     }
@@ -545,16 +520,15 @@ void PartitionBuffer::performNextSwap() {
 
     in_buffer_ids_ = torch::empty({num_nodes}, torch::kInt64);
 
-//    int64_t offset = 0;
-//    for (int i = 0; i < buffer_state_.size(0); i++) {
-//        partition_id = buffer_state_[i].item<int>();
-//        Partition *partition = partition_table_[partition_id];
-//        int64_t partition_offset = partition->idx_offset_;
-//
-//        in_buffer_ids_.slice(0, offset, offset + partition->partition_size_) = torch::arange(partition_offset, partition_offset + partition->partition_size_);
-//        offset += partition->partition_size_;
-//    }
-
+    //    int64_t offset = 0;
+    //    for (int i = 0; i < buffer_state_.size(0); i++) {
+    //        partition_id = buffer_state_[i].item<int>();
+    //        Partition *partition = partition_table_[partition_id];
+    //        int64_t partition_offset = partition->idx_offset_;
+    //
+    //        in_buffer_ids_.slice(0, offset, offset + partition->partition_size_) = torch::arange(partition_offset, partition_offset +
+    //        partition->partition_size_); offset += partition->partition_size_;
+    //    }
 }
 
 std::vector<int> PartitionBuffer::getNextAdmit() {
@@ -603,17 +577,17 @@ torch::Tensor PartitionBuffer::getGlobalToLocalMap(bool get_current) {
     if (get_current) {
         buffer_state = buffer_state_;
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < buffer_state.size(0); i++) {
             int partition_id = buffer_state[i].item<int>();
             Partition *partition = partition_table_[partition_id];
             int64_t partition_offset = partition->idx_offset_;
             int64_t buffer_offset = partition->buffer_idx_ * partition_size_;
-            buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) = torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
+            buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) =
+                torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
         }
 
     } else {
-
         // get mapping for next swap
         buffer_state = *buffer_state_iterator_;
 
@@ -622,7 +596,7 @@ torch::Tensor PartitionBuffer::getGlobalToLocalMap(bool get_current) {
         std::vector<int> admit_ids = getNextAdmit();
 
         // get mapping for the partitions that will still be in the buffer
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < buffer_state.size(0); i++) {
             int partition_id = buffer_state[i].item<int>();
             Partition *partition = partition_table_[partition_id];
@@ -630,51 +604,52 @@ torch::Tensor PartitionBuffer::getGlobalToLocalMap(bool get_current) {
 
             if (partition->buffer_idx_ != -1) {
                 int64_t buffer_offset = partition->buffer_idx_ * partition_size_;
-                buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) = torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
+                buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) =
+                    torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
             }
         }
 
-        // get mapping for the partitions that will be admitted
-        #pragma omp parallel for
+// get mapping for the partitions that will be admitted
+#pragma omp parallel for
         for (int i = 0; i < evict_ids.size(); i++) {
             Partition *admit_partition = partition_table_[admit_ids[i]];
             Partition *evict_partition = partition_table_[evict_ids[i]];
             int64_t partition_offset = admit_partition->idx_offset_;
             int64_t buffer_offset = evict_partition->buffer_idx_ * partition_size_;
-            buffer_index_map.slice(0, partition_offset, partition_offset + admit_partition->partition_size_) = torch::arange(buffer_offset, buffer_offset + admit_partition->partition_size_);
+            buffer_index_map.slice(0, partition_offset, partition_offset + admit_partition->partition_size_) =
+                torch::arange(buffer_offset, buffer_offset + admit_partition->partition_size_);
         }
     }
     return buffer_index_map;
 }
 
 void PartitionBuffer::evict(std::vector<Partition *> evict_partitions) {
-
     if (prefetching_) {
         async_write_block_->async_write(evict_partitions);
     } else {
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < evict_partitions.size(); i++) {
             partitioned_file_->writePartition(evict_partitions[i]);
         }
     }
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < evict_partitions.size(); i++) {
         evict_partitions[i]->present_ = false;
     }
 }
 
 void PartitionBuffer::admit(std::vector<Partition *> admit_partitions, std::vector<int64_t> buffer_idxs) {
-    if(admit_partitions.size() > buffer_idxs.size()) {
+    if (admit_partitions.size() > buffer_idxs.size()) {
         // TODO: throw invalid inputs for function error
         throw std::runtime_error("");
     }
 
     std::vector<void *> buff_addrs(buffer_idxs.size());
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < buffer_idxs.size(); i++) {
-        void *buff_addr = (char *) buff_mem_ + (buffer_idxs[i] * partition_size_ * embedding_size_ * dtype_size_);
+        void *buff_addr = (char *)buff_mem_ + (buffer_idxs[i] * partition_size_ * embedding_size_ * dtype_size_);
         buff_addrs[i] = buff_addr;
     }
 
@@ -688,7 +663,7 @@ void PartitionBuffer::admit(std::vector<Partition *> admit_partitions, std::vect
         }
         lookahead_block_->move_to_buffer(buff_addrs, buffer_idxs, next_partitions);
     } else {
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < admit_partitions.size(); i++) {
             Partition *partition = admit_partitions[i];
             partitioned_file_->readPartition(buff_addrs[i], partition);

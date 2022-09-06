@@ -40,7 +40,7 @@ struct InMemorySubgraphState {
 };
 
 class GraphModelStorage {
-  private:
+   private:
     void _load(shared_ptr<Storage> storage);
 
     void _unload(shared_ptr<Storage> storage, bool write);
@@ -48,13 +48,13 @@ class GraphModelStorage {
     int64_t num_nodes_;
     int64_t num_edges_;
 
-  protected:
+   protected:
     bool train_;
 
     shared_ptr<InMemory> in_memory_embeddings_;
     shared_ptr<InMemory> in_memory_features_;
 
-  public:
+   public:
     // In memory subgraph for partition buffer
 
     EdgeList active_edges_;
@@ -70,11 +70,9 @@ class GraphModelStorage {
     GraphModelStoragePtrs storage_ptrs_;
     bool full_graph_evaluation_;
 
-    GraphModelStorage(GraphModelStoragePtrs storage_ptrs,
-                      shared_ptr<StorageConfig> storage_config);
+    GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_ptr<StorageConfig> storage_config);
 
-    GraphModelStorage(GraphModelStoragePtrs storage_ptrs,
-                      bool prefetch = false);
+    GraphModelStorage(GraphModelStoragePtrs storage_ptrs, bool prefetch = false);
 
     ~GraphModelStorage();
 
@@ -166,7 +164,6 @@ class GraphModelStorage {
         return (embeddings_buffered || features_buffered) && (train_ || (!full_graph_evaluation_));
     }
 
-
     bool hasSwap() {
         if (storage_ptrs_.node_embeddings != nullptr) {
             return std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->hasSwap();
@@ -219,14 +216,9 @@ class GraphModelStorage {
         }
     }
 
-    void setActiveEdges(torch::Tensor active_edges) {
-        active_edges_ = active_edges;
-    }
+    void setActiveEdges(torch::Tensor active_edges) { active_edges_ = active_edges; }
 
-    void setActiveNodes(torch::Tensor node_ids) {
-        active_nodes_ = node_ids;
-    }
-
+    void setActiveNodes(torch::Tensor node_ids) { active_nodes_ = node_ids; }
 
     int64_t getNumActiveEdges() {
         if (active_edges_.defined()) {
@@ -244,12 +236,9 @@ class GraphModelStorage {
         }
     }
 
-    int64_t getNumEdges() {
-        return storage_ptrs_.edges->getDim0();
-    }
+    int64_t getNumEdges() { return storage_ptrs_.edges->getDim0(); }
 
     int64_t getNumNodes() {
-
         if (storage_ptrs_.node_embeddings != nullptr) {
             return storage_ptrs_.node_embeddings->getDim0();
         }
@@ -262,7 +251,6 @@ class GraphModelStorage {
     }
 
     int64_t getNumNodesInMemory() {
-
         if (storage_ptrs_.node_embeddings != nullptr) {
             if (useInMemorySubGraph()) {
                 return std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getNumInMemory();
@@ -314,14 +302,9 @@ class GraphModelStorage {
         }
     }
 
-    void setFilterEdges(std::vector<shared_ptr<Storage>> filter_edges) {
-        storage_ptrs_.filter_edges = filter_edges;
-    }
+    void setFilterEdges(std::vector<shared_ptr<Storage>> filter_edges) { storage_ptrs_.filter_edges = filter_edges; }
 
-    void addFilterEdges(shared_ptr<Storage> filter_edges) {
-        storage_ptrs_.filter_edges.emplace_back(filter_edges);
-    }
+    void addFilterEdges(shared_ptr<Storage> filter_edges) { storage_ptrs_.filter_edges.emplace_back(filter_edges); }
 };
 
-
-#endif //MARIUS_SRC_CPP_INCLUDE_GRAPH_STORAGE_H_
+#endif  // MARIUS_SRC_CPP_INCLUDE_GRAPH_STORAGE_H_

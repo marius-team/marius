@@ -1,9 +1,7 @@
 #include "common/pybind_headers.h"
-
 #include "configuration/config.h"
 
 void init_config(py::module &m) {
-
     py::class_<NeighborSamplingConfig, std::shared_ptr<NeighborSamplingConfig>>(m, "NeighborSamplingConfig")
         .def(py::init<>())
         .def_readwrite("type", &NeighborSamplingConfig::type)

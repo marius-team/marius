@@ -37,7 +37,6 @@ void copyFile(string src_file, string dst_file) {
     dst.close();
 }
 
-
 bool fileExists(string filename) {
     if (FILE *file = fopen(filename.c_str(), "r")) {
         fclose(file);
@@ -53,7 +52,8 @@ void createDir(string path, bool exist_ok) {
             if (exist_ok) {
                 SPDLOG_DEBUG("{} directory already exists", path);
             } else {
-                SPDLOG_ERROR("{} directory already exists", path);throw std::runtime_error("");
+                SPDLOG_ERROR("{} directory already exists", path);
+                throw std::runtime_error("");
             }
         } else {
             SPDLOG_ERROR("Failed to create {}\nError: {}", path, errno);
@@ -72,18 +72,11 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, int64_t dim0_siz
     dtype_ = options_->dtype;
     initialized_ = true;
     loaded_ = false;
-    int64_t partition_size = ceil((double) dim0_size_ / options_->num_partitions);
+    int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
-    buffer_ = new PartitionBuffer(options_->buffer_capacity,
-                                  options_->num_partitions,
-                                  options_->fine_to_coarse_ratio,
-                                  partition_size,
-                                  dim1_size_,
-                                  dim0_size_,
-                                  dtype_,
-                                  filename_,
-                                  options_->prefetching);
+    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
+                                  dtype_, filename_, options_->prefetching);
 }
 
 PartitionBufferStorage::PartitionBufferStorage(string filename, torch::Tensor data, shared_ptr<PartitionBufferOptions> options) {
@@ -95,18 +88,11 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, torch::Tensor da
     append(data);
     initialized_ = true;
     loaded_ = false;
-    int64_t partition_size = ceil((double) dim0_size_ / options_->num_partitions);
+    int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
-    buffer_ = new PartitionBuffer(options_->buffer_capacity,
-                                  options_->num_partitions,
-                                  options_->fine_to_coarse_ratio,
-                                  partition_size,
-                                  dim1_size_,
-                                  dim0_size_,
-                                  dtype_,
-                                  filename_,
-                                  options_->prefetching);
+    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
+                                  dtype_, filename_, options_->prefetching);
 }
 
 PartitionBufferStorage::PartitionBufferStorage(string filename, shared_ptr<PartitionBufferOptions> options) {
@@ -116,18 +102,11 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, shared_ptr<Parti
     loaded_ = false;
     options_ = options;
     dtype_ = options_->dtype;
-    int64_t partition_size = ceil((double) dim0_size_ / options_->num_partitions);
+    int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
-    buffer_ = new PartitionBuffer(options_->buffer_capacity,
-                                  options_->num_partitions,
-                                  options_->fine_to_coarse_ratio,
-                                  partition_size,
-                                  dim1_size_,
-                                  dim0_size_,
-                                  dtype_,
-                                  filename_,
-                                  options_->prefetching);
+    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
+                                  dtype_, filename_, options_->prefetching);
 }
 
 void PartitionBufferStorage::rangePut(int64_t offset, torch::Tensor values) {
@@ -165,14 +144,12 @@ void PartitionBufferStorage::append(torch::Tensor values) {
 
     int dtype_size = get_dtype_size_wrapper(dtype_);
 
-    outfile.write((char *) values.data_ptr(), values.size(0) * values.size(1) * dtype_size);
+    outfile.write((char *)values.data_ptr(), values.size(0) * values.size(1) * dtype_size);
 
     outfile.close();
 }
 
-PartitionBufferStorage::~PartitionBufferStorage() {
-    delete buffer_;
-}
+PartitionBufferStorage::~PartitionBufferStorage() { delete buffer_; }
 
 void PartitionBufferStorage::load() {
     if (!loaded_ && initialized_) {
@@ -194,13 +171,9 @@ void PartitionBufferStorage::unload(bool perform_write) {
     }
 }
 
-torch::Tensor PartitionBufferStorage::indexRead(Indices indices) {
-    return buffer_->indexRead(indices);
-}
+torch::Tensor PartitionBufferStorage::indexRead(Indices indices) { return buffer_->indexRead(indices); }
 
-void PartitionBufferStorage::indexAdd(Indices indices, torch::Tensor values) {
-    return buffer_->indexAdd(indices, values);
-}
+void PartitionBufferStorage::indexAdd(Indices indices, torch::Tensor values) { return buffer_->indexAdd(indices, values); }
 
 torch::Tensor PartitionBufferStorage::range(int64_t offset, int64_t n) {
     SPDLOG_ERROR("Unsupported operation for PartitionBufferStorage");
@@ -237,7 +210,6 @@ FlatFile::FlatFile(string filename, int64_t dim0_size, int64_t dim1_size, torch:
     device_ = torch::kCPU;
 
     if (alloc) {
-
         int64_t dtype_size = 0;
 
         if (dtype_ == torch::kFloat64) {
@@ -280,7 +252,7 @@ FlatFile::FlatFile(string filename, torch::Dtype dtype) {
 }
 
 void FlatFile::rangePut(int64_t offset, torch::Tensor values) {
-    if(!values.defined() || (dim0_size_ != 0 && (values.size(0) + offset > dim0_size_ || values.size(1) != dim1_size_))) {
+    if (!values.defined() || (dim0_size_ != 0 && (values.size(0) + offset > dim0_size_ || values.size(1) != dim1_size_))) {
         // TODO: throw invalid inputs for function error
         throw std::runtime_error("");
     }
@@ -306,10 +278,9 @@ void FlatFile::append(torch::Tensor values) {
 
     int64_t dtype_size = get_dtype_size_wrapper(dtype_);
 
-    outfile.write((char *) values.data_ptr(), values.size(0) * values.size(1) * dtype_size);
+    outfile.write((char *)values.data_ptr(), values.size(0) * values.size(1) * dtype_size);
     outfile.close();
 }
-
 
 void FlatFile::load() {
     if (!loaded_ && initialized_) {
@@ -322,12 +293,10 @@ void FlatFile::load() {
     }
 }
 
-void FlatFile::write() {
-    return;
-}
+void FlatFile::write() { return; }
 
 void FlatFile::unload(bool perform_write) {
-    (void) perform_write;
+    (void)perform_write;
     if (loaded_) {
         close(fd_);
         loaded_ = false;
@@ -369,7 +338,7 @@ void FlatFile::copy(string new_filename, bool rename) {
 }
 
 torch::Tensor FlatFile::range(int64_t offset, int64_t n) {
-    if(n + offset > dim0_size_) {
+    if (n + offset > dim0_size_) {
         // TODO: throw invalid inputs for function error
         throw std::runtime_error("");
     }
@@ -386,7 +355,6 @@ torch::Tensor FlatFile::range(int64_t offset, int64_t n) {
 }
 
 void FlatFile::rangePut(int64_t offset, int64_t n, torch::Tensor values) {
-
     int dtype_size = get_dtype_size_wrapper(dtype_);
 
     int64_t ptr_offset = offset * dim1_size_ * dtype_size;
@@ -405,7 +373,7 @@ void FlatFile::shuffle() {
     if (edge_bucket_sizes_.empty()) {
         int64_t offset = 0;
         int64_t curr_size = 0;
-        while(offset < dim0_size_) {
+        while (offset < dim0_size_) {
             if (dim0_size_ - offset < MAX_SHUFFLE_SIZE) {
                 curr_size = dim0_size_ - offset;
             } else {
@@ -446,7 +414,7 @@ void FlatFile::sort(bool src) {
     if (edge_bucket_sizes_.empty()) {
         int64_t offset = 0;
         int64_t curr_size = 0;
-        while(offset < dim0_size_) {
+        while (offset < dim0_size_) {
             if (dim0_size_ - offset < MAX_SORT_SIZE) {
                 curr_size = dim0_size_ - offset;
             } else {
@@ -553,7 +521,7 @@ InMemory::InMemory(string filename, torch::Tensor data, torch::Device device) {
 
     int64_t dtype_size = get_dtype_size_wrapper(dtype_);
 
-    outfile.write((char *) temp.data_ptr(), data.size(0) * data.size(1) * dtype_size);
+    outfile.write((char *)temp.data_ptr(), data.size(0) * data.size(1) * dtype_size);
 
     outfile.close();
 }
@@ -569,7 +537,6 @@ InMemory::InMemory(string filename, torch::Dtype dtype) {
 }
 
 InMemory::InMemory(torch::Tensor data) {
-
     if (data.sizes().size() == 2) {
         dim0_size_ = data.size(0);
         dim1_size_ = data.size(1);
@@ -649,7 +616,7 @@ void InMemory::unload(bool perform_write) {
 }
 
 torch::Tensor InMemory::indexRead(Indices indices) {
-    if(indices.sizes().size() != 1) {
+    if (indices.sizes().size() != 1) {
         // TODO: throw invalid input to func exception
         throw std::runtime_error("");
     }
@@ -659,11 +626,10 @@ torch::Tensor InMemory::indexRead(Indices indices) {
     } else {
         return torch::Tensor();
     }
-
 }
 
 void InMemory::indexAdd(Indices indices, torch::Tensor values) {
-    if(!values.defined() || indices.sizes().size() != 1 || indices.size(0) != values.size(0) || data_.size(1) != values.size(1)) {
+    if (!values.defined() || indices.sizes().size() != 1 || indices.size(0) != values.size(0) || data_.size(1) != values.size(1)) {
         // TODO: throw invalid input to func exception
         throw std::runtime_error("");
     }
@@ -677,7 +643,7 @@ void InMemory::indexAdd(Indices indices, torch::Tensor values) {
 
         int d = values.size(1);
         int64_t size = indices.size(0);
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int64_t i = 0; i < size; i++) {
             for (int j = 0; j < d; j++) {
                 data_accessor[ids_accessor[i]][j] += values_accessor[i][j];
@@ -687,7 +653,7 @@ void InMemory::indexAdd(Indices indices, torch::Tensor values) {
 }
 
 void InMemory::indexPut(Indices indices, torch::Tensor values) {
-    if(!values.defined() || indices.sizes().size() != 1 || indices.size(0) != values.size(0) || data_.size(1) != values.size(1)) {
+    if (!values.defined() || indices.sizes().size() != 1 || indices.size(0) != values.size(0) || data_.size(1) != values.size(1)) {
         // TODO: throw invalid input to func exception
         throw std::runtime_error("");
     }
@@ -701,7 +667,7 @@ void InMemory::indexPut(Indices indices, torch::Tensor values) {
 
         int d = values.size(1);
         int64_t size = indices.size(0);
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int64_t i = 0; i < size; i++) {
             for (int j = 0; j < d; j++) {
                 data_accessor[ids_accessor[i]][j] = values_accessor[i][j];
@@ -711,16 +677,14 @@ void InMemory::indexPut(Indices indices, torch::Tensor values) {
 }
 
 torch::Tensor InMemory::range(int64_t offset, int64_t n) {
-    if(n + offset > dim0_size_) {
+    if (n + offset > dim0_size_) {
         // TODO: throw invalid inputs for function error
         throw std::runtime_error("");
     }
     return data_.narrow(0, offset, n);
 }
 
-void InMemory::rangePut(int64_t offset, int64_t n, torch::Tensor values) {
-    data_.narrow(0, offset, n).copy_(values);
-}
+void InMemory::rangePut(int64_t offset, int64_t n, torch::Tensor values) { data_.narrow(0, offset, n).copy_(values); }
 
 void InMemory::shuffle() {
     bool loaded = loaded_;

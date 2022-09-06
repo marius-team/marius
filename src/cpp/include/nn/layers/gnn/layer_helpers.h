@@ -15,10 +15,7 @@ torch::Tensor segmented_sum_with_offsets(torch::Tensor tensor, torch::Tensor off
 
 torch::Tensor segmented_max_with_offsets(torch::Tensor tensor, torch::Tensor offsets);
 
-std::tuple<torch::Tensor, torch::Tensor> attention_softmax(torch::Tensor neighbor_attention,
-                                                           torch::Tensor self_attention,
-                                                           torch::Tensor segment_offsets,
-                                                           torch::Tensor segment_ids,
-                                                           torch::Tensor num_nbrs);
+std::tuple<torch::Tensor, torch::Tensor> attention_softmax(torch::Tensor neighbor_attention, torch::Tensor self_attention, torch::Tensor segment_offsets,
+                                                           torch::Tensor segment_ids, torch::Tensor num_nbrs);
 
-#endif //MARIUS_LAYER_HELPERS_H
+#endif  // MARIUS_LAYER_HELPERS_H

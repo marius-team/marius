@@ -2,7 +2,6 @@
 // Created by Jason Mohoney on 4/21/20.
 //
 
-
 #ifndef MARIUS_STORAGE_H
 #define MARIUS_STORAGE_H
 
@@ -15,11 +14,11 @@
 #include "data/batch.h"
 #include "storage/buffer.h"
 
-using std::vector;
-using std::string;
-using std::shared_ptr;
 using std::list;
+using std::shared_ptr;
+using std::string;
 using std::unordered_map;
+using std::vector;
 
 #define MAX_SHUFFLE_SIZE 4E8
 #define MAX_SORT_SIZE 4E8
@@ -34,7 +33,7 @@ void createDir(string path, bool exist_ok);
 
 /** Abstract storage class */
 class Storage {
-  public:
+   public:
     int64_t dim0_size_;
     int64_t dim1_size_;
     torch::Dtype dtype_;
@@ -46,7 +45,7 @@ class Storage {
 
     Storage();
 
-    virtual ~Storage() {};
+    virtual ~Storage(){};
 
     virtual torch::Tensor indexRead(Indices indices) = 0;
 
@@ -68,17 +67,11 @@ class Storage {
 
     virtual void sort(bool src) = 0;
 
-    int64_t getDim0() {
-        return dim0_size_;
-    }
+    int64_t getDim0() { return dim0_size_; }
 
-    bool isInitialized() {
-        return initialized_;
-    }
+    bool isInitialized() { return initialized_; }
 
-    void setInitialized(bool init) {
-        initialized_ = init;
-    }
+    void setInitialized(bool init) { initialized_ = init; }
 
     void readPartitionSizes(string filename) {
         std::ifstream partition_file(filename);
@@ -89,14 +82,12 @@ class Storage {
         }
     }
 
-    vector<int64_t> getEdgeBucketSizes() {
-        return edge_bucket_sizes_;
-    }
+    vector<int64_t> getEdgeBucketSizes() { return edge_bucket_sizes_; }
 };
 
 /** Storage which uses the partition buffer, used for node embeddings and optimizer state */
 class PartitionBufferStorage : public Storage {
-  public:
+   public:
     bool loaded_;
 
     PartitionBuffer *buffer_;
@@ -135,58 +126,40 @@ class PartitionBufferStorage : public Storage {
 
     void sort(bool src) override;
 
-    Indices getRandomIds(int64_t size) {
-        return buffer_->getRandomIds(size);
-    }
+    Indices getRandomIds(int64_t size) { return buffer_->getRandomIds(size); }
 
-    bool hasSwap() {
-        return buffer_->hasSwap();
-    }
+    bool hasSwap() { return buffer_->hasSwap(); }
 
-    void performNextSwap() {
-        buffer_->performNextSwap();
-    }
+    void performNextSwap() { buffer_->performNextSwap(); }
 
-    torch::Tensor getGlobalToLocalMap(bool get_current) {
-        return buffer_->getGlobalToLocalMap(get_current);
-    }
+    torch::Tensor getGlobalToLocalMap(bool get_current) { return buffer_->getGlobalToLocalMap(get_current); }
 
-    void sync() {
-        buffer_->sync();
-    }
+    void sync() { buffer_->sync(); }
 
-    void setBufferOrdering(vector<torch::Tensor> buffer_states) {
-        buffer_->setBufferOrdering(buffer_states);
-    }
+    void setBufferOrdering(vector<torch::Tensor> buffer_states) { buffer_->setBufferOrdering(buffer_states); }
 
-    std::vector<int> getNextAdmit() {
-        return buffer_->getNextAdmit();
-    }
+    std::vector<int> getNextAdmit() { return buffer_->getNextAdmit(); }
 
-    std::vector<int> getNextEvict() {
-        return buffer_->getNextEvict();
-    }
+    std::vector<int> getNextEvict() { return buffer_->getNextEvict(); }
 
-    int64_t getNumInMemory() {
-        return buffer_->getNumInMemory();
-    }
-
+    int64_t getNumInMemory() { return buffer_->getNumInMemory(); }
 };
 
 /** Flat File storage used for data that only requires sequential access. Can be used to store and access large amounts of edges. */
 class FlatFile : public Storage {
-  private:
+   private:
     int fd_;
 
     bool loaded_;
-  public:
+
+   public:
     FlatFile(string filename, int64_t dim0_size, int64_t dim1_size, torch::Dtype dtype, bool alloc = false);
 
     FlatFile(string filename, torch::Tensor data);
 
     FlatFile(string filename, torch::Dtype dtype);
 
-    ~FlatFile() {};
+    ~FlatFile(){};
 
     void rangePut(int64_t offset, torch::Tensor values);
 
@@ -223,13 +196,12 @@ class FlatFile : public Storage {
 
 /** In memory storage for data which fits in either GPU or CPU memory. */
 class InMemory : public Storage {
-  private:
+   private:
     int fd_;
 
     bool loaded_;
 
-  public:
-
+   public:
     InMemory(string filename, int64_t dim0_size, int64_t dim1_size, torch::Dtype dtype, torch::Device device);
 
     InMemory(string filename, torch::Tensor data, torch::Device device);
@@ -238,7 +210,7 @@ class InMemory : public Storage {
 
     InMemory(torch::Tensor data);
 
-    ~InMemory() {};
+    ~InMemory(){};
 
     void load() override;
 
@@ -261,4 +233,4 @@ class InMemory : public Storage {
     void sort(bool src) override;
 };
 
-#endif //MARIUS_STORAGE_H
+#endif  // MARIUS_STORAGE_H

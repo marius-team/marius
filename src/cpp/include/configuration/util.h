@@ -9,4 +9,4 @@
 
 std::vector<torch::Device> devices_from_config(std::shared_ptr<StorageConfig> storage_config);
 
-#endif //MARIUS_CONFIGURATION_UTIL_H
+#endif  // MARIUS_CONFIGURATION_UTIL_H

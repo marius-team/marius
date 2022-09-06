@@ -1,16 +1,15 @@
-import torch
 import marius as m
 
 
-def infer_nc(model: m.nn.Model,
-             graph_storage: m.storage.GraphModelStorage,
-             output_dir: str,
-             metrics: list = None,
-             save_labels: bool = False,
-             batch_size: int = 1000,
-             num_nbrs: list = None,
-             ):
-
+def infer_nc(
+    model: m.nn.Model,
+    graph_storage: m.storage.GraphModelStorage,
+    output_dir: str,
+    metrics: list = None,
+    save_labels: bool = False,
+    batch_size: int = 1000,
+    num_nbrs: list = None,
+):
     reporter = m.report.NodeClassificationReporter()
 
     for metric in metrics:
@@ -20,10 +19,9 @@ def infer_nc(model: m.nn.Model,
     if num_nbrs is not None:
         nbr_sampler = m.samplers.LayeredNeighborSampler(graph_storage, num_nbrs)
 
-    dataloader = m.data.DataLoader(graph_storage=graph_storage,
-                                   nbr_sampler=nbr_sampler,
-                                   batch_size=batch_size,
-                                   learning_task="nc")
+    dataloader = m.data.DataLoader(
+        graph_storage=graph_storage, nbr_sampler=nbr_sampler, batch_size=batch_size, learning_task="nc"
+    )
 
     dataloader.initializeBatches()
 

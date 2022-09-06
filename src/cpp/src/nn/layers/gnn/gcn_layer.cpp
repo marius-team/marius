@@ -3,6 +3,7 @@
 //
 
 #include "nn/layers/gnn/gcn_layer.h"
+
 #include "nn/layers/gnn/layer_helpers.h"
 
 GCNLayer::GCNLayer(shared_ptr<LayerConfig> layer_config, torch::Device device) {
@@ -17,9 +18,7 @@ GCNLayer::GCNLayer(shared_ptr<LayerConfig> layer_config, torch::Device device) {
 
 void GCNLayer::reset() {
     auto tensor_options = torch::TensorOptions().dtype(torch::kFloat32).device(device_);
-    torch::Tensor edge_mat = initialize_tensor(config_->init,
-                                               {output_dim_, input_dim_},
-                                               tensor_options).set_requires_grad(true);
+    torch::Tensor edge_mat = initialize_tensor(config_->init, {output_dim_, input_dim_}, tensor_options).set_requires_grad(true);
 
     w_ = register_parameter("w", edge_mat);
     if (config_->bias) {
@@ -28,7 +27,6 @@ void GCNLayer::reset() {
 }
 
 torch::Tensor GCNLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train) {
-
     torch::Tensor total_num_neighbors;
     torch::Tensor a_i;
 
@@ -43,7 +41,6 @@ torch::Tensor GCNLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
         outgoing_embeddings = outgoing_embeddings / outgoing_normalization;
         a_i = segmented_sum_with_offsets(outgoing_embeddings, outgoing_neighbor_offsets);
     }
-
 
     if (dense_graph.in_neighbors_mapping_.defined()) {
         Indices incoming_neighbors = dense_graph.getNeighborIDs(true, false);

@@ -6,12 +6,12 @@
 #define MARIUS_EDGE_DECODER_H
 
 #include "common/datatypes.h"
+#include "nn/decoders/decoder.h"
 #include "nn/decoders/edge/comparators.h"
 #include "nn/decoders/edge/relation_operators.h"
-#include "nn/decoders/decoder.h"
 
 class EdgeDecoder : public Decoder {
-public:
+   public:
     shared_ptr<Comparator> comparator_;
     shared_ptr<RelationOperator> relation_operator_;
     torch::Tensor relations_;
@@ -27,6 +27,6 @@ public:
 
     torch::Tensor compute_scores(torch::Tensor src, torch::Tensor dst);
 
-    torch::Tensor select_relations(torch::Tensor indices, bool inverse=false);
+    torch::Tensor select_relations(torch::Tensor indices, bool inverse = false);
 };
-#endif //MARIUS_EDGE_DECODER_H
+#endif  // MARIUS_EDGE_DECODER_H

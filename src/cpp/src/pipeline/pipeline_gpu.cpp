@@ -4,28 +4,27 @@
 
 #include "pipeline/pipeline_gpu.h"
 
-#include "reporting/logger.h"
 #include "pipeline/queue.h"
+#include "reporting/logger.h"
 
 void BatchToDeviceWorker::run() {
-
     unsigned int rand_seed = rand();
 
     int assign_id = 0;
 
     while (!done_) {
         while (!paused_) {
-            auto tup = ((PipelineGPU *) pipeline_)->loaded_batches_->blocking_pop();
+            auto tup = ((PipelineGPU *)pipeline_)->loaded_batches_->blocking_pop();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
                 break;
             }
-            int queue_choice = pipeline_->assign_id_++ % ((PipelineGPU *) pipeline_)->device_loaded_batches_.size();
+            int queue_choice = pipeline_->assign_id_++ % ((PipelineGPU *)pipeline_)->device_loaded_batches_.size();
 
             batch->to(pipeline_->model_->device_models_[queue_choice]->device_);
 
-            ((PipelineGPU *) pipeline_)->device_loaded_batches_[queue_choice]->blocking_push(batch);
+            ((PipelineGPU *)pipeline_)->device_loaded_batches_[queue_choice]->blocking_push(batch);
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -34,7 +33,7 @@ void BatchToDeviceWorker::run() {
 void ComputeWorkerGPU::run() {
     while (!done_) {
         while (!paused_) {
-            auto tup = ((PipelineGPU *) pipeline_)->device_loaded_batches_[gpu_id_]->blocking_pop();
+            auto tup = ((PipelineGPU *)pipeline_)->device_loaded_batches_[gpu_id_]->blocking_pop();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -46,16 +45,16 @@ void ComputeWorkerGPU::run() {
             if (pipeline_->isTrain()) {
                 bool will_sync = false;
                 if (pipeline_->model_->device_models_.size() > 1) {
-                    ((PipelineGPU *) pipeline_)->gpu_sync_lock_->lock();
-                    ((PipelineGPU *) pipeline_)->batches_since_last_sync_++;
+                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->lock();
+                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_++;
 
-                    if (((PipelineGPU *) pipeline_)->batches_since_last_sync_ == ((PipelineGPU *) pipeline_)->gpu_sync_interval_) {
+                    if (((PipelineGPU *)pipeline_)->batches_since_last_sync_ == ((PipelineGPU *)pipeline_)->gpu_sync_interval_) {
                         will_sync = true;
                     }
 
                     // only release the lock if we don't need to synchronize the GPUs
                     if (!will_sync) {
-                        ((PipelineGPU *) pipeline_)->gpu_sync_lock_->unlock();
+                        ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
                     }
                 }
 
@@ -65,14 +64,14 @@ void ComputeWorkerGPU::run() {
 
                 batch->dense_graph_.performMap();
 
-                pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *) pipeline_)->pipeline_options_->gpu_model_average);
+                pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
 
                 if (will_sync) {
                     // we already have the lock acquired, it is safe to sync?
                     pipeline_->model_->all_reduce();
 
-                    ((PipelineGPU *) pipeline_)->batches_since_last_sync_ = 0;
-                    ((PipelineGPU *) pipeline_)->gpu_sync_lock_->unlock();
+                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_ = 0;
+                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
                 }
 
                 if (!pipeline_->has_embeddings()) {
@@ -84,7 +83,7 @@ void ComputeWorkerGPU::run() {
                     pipeline_->edges_processed_ += batch->batch_size_;
                 } else {
                     pipeline_->dataloader_->updateEmbeddings(batch, true);
-                    ((PipelineGPU *) pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
+                    ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
                 }
             } else {
                 pipeline_->model_->device_models_[gpu_id_]->evaluate_batch(batch);
@@ -102,7 +101,7 @@ void ComputeWorkerGPU::run() {
 void EncodeNodesWorkerGPU::run() {
     while (!done_) {
         while (!paused_) {
-            auto tup = ((PipelineGPU *) pipeline_)->device_loaded_batches_[gpu_id_]->blocking_pop();
+            auto tup = ((PipelineGPU *)pipeline_)->device_loaded_batches_[gpu_id_]->blocking_pop();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -112,11 +111,12 @@ void EncodeNodesWorkerGPU::run() {
             pipeline_->dataloader_->loadGPUParameters(batch);
 
             batch->dense_graph_.performMap();
-            torch::Tensor encoded = pipeline_->model_->device_models_[gpu_id_].get()->encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, false);
+            torch::Tensor encoded =
+                pipeline_->model_->device_models_[gpu_id_].get()->encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, false);
             batch->clear();
             batch->encoded_uniques_ = encoded.contiguous();
 
-            ((PipelineGPU *) pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
+            ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -125,8 +125,7 @@ void EncodeNodesWorkerGPU::run() {
 void BatchToHostWorker::run() {
     while (!done_) {
         while (!paused_) {
-
-            auto tup = ((PipelineGPU *) pipeline_)->device_update_batches_[gpu_id_]->blocking_pop();
+            auto tup = ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_pop();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -135,18 +134,14 @@ void BatchToHostWorker::run() {
 
             batch->embeddingsToHost();
 
-            ((PipelineGPU *) pipeline_)->update_batches_->blocking_push(batch);
+            ((PipelineGPU *)pipeline_)->update_batches_->blocking_push(batch);
         }
         nanosleep(&sleep_time_, NULL);
     }
 }
 
-PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader,
-                         shared_ptr<Model> model,
-                         bool train,
-                         shared_ptr<ProgressReporter> reporter,
-                         shared_ptr<PipelineConfig> pipeline_config,
-                         bool encode_only) {
+PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, bool train, shared_ptr<ProgressReporter> reporter,
+                         shared_ptr<PipelineConfig> pipeline_config, bool encode_only) {
     dataloader_ = dataloader;
     model_ = model;
     reporter_ = reporter;
@@ -170,7 +165,7 @@ PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader,
         if (model_->has_embeddings()) {
             update_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->gradients_host_queue_size);
         }
-    }  else {
+    } else {
         loaded_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
         device_loaded_batches_.emplace_back(std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_device_queue_size));
     }
@@ -187,9 +182,7 @@ PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader,
     PipelineGPU::initialize();
 }
 
-
 PipelineGPU::~PipelineGPU() {
-
     for (int i = 0; i < GPU_NUM_WORKER_TYPES; i++) {
         for (int j = 0; j < pool_[i].size(); j++) {
             pool_[i][j]->stop();
@@ -215,7 +208,6 @@ PipelineGPU::~PipelineGPU() {
 }
 
 void PipelineGPU::addWorkersToPool(int pool_id, int worker_type, int num_workers, int num_gpus) {
-
     for (int i = 0; i < num_workers; i++) {
         for (int j = 0; j < num_gpus; j++) {
             pool_[pool_id].emplace_back(initWorkerOfType(worker_type, j));
@@ -224,11 +216,10 @@ void PipelineGPU::addWorkersToPool(int pool_id, int worker_type, int num_workers
 }
 
 void PipelineGPU::initialize() {
-
     if (encode_only_) {
         addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
         addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
-        addWorkersToPool(2, GPU_ENCODE_ID, 1, model_->device_models_.size()); // Only one std::thread manages GPU
+        addWorkersToPool(2, GPU_ENCODE_ID, 1, model_->device_models_.size());  // Only one std::thread manages GPU
         if (model_->has_embeddings()) {
             addWorkersToPool(3, D2H_TRANSFER_ID, pipeline_options_->gradient_transfer_threads, model_->device_models_.size());
             addWorkersToPool(4, NODE_WRITE_ID, pipeline_options_->gradient_update_threads);
@@ -237,7 +228,7 @@ void PipelineGPU::initialize() {
         if (train_) {
             addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
             addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
-            addWorkersToPool(2, GPU_COMPUTE_ID, 1, model_->device_models_.size()); // Only one std::thread manages GPU
+            addWorkersToPool(2, GPU_COMPUTE_ID, 1, model_->device_models_.size());  // Only one std::thread manages GPU
             if (model_->has_embeddings()) {
                 addWorkersToPool(3, D2H_TRANSFER_ID, pipeline_options_->gradient_transfer_threads, model_->device_models_.size());
                 addWorkersToPool(4, UPDATE_BATCH_ID, pipeline_options_->gradient_update_threads);
@@ -264,7 +255,6 @@ void PipelineGPU::start() {
 }
 
 void PipelineGPU::pauseAndFlush() {
-
     waitComplete();
     setQueueExpectingData(false);
 
@@ -287,7 +277,7 @@ void PipelineGPU::flushQueues() {
         }
 
         if (model_->has_embeddings()) {
-            for (auto d: device_update_batches_) {
+            for (auto d : device_update_batches_) {
                 d->flush();
             }
         }

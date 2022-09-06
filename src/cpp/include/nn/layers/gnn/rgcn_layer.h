@@ -8,7 +8,7 @@
 #include "gnn_layer.h"
 
 class RGCNLayer : public GNNLayer {
-public:
+   public:
     shared_ptr<GNNLayerOptions> options_;
     int num_relations_;
     torch::Tensor relation_matrices_;
@@ -20,7 +20,6 @@ public:
     void reset() override;
 
     torch::Tensor forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train = true) override;
-
 };
 
-#endif //MARIUS_RGCN_LAYER_H
+#endif  // MARIUS_RGCN_LAYER_H

@@ -28,12 +28,10 @@ class StorageTest : public ::testing::Test {
         dim0_size = 46;
         dim1_size = 1000;
         dtype_array = {torch::kInt32, torch::kInt64, torch::kFloat16, torch::kFloat32, torch::kFloat64};
-        for (int i = 0; i < dtype_array.size(); i++)
-            dtype_size_array.push_back(get_dtype_size_wrapper(dtype_array[i]));
+        for (int i = 0; i < dtype_array.size(); i++) dtype_size_array.push_back(get_dtype_size_wrapper(dtype_array[i]));
     }
 
-    ~StorageTest() {
-    }
+    ~StorageTest() {}
 
     void SetUp() override {
         for (int i = 0; i < dtype_array.size(); i++) {
@@ -68,8 +66,7 @@ class FlatFileTest : public StorageTest {
         edges_bucket_partition_path = testing::TempDir() + "flat_file_edge_partitions.txt";
     }
 
-    ~FlatFileTest() {
-    }
+    ~FlatFileTest() {}
 };
 
 class InMemoryTest : public StorageTest {
@@ -87,8 +84,7 @@ class InMemoryTest : public StorageTest {
         edges_bucket_partition_path = testing::TempDir() + "in_memory_edge_partitions.txt";
     }
 
-    ~InMemoryTest() {
-    }
+    ~InMemoryTest() {}
 };
 
 class PartitionBufferStorageTest : public StorageTest {
@@ -139,8 +135,7 @@ class PartitionBufferStorageTest : public StorageTest {
         }
     }
 
-    ~PartitionBufferStorageTest() {
-    }
+    ~PartitionBufferStorageTest() {}
 };
 
 TEST_F(FlatFileTest, TestFlatFileWrite) {
@@ -149,7 +144,8 @@ TEST_F(FlatFileTest, TestFlatFileWrite) {
         flat_file.append(rand_tensors_array[i]);
         torch::Tensor rand_tensor = getRandTensor(dim0_size, dim1_size, dtype_array[i]);
 
-        ASSERT_EQ(pread_wrapper(fd_array[i], (void *)rand_tensor.data_ptr(), dim0_size * dim1_size * dtype_size_array[i], 0), dim0_size * dim1_size * dtype_size_array[i]);
+        ASSERT_EQ(pread_wrapper(fd_array[i], (void *)rand_tensor.data_ptr(), dim0_size * dim1_size * dtype_size_array[i], 0),
+                  dim0_size * dim1_size * dtype_size_array[i]);
         ASSERT_EQ(rand_tensors_array[i].equal(rand_tensor), true);
 
         flat_file.load();
@@ -181,7 +177,8 @@ TEST_F(FlatFileTest, TestFlatFileCopy) {
         ASSERT_NE(new_fd, -1);
 
         flat_file.copy(new_filename, false);
-        ASSERT_EQ(pread_wrapper(new_fd, (void *)rand_tensor.data_ptr(), dim0_size * dim1_size * dtype_size_array[i], 0), dim0_size * dim1_size * dtype_size_array[i]);
+        ASSERT_EQ(pread_wrapper(new_fd, (void *)rand_tensor.data_ptr(), dim0_size * dim1_size * dtype_size_array[i], 0),
+                  dim0_size * dim1_size * dtype_size_array[i]);
         ASSERT_EQ(rand_tensors_array[i].equal(rand_tensor), true);
 
         close(new_fd);
@@ -234,8 +231,7 @@ TEST_F(FlatFileTest, TestFlatFileSortEdges) {
     {
         std::ofstream ostrm;
         ostrm.open(edges_bucket_partition_path, std::ios::out | std::ios::trunc);
-        for (int i = 0; i < partition_sizes.size(); i++)
-            ostrm << partition_sizes[i] << "\n";
+        for (int i = 0; i < partition_sizes.size(); i++) ostrm << partition_sizes[i] << "\n";
         ostrm.close();
     }
     flat_file.readPartitionSizes(edges_bucket_partition_path);
@@ -266,7 +262,8 @@ TEST_F(InMemoryTest, TestIndexRead) {
         InMemory in_memory(filenames_array[i], rand_tensors_array[i], torch::kCPU);
         in_memory.load();
         torch::Tensor rand_tensor = getRandTensor(10, dim1_size, dtype_array[i]);
-        ASSERT_EQ(pread_wrapper(fd_array[i], rand_tensor.data_ptr(), 10 * dim1_size * dtype_size_array[i], 10 * dim1_size * dtype_size_array[i]), 10 * dim1_size * dtype_size_array[i]);
+        ASSERT_EQ(pread_wrapper(fd_array[i], rand_tensor.data_ptr(), 10 * dim1_size * dtype_size_array[i], 10 * dim1_size * dtype_size_array[i]),
+                  10 * dim1_size * dtype_size_array[i]);
         ASSERT_EQ(in_memory.indexRead(torch::arange(10, 20)).equal(rand_tensor), true);
 
         ASSERT_THROW(in_memory.indexRead(torch::randint(100, {10, 10}, dtype_array[i])), std::runtime_error);
@@ -355,8 +352,7 @@ TEST_F(InMemoryTest, TestInMemorySortEdges) {
     {
         std::ofstream ostrm;
         ostrm.open(edges_bucket_partition_path, std::ios::out | std::ios::trunc);
-        for (int i = 0; i < partition_sizes.size(); i++)
-            ostrm << partition_sizes[i] << "\n";
+        for (int i = 0; i < partition_sizes.size(); i++) ostrm << partition_sizes[i] << "\n";
         ostrm.close();
     }
     in_memory.readPartitionSizes(edges_bucket_partition_path);

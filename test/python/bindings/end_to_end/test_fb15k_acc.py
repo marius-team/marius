@@ -1,14 +1,13 @@
-import unittest
-import shutil
-from pathlib import Path
-import pytest
 import os
-import marius as m
-from test.python.constants import TMP_TEST_DIR, TESTING_DATA_DIR
+import shutil
+import unittest
+from pathlib import Path
+from test.python.constants import TMP_TEST_DIR
+
+import pytest
 
 
 class TestFB15K(unittest.TestCase):
-
     @classmethod
     def setUp(self):
         if not Path(TMP_TEST_DIR).exists():

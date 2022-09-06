@@ -7,7 +7,6 @@
 #include "nn/layers/gnn/layer_helpers.h"
 
 GATLayer::GATLayer(shared_ptr<LayerConfig> layer_config, torch::Device device) {
-
     config_ = layer_config;
     options_ = std::dynamic_pointer_cast<GATLayerOptions>(layer_config->options);
     input_dim_ = layer_config->input_dim;
@@ -31,20 +30,12 @@ GATLayer::GATLayer(shared_ptr<LayerConfig> layer_config, torch::Device device) {
 void GATLayer::reset() {
     auto tensor_options = torch::TensorOptions().dtype(torch::kFloat32).device(device_);
 
-    torch::Tensor weight_matrices = initialize_tensor(config_->init,
-                                                      {head_dim_ * options_->num_heads, input_dim_},
-                                                      tensor_options,
-                                                      {input_dim_, head_dim_}).set_requires_grad(true);
+    torch::Tensor weight_matrices =
+        initialize_tensor(config_->init, {head_dim_ * options_->num_heads, input_dim_}, tensor_options, {input_dim_, head_dim_}).set_requires_grad(true);
 
-    torch::Tensor a_l = initialize_tensor(config_->init,
-                                          {options_->num_heads, 1, head_dim_},
-                                          tensor_options,
-                                          {head_dim_, 1}).set_requires_grad(true);
+    torch::Tensor a_l = initialize_tensor(config_->init, {options_->num_heads, 1, head_dim_}, tensor_options, {head_dim_, 1}).set_requires_grad(true);
 
-    torch::Tensor a_r = initialize_tensor(config_->init,
-                                          {options_->num_heads, 1, head_dim_},
-                                          tensor_options,
-                                          {head_dim_, 1}).set_requires_grad(true);
+    torch::Tensor a_r = initialize_tensor(config_->init, {options_->num_heads, 1, head_dim_}, tensor_options, {head_dim_, 1}).set_requires_grad(true);
 
     weight_matrices_ = register_parameter("weight_matrices", weight_matrices);
     a_l_ = register_parameter("a_l", a_l);
@@ -53,7 +44,6 @@ void GATLayer::reset() {
     if (config_->bias) {
         init_bias();
     }
-
 }
 
 torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train) {
@@ -67,8 +57,7 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
     torch::Tensor incoming_total_neighbors = dense_graph.getNumNeighbors(true);
 
     int64_t layer_offset = dense_graph.getLayerOffset();
-    torch::Tensor parent_ids = torch::arange(inputs.size(0) - layer_offset, incoming_total_neighbors.options())
-            .repeat_interleave(incoming_total_neighbors);
+    torch::Tensor parent_ids = torch::arange(inputs.size(0) - layer_offset, incoming_total_neighbors.options()).repeat_interleave(incoming_total_neighbors);
 
     if (train && input_dropout_ > 0) {
         auto dropout_opts = torch::nn::DropoutOptions().p(input_dropout_).inplace(false);
@@ -95,12 +84,11 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
     torch::Tensor nbr_atn_weights = self_transforms_l + torch::matmul(a_r_, incoming_transforms);
     nbr_atn_weights = leaky_relu(nbr_atn_weights);
 
-    nbr_atn_weights = nbr_atn_weights.transpose(0, 2);   // [total_num_nbrs, 1, num_heads_]
-    self_atn_weights = self_atn_weights.transpose(0, 2); // [num_to_encode, 1, num_heads_]
+    nbr_atn_weights = nbr_atn_weights.transpose(0, 2);    // [total_num_nbrs, 1, num_heads_]
+    self_atn_weights = self_atn_weights.transpose(0, 2);  // [num_to_encode, 1, num_heads_]
 
-    std::tie(nbr_atn_weights, self_atn_weights) = attention_softmax(nbr_atn_weights, self_atn_weights,
-                                                                    incoming_neighbor_offsets, parent_ids,
-                                                                    incoming_total_neighbors);
+    std::tie(nbr_atn_weights, self_atn_weights) =
+        attention_softmax(nbr_atn_weights, self_atn_weights, incoming_neighbor_offsets, parent_ids, incoming_total_neighbors);
 
     nbr_atn_weights = nbr_atn_weights.transpose(0, 2);
     self_atn_weights = self_atn_weights.transpose(0, 2);

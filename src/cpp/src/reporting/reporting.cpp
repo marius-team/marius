@@ -7,34 +7,27 @@
 #include "configuration/constants.h"
 #include "reporting/logger.h"
 
-
 HitskMetric::HitskMetric(int k) {
     k_ = k;
     name_ = "Hits@" + std::to_string(k_);
     unit_ = "";
 }
 
-torch::Tensor HitskMetric::computeMetric(torch::Tensor ranks) {
-    return torch::tensor((double) ranks.le(k_).nonzero().size(0) / ranks.size(0), torch::kFloat64);
-}
+torch::Tensor HitskMetric::computeMetric(torch::Tensor ranks) { return torch::tensor((double)ranks.le(k_).nonzero().size(0) / ranks.size(0), torch::kFloat64); }
 
 MeanRankMetric::MeanRankMetric() {
     name_ = "Mean Rank";
     unit_ = "";
 }
 
-torch::Tensor MeanRankMetric::computeMetric(torch::Tensor ranks) {
-    return ranks.to(torch::kFloat64).mean();
-}
+torch::Tensor MeanRankMetric::computeMetric(torch::Tensor ranks) { return ranks.to(torch::kFloat64).mean(); }
 
 MeanReciprocalRankMetric::MeanReciprocalRankMetric() {
     name_ = "MRR";
     unit_ = "";
 }
 
-torch::Tensor MeanReciprocalRankMetric::computeMetric(torch::Tensor ranks) {
-    return ranks.to(torch::kFloat32).reciprocal().mean();
-}
+torch::Tensor MeanReciprocalRankMetric::computeMetric(torch::Tensor ranks) { return ranks.to(torch::kFloat32).reciprocal().mean(); }
 
 CategoricalAccuracyMetric::CategoricalAccuracyMetric() {
     name_ = "Accuracy";
@@ -42,20 +35,14 @@ CategoricalAccuracyMetric::CategoricalAccuracyMetric() {
 }
 
 torch::Tensor CategoricalAccuracyMetric::computeMetric(torch::Tensor y_true, torch::Tensor y_pred) {
-    return 100 * torch::tensor({(double) (y_true == y_pred).nonzero().size(0) / y_true.size(0)}, torch::kFloat64);
+    return 100 * torch::tensor({(double)(y_true == y_pred).nonzero().size(0) / y_true.size(0)}, torch::kFloat64);
 }
 
-Reporter::~Reporter() {
-    delete lock_;
-}
+Reporter::~Reporter() { delete lock_; }
 
-LinkPredictionReporter::LinkPredictionReporter() {
+LinkPredictionReporter::LinkPredictionReporter() {}
 
-}
-
-LinkPredictionReporter::~LinkPredictionReporter() {
-    clear();
-}
+LinkPredictionReporter::~LinkPredictionReporter() { clear(); }
 
 void LinkPredictionReporter::clear() {
     all_ranks_ = torch::Tensor();
@@ -109,7 +96,7 @@ void LinkPredictionReporter::report() {
 void LinkPredictionReporter::save(string directory, bool scores, bool ranks) {
     all_ranks_ = torch::cat(per_batch_ranks_).to(torch::kCPU);
     if (per_batch_scores_.size() > 0) {
-	all_scores_ = torch::cat(per_batch_scores_);
+        all_scores_ = torch::cat(per_batch_scores_);
     }
     per_batch_ranks_ = {};
     per_batch_scores_ = {};
@@ -192,13 +179,9 @@ void LinkPredictionReporter::save(string directory, bool scores, bool ranks) {
     }
 }
 
-NodeClassificationReporter::NodeClassificationReporter() {
+NodeClassificationReporter::NodeClassificationReporter() {}
 
-}
-
-NodeClassificationReporter::~NodeClassificationReporter() {
-    clear();
-}
+NodeClassificationReporter::~NodeClassificationReporter() { clear(); }
 
 void NodeClassificationReporter::clear() {
     all_y_true_ = torch::Tensor();
@@ -313,9 +296,7 @@ ProgressReporter::ProgressReporter(std::string item_name, int64_t total_items, i
     next_report_ = items_per_report_;
 }
 
-ProgressReporter::~ProgressReporter() {
-    clear();
-}
+ProgressReporter::~ProgressReporter() { clear(); }
 
 void ProgressReporter::clear() {
     current_item_ = 0;
@@ -333,6 +314,7 @@ void ProgressReporter::addResult(int64_t items_processed) {
 }
 
 void ProgressReporter::report() {
-    std::string report_string = item_name_ + " processed: [" + std::to_string(current_item_) + "/" + std::to_string(total_items_) + "], " + fmt::format("{:.2f}", 100 * (double) current_item_ / total_items_) + "%";
+    std::string report_string = item_name_ + " processed: [" + std::to_string(current_item_) + "/" + std::to_string(total_items_) + "], " +
+                                fmt::format("{:.2f}", 100 * (double)current_item_ / total_items_) + "%";
     SPDLOG_INFO(report_string);
 }
