@@ -6,13 +6,20 @@ from test.python.preprocessing.test_torch_converter import validate_output_dir, 
 
 import numpy as np
 import pandas as pd
-
-from marius.tools.configuration.marius_config import DatasetConfig
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
+import pytest
 
 test_files = ["train_edges.txt", "valid_edges.txt", "test_edges.txt"]
 
+try:
+    from marius.tools.configuration.marius_config import DatasetConfig
+    from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 
+    pyspark_imported = True
+except ImportError:
+    pyspark_imported = False
+
+
+@pytest.mark.skipif(not pyspark_imported, reason="Pyspark must be installed to run these tests.")
 class TestSparkConverter(unittest.TestCase):
     @classmethod
     def setUp(self):
