@@ -15,7 +15,6 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -100,10 +99,10 @@
            <div itemprop="articleBody">
              
   <section id="command-line-preprocessing">
-<h1>Command Line Preprocessing<a class="headerlink" href="#command-line-preprocessing" title="Permalink to this heading"></a></h1>
+<h1>Command Line Preprocessing<a class="headerlink" href="#command-line-preprocessing" title="Permalink to this headline"></a></h1>
 <p>The preprocessing procedure takes datasets in their raw format and converts them to the input format required by Marius.</p>
 <section id="built-in-datasets">
-<h2>Built-in datasets<a class="headerlink" href="#built-in-datasets" title="Permalink to this heading"></a></h2>
+<h2>Built-in datasets<a class="headerlink" href="#built-in-datasets" title="Permalink to this headline"></a></h2>
 <p>Preprocessing the FB15K-237 knowledge graph</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess --dataset fb15k_237 --output_directory datasets/fb15k_237_example/
 Downloading FB15K-237.2.zip to datasets/fb15k_237_example/FB15K-237.2.zip
@@ -156,12 +155,12 @@ ogb_wikikg90mv2
 </div>
 </section>
 <section id="custom-datasets">
-<h2>Custom datasets<a class="headerlink" href="#custom-datasets" title="Permalink to this heading"></a></h2>
+<h2>Custom datasets<a class="headerlink" href="#custom-datasets" title="Permalink to this headline"></a></h2>
 <p>Datasets in delimited file formats such as CSVs can be preprocessed with <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code></p>
 <p>See this <a class="reference external" href="http://marius-project.org/marius/examples/config/lp_custom.html#preprocess-dataset">example</a>.</p>
 </section>
 <section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: marius_preprocess [-h] [--output_directory output_directory] [--edges edges [edges ...]] [--dataset dataset] [--num_partitions num_partitions] [--partitioned_eval] [--delim delim]
                   [--dataset_split dataset_split [dataset_split ...]] [--overwrite] [--spark] [--no_remap_ids]
 

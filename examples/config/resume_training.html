@@ -15,7 +15,6 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -89,7 +88,7 @@
            <div itemprop="articleBody">
              
   <section id="resume-training-fb15k-237">
-<h1>Resume Training (FB15K-237)<a class="headerlink" href="#resume-training-fb15k-237" title="Permalink to this heading"></a></h1>
+<h1>Resume Training (FB15K-237)<a class="headerlink" href="#resume-training-fb15k-237" title="Permalink to this headline"></a></h1>
 <p>In this tutorial, we use the <strong>FB15K_237 knowledge graph</strong> as an example to demonstrate the resume training functionality available in Marius using the <span class="xref std std-doc">fb15k_237</span> example.</p>
 <p>Using <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code>, we pre-process the data to make it available under path <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt</span></code></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess --dataset fb15k_237 --output_directory datasets/fb15k_237_rt/
@@ -115,12 +114,12 @@ nodes
 </div>
 <p>The current model parameters are present in <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_0</span></code></p>
 <section id="resume-training-and-overwrite-existing-model">
-<h2>1. Resume training and overwrite existing model<a class="headerlink" href="#resume-training-and-overwrite-existing-model" title="Permalink to this heading"></a></h2>
+<h2>1. Resume training and overwrite existing model<a class="headerlink" href="#resume-training-and-overwrite-existing-model" title="Permalink to this headline"></a></h2>
 <p>Assuming the model is trained at least once, <code class="docutils literal notranslate"><span class="pre">training.resume_training</span></code> can be set to <code class="docutils literal notranslate"><span class="pre">true</span></code> to train the previously saved model further for n epochs (default 10).</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">resume_training</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">training</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+  <span class="nt">resume_training</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 <p>Running <code class="docutils literal notranslate"><span class="pre">marius_train</span></code> with the updated config will now overwrite the model parameters in <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_0/</span></code></p>
@@ -133,7 +132,7 @@ nodes
 </div>
 </section>
 <section id="resume-training-from-given-checkpoint">
-<h2>2. Resume training from given checkpoint<a class="headerlink" href="#resume-training-from-given-checkpoint" title="Permalink to this heading"></a></h2>
+<h2>2. Resume training from given checkpoint<a class="headerlink" href="#resume-training-from-given-checkpoint" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">training.resume_from_checkpoint</span></code> can be set to preserve the existing checkpointed model and write the new model to a different directory.
 If <code class="docutils literal notranslate"><span class="pre">storage.model_dir</span></code> is set, the new model will be written to the given directory, else a new directory of the pattern <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_x</span></code>
 will be created where <cite>x</cite> changes incrementally from 0-10 and will take the least non-existent value.</p>
@@ -148,11 +147,11 @@ nodes
 <p>Resuming training from the above config with <code class="docutils literal notranslate"><span class="pre">training.resume_from_checkpoint</span></code> set will write the model to <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_1</span></code> if
 <code class="docutils literal notranslate"><span class="pre">storage.model_dir</span></code> is not set. Since <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_0</span></code> now has a model trained for 20 epochs, the new model will further be
 trained 10 epochs from there.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">resume_training</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">  </span><span class="nt">resume_from_checkpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">datasets/fb15k_237_rt/model_0/</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">training</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+  <span class="nt">resume_training</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">resume_from_checkpoint</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">datasets/fb15k_237_rt/model_0/</span>
 </pre></div>
 </div>
 <p>Running <code class="docutils literal notranslate"><span class="pre">marius_train</span></code> with the updated config will save the new model parameters to <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_1/</span></code></p>

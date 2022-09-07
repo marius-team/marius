@@ -15,7 +15,6 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -110,7 +109,7 @@
            <div itemprop="articleBody">
              
   <section id="small-scale-node-classification-ogbn-arxiv">
-<h1>Small Scale Node Classification (OGBN-Arxiv)<a class="headerlink" href="#small-scale-node-classification-ogbn-arxiv" title="Permalink to this heading"></a></h1>
+<h1>Small Scale Node Classification (OGBN-Arxiv)<a class="headerlink" href="#small-scale-node-classification-ogbn-arxiv" title="Permalink to this headline"></a></h1>
 <p>OGBN-Arxiv is a built in dataset in Marius for node classification. In this example
 we will use the dataset class for OGBN-Arxiv (already defined in Marius) and the
 python APIs to make a node classification example. This example will use GraphSage
@@ -132,7 +131,7 @@ node classification</p></li>
 </div>
 <p>If you want to run CPU based training please change <em>cuda</em> to <em>cpu</em>.</p>
 <section id="create-dataset-class">
-<h2>1. Create Dataset Class<a class="headerlink" href="#create-dataset-class" title="Permalink to this heading"></a></h2>
+<h2>1. Create Dataset Class<a class="headerlink" href="#create-dataset-class" title="Permalink to this headline"></a></h2>
 <p>The dataset in this example is OGBN-Arxiv. For this dataset we already have a preprocessing
 dataset class defined in Marius. So we can use that class directly. This will help us
 avoid writing a new custom dataset class. To use the dataset class you need to import
@@ -153,7 +152,7 @@ download and the preprocess methods:</p>
 now be used in Marius for training.</p>
 </section>
 <section id="create-model">
-<h2>2. Create Model<a class="headerlink" href="#create-model" title="Permalink to this heading"></a></h2>
+<h2>2. Create Model<a class="headerlink" href="#create-model" title="Permalink to this headline"></a></h2>
 <p>In this example we are going to create a four layer model using GraphSage. While
 defining a model you need to define three things. First is the encoder, second is
 a decoder and lastly we need to define the loss function. This will setup the model.
@@ -227,7 +226,7 @@ model creation:</p>
 </div>
 </section>
 <section id="create-dataloader">
-<h2>1. Create Dataloader<a class="headerlink" href="#create-dataloader" title="Permalink to this heading"></a></h2>
+<h2>1. Create Dataloader<a class="headerlink" href="#create-dataloader" title="Permalink to this headline"></a></h2>
 <p>The dataloader object is used for setting up the storage layer. We are going to use
 <code class="docutils literal notranslate"><span class="pre">tensor_to_file()</span></code> method for defining the dataloader. This method stores all the data
 in memory.</p>
@@ -264,7 +263,7 @@ refer to the example for more details. <code class="docutils literal notranslate
 train.</p>
 </section>
 <section id="train-model">
-<h2>4. Train Model<a class="headerlink" href="#train-model" title="Permalink to this heading"></a></h2>
+<h2>4. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
 <p>Now we have defined both the model and the dataloaders so we can start with the training
 task. To train an epoch all we need to do is call the following function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">):</span>
@@ -282,7 +281,7 @@ task. To train an epoch all we need to do is call the following function:</p>
 </ul>
 </section>
 <section id="inference">
-<h2>5. Inference<a class="headerlink" href="#inference" title="Permalink to this heading"></a></h2>
+<h2>5. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
 <p>Similar to the training we can do the evaluation using the following function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">eval_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
     <span class="n">dataloader</span><span class="o">.</span><span class="n">initializeBatches</span><span class="p">()</span>
@@ -303,7 +302,7 @@ task. To train an epoch all we need to do is call the following function:</p>
 </ul>
 </section>
 <section id="save-model">
-<h2>6. Save Model<a class="headerlink" href="#save-model" title="Permalink to this heading"></a></h2>
+<h2>6. Save Model<a class="headerlink" href="#save-model" title="Permalink to this headline"></a></h2>
 <p>Work in progress - More details later</p>
 </section>
 </section>

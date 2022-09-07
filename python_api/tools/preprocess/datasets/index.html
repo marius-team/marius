@@ -15,7 +15,6 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -115,7 +114,1328 @@
            <div itemprop="articleBody">
              
   <section id="datasets">
-<h1>datasets<a class="headerlink" href="#datasets" title="Permalink to this heading"></a></h1>
+<h1>datasets<a class="headerlink" href="#datasets" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.dataset.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract dataset class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.download">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.dataset.Dataset.preprocess">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.dataset.Dataset.preprocess" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../configuration/marius_config.html#marius.tools.configuration.marius_config.DatasetConfig" title="marius.tools.configuration.marius_config.DatasetConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetConfig</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.fb15k.</span></span><span class="sig-name descname"><span class="pre">FB15K</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k.FB15K.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k.FB15K.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.fb15k_237.</span></span><span class="sig-name descname"><span class="pre">FB15K237</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.fb15k_237.FB15K237.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.fb15k_237.FB15K237.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.freebase86m.</span></span><span class="sig-name descname"><span class="pre">Freebase86m</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.freebase86m.Freebase86m.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.freebase86m.Freebase86m.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.friendster.</span></span><span class="sig-name descname"><span class="pre">Friendster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_random_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_feature_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.1,</span> <span class="pre">0.05,</span> <span class="pre">0.05]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.friendster.Friendster.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.friendster.Friendster.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.livejournal.</span></span><span class="sig-name descname"><span class="pre">Livejournal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.9,</span> <span class="pre">0.05,</span> <span class="pre">0.05]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.livejournal.Livejournal.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.livejournal.Livejournal.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogb_mag240m.</span></span><span class="sig-name descname"><span class="pre">OGBMag240M</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_mag240m.OGBMag240M.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogb_wikikg90mv2.</span></span><span class="sig-name descname"><span class="pre">OGBWikiKG90Mv2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogb_wikikg90mv2.OGBWikiKG90Mv2.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogbl_citation2.</span></span><span class="sig-name descname"><span class="pre">OGBLCitation2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_citation2.OGBLCitation2.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogbl_ppa.</span></span><span class="sig-name descname"><span class="pre">OGBLPpa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_ppa.OGBLPpa.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogbl_wikikg2.</span></span><span class="sig-name descname"><span class="pre">OGBLWikiKG2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbl_wikikg2.OGBLWikiKG2.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogbn_arxiv.</span></span><span class="sig-name descname"><span class="pre">OGBNArxiv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_arxiv.OGBNArxiv.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogbn_papers100m.</span></span><span class="sig-name descname"><span class="pre">OGBNPapers100M</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.ogbn_products.</span></span><span class="sig-name descname"><span class="pre">OGBNProducts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.ogbn_products.OGBNProducts.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.tools.preprocess.datasets.twitter.</span></span><span class="sig-name descname"><span class="pre">Twitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>spark</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_directory</strong> (<em>pathlib.Path</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.dataset_name">
+<span class="sig-name descname"><span class="pre">dataset_name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.dataset_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.dataset_url">
+<span class="sig-name descname"><span class="pre">dataset_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.dataset_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.download" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remap_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.9,</span> <span class="pre">0.05,</span> <span class="pre">0.05]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential_train_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.preprocess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.edge_list_file">
+<span class="sig-name descname"><span class="pre">edge_list_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.edge_list_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.edge_features_file">
+<span class="sig-name descname"><span class="pre">edge_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.edge_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.node_mapping_file">
+<span class="sig-name descname"><span class="pre">node_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.node_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.node_features_file">
+<span class="sig-name descname"><span class="pre">node_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.node_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.relation_mapping_file">
+<span class="sig-name descname"><span class="pre">relation_mapping_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.relation_mapping_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.relation_features_file">
+<span class="sig-name descname"><span class="pre">relation_features_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.relation_features_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.node_type_file">
+<span class="sig-name descname"><span class="pre">node_type_file</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.node_type_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.output_directory">
+<span class="sig-name descname"><span class="pre">output_directory</span></span><em class="property"><span class="pre">:</span> <span class="pre">pathlib.Path</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.output_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marius.tools.preprocess.datasets.twitter.Twitter.spark">
+<span class="sig-name descname"><span class="pre">spark</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#marius.tools.preprocess.datasets.twitter.Twitter.spark" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

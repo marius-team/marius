@@ -15,7 +15,6 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -110,10 +109,10 @@
            <div itemprop="articleBody">
              
   <section id="small-scale-node-classification-ogbn-arxiv">
-<h1>Small Scale Node Classification (OGBN-Arxiv)<a class="headerlink" href="#small-scale-node-classification-ogbn-arxiv" title="Permalink to this heading"></a></h1>
+<h1>Small Scale Node Classification (OGBN-Arxiv)<a class="headerlink" href="#small-scale-node-classification-ogbn-arxiv" title="Permalink to this headline"></a></h1>
 <p>In this tutorial, we use the <strong>OGBN-Arxiv dataset</strong> as an example to demonstrate a step-by-step walkthrough from preprocessing the dataset to defining the configuration file and to training <strong>a node classification with 3-layer GraphSage model</strong>.</p>
 <section id="preprocess-dataset">
-<h2>1. Preprocess Dataset<a class="headerlink" href="#preprocess-dataset" title="Permalink to this heading"></a></h2>
+<h2>1. Preprocess Dataset<a class="headerlink" href="#preprocess-dataset" title="Permalink to this headline"></a></h2>
 <p>Preprocessing a dataset is straightforward with the <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> command. This command comes with <code class="docutils literal notranslate"><span class="pre">marius</span></code> when <code class="docutils literal notranslate"><span class="pre">marius</span></code> is installed. See (TODO link) for installation information.</p>
 <p>Assuming <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> has been built, we preprocess the OGBN-Arxiv dataset by running the following command (assuming we are in the <code class="docutils literal notranslate"><span class="pre">marius</span></code> root directory):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess --dataset ogbn_arxiv --output_directory datasets/ogbn_arxiv_example/
@@ -179,7 +178,7 @@ initialized: <span class="nb">false</span>
 </div>
 </section>
 <section id="define-configuration-file">
-<h2>2. Define Configuration File<a class="headerlink" href="#define-configuration-file" title="Permalink to this heading"></a></h2>
+<h2>2. Define Configuration File<a class="headerlink" href="#define-configuration-file" title="Permalink to this headline"></a></h2>
 <p>To train a model, we need to define a YAML configuration file based on information created from marius_preprocess.</p>
 <p>The configuration file contains information including but not limited to the inputs to the model, training procedure, and hyperparameters to optimize. Given a configuration file, marius assembles a model depending on the given parameters. The configuration file is grouped up into four sections:</p>
 <ul class="simple">
@@ -197,54 +196,54 @@ initialized: <span class="nb">false</span>
 <div class="line">Note that the output of the encoder is the output label vector for a given node. (E.g. For node classification with 5 classes, the output label vector from the encoder might look like this: [.05, .2, .8, .01, .03]. In this case, an argmax will return a class label of 2 for the node.) The rest of the configurations can be fine-tuned by the user.</div>
 </div>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NODE_CLASSIFICATION</span><span class="w"> </span><span class="c1"># set the learning task to node classification</span><span class="w"></span>
-<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">train_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
-<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"> </span><span class="c1"># define three layers of GNN of type GRAPH_SAGE</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FEATURE</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"> </span><span class="c1"># set to 128 (to match &quot;node_feature_dim=128&quot; in &quot;dataset.yaml&quot;) for each layer except for the last</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
-<span class="w">            </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"> </span><span class="c1"># set to 128 (to match &quot;node_feature_dim=128&quot; in &quot;dataset.yaml&quot;) for each layer except for the last</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
-<span class="w">            </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
-<span class="w">            </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
-<span class="w">          </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
-<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w"> </span><span class="c1"># set &quot;output_dim&quot; to 40 (to match &quot;num_classes=40&quot;) in &quot;dataset.yaml&quot; for the last layer</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NODE</span><span class="w"></span>
-<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CROSS_ENTROPY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
-<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
-<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE_CLASSIFICATION</span> <span class="c1"># set the learning task to node classification</span>
+  <span class="nt">encoder</span><span class="p">:</span>
+    <span class="nt">train_neighbor_sampling</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
+    <span class="nt">layers</span><span class="p">:</span> <span class="c1"># define three layers of GNN of type GRAPH_SAGE</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FEATURE</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span> <span class="c1"># set to 128 (to match &quot;node_feature_dim=128&quot; in &quot;dataset.yaml&quot;) for each layer except for the last</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
+          <span class="nt">options</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
+            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
+          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span> <span class="c1"># set to 128 (to match &quot;node_feature_dim=128&quot; in &quot;dataset.yaml&quot;) for each layer except for the last</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
+          <span class="nt">options</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
+            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
+          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
+          <span class="nt">options</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
+            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
+          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span> <span class="c1"># set &quot;output_dim&quot; to 40 (to match &quot;num_classes=40&quot;) in &quot;dataset.yaml&quot; for the last layer</span>
+          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">decoder</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE</span>
+  <span class="nt">loss</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">CROSS_ENTROPY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
+  <span class="nt">dense_optimizer</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAM</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="c1"># omit</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -253,43 +252,43 @@ initialized: <span class="nb">false</span>
 <div class="line">Next, we set the <strong>storage</strong> and <strong>dataset</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">dataset</span></code>. Here, the <code class="docutils literal notranslate"><span class="pre">dataset_dir</span></code> is set to <code class="docutils literal notranslate"><span class="pre">datasets/ogbn_arxiv_example/</span></code>, which is the preprocessing output directory.</div>
 </div>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
-<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">dataset_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">datasets/ogbn_arxiv_example/</span><span class="w"></span>
-<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
-<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
-<span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cuda</span>
+  <span class="nt">dataset</span><span class="p">:</span>
+    <span class="nt">dataset_dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">datasets/ogbn_arxiv_example/</span>
+  <span class="nt">edges</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">int</span>
+  <span class="nt">features</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">options</span><span class="p">:</span>
+      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">float</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="c1"># omit</span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
 <li><p>Lastly, we configure <strong>training</strong> and <strong>evaluation</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">num_epochs</span></code>. We set <code class="docutils literal notranslate"><span class="pre">num_epochs=10</span></code> (10 epochs to train) to demonstrate this example.</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
-<span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">storage</span><span class="p">:</span>
+  <span class="c1"># omit</span>
+<span class="nt">training</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -297,7 +296,7 @@ initialized: <span class="nb">false</span>
 </ol>
 </section>
 <section id="train-model">
-<h2>3. Train Model<a class="headerlink" href="#train-model" title="Permalink to this heading"></a></h2>
+<h2>3. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
 <p>After defining our configuration file, training is run with <code class="docutils literal notranslate"><span class="pre">marius_train</span> <span class="pre">&lt;your_config.yaml&gt;</span></code>.</p>
 <p>We can now train our example using the configuration file we just created by running the following command (assuming we are in the <code class="docutils literal notranslate"><span class="pre">marius</span></code> root directory):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_train datasets/ogbn_arxiv_example/ogbn_arxiv.yaml
@@ -381,12 +380,12 @@ edges/
 </div>
 </section>
 <section id="inference">
-<h2>4. Inference<a class="headerlink" href="#inference" title="Permalink to this heading"></a></h2>
+<h2>4. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
 <section id="command-line">
-<h3>4.1 Command Line<a class="headerlink" href="#command-line" title="Permalink to this heading"></a></h3>
+<h3>4.1 Command Line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h3>
 </section>
 <section id="load-into-python">
-<h3>4.2 Load Into Python<a class="headerlink" href="#load-into-python" title="Permalink to this heading"></a></h3>
+<h3>4.2 Load Into Python<a class="headerlink" href="#load-into-python" title="Permalink to this headline"></a></h3>
 </section>
 </section>
 </section>

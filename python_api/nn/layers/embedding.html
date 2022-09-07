@@ -15,7 +15,6 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -121,7 +120,42 @@
            <div itemprop="articleBody">
              
   <section id="embeddinglayer">
-<h1>EmbeddingLayer<a class="headerlink" href="#embeddinglayer" title="Permalink to this heading"></a></h1>
+<h1>EmbeddingLayer<a class="headerlink" href="#embeddinglayer" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.nn.layers.EmbeddingLayer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">EmbeddingLayer</span></span><a class="headerlink" href="#marius.nn.layers.EmbeddingLayer" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.EmbeddingLayer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.EmbeddingLayer" title="marius._nn.layers.EmbeddingLayer"><span class="pre">marius._nn.layers.EmbeddingLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../configuration/index.html#marius.config.LayerConfig" title="marius._config.LayerConfig"><span class="pre">marius._config.LayerConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.EmbeddingLayer.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.layers.EmbeddingLayer</span></em>, <em class="sig-param"><span class="pre">dimension:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">device:</span> <span class="pre">torch.device</span></em>, <em class="sig-param"><span class="pre">init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">bias:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">bias_init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">activation:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">‘none’</span></em>, <em class="sig-param"><span class="pre">offset:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.EmbeddingLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.EmbeddingLayer" title="marius._nn.layers.EmbeddingLayer"><span class="pre">marius._nn.layers.EmbeddingLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.EmbeddingLayer.forward" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.EmbeddingLayer.init_embeddings">
+<span class="sig-name descname"><span class="pre">init_embeddings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.EmbeddingLayer" title="marius._nn.layers.EmbeddingLayer"><span class="pre">marius._nn.layers.EmbeddingLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.EmbeddingLayer.init_embeddings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.EmbeddingLayer.offset">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#marius.nn.layers.EmbeddingLayer.offset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.EmbeddingLayer.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.EmbeddingLayer" title="marius._nn.layers.EmbeddingLayer"><span class="pre">marius._nn.layers.EmbeddingLayer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.EmbeddingLayer.reset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

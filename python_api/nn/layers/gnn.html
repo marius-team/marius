@@ -15,7 +15,6 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -121,7 +120,167 @@
            <div itemprop="articleBody">
              
   <section id="gnnlayer">
-<h1>GNNLayer<a class="headerlink" href="#gnnlayer" title="Permalink to this heading"></a></h1>
+<h1>GNNLayer<a class="headerlink" href="#gnnlayer" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.nn.layers.GNNLayer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">GNNLayer</span></span><a class="headerlink" href="#marius.nn.layers.GNNLayer" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GNNLayer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#marius.nn.layers.GNNLayer.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GNNLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GNNLayer" title="marius._nn.layers.GNNLayer"><span class="pre">marius._nn.layers.GNNLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_graph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../data/dense_graph.html#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.GNNLayer.forward" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GNNLayer.input_dim">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">input_dim</span></span><a class="headerlink" href="#marius.nn.layers.GNNLayer.input_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GNNLayer.output_dim">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">output_dim</span></span><a class="headerlink" href="#marius.nn.layers.GNNLayer.output_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.nn.layers.GraphSageLayer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">GraphSageLayer</span></span><a class="headerlink" href="#marius.nn.layers.GraphSageLayer" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GraphSageLayer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GraphSageLayer" title="marius._nn.layers.GraphSageLayer"><span class="pre">marius._nn.layers.GraphSageLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../configuration/index.html#marius.config.LayerConfig" title="marius._config.LayerConfig"><span class="pre">marius._config.LayerConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.device</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.GraphSageLayer.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.layers.GraphSageLayer</span></em>, <em class="sig-param"><span class="pre">input_dim:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">output_dim:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">device:</span> <span class="pre">Optional[torch.device]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">aggregator:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">‘mean’</span></em>, <em class="sig-param"><span class="pre">init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">bias:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">bias_init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">activation:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">‘none’</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GraphSageLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GraphSageLayer" title="marius._nn.layers.GraphSageLayer"><span class="pre">marius._nn.layers.GraphSageLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_graph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../data/dense_graph.html#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.GraphSageLayer.forward" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GraphSageLayer.options">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.nn.layers.GraphSageLayer.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GraphSageLayer.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GraphSageLayer" title="marius._nn.layers.GraphSageLayer"><span class="pre">marius._nn.layers.GraphSageLayer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.GraphSageLayer.reset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GraphSageLayer.w1">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">w1</span></span><a class="headerlink" href="#marius.nn.layers.GraphSageLayer.w1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GraphSageLayer.w2_">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">w2_</span></span><a class="headerlink" href="#marius.nn.layers.GraphSageLayer.w2_" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">GATLayer</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GATLayer" title="marius._nn.layers.GATLayer"><span class="pre">marius._nn.layers.GATLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../configuration/index.html#marius.config.LayerConfig" title="marius._config.LayerConfig"><span class="pre">marius._config.LayerConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.device</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.layers.GATLayer</span></em>, <em class="sig-param"><span class="pre">input_dim:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">output_dim:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">device:</span> <span class="pre">Optional[torch.device]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">num_heads:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10</span></em>, <em class="sig-param"><span class="pre">average_heads:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">input_dropout:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></em>, <em class="sig-param"><span class="pre">attention_dropout:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></em>, <em class="sig-param"><span class="pre">negative_slope:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.2</span></em>, <em class="sig-param"><span class="pre">init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">bias:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">bias_init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">activation:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">‘none’</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GATLayer" title="marius._nn.layers.GATLayer"><span class="pre">marius._nn.layers.GATLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_graph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../data/dense_graph.html#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.forward" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.a_l">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">a_l</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.a_l" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.a_r">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">a_r</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.a_r" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.attention_dropout">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">attention_dropout</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.attention_dropout" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.head_dim">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">head_dim</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.head_dim" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.input_dropout">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">input_dropout</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.input_dropout" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.options">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GATLayer" title="marius._nn.layers.GATLayer"><span class="pre">marius._nn.layers.GATLayer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.reset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GATLayer.weight_matrices">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">weight_matrices</span></span><a class="headerlink" href="#marius.nn.layers.GATLayer.weight_matrices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.nn.layers.GCNLayer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">GCNLayer</span></span><a class="headerlink" href="#marius.nn.layers.GCNLayer" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GCNLayer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GCNLayer" title="marius._nn.layers.GCNLayer"><span class="pre">marius._nn.layers.GCNLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../configuration/index.html#marius.config.LayerConfig" title="marius._config.LayerConfig"><span class="pre">marius._config.LayerConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.device</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.GCNLayer.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.layers.GCNLayer</span></em>, <em class="sig-param"><span class="pre">input_dim:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">output_dim:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">device:</span> <span class="pre">Optional[torch.device]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">bias:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">bias_init:</span> <span class="pre">marius._config.InitConfig</span></em>, <em class="sig-param"><span class="pre">activation:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">‘none’</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GCNLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GCNLayer" title="marius._nn.layers.GCNLayer"><span class="pre">marius._nn.layers.GCNLayer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dense_graph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../../data/dense_graph.html#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.GCNLayer.forward" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GCNLayer.options">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#marius.nn.layers.GCNLayer.options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.layers.GCNLayer.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.GCNLayer" title="marius._nn.layers.GCNLayer"><span class="pre">marius._nn.layers.GCNLayer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.GCNLayer.reset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.layers.GCNLayer.w_">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">w_</span></span><a class="headerlink" href="#marius.nn.layers.GCNLayer.w_" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

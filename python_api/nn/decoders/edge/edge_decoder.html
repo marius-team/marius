@@ -15,7 +15,6 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -120,7 +119,77 @@
            <div itemprop="articleBody">
              
   <section id="edgedecoder">
-<h1>EdgeDecoder<a class="headerlink" href="#edgedecoder" title="Permalink to this heading"></a></h1>
+<h1>EdgeDecoder<a class="headerlink" href="#edgedecoder" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.decoders.edge.</span></span><span class="sig-name descname"><span class="pre">EdgeDecoder</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.apply_relation">
+<span class="sig-name descname"><span class="pre">apply_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.decoders.edge.EdgeDecoder" title="marius._nn.decoders.edge.EdgeDecoder"><span class="pre">marius._nn.decoders.edge.EdgeDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.apply_relation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.compute_scores">
+<span class="sig-name descname"><span class="pre">compute_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.decoders.edge.EdgeDecoder" title="marius._nn.decoders.edge.EdgeDecoder"><span class="pre">marius._nn.decoders.edge.EdgeDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.compute_scores" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.select_relations">
+<span class="sig-name descname"><span class="pre">select_relations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.decoders.edge.EdgeDecoder" title="marius._nn.decoders.edge.EdgeDecoder"><span class="pre">marius._nn.decoders.edge.EdgeDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.select_relations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.comparator">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">comparator</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.comparator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.embedding_size">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">embedding_size</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.embedding_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.inverse_relations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">inverse_relations</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.inverse_relations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.mode">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.mode" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.num_relations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_relations</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.num_relations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.relation_operator">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">relation_operator</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.relation_operator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.relations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">relations</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.relations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.tensor_options">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">tensor_options</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.tensor_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.nn.decoders.edge.EdgeDecoder.use_inverse_relations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">use_inverse_relations</span></span><a class="headerlink" href="#marius.nn.decoders.edge.EdgeDecoder.use_inverse_relations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

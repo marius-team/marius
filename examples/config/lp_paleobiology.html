@@ -15,7 +15,6 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -110,10 +109,10 @@
            <div itemprop="articleBody">
              
   <section id="paleobiology-dataset-link-prediction">
-<span id="lp-paleo"></span><h1>Paleobiology Dataset Link Prediction<a class="headerlink" href="#paleobiology-dataset-link-prediction" title="Permalink to this heading"></a></h1>
+<span id="lp-paleo"></span><h1>Paleobiology Dataset Link Prediction<a class="headerlink" href="#paleobiology-dataset-link-prediction" title="Permalink to this headline"></a></h1>
 <p>In this tutorial, we will use Marius to perform link prediction on a paleobiology knowledge graph dataset, i.e. predicting the existence of an edge between two nodes in a graph. This will cover the end-to-end process of downloading a dataset, running Marius to learn the embeddings of all the nodes and edges in the graph, and then using these embeddings to infer new links and make discoveries.</p>
 <section id="dataset-information">
-<h2>Dataset Information<a class="headerlink" href="#dataset-information" title="Permalink to this heading"></a></h2>
+<h2>Dataset Information<a class="headerlink" href="#dataset-information" title="Permalink to this headline"></a></h2>
 <p>In our example we will train on a graph-structured paleobiology dataset which contains information about fossils and their relations to Earth. In this knowledge graph dataset, nodes represent different types of entities and directed edges are relationships between them. This dataset contains 14,752 nodes and 107,247 edges, with 5 possible relation types.</p>
 <p>The <strong>nodes/entities</strong> in this graph fall into 10 different types. They are:</p>
 <ol class="arabic simple">
@@ -146,7 +145,7 @@
 <p>Using our embeddings, we can find the source node(s) with the highest probability of existing. If the probability is higher than some threshold, we can say that these predicted links should be considered true.</p>
 </section>
 <section id="download-the-dataset">
-<h2>1. Download the Dataset<a class="headerlink" href="#download-the-dataset" title="Permalink to this heading"></a></h2>
+<h2>1. Download the Dataset<a class="headerlink" href="#download-the-dataset" title="Permalink to this headline"></a></h2>
 <p>To download the dataset and helper files, clone the following repository into the directory of your choosing:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">team</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">examples</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
@@ -158,7 +157,7 @@
 <p>This contains our paleobiology dataset, located in <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>, along with a sample configuration file <code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code> and link prediction Python script predict.py.</p>
 </section>
 <section id="train-model-with-marius">
-<h2>2. Train Model with Marius<a class="headerlink" href="#train-model-with-marius" title="Permalink to this heading"></a></h2>
+<h2>2. Train Model with Marius<a class="headerlink" href="#train-model-with-marius" title="Permalink to this headline"></a></h2>
 <p>We assume Marius has been downloaded and installed with PIP:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">marius</span><span class="o">-</span><span class="n">team</span><span class="o">/</span><span class="n">marius</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">marius</span><span class="p">;</span> <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
@@ -170,46 +169,46 @@
 <p><code class="docutils literal notranslate"><span class="pre">training.num_epochs</span></code>: The number of epochs to train for. Adjust higher or lower based on the desired accuracy of the embeddings. Our default is <code class="docutils literal notranslate"><span class="pre">100</span></code> epochs.</p>
 <p><code class="docutils literal notranslate"><span class="pre">storage.dataset.dataset_dir</span></code>: We assume we are in the link prediction example directory <code class="docutils literal notranslate"><span class="pre">~/marius-examples/link-predict-example/</span></code> when running the training process, so our default relative path is <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>. Change if running from another directory.</p>
 <p><code class="docutils literal notranslate"><span class="pre">paleo_config.yaml</span></code></p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span><span class="w"></span>
-<span class="w">    </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
-<span class="w">            </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
-<span class="w">    </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COMPLEX</span><span class="w"></span>
-<span class="w">    </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span><span class="w"></span>
-<span class="w">    </span><span class="nt">sparse_optimizer</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
-<span class="w">        </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
-<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
-<span class="w">    </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">dataset_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dataset/</span><span class="w"></span>
-<span class="w">    </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">training</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">    </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
-<span class="w">        </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512</span><span class="w"></span>
-<span class="w">        </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
-<span class="w">        </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">    </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
-<span class="w">    </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">    </span><span class="nt">epochs_per_shuffle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
-<span class="w">    </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">    </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+    <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span>
+    <span class="nt">encoder</span><span class="p">:</span>
+        <span class="nt">layers</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span>
+            <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">decoder</span><span class="p">:</span>
+        <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">COMPLEX</span>
+    <span class="nt">loss</span><span class="p">:</span>
+        <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
+    <span class="nt">sparse_optimizer</span><span class="p">:</span>
+        <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span>
+        <span class="nt">options</span><span class="p">:</span>
+        <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="nt">storage</span><span class="p">:</span>
+    <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cuda</span>
+    <span class="nt">dataset</span><span class="p">:</span>
+        <span class="nt">dataset_dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">dataset/</span>
+    <span class="nt">edges</span><span class="p">:</span>
+        <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">embeddings</span><span class="p">:</span>
+        <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
+    <span class="nt">save_model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">training</span><span class="p">:</span>
+    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+    <span class="nt">negative_sampling</span><span class="p">:</span>
+        <span class="nt">num_chunks</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+        <span class="nt">negatives_per_positive</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">512</span>
+        <span class="nt">degree_fraction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
+        <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+    <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+    <span class="nt">pipeline</span><span class="p">:</span>
+        <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+    <span class="nt">epochs_per_shuffle</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">evaluation</span><span class="p">:</span>
+    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+    <span class="nt">negative_sampling</span><span class="p">:</span>
+        <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+    <span class="nt">pipeline</span><span class="p">:</span>
+        <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 <p><strong>Step 2: Run Marius</strong></p>
@@ -268,7 +267,7 @@ edges/
 </div>
 </section>
 <section id="inference-with-python-using-embeddings-for-link-prediction">
-<h2>3. Inference with Python: Using Embeddings for Link Prediction<a class="headerlink" href="#inference-with-python-using-embeddings-for-link-prediction" title="Permalink to this heading"></a></h2>
+<h2>3. Inference with Python: Using Embeddings for Link Prediction<a class="headerlink" href="#inference-with-python-using-embeddings-for-link-prediction" title="Permalink to this headline"></a></h2>
 <p>We will use the Marius inference tool <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code> to perform link prediction with our trained model. For more information about <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code>, see <a class="reference internal" href="../../export_and_inference/marius_predict.html#marius-predict"><span class="std std-ref">Batch Inference (marius_predict)</span></a>.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">~marius-examples/link-predict-example/</span></code>, run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">marius_predict</span> <span class="o">--</span><span class="n">config</span> <span class="n">paleo_config</span><span class="o">.</span><span class="n">yaml</span> <span class="o">--</span><span class="n">output_dir</span> <span class="n">results</span><span class="o">/</span> <span class="o">--</span><span class="n">metrics</span> <span class="n">mrr</span> <span class="n">mean_rank</span> <span class="n">hits1</span> <span class="n">hits10</span> <span class="n">hits50</span> <span class="o">--</span><span class="n">save_scores</span> <span class="o">--</span><span class="n">save_ranks</span>

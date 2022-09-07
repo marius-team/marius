@@ -15,7 +15,6 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -108,7 +107,52 @@
            <div itemprop="articleBody">
              
   <section id="graphencoder">
-<h1>GraphEncoder<a class="headerlink" href="#graphencoder" title="Permalink to this heading"></a></h1>
+<h1>GraphEncoder<a class="headerlink" href="#graphencoder" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.pipeline.GraphEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.pipeline.</span></span><span class="sig-name descname"><span class="pre">GraphEncoder</span></span><a class="headerlink" href="#marius.pipeline.GraphEncoder" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.pipeline.GraphEncoder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#marius.pipeline.GraphEncoder.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.pipeline.GraphEncoder.dataloader">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dataloader</span></span><a class="headerlink" href="#marius.pipeline.GraphEncoder.dataloader" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marius.pipeline.GraphEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.pipeline.GraphEncoder" title="marius._pipeline.GraphEncoder"><span class="pre">marius._pipeline.GraphEncoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">separate_layers</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.pipeline.GraphEncoder.encode" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marius.pipeline.GraphEncoder.progress_reporter">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">progress_reporter</span></span><a class="headerlink" href="#marius.pipeline.GraphEncoder.progress_reporter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.pipeline.SynchronousEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.pipeline.</span></span><span class="sig-name descname"><span class="pre">SynchronousEncoder</span></span><a class="headerlink" href="#marius.pipeline.SynchronousEncoder" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.pipeline.SynchronousEncoder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.pipeline.SynchronousEncoder" title="marius._pipeline.SynchronousEncoder"><span class="pre">marius._pipeline.SynchronousEncoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../data/dataloader.html#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../nn/model.html#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.pipeline.SynchronousEncoder.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="marius.pipeline.PipelineEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.pipeline.</span></span><span class="sig-name descname"><span class="pre">PipelineEncoder</span></span><a class="headerlink" href="#marius.pipeline.PipelineEncoder" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="marius.pipeline.PipelineEncoder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.pipeline.PipelineEncoder" title="marius._pipeline.PipelineEncoder"><span class="pre">marius._pipeline.PipelineEncoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../data/dataloader.html#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../nn/model.html#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../configuration/index.html#marius.config.PipelineConfig" title="marius._config.PipelineConfig"><span class="pre">marius._config.PipelineConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.pipeline.PipelineEncoder.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

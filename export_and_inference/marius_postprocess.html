@@ -15,7 +15,6 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -100,11 +99,11 @@
            <div itemprop="articleBody">
              
   <section id="model-exporting-tool-marius-postprocess">
-<h1>Model exporting tool (marius_postprocess)<a class="headerlink" href="#model-exporting-tool-marius-postprocess" title="Permalink to this heading"></a></h1>
+<h1>Model exporting tool (marius_postprocess)<a class="headerlink" href="#model-exporting-tool-marius-postprocess" title="Permalink to this headline"></a></h1>
 <p>This page describes the marius_postprocess tool, which can convert and export trained models to csv or parquet formats.</p>
 <p>Currently this tool is in memory only, thus the embedding table(s) must fit in CPU memory to perform the export.</p>
 <section id="example-usage">
-<h2>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this heading"></a></h2>
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline"></a></h2>
 <p>Train the fb15k_237 example model:</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_preprocess --dataset fb15k_237 --output_directory datasets/fb15k_237_example/
@@ -133,7 +132,7 @@ Wrote my_output_dir/model.pt
 <p>Note that the CSV format may not be ideal for exporting the embedding table(s), as the embedding vectors are converted to text representations. The model can be exported in parquet format by using <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">parquet</span></code>, or copied in raw format with <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">bin</span></code>.</p>
 </section>
 <section id="command-line-arguments">
-<h2>Command line arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this heading"></a></h2>
+<h2>Command line arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline"></a></h2>
 <p>Below is the help message for the tool, containing an overview of the tools arguments and usage.</p>
 <blockquote>
 <div><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ marius_postprocess --help
