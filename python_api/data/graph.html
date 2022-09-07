@@ -15,6 +15,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,122 +110,7 @@
            <div itemprop="articleBody">
              
   <section id="mariusgraph">
-<h1>MariusGraph<a class="headerlink" href="#mariusgraph" title="Permalink to this headline"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.data.MariusGraph">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.data.</span></span><span class="sig-name descname"><span class="pre">MariusGraph</span></span><a class="headerlink" href="#marius.data.MariusGraph" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.data.MariusGraph.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Overloaded function.</p>
-<ol class="arabic simple">
-<li><p>__init__(self: marius._data.MariusGraph) -&gt; None</p></li>
-<li><p>__init__(self: marius._data.MariusGraph, src_sorted_edges: at::Tensor, dst_sorted_edges: at::Tensor, num_nodes_in_memory: int) -&gt; None</p></li>
-</ol>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.active_in_memory_subgraph">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">active_in_memory_subgraph</span></span><a class="headerlink" href="#marius.data.MariusGraph.active_in_memory_subgraph" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.MariusGraph" title="marius._data.MariusGraph"><span class="pre">marius._data.MariusGraph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.MariusGraph.clear" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.dst_sorted_edges">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dst_sorted_edges</span></span><a class="headerlink" href="#marius.data.MariusGraph.dst_sorted_edges" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.getEdges">
-<span class="sig-name descname"><span class="pre">getEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.MariusGraph" title="marius._data.MariusGraph"><span class="pre">marius._data.MariusGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoming</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.data.MariusGraph.getEdges" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.getNeighborOffsets">
-<span class="sig-name descname"><span class="pre">getNeighborOffsets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.MariusGraph" title="marius._data.MariusGraph"><span class="pre">marius._data.MariusGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoming</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.data.MariusGraph.getNeighborOffsets" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.getNeighborsForNodeIds">
-<span class="sig-name descname"><span class="pre">getNeighborsForNodeIds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._data.MariusGraph</span></em>, <em class="sig-param"><span class="pre">node_ids:</span> <span class="pre">at::Tensor</span></em>, <em class="sig-param"><span class="pre">incoming:</span> <span class="pre">bool</span></em>, <em class="sig-param"><span class="pre">neighbor_sampling_layer:</span> <span class="pre">marius._config.NeighborSamplingLayer</span></em>, <em class="sig-param"><span class="pre">max_neighbors_size:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">rate:</span> <span class="pre">float</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple[at::Tensor,</span> <span class="pre">at::Tensor]</span></span></span><a class="headerlink" href="#marius.data.MariusGraph.getNeighborsForNodeIds" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.getNumNeighbors">
-<span class="sig-name descname"><span class="pre">getNumNeighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.MariusGraph" title="marius._data.MariusGraph"><span class="pre">marius._data.MariusGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoming</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.data.MariusGraph.getNumNeighbors" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.getRelationIDs">
-<span class="sig-name descname"><span class="pre">getRelationIDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.MariusGraph" title="marius._data.MariusGraph"><span class="pre">marius._data.MariusGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoming</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.data.MariusGraph.getRelationIDs" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.in_num_neighbors">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">in_num_neighbors</span></span><a class="headerlink" href="#marius.data.MariusGraph.in_num_neighbors" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.in_offsets">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">in_offsets</span></span><a class="headerlink" href="#marius.data.MariusGraph.in_offsets" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.in_sorted_uniques">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">in_sorted_uniques</span></span><a class="headerlink" href="#marius.data.MariusGraph.in_sorted_uniques" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.max_in_num_neighbors_">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">max_in_num_neighbors_</span></span><a class="headerlink" href="#marius.data.MariusGraph.max_in_num_neighbors_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.max_out_num_neighbors_">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">max_out_num_neighbors_</span></span><a class="headerlink" href="#marius.data.MariusGraph.max_out_num_neighbors_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.node_ids">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">node_ids</span></span><a class="headerlink" href="#marius.data.MariusGraph.node_ids" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.num_nodes_in_memory">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_nodes_in_memory</span></span><a class="headerlink" href="#marius.data.MariusGraph.num_nodes_in_memory" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.out_num_neighbors">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">out_num_neighbors</span></span><a class="headerlink" href="#marius.data.MariusGraph.out_num_neighbors" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.out_offsets">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">out_offsets</span></span><a class="headerlink" href="#marius.data.MariusGraph.out_offsets" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.out_sorted_uniques">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">out_sorted_uniques</span></span><a class="headerlink" href="#marius.data.MariusGraph.out_sorted_uniques" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.src_sorted_edges">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">src_sorted_edges</span></span><a class="headerlink" href="#marius.data.MariusGraph.src_sorted_edges" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.MariusGraph.to">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._data.MariusGraph</span></em>, <em class="sig-param"><span class="pre">device:</span> <span class="pre">at::Device</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.MariusGraph.to" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<h1>MariusGraph<a class="headerlink" href="#mariusgraph" title="Permalink to this heading"></a></h1>
 </section>
 
 

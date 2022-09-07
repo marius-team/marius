@@ -112,13 +112,7 @@ Node embedings are optimized by the sparse optimizer.
    storage:
      device_type: cpu
      dataset:
-       base_directory: /home/data/datasets/fb15k_237/
-       num_edges: 272115
-       num_train: 272115
-       num_nodes: 14541
-       num_relations: 237
-       num_valid: 17535
-       num_test: 20466
+       dataset_dir: /home/data/datasets/fb15k_237/
      edges:
        type: DEVICE_MEMORY
        options:
@@ -228,15 +222,7 @@ classification. The loss function being used is Cross Entropy with sum as the re
    storage:
      device_type: cuda
      dataset:
-       base_directory: /home/data/datasets/ogbn_arxiv/
-       num_edges: 1166243
-       num_nodes: 169343
-       num_relations: 1
-       num_train: 90941
-       num_valid: 29799
-       num_test: 48603
-       node_feature_dim: 128
-       num_classes: 40
+       dataset_dir: /home/data/datasets/ogbn_arxiv/
      edges:
        type: DEVICE_MEMORY
      nodes:
@@ -251,8 +237,7 @@ classification. The loss function being used is Cross Entropy with sum as the re
      shuffle_input: true
      full_graph_evaluation: true
 
-The storage configuration here is very similar to the one shown above in Link Prediction. `num_classes` states the number of output 
-class labels. 
+The storage configuration here is very similar to the one shown above in Link Prediction.
 
 3. Configure training and evaluation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

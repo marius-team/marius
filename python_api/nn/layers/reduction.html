@@ -15,6 +15,7 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -120,77 +121,7 @@
            <div itemprop="articleBody">
              
   <section id="reductionlayer">
-<h1>ReductionLayer<a class="headerlink" href="#reductionlayer" title="Permalink to this headline"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.nn.layers.ReductionLayer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">ReductionLayer</span></span><a class="headerlink" href="#marius.nn.layers.ReductionLayer" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.ReductionLayer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.nn.layers.ReductionLayer.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.ReductionLayer.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.layers.ReductionLayer,</span> <span class="pre">inputs:</span> <span class="pre">List[at::Tensor]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.ReductionLayer.forward" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.nn.layers.ConcatReduction">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">ConcatReduction</span></span><a class="headerlink" href="#marius.nn.layers.ConcatReduction" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.ConcatReduction.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.nn.layers.ConcatReduction.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Overloaded function.</p>
-<ol class="arabic simple">
-<li><p>__init__(self: marius._nn.layers.ConcatReduction, layer_config: marius._config.LayerConfig, device: at::Device) -&gt; None</p></li>
-<li><p>__init__(self: marius._nn.layers.ConcatReduction, input_dim: int, output_dim: int, device: Optional[at::Device] = None, init: marius._config.InitConfig = &lt;marius._config.InitConfig object at 0x10e4f8e70&gt;, bias: bool = False, bias_init: marius._config.InitConfig = &lt;marius._config.InitConfig object at 0x10e4f85b0&gt;, activation: str = ‘none’) -&gt; None</p></li>
-</ol>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.ConcatReduction.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.layers.ConcatReduction,</span> <span class="pre">input:</span> <span class="pre">List[at::Tensor]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.ConcatReduction.forward" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.ConcatReduction.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.ConcatReduction" title="marius._nn.layers.ConcatReduction"><span class="pre">marius._nn.layers.ConcatReduction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.ConcatReduction.reset" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.nn.layers.LinearReduction">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.nn.layers.</span></span><span class="sig-name descname"><span class="pre">LinearReduction</span></span><a class="headerlink" href="#marius.nn.layers.LinearReduction" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.LinearReduction.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.nn.layers.LinearReduction.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Overloaded function.</p>
-<ol class="arabic simple">
-<li><p>__init__(self: marius._nn.layers.LinearReduction, layer_config: marius._config.LayerConfig, device: at::Device) -&gt; None</p></li>
-<li><p>__init__(self: marius._nn.layers.LinearReduction, input_dim: int, output_dim: int, device: Optional[at::Device] = None, init: marius._config.InitConfig = &lt;marius._config.InitConfig object at 0x10e1f0070&gt;, bias: bool = False, bias_init: marius._config.InitConfig = &lt;marius._config.InitConfig object at 0x10e4b83b0&gt;, activation: str = ‘none’) -&gt; None</p></li>
-</ol>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.LinearReduction.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._nn.layers.LinearReduction,</span> <span class="pre">input:</span> <span class="pre">List[at::Tensor]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.nn.layers.LinearReduction.forward" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.nn.layers.LinearReduction.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.nn.layers.LinearReduction" title="marius._nn.layers.LinearReduction"><span class="pre">marius._nn.layers.LinearReduction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.nn.layers.LinearReduction.reset" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.nn.layers.LinearReduction.weight_matrix">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">weight_matrix</span></span><a class="headerlink" href="#marius.nn.layers.LinearReduction.weight_matrix" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<h1>ReductionLayer<a class="headerlink" href="#reductionlayer" title="Permalink to this heading"></a></h1>
 </section>
 
 

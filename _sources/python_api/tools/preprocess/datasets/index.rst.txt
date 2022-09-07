@@ -62,11 +62,6 @@ datasets
     :undoc-members:
     :special-members: __init__
 
-.. autoclass:: marius.tools.preprocess.datasets.ogbn_mag.OGBNMag
-    :members:
-    :undoc-members:
-    :special-members: __init__
-
 .. autoclass:: marius.tools.preprocess.datasets.ogbn_papers100m.OGBNPapers100M
     :members:
     :undoc-members:

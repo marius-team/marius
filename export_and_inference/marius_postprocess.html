@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model exporting tool (marius_postprocess) &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Graph Learning" href="../graph_learning/index.html" />
+    <link rel="prev" title="Batch Inference (marius_predict)" href="marius_predict.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python_api/index.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Model Export and Inference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="marius_predict.html">Batch Inference (marius_predict)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Model exporting tool (marius_postprocess)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-arguments">Command line arguments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Model Export and Inference</a> &raquo;</li>
+      <li>Model exporting tool (marius_postprocess)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/export_and_inference/marius_postprocess.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="model-exporting-tool-marius-postprocess">
+<h1>Model exporting tool (marius_postprocess)<a class="headerlink" href="#model-exporting-tool-marius-postprocess" title="Permalink to this heading"></a></h1>
+<p>This page describes the marius_postprocess tool, which can convert and export trained models to csv or parquet formats.</p>
+<p>Currently this tool is in memory only, thus the embedding table(s) must fit in CPU memory to perform the export.</p>
+<section id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this heading"></a></h2>
+<p>Train the fb15k_237 example model:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_preprocess --dataset fb15k_237 --output_directory datasets/fb15k_237_example/
+marius_train examples/configuration/fb15k_237.yaml
+</pre></div>
+</div>
+</div></blockquote>
+<p>The trained model is located at: <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_example/model_0</span></code></p>
+<p>Export the model to CSV format:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_postprocess --model_dir datasets/fb15k_237_example/model_0 --format csv --output_dir my_output_dir
+</pre></div>
+</div>
+</div></blockquote>
+<p>The output of the command should look like:</p>
+<blockquote>
+<div><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Wrote my_output_dir/embeddings.csv: shape (14541, 2)
+Wrote my_output_dir/relation_embeddings.csv: shape (237, 2)
+Wrote my_output_dir/inverse_relation_embeddings.csv: shape (237, 2)
+Wrote my_output_dir/model.pt
+</pre></div>
+</div>
+</div></blockquote>
+<p>From the above we can see that the node and edge-type (relation) embeddings have been written to CSV files. model.pt is a pytorch model file which may contain additional model parameters (GNN weights).</p>
+<p>The output files contain two columns (id, embedding). The number of rows corresponds to the number of nodes or number of edge-types.</p>
+<p>Note that the CSV format may not be ideal for exporting the embedding table(s), as the embedding vectors are converted to text representations. The model can be exported in parquet format by using <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">parquet</span></code>, or copied in raw format with <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">bin</span></code>.</p>
+</section>
+<section id="command-line-arguments">
+<h2>Command line arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this heading"></a></h2>
+<p>Below is the help message for the tool, containing an overview of the tools arguments and usage.</p>
+<blockquote>
+<div><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ marius_postprocess --help
+usage: postprocess [-h] [--model_dir model_dir] [--format format] [--delim delim] [--output_dir output_dir] [--overwrite]
+
+Convert trained embeddings to desired output format and output to specified directory.
+
+Example usage:
+marius_postprocess --model_dir foo --format csv --output_dir bar
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --model_dir model_dir
+                        Directory of the trained model
+  --format format, -f format
+                        Format of output embeddings. Choices are [csv, parquet, binary]
+  --delim delim         Delimiter to use for the output CSV
+  --output_dir output_dir
+                        Output directory, if not provided the model directory will be used.
+  --overwrite           If enabled, the output directory will be overwritten
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="marius_predict.html" class="btn btn-neutral float-left" title="Batch Inference (marius_predict)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../graph_learning/index.html" class="btn btn-neutral float-right" title="Graph Learning" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

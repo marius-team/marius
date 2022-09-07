@@ -15,6 +15,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,7 +110,7 @@
            <div itemprop="articleBody">
              
   <section id="small-scale-link-prediction-fb15k-237">
-<h1>Small Scale Link Prediction (FB15K-237)<a class="headerlink" href="#small-scale-link-prediction-fb15k-237" title="Permalink to this headline"></a></h1>
+<h1>Small Scale Link Prediction (FB15K-237)<a class="headerlink" href="#small-scale-link-prediction-fb15k-237" title="Permalink to this heading"></a></h1>
 <p>This example will demonstrate how to use Marius Python API to do a Link
 Prediction task on a small scale graph. In this example we will use FB15K-237
 graph. FB15K-237 is a graph that is supported by Marius already so you won’t
@@ -132,7 +133,7 @@ main using the line:</p>
 </div>
 <p>If you want to run CPU based training please change <em>cuda</em> to <em>cpu</em>.</p>
 <section id="create-dataset-class">
-<h2>1. Create Dataset Class<a class="headerlink" href="#create-dataset-class" title="Permalink to this headline"></a></h2>
+<h2>1. Create Dataset Class<a class="headerlink" href="#create-dataset-class" title="Permalink to this heading"></a></h2>
 <p>In this example we are going to use a built in dataset class to do preprocessing
 for FB15K-237 graph. Marius already has support for few graphs and you can use their
 dataset classes directly to preprocess the data.</p>
@@ -143,9 +144,9 @@ dataset classes directly to preprocess the data.</p>
 <p>Once you imported the class all you need to do is instansiate the base directory
 where you will store all the dataset and preprocessed files. And call the download
 and preprocess on the objects. As shown in the code.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;fb15k_dataset/&quot;</span><span class="p">)</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">FB15K237</span><span class="p">(</span><span class="n">base_directory</span><span class="p">)</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">base_directory</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;edges/train_edges.bin&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;fb15k_dataset/&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">FB15K237</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;edges/train_edges.bin&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
     <span class="n">dataset</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
     <span class="n">dataset</span><span class="o">.</span><span class="n">preprocess</span><span class="p">()</span>
 </pre></div>
@@ -154,7 +155,7 @@ and preprocess on the objects. As shown in the code.:</p>
 is needed for further tasks, so we read it in the example code.</p>
 </section>
 <section id="create-model">
-<h2>2. Create Model<a class="headerlink" href="#create-model" title="Permalink to this headline"></a></h2>
+<h2>2. Create Model<a class="headerlink" href="#create-model" title="Permalink to this heading"></a></h2>
 <p>Next step is to define a model for the task. In this example we are going to make
 a model with <em>DistMult</em>. The model is defined in the function <code class="docutils literal notranslate"><span class="pre">init_model</span></code>.
 There are three steps to defining a model:</p>
@@ -214,7 +215,7 @@ create a model object using the following method:</p>
 </div>
 </section>
 <section id="create-dataloader">
-<h2>3. Create Dataloader<a class="headerlink" href="#create-dataloader" title="Permalink to this headline"></a></h2>
+<h2>3. Create Dataloader<a class="headerlink" href="#create-dataloader" title="Permalink to this heading"></a></h2>
 <p>After defining the model we need to define two dataloader objects, one for training
 and the other for evaluation. Dataloader objects are used to handle all the data
 movement required for training. Marius supported different types of storage backends
@@ -251,7 +252,7 @@ to fetch the data and process batches:</p>
 example we also define a dataloader for evaluation.</p>
 </section>
 <section id="train-model">
-<h2>4. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
+<h2>4. Train Model<a class="headerlink" href="#train-model" title="Permalink to this heading"></a></h2>
 <p>Now we have everything available to start the training. For training we run multiple
 epochs of training and evaluation in this example.</p>
 <p>For training all we need is the following function:</p>
@@ -273,7 +274,7 @@ epochs of training and evaluation in this example.</p>
 </ul>
 </section>
 <section id="inference">
-<h2>5. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<h2>5. Inference<a class="headerlink" href="#inference" title="Permalink to this heading"></a></h2>
 <p>Similar to training the evaluation is also pretty simple can be concluded easily
 using the following function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">eval_epoch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">):</span>
@@ -295,7 +296,7 @@ using the following function:</p>
 </ul>
 </section>
 <section id="save-model">
-<h2>6. Save Model<a class="headerlink" href="#save-model" title="Permalink to this headline"></a></h2>
+<h2>6. Save Model<a class="headerlink" href="#save-model" title="Permalink to this heading"></a></h2>
 <p>Work in progress - More details will be added soon</p>
 </section>
 </section>

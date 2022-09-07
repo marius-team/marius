@@ -15,6 +15,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,93 +110,7 @@
            <div itemprop="articleBody">
              
   <section id="densegraph">
-<h1>DENSEGraph<a class="headerlink" href="#densegraph" title="Permalink to this headline"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.data.</span></span><span class="sig-name descname"><span class="pre">DENSEGraph</span></span><a class="headerlink" href="#marius.data.DENSEGraph" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#marius.data.DENSEGraph.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Overloaded function.</p>
-<ol class="arabic simple">
-<li><p>__init__(self: marius._data.DENSEGraph) -&gt; None</p></li>
-<li><p>__init__(self: marius._data.DENSEGraph, hop_offsets: at::Tensor, node_ids: at::Tensor, in_offsets: at::Tensor, in_neighbors_vec: List[at::Tensor], in_neighbors: at::Tensor, out_offsets: at::Tensor, out_neighbors_vec: List[at::Tensor], out_neighbors: at::Tensor, num_nodes_in_memory: int) -&gt; None</p></li>
-</ol>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DENSEGraph.clear" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.getLayerOffset">
-<span class="sig-name descname"><span class="pre">getLayerOffset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#marius.data.DENSEGraph.getLayerOffset" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.getNeighborIDs">
-<span class="sig-name descname"><span class="pre">getNeighborIDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoming</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">at::Tensor</span></span></span><a class="headerlink" href="#marius.data.DENSEGraph.getNeighborIDs" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.hop_offsets">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hop_offsets</span></span><a class="headerlink" href="#marius.data.DENSEGraph.hop_offsets" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.in_neighbors">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">in_neighbors</span></span><a class="headerlink" href="#marius.data.DENSEGraph.in_neighbors" title="Permalink to this definition"></a></dt>
-<dd><p>description of the variable</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.in_neighbors_vec">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">in_neighbors_vec</span></span><a class="headerlink" href="#marius.data.DENSEGraph.in_neighbors_vec" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.node_properties">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">node_properties</span></span><a class="headerlink" href="#marius.data.DENSEGraph.node_properties" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.num_nodes_in_memory">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_nodes_in_memory</span></span><a class="headerlink" href="#marius.data.DENSEGraph.num_nodes_in_memory" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.out_neighbors">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">out_neighbors</span></span><a class="headerlink" href="#marius.data.DENSEGraph.out_neighbors" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.out_neighbors_vec">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">out_neighbors_vec</span></span><a class="headerlink" href="#marius.data.DENSEGraph.out_neighbors_vec" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.performMap">
-<span class="sig-name descname"><span class="pre">performMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DENSEGraph.performMap" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.prepareForNextLayer">
-<span class="sig-name descname"><span class="pre">prepareForNextLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.data.DENSEGraph" title="marius._data.DENSEGraph"><span class="pre">marius._data.DENSEGraph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DENSEGraph.prepareForNextLayer" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.setNodeProperties">
-<span class="sig-name descname"><span class="pre">setNodeProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._data.DENSEGraph</span></em>, <em class="sig-param"><span class="pre">node_properties:</span> <span class="pre">at::Tensor</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DENSEGraph.setNodeProperties" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.data.DENSEGraph.to">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self:</span> <span class="pre">marius._data.DENSEGraph</span></em>, <em class="sig-param"><span class="pre">device:</span> <span class="pre">at::Device</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.data.DENSEGraph.to" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<h1>DENSEGraph<a class="headerlink" href="#densegraph" title="Permalink to this heading"></a></h1>
 </section>
 
 

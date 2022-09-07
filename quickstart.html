@@ -15,6 +15,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -110,11 +111,11 @@
            <div itemprop="articleBody">
              
   <section id="getting-started">
-<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
 <section id="build-and-install">
-<h2>Build and Install<a class="headerlink" href="#build-and-install" title="Permalink to this headline"></a></h2>
+<h2>Build and Install<a class="headerlink" href="#build-and-install" title="Permalink to this heading"></a></h2>
 <section id="requirements">
-<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h3>
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>CUDA &gt;= 10.1</p></li>
 <li><p>CuDNN &gt;= 7</p></li>
@@ -126,7 +127,7 @@
 </ul>
 </section>
 <section id="pip-installation">
-<h3>Pip installation<a class="headerlink" href="#pip-installation" title="Permalink to this headline"></a></h3>
+<h3>Pip installation<a class="headerlink" href="#pip-installation" title="Permalink to this heading"></a></h3>
 <p>First check that the required software is installed (see above).</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/marius-team/marius.git
@@ -142,7 +143,7 @@ pip3 install .
 - marius_predict: Batch inference tool for link prediction or node classification</p>
 </section>
 <section id="cmake-build-no-python-api">
-<h3>CMake build (No Python API)<a class="headerlink" href="#cmake-build-no-python-api" title="Permalink to this headline"></a></h3>
+<h3>CMake build (No Python API)<a class="headerlink" href="#cmake-build-no-python-api" title="Permalink to this heading"></a></h3>
 <p>This does not build the Python API, but only the C++ sources and marius_train executable.</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/marius-team/marius.git
@@ -163,10 +164,10 @@ make marius_train -j
 </section>
 </section>
 <section id="configuration-interface">
-<h2>Configuration Interface<a class="headerlink" href="#configuration-interface" title="Permalink to this headline"></a></h2>
+<h2>Configuration Interface<a class="headerlink" href="#configuration-interface" title="Permalink to this heading"></a></h2>
 <p>See configuration <a class="reference external" href="http://marius-project.org/marius/examples/config/index.html">examples</a> for detailed examples and the <a class="reference external" href="http://marius-project.org/marius/config_interface/full_schema.html">configuration schema</a> for all options.</p>
 <section id="preprocess-configuration">
-<h3>Preprocess &amp; Configuration<a class="headerlink" href="#preprocess-configuration" title="Permalink to this headline"></a></h3>
+<h3>Preprocess &amp; Configuration<a class="headerlink" href="#preprocess-configuration" title="Permalink to this heading"></a></h3>
 <p>Preprocess dataset: this downloads and preprocesses the dataset into the arxiv_example/ directory</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_preprocess --dataset ogbn_arxiv --output_dir arxiv_example/
@@ -175,65 +176,65 @@ make marius_train -j
 </div></blockquote>
 <p>Define configuration file: 1-layer GraphSage GNN</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
-  <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE_CLASSIFICATION</span>
-  <span class="nt">encoder</span><span class="p">:</span>
-    <span class="nt">train_neighbor_sampling</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ALL</span>
-    <span class="nt">layers</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FEATURE</span>
-          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
-      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GNN</span>
-          <span class="nt">options</span><span class="p">:</span>
-            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span>
-            <span class="nt">aggregator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MEAN</span>
-          <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
-          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span>
-  <span class="nt">decoder</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NODE</span>
-  <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">CROSS_ENTROPY</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
-  <span class="nt">dense_optimizer</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAM</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
-<span class="nt">storage</span><span class="p">:</span>
-  <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cuda</span>
-  <span class="nt">dataset</span><span class="p">:</span>
-    <span class="nt">base_directory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">arxiv_example/</span>
-    <span class="nt">num_edges</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1166243</span>
-    <span class="nt">num_train</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">90941</span>
-    <span class="nt">num_nodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">169343</span>
-    <span class="nt">num_relations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-    <span class="nt">num_valid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">29799</span>
-    <span class="nt">num_test</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">48603</span>
-    <span class="nt">node_feature_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
-    <span class="nt">num_classes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span>
-  <span class="nt">edges</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">int</span>
-  <span class="nt">features</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">float</span>
-<span class="nt">training</span><span class="p">:</span>
-  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
-  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-  <span class="nt">pipeline</span><span class="p">:</span>
-    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="nt">evaluation</span><span class="p">:</span>
-  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
-  <span class="nt">pipeline</span><span class="p">:</span>
-    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NODE_CLASSIFICATION</span><span class="w"></span>
+<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">train_neighbor_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span><span class="w"></span>
+<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FEATURE</span><span class="w"></span>
+<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GNN</span><span class="w"></span>
+<span class="w">          </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRAPH_SAGE</span><span class="w"></span>
+<span class="w">            </span><span class="nt">aggregator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MEAN</span><span class="w"></span>
+<span class="w">          </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
+<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w"></span>
+<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NODE</span><span class="w"></span>
+<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CROSS_ENTROPY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dataset_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arxiv_example/</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_edges</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1166243</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90941</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">169343</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_relations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_valid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">29799</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">48603</span><span class="w"></span>
+<span class="w">    </span><span class="nt">node_feature_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_classes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w"></span>
+<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
 </section>
 <section id="training">
-<h3>Training<a class="headerlink" href="#training" title="Permalink to this headline"></a></h3>
+<h3>Training<a class="headerlink" href="#training" title="Permalink to this heading"></a></h3>
 <blockquote>
 <div><p>Train the model described in the configuration file for 10 epochs.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_train arxiv_config.yaml
@@ -272,7 +273,7 @@ Accuracy: 57.936753%
 </div></blockquote>
 </section>
 <section id="inference">
-<h3>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h3>
+<h3>Inference<a class="headerlink" href="#inference" title="Permalink to this heading"></a></h3>
 <blockquote>
 <div><p>Evaluate the test set for the dataset after 10 epochs have completed.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_eval arxiv_config.yaml
@@ -291,10 +292,10 @@ Accuracy: 64.963068%
 </section>
 </section>
 <section id="python-api">
-<h2>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline"></a></h2>
+<h2>Python API<a class="headerlink" href="#python-api" title="Permalink to this heading"></a></h2>
 <p>See the <a class="reference external" href="http://marius-project.org/marius/examples/python/index.html">Python examples</a> and <a class="reference external" href="http://marius-project.org/marius/python_api/index.html">API docs</a> (under construction) for more details.</p>
 <section id="preprocess-dataset-and-load-graph-data">
-<h3>Preprocess Dataset and load graph data<a class="headerlink" href="#preprocess-dataset-and-load-graph-data" title="Permalink to this headline"></a></h3>
+<h3>Preprocess Dataset and load graph data<a class="headerlink" href="#preprocess-dataset-and-load-graph-data" title="Permalink to this heading"></a></h3>
 <p>Import marius and preprocess ogbn_arxiv for node classifcation.</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
@@ -337,7 +338,7 @@ Accuracy: 64.963068%
 </div></blockquote>
 </section>
 <section id="define-model">
-<h3>Define Model<a class="headerlink" href="#define-model" title="Permalink to this headline"></a></h3>
+<h3>Define Model<a class="headerlink" href="#define-model" title="Permalink to this heading"></a></h3>
 <p>Define single layer graph sage model</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">feature_dim</span> <span class="o">=</span> <span class="n">dataset_stats</span><span class="o">.</span><span class="n">node_feature_dim</span>
@@ -368,7 +369,7 @@ Accuracy: 64.963068%
 </div></blockquote>
 </section>
 <section id="training-and-evaluation">
-<h3>Training and Evaluation<a class="headerlink" href="#training-and-evaluation" title="Permalink to this headline"></a></h3>
+<h3>Training and Evaluation<a class="headerlink" href="#training-and-evaluation" title="Permalink to this heading"></a></h3>
 <p>Setup training and evaluation dataloaders</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">train_loader</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">,</span>

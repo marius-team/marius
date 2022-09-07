@@ -6,4 +6,6 @@ Batch
 .. autoclass:: marius.data.Batch
     :members:
     :undoc-members:
-    :special-members: __init__
+    :exclude-members: to
+
+    .. method:: to(self: marius._data.Batch, device: torch.device) -> None

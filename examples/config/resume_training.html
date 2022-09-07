@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume Training (FB15K-237) &mdash; Marius 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/marius_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/marius_logo_scaled.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu"> 
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config_interface/index.html">Configuration Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_api/index.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../preprocess_datasets/index.html">Datasets and Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../export_and_inference/index.html">Model Export and Inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../graph_learning/index.html">Graph Learning</a></li>
+</ul>
+
+
+  <!-- <style>
+    a.gh-font {
+        font-weight: 800;
+        color: rgb(160, 45, 45);
+    }
+    </style> -->
+  <p>
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+    <path
+      d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z" />
+  </svg> -->
+  <a href="https://github.com/marius-team/marius">GitHub</a>
+</p>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Marius</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Resume Training (FB15K-237)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/config/resume_training.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="resume-training-fb15k-237">
+<h1>Resume Training (FB15K-237)<a class="headerlink" href="#resume-training-fb15k-237" title="Permalink to this heading"></a></h1>
+<p>In this tutorial, we use the <strong>FB15K_237 knowledge graph</strong> as an example to demonstrate the resume training functionality available in Marius using the <span class="xref std std-doc">fb15k_237</span> example.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code>, we pre-process the data to make it available under path <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess --dataset fb15k_237 --output_directory datasets/fb15k_237_rt/
+Downloading FB15K-237.2.zip to datasets/fb15k_237_rt/FB15K-237.2.zip
+Reading edges
+Remapping Edges
+Node mapping written to: datasets/fb15k_237_rt/nodes/node_mapping.txt
+Relation mapping written to: datasets/fb15k_237_rt/edges/relation_mapping.txt
+Dataset statistics written to: datasets/fb15k_237_rt/dataset.yaml
+</pre></div>
+</div>
+<p>Train the model at least once before trying to resume training.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_train fb15k_237_config.yaml
+<span class="o">[</span><span class="m">05</span>/06/22 <span class="m">18</span>:08:21.037<span class="o">]</span> <span class="c1">################ Finished training epoch 10 ################</span>
+...
+$ ls datasets/fb15k_237_rt/
+README.txt
+dataset.yaml
+edges
+model_0
+nodes
+</pre></div>
+</div>
+<p>The current model parameters are present in <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_0</span></code></p>
+<section id="resume-training-and-overwrite-existing-model">
+<h2>1. Resume training and overwrite existing model<a class="headerlink" href="#resume-training-and-overwrite-existing-model" title="Permalink to this heading"></a></h2>
+<p>Assuming the model is trained at least once, <code class="docutils literal notranslate"><span class="pre">training.resume_training</span></code> can be set to <code class="docutils literal notranslate"><span class="pre">true</span></code> to train the previously saved model further for n epochs (default 10).</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resume_training</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Running <code class="docutils literal notranslate"><span class="pre">marius_train</span></code> with the updated config will now overwrite the model parameters in <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_0/</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_train fb15k_237_config.yaml
+<span class="o">[</span><span class="m">05</span>/06/22 <span class="m">18</span>:13:41.662<span class="o">]</span> <span class="c1">################ Starting training epoch 11 ################</span>
+...
+<span class="o">[</span><span class="m">05</span>/06/22 <span class="m">18</span>:13:59.233<span class="o">]</span> <span class="c1">################ Finished training epoch 20 ################</span>
+...
+</pre></div>
+</div>
+</section>
+<section id="resume-training-from-given-checkpoint">
+<h2>2. Resume training from given checkpoint<a class="headerlink" href="#resume-training-from-given-checkpoint" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">training.resume_from_checkpoint</span></code> can be set to preserve the existing checkpointed model and write the new model to a different directory.
+If <code class="docutils literal notranslate"><span class="pre">storage.model_dir</span></code> is set, the new model will be written to the given directory, else a new directory of the pattern <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_x</span></code>
+will be created where <cite>x</cite> changes incrementally from 0-10 and will take the least non-existent value.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls datasets/fb15k_237_rt/
+README.txt
+dataset.yaml
+edges
+model_0
+nodes
+</pre></div>
+</div>
+<p>Resuming training from the above config with <code class="docutils literal notranslate"><span class="pre">training.resume_from_checkpoint</span></code> set will write the model to <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_1</span></code> if
+<code class="docutils literal notranslate"><span class="pre">storage.model_dir</span></code> is not set. Since <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_0</span></code> now has a model trained for 20 epochs, the new model will further be
+trained 10 epochs from there.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resume_training</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">resume_from_checkpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">datasets/fb15k_237_rt/model_0/</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Running <code class="docutils literal notranslate"><span class="pre">marius_train</span></code> with the updated config will save the new model parameters to <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_rt/model_1/</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_train fb15k_237_config.yaml
+<span class="o">[</span><span class="m">05</span>/06/22 <span class="m">18</span>:13:41.662<span class="o">]</span> <span class="c1">################ Starting training epoch 21 ################</span>
+...
+<span class="o">[</span><span class="m">05</span>/06/22 <span class="m">18</span>:13:59.233<span class="o">]</span> <span class="c1">################ Finished training epoch 30 ################</span>
+...
+$ ls datasets/fb15k_237_rt/
+README.txt
+dataset.yaml
+edges
+model_0
+nodes
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

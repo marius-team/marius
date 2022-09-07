@@ -15,11 +15,12 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Graph Learning" href="../graph_learning/index.html" />
+    <link rel="next" title="Model exporting tool (marius_postprocess)" href="marius_postprocess.html" />
     <link rel="prev" title="Model Export and Inference" href="index.html" /> 
 </head>
 
@@ -65,6 +66,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#command-line-arguments">Command line arguments</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="marius_postprocess.html">Model exporting tool (marius_postprocess)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../graph_learning/index.html">Graph Learning</a></li>
@@ -111,13 +113,13 @@
            <div itemprop="articleBody">
              
   <section id="batch-inference-marius-predict">
-<h1>Batch Inference (marius_predict)<a class="headerlink" href="#batch-inference-marius-predict" title="Permalink to this headline"></a></h1>
+<span id="marius-predict"></span><h1>Batch Inference (marius_predict)<a class="headerlink" href="#batch-inference-marius-predict" title="Permalink to this heading"></a></h1>
 <p>This document contains an overview of the inference module for link prediction and node classification models trained using the configuration API. The module supports both in memory and disk-based inference.</p>
 <p>The input test set can be be preprocessed, or can be in the raw input format and then preprocessed (partitioned, remapped and converted to binary format) before input to evaluation.</p>
 <section id="link-prediction">
-<h2>Link Prediction<a class="headerlink" href="#link-prediction" title="Permalink to this headline"></a></h2>
+<h2>Link Prediction<a class="headerlink" href="#link-prediction" title="Permalink to this heading"></a></h2>
 <section id="input">
-<h3>Input<a class="headerlink" href="#input" title="Permalink to this headline"></a></h3>
+<h3>Input<a class="headerlink" href="#input" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>A configuration file for a previously trained link prediction model</p></li>
 <li><p>A set of test edges (preprocessed or unpreprocessed)</p></li>
@@ -126,12 +128,12 @@
 </ul>
 </section>
 <section id="output">
-<h3>Output<a class="headerlink" href="#output" title="Permalink to this headline"></a></h3>
+<h3>Output<a class="headerlink" href="#output" title="Permalink to this heading"></a></h3>
 <p>Text file containing a summary of metrics for the evaluation set: <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/metrics.txt</span></code> (optional)</p>
 <p>CSV file where each row denotes an edge, and it’s corresponding score and link prediction rank <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/scores.csv</span></code> (optional)</p>
 </section>
 <section id="example-usage">
-<h3>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline"></a></h3>
+<h3>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this heading"></a></h3>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_predict --config configs/fb15k237.yaml --metrics mrr mr hits3 hits5 hits10 hits50 hits100 hits2129 --save_ranks --save_scores --output_dir results/<span class="sb">`</span>
 </pre></div>
@@ -139,74 +141,73 @@
 </div></blockquote>
 <p>This command takes in a trained configuration file, <code class="docutils literal notranslate"><span class="pre">configs/fb15k237.yaml</span></code>, which defines a model that has been previous trained.</p>
 <p>The list of metrics over the training set will be computed and output to results/metrics.txt. The ranks and scores for each edge are output to <code class="docutils literal notranslate"><span class="pre">results/scores.csv</span></code>.</p>
-<p>Contents of <code class="docutils literal notranslate"><span class="pre">configs/fb15k237.yaml</span></code>. The test set here has been created during preprocessing and is stored in <code class="docutils literal notranslate"><span class="pre">&lt;storage.dataset.base_directory&gt;/edges/test_edges.bin</span></code></p>
+<p>Contents of <code class="docutils literal notranslate"><span class="pre">configs/fb15k237.yaml</span></code>. The test set here has been created during preprocessing and is stored in <code class="docutils literal notranslate"><span class="pre">&lt;storage.dataset.dataset_dir&gt;/edges/test_edges.bin</span></code></p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
-  <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span>
-  <span class="nt">encoder</span><span class="p">:</span>
-    <span class="nt">layers</span><span class="p">:</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span><span class="w"></span>
+<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
 
-      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span>
-          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-          <span class="nt">bias</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-          <span class="nt">init</span><span class="p">:</span>
-            <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"></span>
+<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">          </span><span class="nt">bias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">          </span><span class="nt">init</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GLOROT_NORMAL</span><span class="w"></span>
 
-  <span class="nt">decoder</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
-  <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
-  <span class="nt">dense_optimizer</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAM</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
-  <span class="nt">sparse_optimizer</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISTMULT</span><span class="w"></span>
+<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sparse_optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
 
-<span class="nt">storage</span><span class="p">:</span>
-  <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cpu</span>
-  <span class="nt">dataset</span><span class="p">:</span>
-    <span class="nt">base_directory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./fb15k_237_example/</span>
-    <span class="nt">num_edges</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">272115</span>
-    <span class="nt">num_nodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">14541</span>
-    <span class="nt">num_relations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">237</span>
-    <span class="nt">num_train</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">272115</span>
-    <span class="nt">num_valid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">17535</span>
-    <span class="nt">num_test</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20466</span>
-  <span class="nt">edges</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HOST_MEMORY</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">int</span>
-  <span class="nt">embeddings</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HOST_MEMORY</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">dtype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">float</span>
-<span class="nt">training</span><span class="p">:</span>
-  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
-  <span class="nt">negative_sampling</span><span class="p">:</span>
-    <span class="nt">num_chunks</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-    <span class="nt">negatives_per_positive</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-    <span class="nt">degree_fraction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
-    <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
-  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-  <span class="nt">pipeline</span><span class="p">:</span>
-    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="nt">evaluation</span><span class="p">:</span>
-  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
-  <span class="nt">negative_sampling</span><span class="p">:</span>
-    <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-  <span class="nt">pipeline</span><span class="p">:</span>
-    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dataset_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./fb15k_237_example/</span><span class="w"></span>
+<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HOST_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span><span class="w"></span>
+<span class="w">  </span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HOST_MEMORY</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
+<p>Since <code class="docutils literal notranslate"><span class="pre">storage.model_dir</span></code> is not specified in the above configuration, <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code> will use the latest trained model present in <code class="docutils literal notranslate"><span class="pre">storage.dataset.dataset_dir</span></code>.
+When <code class="docutils literal notranslate"><span class="pre">storage.model_dir</span></code> is not specified, <code class="docutils literal notranslate"><span class="pre">marius_train</span></code> stores the model parameters in <cite>model_x</cite> directory within the <cite>storage.dataset.dataset_dir</cite>, where x changes
+incrementally from 0 - 10. A maximum of 11 models are stored when <cite>model_dir</cite> is not specified, post which the contents in <cite>model_10/</cite> directory are overwritten with the
+latest parameters. <code class="docutils literal notranslate"><span class="pre">marius_predict</span></code> will use the latest model for inference and save the files to that directory. If <code class="docutils literal notranslate"><span class="pre">storage.model_dir</span></code> is specified, the model
+parameters will be loaded from the given directory and the generated files will be saved to the same.</p>
 </section>
 <section id="example-output">
-<h3>Example output<a class="headerlink" href="#example-output" title="Permalink to this headline"></a></h3>
+<h3>Example output<a class="headerlink" href="#example-output" title="Permalink to this heading"></a></h3>
 <p>Two files are output by the above command:</p>
 <dl>
 <dt>metrics.txt</dt><dd><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Link Prediction: 40932 edges evaluated
@@ -236,7 +237,7 @@ Hits@2129: 0.947987
 </dl>
 </section>
 <section id="input-a-new-test-set">
-<h3>Input a new test set<a class="headerlink" href="#input-a-new-test-set" title="Permalink to this headline"></a></h3>
+<h3>Input a new test set<a class="headerlink" href="#input-a-new-test-set" title="Permalink to this heading"></a></h3>
 <p>If the dataset does not have a predefined test set. (e.g. <code class="docutils literal notranslate"><span class="pre">storage.dataset.num_test</span> <span class="pre">==</span> <span class="pre">0</span></code>). Then users can specify a separate test set with the <code class="docutils literal notranslate"><span class="pre">--input_file</span> <span class="pre">&lt;path_to_test_set&gt;</span></code>. This test set can either be preprocessed and in binary format, or unpreprocessed.</p>
 <p>Preprocessed input_test set usage:</p>
 <blockquote>
@@ -254,20 +255,20 @@ Hits@2129: 0.947987
 </section>
 </section>
 <section id="node-classification">
-<h2>Node Classification<a class="headerlink" href="#node-classification" title="Permalink to this headline"></a></h2>
+<h2>Node Classification<a class="headerlink" href="#node-classification" title="Permalink to this heading"></a></h2>
 <section id="id1">
-<h3>Input<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<h3>Input<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>A configuration file for a previously trained node classification model</p>
 <p>A set of test nodes (preprocessed or unpreprocessed)</p>
 <p>A list of metrics to compute (optional)</p>
 </section>
 <section id="id2">
-<h3>Output<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<h3>Output<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>Text file containing a summary of metrics for the evaluation set: <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/metrics.txt</span></code> (optional)</p>
 <p>CSV file where each row denotes an node, and it’s corresponding node classification label <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/labels.csv</span></code> (optional)</p>
 </section>
 <section id="id3">
-<h3>Example Usage<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<h3>Example Usage<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>marius_predict --config configs/arxiv.yaml --metrics accuracy --save_labels --output_dir results/
 </pre></div>
@@ -278,7 +279,7 @@ Hits@2129: 0.947987
 </section>
 </section>
 <section id="command-line-arguments">
-<h2>Command line arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline"></a></h2>
+<h2>Command line arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this heading"></a></h2>
 <p>Below is the help message for the tool, containing an overview of the tools arguments and usage.</p>
 <blockquote>
 <div><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ marius_predict --help
@@ -347,7 +348,7 @@ optional arguments:
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Model Export and Inference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../graph_learning/index.html" class="btn btn-neutral float-right" title="Graph Learning" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="marius_postprocess.html" class="btn btn-neutral float-right" title="Model exporting tool (marius_postprocess)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

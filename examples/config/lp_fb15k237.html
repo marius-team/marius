@@ -15,6 +15,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,10 +110,10 @@
            <div itemprop="articleBody">
              
   <section id="small-scale-link-prediction-fb15k-237">
-<h1>Small Scale Link Prediction (FB15K-237)<a class="headerlink" href="#small-scale-link-prediction-fb15k-237" title="Permalink to this headline"></a></h1>
+<h1>Small Scale Link Prediction (FB15K-237)<a class="headerlink" href="#small-scale-link-prediction-fb15k-237" title="Permalink to this heading"></a></h1>
 <p>In this tutorial, we use the <strong>FB15K_237 knowledge graph</strong> as an example to demonstrate a step-by-step walkthrough from preprocessing the dataset to defining the configuration file and to training <strong>a link prediction model with the DistMult algorithm</strong>.</p>
 <section id="preprocess-dataset">
-<h2>1. Preprocess Dataset<a class="headerlink" href="#preprocess-dataset" title="Permalink to this headline"></a></h2>
+<h2>1. Preprocess Dataset<a class="headerlink" href="#preprocess-dataset" title="Permalink to this heading"></a></h2>
 <p>Preprocessing a dataset is straightforward with the <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> command. This command comes with <code class="docutils literal notranslate"><span class="pre">marius</span></code> when <code class="docutils literal notranslate"><span class="pre">marius</span></code> is installed. See (TODO link) for installation information.</p>
 <p>Assuming <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> has been built, we preprocess the FB15K_237 dataset by running the following command (assuming we are in the <code class="docutils literal notranslate"><span class="pre">marius</span></code> root directory):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess --dataset fb15k_237 --output_directory datasets/fb15k_237_example/
@@ -126,7 +127,10 @@ Dataset statistics written to: datasets/fb15k_237_example/dataset.yaml
 </div>
 <p>The  <code class="docutils literal notranslate"><span class="pre">--dataset</span></code> flag specifies which of the pre-set datasets <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> will preprocess and download.</p>
 <p>The  <code class="docutils literal notranslate"><span class="pre">--output_directory</span></code> flag specifies where the preprocessed graph will be output and is set by the user. In this example, assume we have not created the datasets/fb15k_237_example repository. <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code> will create it for us.</p>
-<p>For detailed usages of  <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code>, please refer to <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span> <span class="pre">-h</span></code>.</p>
+<p>For detailed usages of  <code class="docutils literal notranslate"><span class="pre">marius_preprocess</span></code>, please execute the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_preprocess -h
+</pre></div>
+</div>
 <p>Let’s check what is inside the created directory:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls -l datasets/fb15k_237_example/
 dataset.yaml                       <span class="c1"># input dataset statistics</span>
@@ -147,7 +151,7 @@ README.txt                         <span class="c1"># README of the downloaded F
 </div>
 <p>Let’s check what is inside the generated <code class="docutils literal notranslate"><span class="pre">dataset.yaml</span></code> file:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ cat datasets/fb15k_237_example/dataset.yaml
-base_directory: /marius-internal/datasets/fb15k_237_example/
+dataset_dir: /marius-internal/datasets/fb15k_237_example/
 num_edges: <span class="m">272115</span>
 num_nodes: <span class="m">14541</span>
 num_relations: <span class="m">237</span>
@@ -166,7 +170,7 @@ initialized: <span class="nb">false</span>
 </div>
 </section>
 <section id="define-configuration-file">
-<h2>2. Define Configuration File<a class="headerlink" href="#define-configuration-file" title="Permalink to this headline"></a></h2>
+<h2>2. Define Configuration File<a class="headerlink" href="#define-configuration-file" title="Permalink to this heading"></a></h2>
 <p>To train a model, we need to define a YAML configuration file based on information created from marius_preprocess.</p>
 <p>The configuration file contains information including but not limited to the inputs to the model, training procedure, and hyperparameters to optimize. Given a configuration file, marius assembles a model depending on the given parameters. The configuration file is grouped up into four sections:</p>
 <ul class="simple">
@@ -176,93 +180,87 @@ initialized: <span class="nb">false</span>
 <li><p>Evaluation: Sets options for the evaluation procedure (if any). The options here are similar to those in the training section.</p></li>
 </ul>
 <p>For the full configuration schema, please refer to <code class="docutils literal notranslate"><span class="pre">docs/config_interface</span></code>.</p>
-<p>An example YAML configuration file for the FB15K_237 dataset is given in <code class="docutils literal notranslate"><span class="pre">examples/configuration/fb15k_237.yaml</span></code>. Note that the <code class="docutils literal notranslate"><span class="pre">base_directory</span></code> is set to the preprocessing output directory, in our example, <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_example/</span></code>.</p>
+<p>An example YAML configuration file for the FB15K_237 dataset is given in <code class="docutils literal notranslate"><span class="pre">examples/configuration/fb15k_237.yaml</span></code>. Note that the <code class="docutils literal notranslate"><span class="pre">dataset_dir</span></code> is set to the preprocessing output directory, in our example, <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_example/</span></code>.</p>
 <p>Let’s create the same YAML configuration file for the FB15K_237 dataset from scratch. We follow the structure of the configuration file and create each of the four sections one by one. In a YAML file, indentation is used to denote nesting and all parameters are in the format of key-value pairs.</p>
 <ol class="arabic">
-<li><p>First, we define the <strong>model</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">learning_task</span></code>, <code class="docutils literal notranslate"><span class="pre">encoder</span></code>, <code class="docutils literal notranslate"><span class="pre">decoder</span></code>, and <code class="docutils literal notranslate"><span class="pre">loss</span></code>. Since we are training a link prediction model, set the <code class="docutils literal notranslate"><span class="pre">learning_task</span></code> to <code class="docutils literal notranslate"><span class="pre">LINK_PREDICTION</span></code>. Since we are training a model with DistMult, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> of <code class="docutils literal notranslate"><span class="pre">decoder</span></code> to <code class="docutils literal notranslate"><span class="pre">DISTMULT</span></code>. We set the <code class="docutils literal notranslate"><span class="pre">encoder</span></code> to be an <code class="docutils literal notranslate"><span class="pre">EMBEDDING</span></code> table with 50-dimensional embeddings. The rest of the configurations can be fine-tuned by the user.</p>
+<li><p>First, we define the <strong>model</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">learning_task</span></code>, <code class="docutils literal notranslate"><span class="pre">encoder</span></code>, <code class="docutils literal notranslate"><span class="pre">decoder</span></code>, and <code class="docutils literal notranslate"><span class="pre">loss</span></code>. The rest of the configurations can be fine-tuned by the user.</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
-  <span class="nt">learning_task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span>
-  <span class="nt">encoder</span><span class="p">:</span>
-    <span class="nt">layers</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span>
-          <span class="nt">output_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
-  <span class="nt">decoder</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DISTMULT</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">input_dim</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
-  <span class="nt">loss</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span>
-    <span class="nt">options</span><span class="p">:</span>
-      <span class="nt">reduction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SUM</span>
-  <span class="nt">dense_optimizer</span><span class="p">:</span> <span class="c1"># optimizer to use for dense model parameters. In this case these are the DistMult relation (edge-type) embeddings</span>
-      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAM</span>
-      <span class="nt">options</span><span class="p">:</span>
-        <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
-  <span class="nt">sparse_optimizer</span><span class="p">:</span> <span class="c1"># optimizer to use for node embedding table</span>
-      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span>
-      <span class="nt">options</span><span class="p">:</span>
-        <span class="nt">learning_rate</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="nt">storage</span><span class="p">:</span>
-  <span class="c1"># omit</span>
-<span class="nt">training</span><span class="p">:</span>
-  <span class="c1"># omit</span>
-<span class="nt">evaluation</span><span class="p">:</span>
-  <span class="c1"># omit</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">learning_task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LINK_PREDICTION</span><span class="w"> </span><span class="c1"># set the learning task to link prediction</span><span class="w"></span>
+<span class="w">  </span><span class="nt">encoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">layers</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EMBEDDING</span><span class="w"> </span><span class="c1"># set the encoder to be an embedding table with 50-dimensional embeddings</span><span class="w"></span>
+<span class="w">          </span><span class="nt">output_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">  </span><span class="nt">decoder</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISTMULT</span><span class="w"> </span><span class="c1"># set the decoder to DistMult</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">input_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="w">  </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOFTMAX_CE</span><span class="w"></span>
+<span class="w">    </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUM</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dense_optimizer</span><span class="p">:</span><span class="w"> </span><span class="c1"># optimizer to use for dense model parameters. In this case these are the DistMult relation (edge-type) embeddings</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAM</span><span class="w"></span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sparse_optimizer</span><span class="p">:</span><span class="w"> </span><span class="c1"># optimizer to use for node embedding table</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADAGRAD</span><span class="w"></span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
-<li><p>Next, we set the <strong>storage</strong> and <strong>dataset</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">dataset</span></code>. Here, the <code class="docutils literal notranslate"><span class="pre">base_directory</span></code> is set to <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_example/</span></code>, which is the preprocessing output directory. To populate the <code class="docutils literal notranslate"><span class="pre">num_edges</span></code>, <code class="docutils literal notranslate"><span class="pre">num_train</span></code>,…, <code class="docutils literal notranslate"><span class="pre">num_test</span></code> fields, we use the same input dataset statistics obtained from <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_example/dataset.yaml</span></code>.</p>
+<li><p>Next, we set the <strong>storage</strong> and <strong>dataset</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">dataset</span></code>. Here, the <code class="docutils literal notranslate"><span class="pre">dataset_dir</span></code> is set to <code class="docutils literal notranslate"><span class="pre">datasets/fb15k_237_example/</span></code>, which is the preprocessing output directory.</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
-  <span class="c1"># omit</span>
-<span class="nt">storage</span><span class="p">:</span>
-  <span class="nt">device_type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cuda</span>
-  <span class="nt">dataset</span><span class="p">:</span>
-    <span class="nt">base_directory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">datasets/fb15k_237_example/</span>
-    <span class="nt">num_edges</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">272115</span>
-    <span class="nt">num_train</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">272115</span>
-    <span class="nt">num_nodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">14541</span>
-    <span class="nt">num_relations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">237</span>
-    <span class="nt">num_valid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">17535</span>
-    <span class="nt">num_test</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20466</span>
-  <span class="nt">edges</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
-  <span class="nt">embeddings</span><span class="p">:</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span>
-  <span class="nt">save_model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="nt">training</span><span class="p">:</span>
-  <span class="c1"># omit</span>
-<span class="nt">evaluation</span><span class="p">:</span>
-  <span class="c1"># omit</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dataset_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">datasets/fb15k_237_example/</span><span class="w"></span>
+<span class="w">  </span><span class="nt">edges</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">  </span><span class="nt">embeddings</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEVICE_MEMORY</span><span class="w"></span>
+<span class="w">  </span><span class="nt">save_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
 <li><p>Lastly, we configure <strong>training</strong> and <strong>evaluation</strong>. We begin by setting all required parameters. This includes <code class="docutils literal notranslate"><span class="pre">num_epochs</span></code> and <code class="docutils literal notranslate"><span class="pre">negative_sampling</span></code>. We set <code class="docutils literal notranslate"><span class="pre">num_epochs=10</span></code> (10 epochs to train) to demonstrate this example. Note that <code class="docutils literal notranslate"><span class="pre">negative_sampling</span></code> is required for link prediction.</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
-  <span class="c1"># omit</span>
-<span class="nt">storage</span><span class="p">:</span>
-  <span class="c1"># omit</span>
-<span class="nt">training</span><span class="p">:</span>
-  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
-  <span class="nt">negative_sampling</span><span class="p">:</span>
-    <span class="nt">num_chunks</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-    <span class="nt">negatives_per_positive</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">500</span>
-    <span class="nt">degree_fraction</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
-    <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
-  <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-  <span class="nt">pipeline</span><span class="p">:</span>
-    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-  <span class="nt">epochs_per_shuffle</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="nt">evaluation</span><span class="p">:</span>
-  <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
-  <span class="nt">negative_sampling</span><span class="p">:</span>
-    <span class="nt">filtered</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-  <span class="nt">pipeline</span><span class="p">:</span>
-    <span class="nt">sync</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">storage</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># omit</span><span class="w"></span>
+<span class="nt">training</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">negatives_per_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w"></span>
+<span class="w">    </span><span class="nt">degree_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">  </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">epochs_per_shuffle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="nt">evaluation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">  </span><span class="nt">negative_sampling</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -270,7 +268,7 @@ initialized: <span class="nb">false</span>
 </ol>
 </section>
 <section id="train-model">
-<h2>3. Train Model<a class="headerlink" href="#train-model" title="Permalink to this headline"></a></h2>
+<h2>3. Train Model<a class="headerlink" href="#train-model" title="Permalink to this heading"></a></h2>
 <p>After defining our configuration file, training is run with <code class="docutils literal notranslate"><span class="pre">marius_train</span> <span class="pre">&lt;your_config.yaml&gt;</span></code>.</p>
 <p>We can now train our example using the configuration file we just created by running the following command (assuming we are in the <code class="docutils literal notranslate"><span class="pre">marius</span></code> root directory):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ marius_train datasets/fb15k_237_example/fb15k_237.yaml
@@ -384,12 +382,12 @@ edges/
 </div>
 </section>
 <section id="inference">
-<h2>4. Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<h2>4. Inference<a class="headerlink" href="#inference" title="Permalink to this heading"></a></h2>
 <section id="command-line">
-<h3>4.1 Command Line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h3>
+<h3>4.1 Command Line<a class="headerlink" href="#command-line" title="Permalink to this heading"></a></h3>
 </section>
 <section id="load-into-python">
-<h3>4.2 Load Into Python<a class="headerlink" href="#load-into-python" title="Permalink to this headline"></a></h3>
+<h3>4.2 Load Into Python<a class="headerlink" href="#load-into-python" title="Permalink to this heading"></a></h3>
 </section>
 </section>
 </section>

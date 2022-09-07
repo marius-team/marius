@@ -15,6 +15,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -107,57 +108,7 @@
            <div itemprop="articleBody">
              
   <section id="trainer">
-<h1>Trainer<a class="headerlink" href="#trainer" title="Permalink to this headline"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.pipeline.Trainer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.pipeline.</span></span><span class="sig-name descname"><span class="pre">Trainer</span></span><a class="headerlink" href="#marius.pipeline.Trainer" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.pipeline.Trainer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.pipeline.Trainer" title="marius._pipeline.Trainer"><span class="pre">marius._pipeline.Trainer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.pipeline.Trainer.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.pipeline.Trainer.dataloader">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dataloader</span></span><a class="headerlink" href="#marius.pipeline.Trainer.dataloader" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.pipeline.Trainer.learning_task">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">learning_task</span></span><a class="headerlink" href="#marius.pipeline.Trainer.learning_task" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="marius.pipeline.Trainer.progress_reporter">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">progress_reporter</span></span><a class="headerlink" href="#marius.pipeline.Trainer.progress_reporter" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marius.pipeline.Trainer.train">
-<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.pipeline.Trainer" title="marius._pipeline.Trainer"><span class="pre">marius._pipeline.Trainer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_epochs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.pipeline.Trainer.train" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.pipeline.SynchronousTrainer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.pipeline.</span></span><span class="sig-name descname"><span class="pre">SynchronousTrainer</span></span><a class="headerlink" href="#marius.pipeline.SynchronousTrainer" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.pipeline.SynchronousTrainer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.pipeline.SynchronousTrainer" title="marius._pipeline.SynchronousTrainer"><span class="pre">marius._pipeline.SynchronousTrainer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../data/dataloader.html#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../nn/model.html#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs_per_epoch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.pipeline.SynchronousTrainer.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="marius.pipeline.PipelineTrainer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">marius.pipeline.</span></span><span class="sig-name descname"><span class="pre">PipelineTrainer</span></span><a class="headerlink" href="#marius.pipeline.PipelineTrainer" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="marius.pipeline.PipelineTrainer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#marius.pipeline.PipelineTrainer" title="marius._pipeline.PipelineTrainer"><span class="pre">marius._pipeline.PipelineTrainer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../data/dataloader.html#marius.data.DataLoader" title="marius._data.DataLoader"><span class="pre">marius._data.DataLoader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../nn/model.html#marius.nn.Model" title="marius._nn.Model"><span class="pre">marius._nn.Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../configuration/index.html#marius.config.PipelineConfig" title="marius._config.PipelineConfig"><span class="pre">marius._config.PipelineConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logs_per_epoch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#marius.pipeline.PipelineTrainer.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<h1>Trainer<a class="headerlink" href="#trainer" title="Permalink to this heading"></a></h1>
 </section>
 
 
