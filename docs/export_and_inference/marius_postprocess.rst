@@ -30,11 +30,13 @@ The output of the command should look like:
     .. code-block:: text
 
         Wrote my_output_dir/embeddings.csv: shape (14541, 2)
-        Wrote my_output_dir/rel_embeddings.csv: shape (237, 2)
-        Wrote my_output_dir/inv_rel_embeddings.csv: shape (237, 2)
+        Wrote my_output_dir/relation_embeddings.csv: shape (237, 2)
+        Wrote my_output_dir/inverse_relation_embeddings.csv: shape (237, 2)
         Wrote my_output_dir/model.pt
 
-From the above we can see that the node and edge-type embeddings have been written to CSV files. model.pt is a pytorch model file which may contain additional model parameters (GNN weights).
+From the above we can see that the node and edge-type (relation) embeddings have been written to CSV files. model.pt is a pytorch model file which may contain additional model parameters (GNN weights).
+
+The output files contain two columns (id, embedding). The number of rows corresponds to the number of nodes or number of edge-types.
 
 Note that the CSV format may not be ideal for exporting the embedding table(s), as the embedding vectors are converted to text representations. The model can be exported in parquet format by using ``--format parquet``, or copied in raw format with ``--format bin``.
 

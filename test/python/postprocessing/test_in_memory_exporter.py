@@ -45,11 +45,10 @@ def check_output(output_dir, fmt, has_rels=False):
             header=0,
             converters={"embedding": lambda x: x.strip("[]").strip().split()},
         )
-        encoded_nodes_df["embedding"] = encoded_nodes_df["embedding"].map(np.array)
 
         assert encoded_nodes_df.shape[0] == 100
         assert encoded_nodes_df.shape[1] == 2
-        assert len(encoded_nodes_df.iloc[0, 1]) == 10
+        assert len(encoded_nodes_df["embedding"][0]) == 10
     elif fmt == "parquet":
         encoded_nodes_df = pd.read_parquet(output_dir / ("encoded_nodes." + fmt))
         assert encoded_nodes_df.shape[0] == 100
@@ -63,22 +62,20 @@ def check_output(output_dir, fmt, has_rels=False):
                 header=0,
                 converters={"embedding": lambda x: x.strip("[]").strip().split()},
             )
-            rel_embs_df["embedding"] = pd.eval(rel_embs_df["embedding"])
 
             assert rel_embs_df.shape[0] == 10
             assert rel_embs_df.shape[1] == 2
-            assert len(rel_embs_df.iloc[0, 1]) == 10
+            assert len(rel_embs_df["embedding"][0]) == 10
 
             rel_embs_df = pd.read_csv(
                 output_dir / ("inverse_relation_embeddings." + fmt),
                 header=0,
                 converters={"embedding": lambda x: x.strip("[]").strip().split()},
             )
-            rel_embs_df["embedding"] = pd.eval(rel_embs_df["embedding"])
 
             assert rel_embs_df.shape[0] == 10
             assert rel_embs_df.shape[1] == 2
-            assert len(rel_embs_df.iloc[0, 1]) == 10
+            assert len(rel_embs_df["embedding"][0]) == 10
         elif fmt == "parquet":
             rel_embs_df = pd.read_parquet(output_dir / ("relation_embeddings." + fmt))
             assert rel_embs_df.shape[0] == 10
