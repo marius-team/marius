@@ -39,7 +39,7 @@ jobs:
         run: MARIUS_NO_BINDINGS=1 python3 -m pip install .[db2graph,tests]
 
       - name: Running pytest
-        run: pytest -s test/db2graph/test_postgres.py
+        run: MARIUS_NO_BINDINGS=1 pytest -s test/db2graph/test_postgres.py
         # Environment variables used in the test
         env:
           # The hostname used to communicate with the PostgreSQL service container
