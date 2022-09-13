@@ -36,7 +36,9 @@ Db2Graph outputs a set of triplets in the format of ``[source node] [edge] [dest
 How to Use
 """"""""""""""""""""
 
-Assuming a database has been created locally and ``marius`` has been installed successfully, database to graph conversion with Db2Graph can be achieved in the following steps: 
+First, make sure marius is installed with the optional db2graph dependencies: `python3 -m pip install .[db2graph]`.
+
+Assuming that a database has already been created, graph conversion with Db2Graph can be achieved in the following steps:
 
 #. | First, create a YAML configuration file ``config.yaml`` and a query definition files to contain SQL SELECT queries of type ``edges_queries``. Assume that the config file and query file are placed in a ``./conf/`` directory. 
 
