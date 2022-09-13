@@ -38,12 +38,11 @@ void process_mem_usage() {
     {
         std::string ignore;
         std::ifstream ifs("/proc/self/stat", std::ios_base::in);
-        ifs >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore
-            >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore
-            >> ignore >> ignore >> vsize >> rss;
+        ifs >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >>
+            ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> vsize >> rss;
     }
 
-    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
+    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024;  // in case x86-64 is configured to use 2MB pages
     vm_usage = vsize / 1024.0;
     resident_set = rss * page_size_kb;
 
@@ -60,7 +59,7 @@ void *memset_wrapper(void *ptr, int value, int64_t num) {
             curr_bytes = 1e9;
         }
 
-        memset((char *) ptr + local_offset, value, curr_bytes);
+        memset((char *)ptr + local_offset, value, curr_bytes);
 
         local_offset += curr_bytes;
     }
@@ -68,7 +67,7 @@ void *memset_wrapper(void *ptr, int value, int64_t num) {
     return ptr;
 }
 
-void *memcpy_wrapper(void* dest, const void* src, int64_t count) {
+void *memcpy_wrapper(void *dest, const void *src, int64_t count) {
     int64_t curr_bytes = 0;
     int64_t local_offset = 0;
 
@@ -78,7 +77,7 @@ void *memcpy_wrapper(void* dest, const void* src, int64_t count) {
             curr_bytes = 1e9;
         }
 
-        memcpy((char *) dest + local_offset, (char *) src + local_offset, curr_bytes);
+        memcpy((char *)dest + local_offset, (char *)src + local_offset, curr_bytes);
 
         local_offset += curr_bytes;
     }
@@ -96,7 +95,7 @@ int64_t pread_wrapper(int fd, void *buf, int64_t count, int64_t offset) {
             curr_bytes = 1e9;
         }
 
-        if (pread(fd, (char *) buf + local_offset, curr_bytes, offset + local_offset) == -1) {
+        if (pread(fd, (char *)buf + local_offset, curr_bytes, offset + local_offset) == -1) {
             return -1;
         }
 
@@ -116,7 +115,7 @@ int64_t pwrite_wrapper(int fd, const void *buf, int64_t count, int64_t offset) {
             curr_bytes = 1e9;
         }
 
-        if (pwrite(fd, (char *) buf + local_offset, curr_bytes, offset + local_offset) == -1) {
+        if (pwrite(fd, (char *)buf + local_offset, curr_bytes, offset + local_offset) == -1) {
             return -1;
         }
 
@@ -148,13 +147,11 @@ int64_t get_dtype_size_wrapper(torch::Dtype dtype_) {
 }
 
 std::string get_directory(std::string filename) {
-
-    assert (!filename.empty());
+    assert(!filename.empty());
 
     string directory;
     const size_t last_slash_idx = filename.rfind('/');
-    if (std::string::npos != last_slash_idx)
-    {
+    if (std::string::npos != last_slash_idx) {
         directory = filename.substr(0, last_slash_idx);
     }
 
@@ -162,7 +159,6 @@ std::string get_directory(std::string filename) {
 }
 
 std::tuple<torch::Tensor, std::vector<torch::Tensor>> map_tensors(std::vector<torch::Tensor> unmapped_tensors) {
-
     for (auto tensor : unmapped_tensors) {
         if (tensor.sizes().size() > 1) {
             throw MariusRuntimeException("Input tensors must be 1D");
@@ -183,17 +179,15 @@ std::tuple<torch::Tensor, std::vector<torch::Tensor>> map_tensors(std::vector<to
     for (auto tensor : unmapped_tensors) {
         size = tensor.size(0);
         mapped_tensors.emplace_back(mapped_all_ids.narrow(0, offset, size));
-        offset+=size;
+        offset += size;
     }
 
     return std::forward_as_tuple(map, mapped_tensors);
 }
 
-
 // TODO this function uses a searchsorted to find the approriate value in the map tensor
 // this can be made faster on the cpu by using an std::map to perform lookups
 std::vector<torch::Tensor> apply_tensor_map(torch::Tensor map, std::vector<torch::Tensor> unmapped_tensors) {
-
     for (auto tensor : unmapped_tensors) {
         if (tensor.sizes().size() > 1) {
             throw MariusRuntimeException("Input tensors must be 1D");

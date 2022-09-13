@@ -6,10 +6,10 @@
 
 #include "reporting/logger.h"
 
-using std::tie;
 using std::get;
+using std::tie;
 
-PipelineTrainer::PipelineTrainer(shared_ptr<DataLoader> dataloader, shared_ptr<Model>model, shared_ptr<PipelineConfig> pipeline_config, int logs_per_epoch) {
+PipelineTrainer::PipelineTrainer(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config, int logs_per_epoch) {
     dataloader_ = dataloader;
     learning_task_ = dataloader_->learning_task_;
 
@@ -67,7 +67,7 @@ void PipelineTrainer::train(int num_epochs) {
         }
 
         int64_t epoch_time = timer.getDuration();
-        float items_per_second = (float) num_items / ((float) epoch_time / 1000);
+        float items_per_second = (float)num_items / ((float)epoch_time / 1000);
         SPDLOG_INFO("Epoch Runtime: {}ms", epoch_time);
         SPDLOG_INFO("{} per Second: {}", item_name, items_per_second);
     }
@@ -92,7 +92,6 @@ SynchronousTrainer::SynchronousTrainer(shared_ptr<DataLoader> dataloader, shared
 }
 
 void SynchronousTrainer::train(int num_epochs) {
-
     if (!dataloader_->single_dataset_) {
         dataloader_->setTrainSet();
     }
@@ -105,7 +104,6 @@ void SynchronousTrainer::train(int num_epochs) {
         timer.start();
         SPDLOG_INFO("################ Starting training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
         while (dataloader_->hasNextBatch()) {
-
             // gets data and parameters for the next batch
             shared_ptr<Batch> batch = dataloader_->getBatch();
 
@@ -162,7 +160,7 @@ void SynchronousTrainer::train(int num_epochs) {
         }
 
         int64_t epoch_time = timer.getDuration();
-        float items_per_second = (float) num_items / ((float) epoch_time / 1000);
+        float items_per_second = (float)num_items / ((float)epoch_time / 1000);
         SPDLOG_INFO("Epoch Runtime: {}ms", epoch_time);
         SPDLOG_INFO("{} per Second: {}", item_name, items_per_second);
     }

@@ -4,13 +4,13 @@
 
 #include "pipeline/pipeline_cpu.h"
 
-#include "reporting/logger.h"
 #include "pipeline/queue.h"
+#include "reporting/logger.h"
 
 void ComputeWorkerCPU::run() {
     while (!done_) {
         while (!paused_) {
-            shared_ptr<Queue<shared_ptr<Batch>>> pop_queue = ((PipelineCPU *) pipeline_)->loaded_batches_;
+            shared_ptr<Queue<shared_ptr<Batch>>> pop_queue = ((PipelineCPU *)pipeline_)->loaded_batches_;
             auto tup = pop_queue->blocking_pop();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
@@ -18,7 +18,6 @@ void ComputeWorkerCPU::run() {
                 break;
             }
             if (pipeline_->isTrain()) {
-
                 if (batch->node_embeddings_.defined()) {
                     batch->node_embeddings_.requires_grad_();
                 }
@@ -27,7 +26,7 @@ void ComputeWorkerCPU::run() {
 
                 pipeline_->model_->train_batch(batch);
                 batch->status_ = BatchStatus::ComputedGradients;
-                shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *) pipeline_)->update_batches_;
+                shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *)pipeline_)->update_batches_;
 
                 push_queue->blocking_push(batch);
             } else {
@@ -46,7 +45,7 @@ void ComputeWorkerCPU::run() {
 void EncodeNodesWorkerCPU::run() {
     while (!done_) {
         while (!paused_) {
-            shared_ptr<Queue<shared_ptr<Batch>>> pop_queue = ((PipelineCPU *) pipeline_)->loaded_batches_;
+            shared_ptr<Queue<shared_ptr<Batch>>> pop_queue = ((PipelineCPU *)pipeline_)->loaded_batches_;
             auto tup = pop_queue->blocking_pop();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
@@ -59,20 +58,15 @@ void EncodeNodesWorkerCPU::run() {
             batch->clear();
             batch->encoded_uniques_ = encoded.contiguous();
 
-            shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *) pipeline_)->update_batches_;
+            shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *)pipeline_)->update_batches_;
             push_queue->blocking_push(batch);
         }
         nanosleep(&sleep_time_, NULL);
     }
 }
 
-PipelineCPU::PipelineCPU(shared_ptr<DataLoader> dataloader,
-                         shared_ptr<Model> model,
-                         bool train,
-                         shared_ptr<ProgressReporter> reporter,
-                         shared_ptr<PipelineConfig> pipeline_config,
-                         bool encode_only) {
-
+PipelineCPU::PipelineCPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, bool train, shared_ptr<ProgressReporter> reporter,
+                         shared_ptr<PipelineConfig> pipeline_config, bool encode_only) {
     dataloader_ = dataloader;
     model_ = model;
     reporter_ = reporter;
@@ -101,7 +95,6 @@ PipelineCPU::PipelineCPU(shared_ptr<DataLoader> dataloader,
 }
 
 PipelineCPU::~PipelineCPU() {
-
     for (int i = 0; i < CPU_NUM_WORKER_TYPES; i++) {
         for (int j = 0; j < pool_[i].size(); j++) {
             pool_[i][j]->stop();
@@ -112,28 +105,22 @@ PipelineCPU::~PipelineCPU() {
 
     if (train_) {
         loaded_batches_ = nullptr;
-        update_batches_  = nullptr;
+        update_batches_ = nullptr;
     } else {
-        loaded_batches_  = nullptr;
+        loaded_batches_ = nullptr;
     }
 }
 
-bool Pipeline::isDone() {
-    return (batches_in_flight_ <= 0) && dataloader_->epochComplete();
-}
+bool Pipeline::isDone() { return (batches_in_flight_ <= 0) && dataloader_->epochComplete(); }
 
-bool Pipeline::isTrain() {
-    return train_;
-}
+bool Pipeline::isTrain() { return train_; }
 
-bool Pipeline::has_embeddings() {
-    return model_->has_embeddings();
-}
+bool Pipeline::has_embeddings() { return model_->has_embeddings(); }
 
 void Pipeline::waitComplete() {
     timespec sleep_time{};
     sleep_time.tv_sec = 0;
-    sleep_time.tv_nsec = MILLISECOND; // check every 1 millisecond
+    sleep_time.tv_nsec = MILLISECOND;  // check every 1 millisecond
     while (!isDone()) {
         nanosleep(&sleep_time, NULL);
     }
@@ -146,7 +133,6 @@ void PipelineCPU::addWorkersToPool(int pool_id, int worker_type, int num_workers
 }
 
 void PipelineCPU::initialize() {
-
     if (encode_only_) {
         addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
         addWorkersToPool(1, CPU_ENCODE_ID, pipeline_options_->compute_threads);
@@ -177,7 +163,6 @@ void PipelineCPU::start() {
 }
 
 void PipelineCPU::pauseAndFlush() {
-
     waitComplete();
     setQueueExpectingData(false);
 

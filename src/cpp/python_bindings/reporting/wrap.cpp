@@ -4,7 +4,6 @@
 void init_reporting(py::module &);
 
 PYBIND11_MODULE(_report, m) {
-
     m.doc() = "Training and evaluation metrics.";
 
     // reporting

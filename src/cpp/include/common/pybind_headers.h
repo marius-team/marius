@@ -5,10 +5,9 @@
 #ifndef MARIUS_PYBIND_HEADERS_H
 #define MARIUS_PYBIND_HEADERS_H
 
-#include "torch/extension.h"
-
 #include "pybind11/embed.h"
+#include "torch/extension.h"
 
 namespace py = pybind11;
 
-#endif //MARIUS_PYBIND_HEADERS_H
+#endif  // MARIUS_PYBIND_HEADERS_H

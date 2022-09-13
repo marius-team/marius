@@ -6,7 +6,6 @@ void init_io(py::module &);
 void init_storage(py::module &);
 
 PYBIND11_MODULE(_storage, m) {
-
     m.doc() = "Storage objects for arbitrary backends.";
 
     // storage

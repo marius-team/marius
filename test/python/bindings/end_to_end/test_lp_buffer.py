@@ -1,14 +1,14 @@
-import unittest
-import shutil
-from pathlib import Path
-import pytest
 import os
-import marius as m
-import torch
-
-from test.python.constants import TMP_TEST_DIR, TESTING_DATA_DIR
-from test.test_data.generate import generate_random_dataset
+import shutil
+import unittest
+from pathlib import Path
+from test.python.constants import TMP_TEST_DIR
 from test.test_configs.generate_test_configs import generate_configs_for_dataset
+from test.test_data.generate import generate_random_dataset
+
+import pytest
+
+import marius as m
 
 
 def run_configs(directory, partitioned_eval=False):
@@ -27,7 +27,6 @@ def run_configs(directory, partitioned_eval=False):
 
 # @pytest.mark.skip("Buffer tests currently flakey with python API")
 class TestLPBuffer(unittest.TestCase):
-
     output_dir = TMP_TEST_DIR / Path("buffer")
 
     @classmethod
@@ -40,13 +39,15 @@ class TestLPBuffer(unittest.TestCase):
         num_edges = 1000
 
         name = "test_graph"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                num_partitions=8,
-                                splits=[.9, .05, .05],
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            num_partitions=8,
+            splits=[0.9, 0.05, 0.05],
+            task="lp",
+        )
 
     @classmethod
     def tearDown(self):
@@ -58,57 +59,62 @@ class TestLPBuffer(unittest.TestCase):
         name = "basic_dm"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     @pytest.mark.skip("Known issue with GNN + buffer")
     def test_gs(self):
         name = "basic_gs"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["gs_1_layer", "gs_3_layer"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["gs_1_layer", "gs_3_layer"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
     @pytest.mark.skip("Known issue with GNN + buffer")
     def test_gs_uniform(self):
         name = "basic_gs_uniform"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["gs_1_layer_uniform", "gs_3_layer_uniform"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["gs_1_layer_uniform", "gs_3_layer_uniform"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
     @pytest.mark.skip("GAT only supported for GPU")
     def test_gat(self):
         name = "basic_gat"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["gat_1_layer", "gat_3_layer"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["gat_1_layer", "gat_3_layer"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -117,12 +123,14 @@ class TestLPBuffer(unittest.TestCase):
         name = "sync_training"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync_deg", "sync_filtered"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync_deg", "sync_filtered"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -131,12 +139,14 @@ class TestLPBuffer(unittest.TestCase):
         name = "async_training"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["async", "async_deg", "async_filtered"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["async", "async_deg", "async_filtered"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -145,12 +155,14 @@ class TestLPBuffer(unittest.TestCase):
         name = "sync_eval"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync", "sync_deg", "sync_filtered"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync", "sync_deg", "sync_filtered"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -159,12 +171,14 @@ class TestLPBuffer(unittest.TestCase):
         name = "async_eval"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["async", "async_deg", "async_filtered"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["async", "async_deg", "async_filtered"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -175,27 +189,30 @@ class TestLPBuffer(unittest.TestCase):
         num_edges = 1000
 
         name = "partitioned_eval"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                splits=[.9, .05, .05],
-                                num_partitions=8,
-                                partitioned_eval=True,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            splits=[0.9, 0.05, 0.05],
+            num_partitions=8,
+            partitioned_eval=True,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync", "async", "async_deg", "async_filtered"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync", "async", "async_deg", "async_filtered"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)
 
 
 class TestLPBufferNoRelations(unittest.TestCase):
-
     output_dir = TMP_TEST_DIR / Path("buffer_no_relations")
 
     @classmethod
@@ -208,13 +225,15 @@ class TestLPBufferNoRelations(unittest.TestCase):
         num_edges = 1000
 
         name = "test_graph"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                num_partitions=8,
-                                splits=[.9, .05, .05],
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            num_partitions=8,
+            splits=[0.9, 0.05, 0.05],
+            task="lp",
+        )
 
     @classmethod
     def tearDown(self):
@@ -226,12 +245,14 @@ class TestLPBufferNoRelations(unittest.TestCase):
         name = "dm"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -241,12 +262,14 @@ class TestLPBufferNoRelations(unittest.TestCase):
         name = "gs"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["gs_1_layer", "gs_3_layer"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["gs_1_layer", "gs_3_layer"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -256,27 +279,30 @@ class TestLPBufferNoRelations(unittest.TestCase):
         name = "gs_uniform"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["gs_1_layer_uniform", "gs_3_layer_uniform"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["gs_1_layer_uniform", "gs_3_layer_uniform"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
-    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE" or not torch.cuda.is_available(), reason="Requires building the bindings with cuda support.")
     @pytest.mark.skip("GAT only supported for GPU")
     def test_gat(self):
         name = "gat"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["gat_1_layer", "gat_3_layer"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["gat_1_layer", "gat_3_layer"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -285,12 +311,14 @@ class TestLPBufferNoRelations(unittest.TestCase):
         name = "sync_training"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync_deg", "sync_filtered"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync_deg", "sync_filtered"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -299,12 +327,14 @@ class TestLPBufferNoRelations(unittest.TestCase):
         name = "async_training"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["async", "async_deg", "async_filtered"],
-                                     evaluation_names=["sync"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["async", "async_deg", "async_filtered"],
+            evaluation_names=["sync"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -313,12 +343,14 @@ class TestLPBufferNoRelations(unittest.TestCase):
         name = "sync_eval"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync", "sync_deg", "sync_filtered"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync", "sync_deg", "sync_filtered"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -327,12 +359,14 @@ class TestLPBufferNoRelations(unittest.TestCase):
         name = "async_eval"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["async", "async_deg", "async_filtered"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["async", "async_deg", "async_filtered"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name))
 
@@ -343,20 +377,24 @@ class TestLPBufferNoRelations(unittest.TestCase):
         num_edges = 1000
 
         name = "partitioned_eval"
-        generate_random_dataset(output_dir=self.output_dir / Path(name),
-                                num_nodes=num_nodes,
-                                num_edges=num_edges,
-                                num_rels=num_rels,
-                                splits=[.9, .05, .05],
-                                num_partitions=8,
-                                partitioned_eval=True,
-                                task="lp")
+        generate_random_dataset(
+            output_dir=self.output_dir / Path(name),
+            num_nodes=num_nodes,
+            num_edges=num_edges,
+            num_rels=num_rels,
+            splits=[0.9, 0.05, 0.05],
+            num_partitions=8,
+            partitioned_eval=True,
+            task="lp",
+        )
 
-        generate_configs_for_dataset(self.output_dir / Path(name),
-                                     model_names=["distmult"],
-                                     storage_names=["part_buffer"],
-                                     training_names=["sync"],
-                                     evaluation_names=["sync", "async", "async_deg", "async_filtered"],
-                                     task="lp")
+        generate_configs_for_dataset(
+            self.output_dir / Path(name),
+            model_names=["distmult"],
+            storage_names=["part_buffer"],
+            training_names=["sync"],
+            evaluation_names=["sync", "async", "async_deg", "async_filtered"],
+            task="lp",
+        )
 
         run_configs(self.output_dir / Path(name), partitioned_eval=True)

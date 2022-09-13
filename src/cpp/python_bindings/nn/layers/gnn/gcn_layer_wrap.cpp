@@ -3,25 +3,15 @@
 //
 
 #include "common/pybind_headers.h"
-
 #include "nn/layers/gnn/gcn_layer.h"
 
 void init_gcn_layer(py::module &m) {
-
     py::class_<GCNLayer, GNNLayer, shared_ptr<GCNLayer>>(m, "GCNLayer")
-            .def_readwrite("options", &GCNLayer::options_)
-            .def_readwrite("w_", &GCNLayer::w_)
-            .def(py::init<shared_ptr<LayerConfig>, torch::Device>(),
-                 py::arg("layer_config"),
-                 py::arg("device"))
-            .def(py::init([](int input_dim,
-                             int output_dim,
-                             std::optional<torch::Device> device,
-                             InitConfig init,
-                             bool bias,
-                             InitConfig bias_init,
-                             string activation) {
-
+        .def_readwrite("options", &GCNLayer::options_)
+        .def_readwrite("w_", &GCNLayer::w_)
+        .def(py::init<shared_ptr<LayerConfig>, torch::Device>(), py::arg("layer_config"), py::arg("device"))
+        .def(py::init(
+                 [](int input_dim, int output_dim, std::optional<torch::Device> device, InitConfig init, bool bias, InitConfig bias_init, string activation) {
                      auto layer_config = std::make_shared<LayerConfig>();
                      layer_config->input_dim = input_dim;
                      layer_config->output_dim = output_dim;
@@ -42,17 +32,10 @@ void init_gcn_layer(py::module &m) {
                      }
 
                      return std::make_shared<GCNLayer>(layer_config, torch_device);
-
-                 }), py::arg("input_dim"),
-                 py::arg("output_dim"),
-                 py::arg("device") = py::none(),
-                 py::arg("init") = InitConfig(InitDistribution::GLOROT_UNIFORM, nullptr),
-                 py::arg("bias") = false,
-                 py::arg("bias_init") = InitConfig(InitDistribution::ZEROS, nullptr),
-                 py::arg("activation") = "none")
-            .def("reset", &GCNLayer::reset)
-            .def("forward", &GCNLayer::forward,
-                 py::arg("inputs"),
-                 py::arg("dense_graph"),
-                 py::arg("train") = true);
+                 }),
+             py::arg("input_dim"), py::arg("output_dim"), py::arg("device") = py::none(),
+             py::arg("init") = InitConfig(InitDistribution::GLOROT_UNIFORM, nullptr), py::arg("bias") = false,
+             py::arg("bias_init") = InitConfig(InitDistribution::ZEROS, nullptr), py::arg("activation") = "none")
+        .def("reset", &GCNLayer::reset)
+        .def("forward", &GCNLayer::forward, py::arg("inputs"), py::arg("dense_graph"), py::arg("train") = true);
 }

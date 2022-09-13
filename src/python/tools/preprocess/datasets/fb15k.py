@@ -1,12 +1,19 @@
 from pathlib import Path
+
+from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
+from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
-from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
-
 
 
 class FB15K(LinkPredictionDataset):
+    """
+    Freebase 15k
+
+    The FB15k dataset contains knowledge base relation triples and textual
+    mentions of Freebase entity pairs. It has a total of 592,213 triplets
+    with 14,951 entities and 1,345 relationships.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
         super().__init__(output_directory, spark)
@@ -15,7 +22,6 @@ class FB15K(LinkPredictionDataset):
         self.dataset_url = "https://dl.fbaipublicfiles.com/starspace/fb15k.tgz"
 
     def download(self, overwrite=False):
-
         self.input_train_edges_file = self.output_directory / Path("freebase_mtr100_mte100-train.txt")
         self.input_valid_edges_file = self.output_directory / Path("freebase_mtr100_mte100-valid.txt")
         self.input_test_edges_file = self.output_directory / Path("freebase_mtr100_mte100-test.txt")
@@ -37,7 +43,9 @@ class FB15K(LinkPredictionDataset):
 
             (self.output_directory / Path("FB15k")).rmdir()
 
-    def preprocess(self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False):
+    def preprocess(
+        self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False
+    ):
         converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
         converter = converter(
             output_dir=self.output_directory,
@@ -46,7 +54,7 @@ class FB15K(LinkPredictionDataset):
             test_edges=self.input_test_edges_file,
             num_partitions=num_partitions,
             remap_ids=remap_ids,
-            partitioned_evaluation=partitioned_eval
+            partitioned_evaluation=partitioned_eval,
         )
 
         return converter.convert()

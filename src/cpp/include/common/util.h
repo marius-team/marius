@@ -8,7 +8,7 @@
 #include "datatypes.h"
 
 class Timer {
-  public:
+   public:
     bool gpu_;
     std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
     std::chrono::time_point<std::chrono::high_resolution_clock> stop_time_;
@@ -69,7 +69,7 @@ void process_mem_usage();
 
 void *memset_wrapper(void *ptr, int value, int64_t num);
 
-void *memcpy_wrapper(void* dest, const void* src, int64_t count);
+void *memcpy_wrapper(void *dest, const void *src, int64_t count);
 
 int64_t pread_wrapper(int fd, void *buf, int64_t count, int64_t offset);
 
@@ -87,4 +87,4 @@ bool instance_of(std::shared_ptr<T1> instance) {
 std::tuple<torch::Tensor, std::vector<torch::Tensor>> map_tensors(std::vector<torch::Tensor> unmapped_tensors);
 
 std::vector<torch::Tensor> apply_tensor_map(torch::Tensor map, std::vector<torch::Tensor> unmapped_tensors);
-#endif //MARIUS_UTIL_H
+#endif  // MARIUS_UTIL_H

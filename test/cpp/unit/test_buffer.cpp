@@ -47,8 +47,7 @@ class PartitionBufferTest : public ::testing::Test {
         fine_to_coarse_ratio = 2;
     }
 
-    ~PartitionBufferTest() {
-    }
+    ~PartitionBufferTest() {}
 
     void SetUp() override {
         filename = testing::TempDir() + "embeddings_data.txt";
@@ -89,15 +88,7 @@ class PartitionBufferTest : public ::testing::Test {
     }
 
     void initializePartitionBuffer(bool prefetch) {
-        pb = new PartitionBuffer(capacity,
-                                 num_partitions,
-                                 fine_to_coarse_ratio,
-                                 partition_size,
-                                 embedding_size,
-                                 total_embeddings,
-                                 dtype,
-                                 filename,
-                                 prefetch);
+        pb = new PartitionBuffer(capacity, num_partitions, fine_to_coarse_ratio, partition_size, embedding_size, total_embeddings, dtype, filename, prefetch);
         pb->setBufferOrdering(buffer_states);
         pb->load();
     }
@@ -131,14 +122,14 @@ class PartitionedFileTest : public ::testing::Test {
         dtype_size = get_dtype_size_wrapper(dtype);
     }
 
-    ~PartitionedFileTest() {
-    }
+    ~PartitionedFileTest() {}
 
     void SetUp() override {
         filename = testing::TempDir() + "partitioned_file.txt";
         fd = createTmpFile(filename);
         ASSERT_NE(fd, -1);
-        ASSERT_EQ(genRandTensorAndWriteToFile(rand_tensor_float32, total_embeddings, embedding_size, dtype, fd), total_embeddings * embedding_size * dtype_size);
+        ASSERT_EQ(genRandTensorAndWriteToFile(rand_tensor_float32, total_embeddings, embedding_size, dtype, fd),
+                  total_embeddings * embedding_size * dtype_size);
         pf = new PartitionedFile(filename, num_partitions, partition_size, embedding_size, total_embeddings, dtype);
     }
 
@@ -177,14 +168,14 @@ class LookaheadBlockTest : public ::testing::Test {
         num_per_lookahead = 2;
     }
 
-    ~LookaheadBlockTest() {
-    }
+    ~LookaheadBlockTest() {}
 
     void SetUp() override {
         filename = testing::TempDir() + "lookahead_buffer.txt";
         fd = createTmpFile(filename);
         ASSERT_NE(fd, -1);
-        ASSERT_EQ(genRandTensorAndWriteToFile(rand_tensor_float32, total_embeddings, embedding_size, dtype, fd), total_embeddings * embedding_size * dtype_size);
+        ASSERT_EQ(genRandTensorAndWriteToFile(rand_tensor_float32, total_embeddings, embedding_size, dtype, fd),
+                  total_embeddings * embedding_size * dtype_size);
         pf = new PartitionedFile(filename, num_partitions, partition_size, embedding_size, total_embeddings, dtype);
     }
 
@@ -226,14 +217,14 @@ class AsyncWriteBlockTest : public ::testing::Test {
         num_per_evict = 5;
     }
 
-    ~AsyncWriteBlockTest() {
-    }
+    ~AsyncWriteBlockTest() {}
 
     void SetUp() override {
         filename = testing::TempDir() + "asyn_write_block.txt";
         fd = createTmpFile(filename);
         ASSERT_NE(fd, -1);
-        ASSERT_EQ(genRandTensorAndWriteToFile(rand_tensor_float32, total_embeddings, embedding_size, dtype, fd), total_embeddings * embedding_size * dtype_size);
+        ASSERT_EQ(genRandTensorAndWriteToFile(rand_tensor_float32, total_embeddings, embedding_size, dtype, fd),
+                  total_embeddings * embedding_size * dtype_size);
         pf = new PartitionedFile(filename, num_partitions, partition_size, embedding_size, total_embeddings, dtype);
     }
 
@@ -328,7 +319,8 @@ TEST_F(PartitionBufferTest, TestPartitionBufferGlobalMap) {
 
 TEST_F(PartitionedFileTest, TestReadPartition) {
     int idx_offset = (num_partitions - 1) * partition_size;
-    Partition p(num_partitions - 1, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset, idx_offset * embedding_size * dtype_size);
+    Partition p(num_partitions - 1, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset,
+                idx_offset * embedding_size * dtype_size);
     torch::Tensor rand_tensor = torch::randint(1000, {partition_size, embedding_size}, torch::kFloat32);
     void *addr = rand_tensor.data_ptr();
     pf->readPartition(addr, &p);
@@ -343,8 +335,9 @@ TEST_F(PartitionedFileTest, TestReadPartition) {
 
 TEST_F(PartitionedFileTest, TestWritePartition) {
     int idx_offset = (num_partitions - 1) * partition_size;
-    Partition p(num_partitions - 1, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset, idx_offset * embedding_size * dtype_size);
-    void *addr = (void *) ((char *) rand_tensor_float32.data_ptr() + idx_offset * embedding_size * dtype_size);
+    Partition p(num_partitions - 1, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset,
+                idx_offset * embedding_size * dtype_size);
+    void *addr = (void *)((char *)rand_tensor_float32.data_ptr() + idx_offset * embedding_size * dtype_size);
     pf->readPartition(addr, &p);
 
     // write random data to PartitionedFile
@@ -353,8 +346,9 @@ TEST_F(PartitionedFileTest, TestWritePartition) {
 
     // write prev data
     pf->writePartition(&p, false);
-    Partition p_(num_partitions - 1, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset, idx_offset * embedding_size * dtype_size);
-    addr = (void *) ((char *) rand.data_ptr() + idx_offset * embedding_size * dtype_size);
+    Partition p_(num_partitions - 1, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset,
+                 idx_offset * embedding_size * dtype_size);
+    addr = (void *)((char *)rand.data_ptr() + idx_offset * embedding_size * dtype_size);
     pf->readPartition(addr, &p_);
     ASSERT_EQ(p.tensor_.equal(p_.tensor_), true);
 
@@ -369,24 +363,23 @@ TEST_F(PartitionedFileTest, TestWritePartition) {
 TEST_F(LookaheadBlockTest, TestMoveToBuffer) {
     for (int i = 0; i < num_partitions; i++) {
         int idx_offset = i * partition_size;
-        partitions.push_back(new Partition(i, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset, idx_offset * embedding_size * dtype_size));
-        returned_partitions.push_back(new Partition(i, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset, idx_offset * embedding_size * dtype_size));
+        partitions.push_back(new Partition(i, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset,
+                                           idx_offset * embedding_size * dtype_size));
+        returned_partitions.push_back(new Partition(i, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset,
+                                                    idx_offset * embedding_size * dtype_size));
     }
 
     LookaheadBlock lb(total_size, pf, num_per_lookahead);
     vector<Partition *> curr_partitions(2);
-    for (int i = 0; i < 2; i++)
-        curr_partitions[i] = partitions[i];
+    for (int i = 0; i < 2; i++) curr_partitions[i] = partitions[i];
     lb.start(curr_partitions);
 
     vector<void *> buff_mem(num_per_lookahead);
-    for (int i = 0; i < buff_mem.size(); i++)
-        buff_mem[i] = malloc(partition_size * embedding_size * dtype_size);
+    for (int i = 0; i < buff_mem.size(); i++) buff_mem[i] = malloc(partition_size * embedding_size * dtype_size);
     vector<int64_t> buff_ids;
     buff_ids.push_back(0);
     buff_ids.push_back(1);
-    for (int i = 2; i < 4; i++)
-        curr_partitions[i - 2] = partitions[i];
+    for (int i = 2; i < 4; i++) curr_partitions[i - 2] = partitions[i];
     lb.move_to_buffer(buff_mem, buff_ids, curr_partitions);
     for (int i = 0; i < 2; i++) {
         pf->readPartition(buff_mem[i], returned_partitions[i]);
@@ -411,14 +404,14 @@ TEST_F(LookaheadBlockTest, TestMoveToBuffer) {
     pf->readPartition(buff_mem[0], returned_partitions[4]);
     ASSERT_EQ(returned_partitions[4]->tensor_.equal(partitions[4]->tensor_), true);
     lb.stop();
-    for (int i = 0; i < buff_mem.size(); i++)
-        free(buff_mem[i]);
+    for (int i = 0; i < buff_mem.size(); i++) free(buff_mem[i]);
 }
 
 TEST_F(AsyncWriteBlockTest, TestAsyncWrite) {
     for (int i = 0; i < num_partitions; i++) {
         int idx_offset = i * partition_size;
-        partitions.push_back(new Partition(i, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset, idx_offset * embedding_size * dtype_size));
+        partitions.push_back(new Partition(i, std::min(partition_size, total_embeddings - idx_offset), embedding_size, dtype, idx_offset,
+                                           idx_offset * embedding_size * dtype_size));
     }
 
     LookaheadBlock lb(total_size, pf, num_per_evict);
@@ -436,7 +429,7 @@ TEST_F(AsyncWriteBlockTest, TestAsyncWrite) {
     torch::Tensor rand_tensor = torch::randn({total_embeddings, embedding_size}, dtype);
     for (int i = 0; i < partitions.size(); i++) {
         int idx_offset = i * partition_size;
-        void *addr = (void *) ((char *) rand_tensor.data_ptr() + idx_offset * embedding_size * dtype_size);
+        void *addr = (void *)((char *)rand_tensor.data_ptr() + idx_offset * embedding_size * dtype_size);
         memcpy_wrapper(partitions[i]->data_ptr_, addr, partitions[i]->partition_size_ * embedding_size * dtype_size);
         partitions[i]->tensor_ = torch::from_blob(partitions[i]->data_ptr_, {partitions[i]->partition_size_, embedding_size}, dtype);
     }
@@ -456,8 +449,7 @@ TEST_F(AsyncWriteBlockTest, TestAsyncWrite) {
     ASSERT_THROW(awb.async_write(partitions), std::runtime_error);
     partitions.pop_back();
 
-    for (int i = 0; i < buff_mem.size(); i++)
-        free(buff_mem[i]);
+    for (int i = 0; i < buff_mem.size(); i++) free(buff_mem[i]);
     lb.stop();
     awb.stop();
 }

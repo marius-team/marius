@@ -9,24 +9,14 @@
 #include "nn/model.h"
 #include "reporting/logger.h"
 
-
-std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config, LearningTask learning_task) {
-
-    string train_filename = storage_config->dataset->dataset_dir
-                            + PathConstants::edges_directory
-                            + PathConstants::training
-                            + PathConstants::edges_file
-                            + PathConstants::file_ext;
-    string valid_filename = storage_config->dataset->dataset_dir
-                            + PathConstants::edges_directory
-                            + PathConstants::validation
-                            + PathConstants::edges_file
-                            + PathConstants::file_ext;
-    string test_filename = storage_config->dataset->dataset_dir
-                           + PathConstants::edges_directory
-                           + PathConstants::test
-                           + PathConstants::edges_file
-                           + PathConstants::file_ext;
+std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config,
+                                                                                          LearningTask learning_task) {
+    string train_filename =
+        storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edges_file + PathConstants::file_ext;
+    string valid_filename =
+        storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::validation + PathConstants::edges_file + PathConstants::file_ext;
+    string test_filename =
+        storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edges_file + PathConstants::file_ext;
 
     shared_ptr<Storage> train_edge_storage = nullptr;
     shared_ptr<Storage> valid_edge_storage = nullptr;
@@ -108,20 +98,14 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initia
     }
 
     if (use_buffer) {
-        string train_edges_partitions = storage_config->dataset->dataset_dir
-                                        + PathConstants::edges_directory
-                                        + PathConstants::training
-                                        + PathConstants::edge_partition_offsets_file;
+        string train_edges_partitions =
+            storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edge_partition_offsets_file;
 
-        string validation_edges_partitions = storage_config->dataset->dataset_dir
-                                             + PathConstants::edges_directory
-                                             + PathConstants::validation
-                                             + PathConstants::edge_partition_offsets_file;
+        string validation_edges_partitions =
+            storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::validation + PathConstants::edge_partition_offsets_file;
 
-        string test_edges_partitions = storage_config->dataset->dataset_dir
-                                       + PathConstants::edges_directory
-                                       + PathConstants::test
-                                       + PathConstants::edge_partition_offsets_file;
+        string test_edges_partitions =
+            storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edge_partition_offsets_file;
 
         if (train_edge_storage != nullptr) {
             train_edge_storage->readPartitionSizes(train_edges_partitions);
@@ -151,18 +135,10 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initia
     return std::forward_as_tuple(train_edge_storage, valid_edge_storage, test_edge_storage);
 }
 
-std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeEmbeddings(shared_ptr<Model> model,
-                                                                               shared_ptr<StorageConfig> storage_config,
-                                                                               bool reinitialize,
-                                                                               bool train,
-                                                                               shared_ptr<InitConfig> init_config) {
-
-    string node_embedding_filename = storage_config->model_dir
-                                     + PathConstants::embeddings_file
-                                     + PathConstants::file_ext;
-    string optimizer_state_filename = storage_config->model_dir
-                                      + PathConstants::embeddings_state_file
-                                      + PathConstants::file_ext;
+std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeEmbeddings(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config,
+                                                                              bool reinitialize, bool train, shared_ptr<InitConfig> init_config) {
+    string node_embedding_filename = storage_config->model_dir + PathConstants::embeddings_file + PathConstants::file_ext;
+    string optimizer_state_filename = storage_config->model_dir + PathConstants::embeddings_state_file + PathConstants::file_ext;
 
     if (storage_config->embeddings == nullptr || !model->has_embeddings()) {
         return std::forward_as_tuple(nullptr, nullptr);
@@ -186,10 +162,7 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeEmbeddings(s
                 curr_num_nodes = MAX_NODE_EMBEDDING_INIT_SIZE;
             }
 
-            torch::Tensor weights = initialize_subtensor(init_config,
-                                                         {curr_num_nodes, embedding_dim},
-                                                         {num_nodes, embedding_dim},
-                                                         torch::TensorOptions());
+            torch::Tensor weights = initialize_subtensor(init_config, {curr_num_nodes, embedding_dim}, {num_nodes, embedding_dim}, torch::TensorOptions());
             OptimizerState emb_state = torch::zeros_like(weights);
             init_node_embeddings->append(weights);
             init_optimizer_state_storage->append(emb_state);
@@ -203,15 +176,11 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeEmbeddings(s
 
     switch (storage_config->embeddings->type) {
         case StorageBackend::PARTITION_BUFFER: {
-            node_embeddings = std::make_shared<PartitionBufferStorage>(node_embedding_filename,
-                                                                       num_nodes,
-                                                                       embedding_dim,
+            node_embeddings = std::make_shared<PartitionBufferStorage>(node_embedding_filename, num_nodes, embedding_dim,
                                                                        std::dynamic_pointer_cast<PartitionBufferOptions>(storage_config->embeddings->options));
             if (train) {
-                optimizer_state_storage = std::make_shared<PartitionBufferStorage>(optimizer_state_filename,
-                                                                                   num_nodes,
-                                                                                   embedding_dim,
-                                                                                   std::dynamic_pointer_cast<PartitionBufferOptions>(storage_config->embeddings->options));
+                optimizer_state_storage = std::make_shared<PartitionBufferStorage>(
+                    optimizer_state_filename, num_nodes, embedding_dim, std::dynamic_pointer_cast<PartitionBufferOptions>(storage_config->embeddings->options));
             }
             break;
         }
@@ -220,32 +189,16 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeEmbeddings(s
             throw std::runtime_error("");
         }
         case StorageBackend::HOST_MEMORY: {
-            node_embeddings = std::make_shared<InMemory>(node_embedding_filename,
-                                                         num_nodes,
-                                                         embedding_dim,
-                                                         dtype,
-                                                         torch::kCPU);
+            node_embeddings = std::make_shared<InMemory>(node_embedding_filename, num_nodes, embedding_dim, dtype, torch::kCPU);
             if (train) {
-                optimizer_state_storage = std::make_shared<InMemory>(optimizer_state_filename,
-                                                                     num_nodes,
-                                                                     embedding_dim,
-                                                                     dtype,
-                                                                     torch::kCPU);
+                optimizer_state_storage = std::make_shared<InMemory>(optimizer_state_filename, num_nodes, embedding_dim, dtype, torch::kCPU);
             }
             break;
         }
         case StorageBackend::DEVICE_MEMORY: {
-            node_embeddings = std::make_shared<InMemory>(node_embedding_filename,
-                                                         num_nodes,
-                                                         embedding_dim,
-                                                         dtype,
-                                                         storage_config->device_type);
+            node_embeddings = std::make_shared<InMemory>(node_embedding_filename, num_nodes, embedding_dim, dtype, storage_config->device_type);
             if (train) {
-                optimizer_state_storage = std::make_shared<InMemory>(optimizer_state_filename,
-                                                                     num_nodes,
-                                                                     embedding_dim,
-                                                                     dtype,
-                                                                     storage_config->device_type);
+                optimizer_state_storage = std::make_shared<InMemory>(optimizer_state_filename, num_nodes, embedding_dim, dtype, storage_config->device_type);
             }
             break;
         }
@@ -254,23 +207,13 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeEmbeddings(s
     return std::forward_as_tuple(node_embeddings, optimizer_state_storage);
 }
 
-std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > initializeNodeIds(shared_ptr<StorageConfig> storage_config) {
-
-    string train_filename = storage_config->dataset->dataset_dir
-                            + PathConstants::nodes_directory
-                            + PathConstants::training
-                            + PathConstants::nodes_file
-                            + PathConstants::file_ext;
-    string valid_filename = storage_config->dataset->dataset_dir
-                            + PathConstants::nodes_directory
-                            + PathConstants::validation
-                            + PathConstants::nodes_file
-                            + PathConstants::file_ext;
-    string test_filename = storage_config->dataset->dataset_dir
-                           + PathConstants::nodes_directory
-                           + PathConstants::test
-                           + PathConstants::nodes_file
-                           + PathConstants::file_ext;
+std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeIds(shared_ptr<StorageConfig> storage_config) {
+    string train_filename =
+        storage_config->dataset->dataset_dir + PathConstants::nodes_directory + PathConstants::training + PathConstants::nodes_file + PathConstants::file_ext;
+    string valid_filename =
+        storage_config->dataset->dataset_dir + PathConstants::nodes_directory + PathConstants::validation + PathConstants::nodes_file + PathConstants::file_ext;
+    string test_filename =
+        storage_config->dataset->dataset_dir + PathConstants::nodes_directory + PathConstants::test + PathConstants::nodes_file + PathConstants::file_ext;
 
     int64_t num_train = storage_config->dataset->num_train;
     int64_t num_valid = storage_config->dataset->num_valid;
@@ -291,7 +234,6 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > initi
             throw std::runtime_error("");
         }
         case StorageBackend::HOST_MEMORY: {
-
             if (num_train != -1) {
                 train_node_storage = std::make_shared<InMemory>(train_filename, num_train, 1, dtype, torch::kCPU);
             }
@@ -318,7 +260,6 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > initi
         }
     }
 
-
     if (storage_config->shuffle_input) {
         if (train_node_storage != nullptr) {
             train_node_storage->shuffle();
@@ -335,10 +276,7 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > initi
 }
 
 shared_ptr<Storage> initializeRelationFeatures(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config) {
-
-    string rel_features_file = storage_config->model_dir
-                               + PathConstants::features_file
-                               + PathConstants::file_ext;
+    string rel_features_file = storage_config->model_dir + PathConstants::features_file + PathConstants::file_ext;
 
     int64_t num_relations = storage_config->dataset->num_relations;
     int64_t rel_feature_dim = storage_config->dataset->rel_feature_dim;
@@ -347,18 +285,15 @@ shared_ptr<Storage> initializeRelationFeatures(shared_ptr<Model> model, shared_p
         return nullptr;
     }
 
-    shared_ptr<Storage> rel_features = std::make_shared<InMemory>(rel_features_file, num_relations, rel_feature_dim, torch::kFloat32, storage_config->device_type);
+    shared_ptr<Storage> rel_features =
+        std::make_shared<InMemory>(rel_features_file, num_relations, rel_feature_dim, torch::kFloat32, storage_config->device_type);
     rel_features->load();
 
     return rel_features;
 }
 
 shared_ptr<Storage> initializeNodeFeatures(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config) {
-
-    string node_features_file = storage_config->dataset->dataset_dir
-                                + PathConstants::nodes_directory
-                                + PathConstants::features_file
-                                + PathConstants::file_ext;
+    string node_features_file = storage_config->dataset->dataset_dir + PathConstants::nodes_directory + PathConstants::features_file + PathConstants::file_ext;
 
     shared_ptr<Storage> node_features;
 
@@ -372,9 +307,7 @@ shared_ptr<Storage> initializeNodeFeatures(shared_ptr<Model> model, shared_ptr<S
 
     switch (storage_config->features->type) {
         case StorageBackend::PARTITION_BUFFER: {
-            node_features = std::make_shared<PartitionBufferStorage>(node_features_file,
-                                                                     num_nodes,
-                                                                     node_feature_dim,
+            node_features = std::make_shared<PartitionBufferStorage>(node_features_file, num_nodes, node_feature_dim,
                                                                      std::dynamic_pointer_cast<PartitionBufferOptions>(storage_config->features->options));
             break;
         }
@@ -396,12 +329,7 @@ shared_ptr<Storage> initializeNodeFeatures(shared_ptr<Model> model, shared_ptr<S
 }
 
 shared_ptr<Storage> initializeNodeLabels(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config) {
-
-    string node_labels_file = storage_config->dataset->dataset_dir
-                              + PathConstants::nodes_directory
-                              + PathConstants::labels_file
-                              + PathConstants::file_ext;
-
+    string node_labels_file = storage_config->dataset->dataset_dir + PathConstants::nodes_directory + PathConstants::labels_file + PathConstants::file_ext;
 
     shared_ptr<Storage> node_labels;
 
@@ -431,14 +359,10 @@ shared_ptr<Storage> initializeNodeLabels(shared_ptr<Model> model, shared_ptr<Sto
     return node_labels;
 }
 
-shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> model,
-                                                              shared_ptr<StorageConfig> storage_config,
-                                                              bool reinitialize,
-                                                              bool train,
+shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
                                                               shared_ptr<InitConfig> init_config) {
-
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > edge_storages = initializeEdges(storage_config, model->learning_task_);
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
 
     GraphModelStoragePtrs storage_ptrs = {};
 
@@ -457,15 +381,10 @@ shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> 
     return graph_model_storage;
 }
 
-shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Model> model,
-                                                                  shared_ptr<StorageConfig> storage_config,
-                                                                  bool reinitialize,
-                                                                  bool train,
-                                                                  shared_ptr<InitConfig> init_config) {
-
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > edge_storages = initializeEdges(storage_config,
-                                                                                                                                    model->learning_task_);
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage> > node_id_storages = initializeNodeIds(storage_config);
+shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize,
+                                                                  bool train, shared_ptr<InitConfig> init_config) {
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> node_id_storages = initializeNodeIds(storage_config);
     shared_ptr<Storage> node_features = initializeNodeFeatures(model, storage_config);
     shared_ptr<Storage> node_labels = initializeNodeLabels(model, storage_config);
 
@@ -482,7 +401,7 @@ shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Mod
     storage_ptrs.node_features = node_features;
     storage_ptrs.node_labels = node_labels;
 
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage> > node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
     storage_ptrs.node_embeddings = std::get<0>(node_embeddings);
     storage_ptrs.node_optimizer_state = std::get<1>(node_embeddings);
 
@@ -491,12 +410,8 @@ shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Mod
     return graph_model_storage;
 }
 
-shared_ptr<GraphModelStorage> initializeStorage(shared_ptr<Model> model,
-                                                shared_ptr<StorageConfig> storage_config,
-                                                bool reinitialize,
-                                                bool train,
+shared_ptr<GraphModelStorage> initializeStorage(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
                                                 shared_ptr<InitConfig> init_config) {
-
     if (init_config == nullptr) {
         init_config = std::make_shared<InitConfig>();
         init_config->type = InitDistribution::GLOROT_UNIFORM;

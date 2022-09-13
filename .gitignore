@@ -10,6 +10,7 @@ CTestTestfile.cmake
 .idea/
 cmake-*/
 logs/
+data/
 test/test_data/generated/
 *.dylib
 
@@ -28,6 +29,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+docs_build/
+docs_html/
 develop-eggs/
 dist/
 downloads/

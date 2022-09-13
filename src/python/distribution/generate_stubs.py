@@ -1,17 +1,15 @@
 import os
+
 from pybind11_stubgen import ModuleStubsGenerator
-import torch
+
 
 def generate_stubs(output_dir, module_name):
-
-
     module = ModuleStubsGenerator(module_name)
 
     module.parse()
 
     module.write_setup_py = False
 
-    module_root = "/".join(module_name.split(".")[:-1])
     module_name = module_name.split(".")[-1]
 
     os.makedirs(output_dir, exist_ok=True)
@@ -22,9 +20,7 @@ def generate_stubs(output_dir, module_name):
         fp.write("\n".join(module.to_lines()))
 
 
-
 def gen_all_stubs(output_dir):
-
     generate_stubs(output_dir, "marius.config")
 
     generate_stubs(output_dir, "marius._data.samplers")
@@ -45,7 +41,8 @@ def gen_all_stubs(output_dir):
 
     generate_stubs(output_dir, "marius")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     gen_all_stubs("tmp")
 # generate_stubs("tmp", "marius")
 # generate_stubs("tmp", "marius.config")

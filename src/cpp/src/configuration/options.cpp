@@ -5,8 +5,7 @@
 #include "configuration/options.h"
 
 LearningTask getLearningTask(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "NODE_CLASSIFICATION" || string_val == "NC") {
         return LearningTask::NODE_CLASSIFICATION;
@@ -18,8 +17,7 @@ LearningTask getLearningTask(std::string string_val) {
 }
 
 InitDistribution getInitDistribution(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "ZEROS") {
         return InitDistribution::ZEROS;
@@ -41,8 +39,7 @@ InitDistribution getInitDistribution(std::string string_val) {
 }
 
 LossFunctionType getLossFunctionType(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "SOFTMAX_CE") {
         return LossFunctionType::SOFTMAX_CE;
@@ -64,8 +61,7 @@ LossFunctionType getLossFunctionType(std::string string_val) {
 }
 
 LossReduction getLossReduction(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "MEAN") {
         return LossReduction::MEAN;
@@ -77,8 +73,7 @@ LossReduction getLossReduction(std::string string_val) {
 }
 
 ActivationFunction getActivationFunction(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "RELU") {
         return ActivationFunction::RELU;
@@ -92,8 +87,7 @@ ActivationFunction getActivationFunction(std::string string_val) {
 }
 
 OptimizerType getOptimizerType(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "SGD") {
         return OptimizerType::SGD;
@@ -109,8 +103,7 @@ OptimizerType getOptimizerType(std::string string_val) {
 }
 
 ReductionLayerType getReductionLayerType(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "NONE") {
         return ReductionLayerType::NONE;
@@ -124,8 +117,7 @@ ReductionLayerType getReductionLayerType(std::string string_val) {
 }
 
 DenseLayerType getDenseLayerType(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "NONE") {
         return DenseLayerType::NONE;
@@ -139,8 +131,7 @@ DenseLayerType getDenseLayerType(std::string string_val) {
 }
 
 LayerType getLayerType(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "NONE") {
         return LayerType::NONE;
@@ -159,10 +150,8 @@ LayerType getLayerType(std::string string_val) {
     }
 }
 
-
 GNNLayerType getGNNLayerType(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "NONE") {
         return GNNLayerType::NONE;
@@ -180,8 +169,7 @@ GNNLayerType getGNNLayerType(std::string string_val) {
 }
 
 GraphSageAggregator getGraphSageAggregator(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "GCN") {
         return GraphSageAggregator::GCN;
@@ -193,8 +181,7 @@ GraphSageAggregator getGraphSageAggregator(std::string string_val) {
 }
 
 DecoderType getDecoderType(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "NODE") {
         return DecoderType::NODE;
@@ -210,8 +197,7 @@ DecoderType getDecoderType(std::string string_val) {
 }
 
 EdgeDecoderMethod getEdgeDecoderMethod(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "ONLY_POS") {
         return EdgeDecoderMethod::ONLY_POS;
@@ -231,8 +217,7 @@ EdgeDecoderMethod getEdgeDecoderMethod(std::string string_val) {
 }
 
 StorageBackend getStorageBackend(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "PARTITION_BUFFER") {
         return StorageBackend::PARTITION_BUFFER;
@@ -248,8 +233,7 @@ StorageBackend getStorageBackend(std::string string_val) {
 }
 
 EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "OLD_BETA") {
         return EdgeBucketOrdering::OLD_BETA;
@@ -267,8 +251,7 @@ EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val) {
 }
 
 NodePartitionOrdering getNodePartitionOrderingEnum(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "DISPERSED") {
         return NodePartitionOrdering::DISPERSED;
@@ -282,8 +265,7 @@ NodePartitionOrdering getNodePartitionOrderingEnum(std::string string_val) {
 }
 
 NeighborSamplingLayer getNeighborSamplingLayer(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "ALL") {
         return NeighborSamplingLayer::ALL;
@@ -297,8 +279,7 @@ NeighborSamplingLayer getNeighborSamplingLayer(std::string string_val) {
 }
 
 LocalFilterMode getLocalFilterMode(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "ALL") {
         return LocalFilterMode::ALL;
@@ -310,8 +291,7 @@ LocalFilterMode getLocalFilterMode(std::string string_val) {
 }
 
 torch::Dtype getDtype(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "INT" || string_val == "INT32") {
         return torch::kInt32;
@@ -327,8 +307,7 @@ torch::Dtype getDtype(std::string string_val) {
 }
 
 spdlog::level::level_enum getLogLevel(std::string string_val) {
-
-    for (auto & c: string_val) c = toupper(c);
+    for (auto& c : string_val) c = toupper(c);
 
     if (string_val == "ERROR" || string_val == "E") {
         return spdlog::level::err;

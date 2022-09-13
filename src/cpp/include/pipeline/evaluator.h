@@ -15,11 +15,11 @@
   The evaluator runs the evaluation process using the given model and dataset.
 */
 class Evaluator {
-  public:
+   public:
     shared_ptr<DataLoader> dataloader_;
 
-    virtual ~Evaluator() { };
-    
+    virtual ~Evaluator(){};
+
     /**
       Runs evaluation process.
       @param validation If true, evaluate on validation set. Otherwise evaluate on test set
@@ -29,7 +29,8 @@ class Evaluator {
 
 class PipelineEvaluator : public Evaluator {
     shared_ptr<Pipeline> pipeline_;
-  public:
+
+   public:
     PipelineEvaluator(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config);
 
     void evaluate(bool validation) override;
@@ -37,11 +38,11 @@ class PipelineEvaluator : public Evaluator {
 
 class SynchronousEvaluator : public Evaluator {
     shared_ptr<Model> model_;
-  public:
+
+   public:
     SynchronousEvaluator(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model);
 
     void evaluate(bool validation) override;
 };
 
-#endif //MARIUS_EVALUATOR_H
-
+#endif  // MARIUS_EVALUATOR_H

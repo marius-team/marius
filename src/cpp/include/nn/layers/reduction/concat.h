@@ -9,7 +9,7 @@
 #include "reduction_layer.h"
 
 class ConcatReduction : public ReductionLayer {
-public:
+   public:
     ConcatReduction(shared_ptr<LayerConfig> layer_config, torch::Device device);
 
     torch::Tensor forward(std::vector<torch::Tensor> inputs) override;
@@ -17,4 +17,4 @@ public:
     void reset() override;
 };
 
-#endif //MARIUS_CONCAT_H
+#endif  // MARIUS_CONCAT_H

@@ -10,7 +10,7 @@
 #include "storage/storage.h"
 
 class EmbeddingLayer : public Layer {
-public:
+   public:
     int offset_;
 
     EmbeddingLayer(shared_ptr<LayerConfig> layer_config, torch::Device device, int offset = 0);
@@ -22,5 +22,4 @@ public:
     void reset() override;
 };
 
-
-#endif //MARIUS_EMBEDDING_H
+#endif  // MARIUS_EMBEDDING_H

@@ -37,9 +37,9 @@ jobs:
       shell: bash
       run:   |
         if [ "$RUNNER_OS" == "Linux" ]; then
-             pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
+             sudo python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
         elif [ "$RUNNER_OS" == "macOS" ]; then
-             pip3 install torch
+             sudo python3 -m pip install torch
         else
              echo "$RUNNER_OS not supported"
              exit 1
@@ -48,7 +48,7 @@ jobs:
     - name: Install Marius
       working-directory: ${{github.workspace}}
       shell: bash
-      run: pip3 install . --verbose
+      run: sudo python3 -m pip install .[tests] --verbose
 
     - name: Run Tests
       working-directory: ${{github.workspace}}

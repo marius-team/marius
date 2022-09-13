@@ -1,9 +1,7 @@
 #include "common/pybind_headers.h"
-
 #include "configuration/options.h"
 
 void init_options(py::module &m) {
-
     py::enum_<LearningTask>(m, "LearningTask")
         .value("NODE_CLASSIFICATION", LearningTask::NODE_CLASSIFICATION)
         .value("LINK_PREDICTION", LearningTask::LINK_PREDICTION)
@@ -11,9 +9,7 @@ void init_options(py::module &m) {
 
     m.def("getLearningTask", &getLearningTask, py::arg("string_val"));
 
-    py::enum_<EdgeDecoderMethod>(m, "EdgeDecoderMethod")
-        .value("ONLY_POS", EdgeDecoderMethod::ONLY_POS)
-        .value("CORRUPT_NODE", EdgeDecoderMethod::CORRUPT_NODE);
+    py::enum_<EdgeDecoderMethod>(m, "EdgeDecoderMethod").value("ONLY_POS", EdgeDecoderMethod::ONLY_POS).value("CORRUPT_NODE", EdgeDecoderMethod::CORRUPT_NODE);
 
     m.def("getEdgeDecoderMethod", &getEdgeDecoderMethod, py::arg("string_val"));
 
@@ -38,9 +34,7 @@ void init_options(py::module &m) {
 
     m.def("getLossFunctionType", &getLossFunctionType, py::arg("string_val"));
 
-    py::enum_<LossReduction>(m, "LossReduction")
-        .value("MEAN", LossReduction::MEAN)
-        .value("SUM", LossReduction::SUM);
+    py::enum_<LossReduction>(m, "LossReduction").value("MEAN", LossReduction::MEAN).value("SUM", LossReduction::SUM);
 
     m.def("getLossReduction", &getLossReduction, py::arg("string_val"));
 
@@ -92,9 +86,7 @@ void init_options(py::module &m) {
 
     m.def("getGNNLayerType", &getGNNLayerType, py::arg("string_val"));
 
-    py::enum_<GraphSageAggregator>(m, "GraphSageAggregator")
-        .value("GCN", GraphSageAggregator::GCN)
-        .value("MEAN", GraphSageAggregator::MEAN);
+    py::enum_<GraphSageAggregator>(m, "GraphSageAggregator").value("GCN", GraphSageAggregator::GCN).value("MEAN", GraphSageAggregator::MEAN);
 
     m.def("getGraphSageAggregator", &getGraphSageAggregator, py::arg("string_val"));
 
@@ -103,7 +95,7 @@ void init_options(py::module &m) {
         .value("DISTMULT", DecoderType::DISTMULT)
         .value("TRANSE", DecoderType::TRANSE)
         .value("COMPLEX", DecoderType::COMPLEX);
-    
+
     m.def("getDecoderType", &getDecoderType, py::arg("string_val"));
 
     py::enum_<StorageBackend>(m, "StorageBackend")
@@ -120,7 +112,7 @@ void init_options(py::module &m) {
         .value("ALL_BETA", EdgeBucketOrdering::ALL_BETA)
         .value("TWO_LEVEL_BETA", EdgeBucketOrdering::TWO_LEVEL_BETA)
         .value("CUSTOM", EdgeBucketOrdering::CUSTOM);
-    
+
     m.def("getEdgeBucketOrderingEnum", &getEdgeBucketOrderingEnum, py::arg("string_val"));
 
     py::enum_<NodePartitionOrdering>(m, "NodePartitionOrdering")
@@ -139,13 +131,12 @@ void init_options(py::module &m) {
 
     m.def("getDtype", &getDtype, py::arg("string_val"));
 
-    py::class_<InitOptions, std::shared_ptr<InitOptions>>(m, "InitOptions")
-        .def(py::init<>());
+    py::class_<InitOptions, std::shared_ptr<InitOptions>>(m, "InitOptions").def(py::init<>());
 
     py::class_<ConstantInitOptions, InitOptions, std::shared_ptr<ConstantInitOptions>>(m, "ConstantInitOptions")
         .def(py::init<float>(), py::arg("constant"))
         .def_readwrite("constant", &ConstantInitOptions::constant);
-    
+
     py::class_<UniformInitOptions, InitOptions, std::shared_ptr<UniformInitOptions>>(m, "UniformInitOptions")
         .def(py::init<float>(), py::arg("scale_factor"))
         .def_readwrite("scale_factor", &UniformInitOptions::scale_factor);
@@ -155,9 +146,7 @@ void init_options(py::module &m) {
         .def_readwrite("mean", &NormalInitOptions::mean)
         .def_readwrite("std", &NormalInitOptions::std);
 
-    py::class_<LossOptions, std::shared_ptr<LossOptions>>(m, "LossOptions")
-        .def(py::init<>())
-        .def_readwrite("loss_reduction", &LossOptions::loss_reduction);
+    py::class_<LossOptions, std::shared_ptr<LossOptions>>(m, "LossOptions").def(py::init<>()).def_readwrite("loss_reduction", &LossOptions::loss_reduction);
 
     py::class_<RankingLossOptions, LossOptions, std::shared_ptr<RankingLossOptions>>(m, "RankingLossOptions")
         .def(py::init<>())
@@ -183,14 +172,11 @@ void init_options(py::module &m) {
         .def_readwrite("eps", &AdamOptions::eps)
         .def_readwrite("weight_decay", &AdamOptions::weight_decay);
 
-    py::class_<LayerOptions, std::shared_ptr<LayerOptions>>(m, "LayerOptions")
-        .def(py::init<>());
+    py::class_<LayerOptions, std::shared_ptr<LayerOptions>>(m, "LayerOptions").def(py::init<>());
 
-    py::class_<EmbeddingLayerOptions, LayerOptions, std::shared_ptr<EmbeddingLayerOptions>>(m, "EmbeddingLayerOptions")
-        .def(py::init<>());
+    py::class_<EmbeddingLayerOptions, LayerOptions, std::shared_ptr<EmbeddingLayerOptions>>(m, "EmbeddingLayerOptions").def(py::init<>());
 
-    py::class_<FeatureLayerOptions, LayerOptions, std::shared_ptr<FeatureLayerOptions>>(m, "FeatureLayerOptions")
-        .def(py::init<>());
+    py::class_<FeatureLayerOptions, LayerOptions, std::shared_ptr<FeatureLayerOptions>>(m, "FeatureLayerOptions").def(py::init<>());
 
     py::class_<DenseLayerOptions, LayerOptions, std::shared_ptr<DenseLayerOptions>>(m, "DenseLayerOptions")
         .def(py::init<>())
@@ -216,8 +202,7 @@ void init_options(py::module &m) {
         .def_readwrite("input_dropout", &GATLayerOptions::input_dropout)
         .def_readwrite("attention_dropout", &GATLayerOptions::attention_dropout);
 
-    py::class_<DecoderOptions, std::shared_ptr<DecoderOptions>>(m, "DecoderOptions")
-        .def(py::init<>());
+    py::class_<DecoderOptions, std::shared_ptr<DecoderOptions>>(m, "DecoderOptions").def(py::init<>());
 
     py::class_<EdgeDecoderOptions, DecoderOptions, std::shared_ptr<EdgeDecoderOptions>>(m, "EdgeDecoderOptions")
         .def(py::init<>())
@@ -225,9 +210,7 @@ void init_options(py::module &m) {
         .def_readwrite("mode", &EdgeDecoderOptions::edge_decoder_method)
         .def_readwrite("input_dim", &EdgeDecoderOptions::input_dim);
 
-    py::class_<StorageOptions, std::shared_ptr<StorageOptions>>(m, "StorageOptions")
-        .def(py::init<>())
-        .def_readwrite("dtype", &StorageOptions::dtype);
+    py::class_<StorageOptions, std::shared_ptr<StorageOptions>>(m, "StorageOptions").def(py::init<>()).def_readwrite("dtype", &StorageOptions::dtype);
 
     py::class_<PartitionBufferOptions, StorageOptions, std::shared_ptr<PartitionBufferOptions>>(m, "PartitionBufferOptions")
         .def(py::init<>())
@@ -238,13 +221,12 @@ void init_options(py::module &m) {
         .def_readwrite("edge_bucket_ordering", &PartitionBufferOptions::edge_bucket_ordering)
         .def_readwrite("node_partition_ordering", &PartitionBufferOptions::node_partition_ordering);
 
-    py::class_<NeighborSamplingOptions, std::shared_ptr<NeighborSamplingOptions>>(m, "NeighborSamplingOptions")
-        .def(py::init<>());
+    py::class_<NeighborSamplingOptions, std::shared_ptr<NeighborSamplingOptions>>(m, "NeighborSamplingOptions").def(py::init<>());
 
     py::class_<UniformSamplingOptions, NeighborSamplingOptions, std::shared_ptr<UniformSamplingOptions>>(m, "UniformSamplingOptions")
         .def(py::init<>())
         .def_readwrite("max_neighbors", &UniformSamplingOptions::max_neighbors);
-    
+
     py::class_<DropoutSamplingOptions, NeighborSamplingOptions, std::shared_ptr<DropoutSamplingOptions>>(m, "DropoutSamplingOptions")
         .def(py::init<>())
         .def_readwrite("rate", &DropoutSamplingOptions::rate);

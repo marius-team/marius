@@ -3,7 +3,6 @@
 //
 
 #include "common/pybind_headers.h"
-
 #include "marius.h"
 
 void init_marius(py::module &m) {

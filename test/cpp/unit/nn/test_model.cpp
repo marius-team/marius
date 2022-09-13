@@ -3,19 +3,18 @@
 //
 
 #include <gtest/gtest.h>
-#include <nn/model.h>
-#include <nn/layers/embedding/embedding.h>
-#include <nn/layers/feature/feature.h>
-#include <nn/decoders/edge/distmult.h>
-#include <nn/decoders/edge/transe.h>
 #include <nn/decoders/edge/corrupt_node_decoder.h>
 #include <nn/decoders/edge/corrupt_rel_decoder.h>
-#include <nn/decoders/node/node_decoder_model.h>
+#include <nn/decoders/edge/distmult.h>
+#include <nn/decoders/edge/transe.h>
 #include <nn/decoders/node/node_decoder.h>
+#include <nn/decoders/node/node_decoder_model.h>
 #include <nn/decoders/node/noop_node_decoder.h>
+#include <nn/layers/embedding/embedding.h>
+#include <nn/layers/feature/feature.h>
+#include <nn/model.h>
 
 TEST(TestModel, TestInitModelFromConfigLP) {
-
     int embedding_dim = 50;
     int random_seed = 100;
     int num_relations = 10;
@@ -124,7 +123,6 @@ TEST(TestModel, TestInitModelFromConfigLP) {
 }
 
 TEST(TestModel, TestInitModelFromConfigNC) {
-
     int feature_dim = 50;
     int random_seed = 100;
 

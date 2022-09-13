@@ -1,26 +1,37 @@
 from pathlib import Path
-from marius.tools.preprocess.dataset import NodeClassificationDataset
-from marius.tools.preprocess.utils import download_url, extract_file
+
 import numpy as np
-import pandas as pd
-from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
-from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
 from omegaconf import OmegaConf
+
+from marius.tools.configuration.constants import PathConstants
+from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
+from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
+from marius.tools.preprocess.dataset import NodeClassificationDataset
+from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
+from marius.tools.preprocess.utils import download_url, extract_file
 
 
 class OGBNArxiv(NodeClassificationDataset):
+    """
+    Open Graph Benchmark: arxiv
+
+    The ogbn-arxiv dataset is a directed graph,
+    representing the citation network between all Computer Science (CS) arXiv papers indexed by MAG.
+    Each node is an arXiv paper and each directed edge indicates that one paper cites another one.
+    Each paper comes with a 128-dimensional feature vector obtained by averaging the embeddings of words
+    in its title and abstract.
+    The embeddings of individual words are computed by running the skip-gram model over the MAG corpus.
+    We also provide the mapping from MAG paper IDs into the raw texts of titles and abstracts here.
+    In addition, all papers are also associated with the year that the corresponding paper was published.
+    """
 
     def __init__(self, output_directory: Path, spark=False):
-
         super().__init__(output_directory, spark)
 
         self.dataset_name = "ogbn_arxiv"
         self.dataset_url = "http://snap.stanford.edu/ogb/data/nodeproppred/arxiv.zip"
 
     def download(self, overwrite=False):
-
         self.input_edge_list_file = self.output_directory / Path("edge.csv")
         self.input_node_feature_file = self.output_directory / Path("node-feat.csv")
         self.input_node_label_file = self.output_directory / Path("node-label.csv")
@@ -60,8 +71,9 @@ class OGBNArxiv(NodeClassificationDataset):
             for file in (self.output_directory / Path("arxiv/split/time")).iterdir():
                 file.rename(self.output_directory / Path(file.name))
 
-    def preprocess(self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False):
-
+    def preprocess(
+        self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False
+    ):
         train_nodes = np.genfromtxt(self.input_train_nodes_file, delimiter=",").astype(np.int32)
         valid_nodes = np.genfromtxt(self.input_valid_nodes_file, delimiter=",").astype(np.int32)
         test_nodes = np.genfromtxt(self.input_test_nodes_file, delimiter=",").astype(np.int32)
@@ -76,7 +88,7 @@ class OGBNArxiv(NodeClassificationDataset):
             sequential_train_nodes=sequential_train_nodes,
             delim=",",
             known_node_ids=[train_nodes, valid_nodes, test_nodes],
-            partitioned_evaluation=partitioned_eval
+            partitioned_evaluation=partitioned_eval,
         )
         dataset_stats = converter.convert()
 
@@ -85,7 +97,9 @@ class OGBNArxiv(NodeClassificationDataset):
 
         if remap_ids:
             node_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.node_mapping_path), delimiter=",")
-            train_nodes, valid_nodes, test_nodes, features, labels = remap_nodes(node_mapping, train_nodes, valid_nodes, test_nodes, features, labels)
+            train_nodes, valid_nodes, test_nodes, features, labels = remap_nodes(
+                node_mapping, train_nodes, valid_nodes, test_nodes, features, labels
+            )
 
         with open(self.train_nodes_file, "wb") as f:
             f.write(bytes(train_nodes))
@@ -112,4 +126,3 @@ class OGBNArxiv(NodeClassificationDataset):
             f.writelines(yaml_file)
 
         return dataset_stats
-

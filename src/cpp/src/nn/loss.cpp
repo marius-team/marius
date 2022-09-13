@@ -5,7 +5,6 @@
 #include "nn/loss.h"
 
 void check_score_shapes(torch::Tensor pos_scores, torch::Tensor neg_scores) {
-
     if (!pos_scores.defined()) {
         throw UndefinedTensorException();
     }
@@ -23,7 +22,8 @@ void check_score_shapes(torch::Tensor pos_scores, torch::Tensor neg_scores) {
     }
 
     if (pos_scores.size(0) != neg_scores.size(0)) {
-//        throw TensorSizeMismatchException(pos_scores, (std::stringstream("Size: ") << neg_scores.size(1) << " First dimension of pos_scores and neg_scores should match.").str());
+        //        throw TensorSizeMismatchException(pos_scores, (std::stringstream("Size: ") << neg_scores.size(1) << " First dimension of pos_scores and
+        //        neg_scores should match.").str());
         throw TensorSizeMismatchException(pos_scores, "First dimension of pos_scores and neg_scores should match.");
     }
 }
@@ -48,9 +48,9 @@ std::tuple<torch::Tensor, torch::Tensor> scores_to_labels(torch::Tensor pos_scor
 }
 
 torch::Tensor SoftmaxCrossEntropy::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
-
     if (!scores) {
-        throw MariusRuntimeException("Input to SoftmaxCrossEntropy loss function must be scores. SoftmaxCrossEntropy is currently unsupported for classification.");
+        throw MariusRuntimeException(
+            "Input to SoftmaxCrossEntropy loss function must be scores. SoftmaxCrossEntropy is currently unsupported for classification.");
     }
 
     check_score_shapes(y_pred, labels);
@@ -86,7 +86,6 @@ torch::Tensor RankingLoss::operator()(torch::Tensor pos_scores, torch::Tensor ne
 }
 
 torch::Tensor CrossEntropyLoss::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
-
     if (scores) {
         check_score_shapes(y_pred, labels);
         std::tie(y_pred, labels) = scores_to_labels(y_pred.unsqueeze(1), labels, false);
@@ -103,7 +102,6 @@ torch::Tensor CrossEntropyLoss::operator()(torch::Tensor y_pred, torch::Tensor l
 }
 
 torch::Tensor BCEAfterSigmoidLoss::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
-
     if (scores) {
         check_score_shapes(y_pred, labels);
         std::tie(y_pred, labels) = scores_to_labels(y_pred, labels.flatten(0, 1), true);
@@ -122,7 +120,6 @@ torch::Tensor BCEAfterSigmoidLoss::operator()(torch::Tensor y_pred, torch::Tenso
 }
 
 torch::Tensor BCEWithLogitsLoss::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
-
     if (scores) {
         check_score_shapes(y_pred, labels);
         std::tie(y_pred, labels) = scores_to_labels(y_pred, labels.flatten(0, 1), true);
@@ -141,7 +138,6 @@ torch::Tensor BCEWithLogitsLoss::operator()(torch::Tensor y_pred, torch::Tensor 
 }
 
 torch::Tensor MSELoss::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
-
     if (scores) {
         check_score_shapes(y_pred, labels);
         std::tie(y_pred, labels) = scores_to_labels(y_pred, labels.flatten(0, 1), true);
@@ -160,7 +156,6 @@ torch::Tensor MSELoss::operator()(torch::Tensor y_pred, torch::Tensor labels, bo
 }
 
 torch::Tensor SoftPlusLoss::operator()(torch::Tensor y_pred, torch::Tensor labels, bool scores) {
-
     if (scores) {
         check_score_shapes(y_pred, labels);
         std::tie(y_pred, labels) = scores_to_labels(y_pred, labels.flatten(0, 1), true);
@@ -180,7 +175,6 @@ torch::Tensor SoftPlusLoss::operator()(torch::Tensor y_pred, torch::Tensor label
 }
 
 std::shared_ptr<LossFunction> getLossFunction(shared_ptr<LossConfig> config) {
-
     if (config == nullptr) {
         throw UnexpectedNullPtrException();
     }
@@ -188,7 +182,7 @@ std::shared_ptr<LossFunction> getLossFunction(shared_ptr<LossConfig> config) {
     if (config->type == LossFunctionType::SOFTMAX_CE) {
         return std::make_shared<SoftmaxCrossEntropy>(config->options);
     } else if (config->type == LossFunctionType::RANKING) {
-        return  std::make_shared<RankingLoss>(std::dynamic_pointer_cast<RankingLossOptions>(config->options));
+        return std::make_shared<RankingLoss>(std::dynamic_pointer_cast<RankingLossOptions>(config->options));
     } else if (config->type == LossFunctionType::CROSS_ENTROPY) {
         return std::make_shared<CrossEntropyLoss>(config->options);
     } else if (config->type == LossFunctionType::BCE_AFTER_SIGMOID) {

@@ -20,7 +20,6 @@ PipelineEvaluator::PipelineEvaluator(shared_ptr<DataLoader> dataloader, shared_p
 }
 
 void PipelineEvaluator::evaluate(bool validation) {
-
     if (!dataloader_->single_dataset_) {
         if (validation) {
             SPDLOG_INFO("Evaluating validation set");
@@ -57,7 +56,6 @@ SynchronousEvaluator::SynchronousEvaluator(shared_ptr<DataLoader> dataloader, sh
 }
 
 void SynchronousEvaluator::evaluate(bool validation) {
-
     if (!dataloader_->single_dataset_) {
         if (validation) {
             SPDLOG_INFO("Evaluating validation set");
@@ -81,7 +79,6 @@ void SynchronousEvaluator::evaluate(bool validation) {
     int num_batches = 0;
 
     while (dataloader_->hasNextBatch()) {
-
         shared_ptr<Batch> batch = dataloader_->getBatch();
         batch->to(model_->device_);
         dataloader_->loadGPUParameters(batch);

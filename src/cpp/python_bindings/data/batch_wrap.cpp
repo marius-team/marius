@@ -1,10 +1,8 @@
 #include "common/pybind_headers.h"
-
 #include "data/batch.h"
 
 void init_batch(py::module &m) {
-
-	py::enum_<BatchStatus>(m, "BatchStatus")
+    py::enum_<BatchStatus>(m, "BatchStatus")
         .value("Waiting", BatchStatus::Waiting)
         .value("AccumulatedIndices", BatchStatus::AccumulatedIndices)
         .value("LoadedEmbeddings", BatchStatus::LoadedEmbeddings)
@@ -15,7 +13,7 @@ void init_batch(py::module &m) {
         .value("TransferredToHost", BatchStatus::TransferredToHost)
         .value("Done", BatchStatus::Done);
 
-	py::class_<Batch, shared_ptr<Batch>>(m, "Batch", py::dynamic_attr())
+    py::class_<Batch, shared_ptr<Batch>>(m, "Batch", py::dynamic_attr())
         .def_readwrite("batch_id", &Batch::batch_id_)
         .def_readwrite("start_idx", &Batch::start_idx_)
         .def_readwrite("batch_size", &Batch::batch_size_)

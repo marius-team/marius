@@ -3,9 +3,7 @@
 #include "gtest/gtest.h"
 #include "util.h"
 
-int createTmpFile(std::string &filename) {
-    return open(filename.c_str(), O_RDWR | O_CREAT, 0777);
-}
+int createTmpFile(std::string &filename) { return open(filename.c_str(), O_RDWR | O_CREAT, 0777); }
 
 torch::Tensor getRandTensor(int dim0_size, int dim1_size, torch::Dtype dtype, int max_val) {
     if (dtype == torch::kInt32 || dtype == torch::kInt64) {
@@ -21,8 +19,7 @@ int genRandTensorAndWriteToFile(torch::Tensor &rand_tensor, int total_embeddings
 }
 
 bool checkPermOf2dTensor(torch::Tensor &a, torch::Tensor &b) {
-    if (a.sizes().size() != b.sizes().size() || a.sizes().size() != 2)
-        return false;
+    if (a.sizes().size() != b.sizes().size() || a.sizes().size() != 2) return false;
     vector<int> has_seen_count(a.size(0), 0);
     for (int i = 0; i < a.size(0); i++) {
         for (int j = 0; j < b.size(0); j++) {
@@ -32,8 +29,7 @@ bool checkPermOf2dTensor(torch::Tensor &a, torch::Tensor &b) {
         }
     }
     for (int i = 0; i < a.size(0); i++)
-        if (has_seen_count[i] != 1)
-            return false;
+        if (has_seen_count[i] != 1) return false;
     return true;
 }
 
@@ -49,10 +45,8 @@ void sortWithinEdgeBuckets(torch::Tensor &rand_tensor, vector<int64_t> &edge_buc
 }
 
 bool sortEdgesSrcDest(vector<int> &edge1, vector<int> &edge2) {
-    if (edge1[0] != edge2[0])
-        return edge1[0] < edge2[0];
-    if (edge1[2] != edge2[2])
-        return edge1[2] < edge2[2];
+    if (edge1[0] != edge2[0]) return edge1[0] < edge2[0];
+    if (edge1[2] != edge2[2]) return edge1[2] < edge2[2];
     return false;
 }
 

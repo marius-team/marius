@@ -42,6 +42,6 @@ torch::Tensor TranslationOperator::operator()(const torch::Tensor &embs, const t
 }
 
 torch::Tensor NoOp::operator()(const torch::Tensor &embs, const torch::Tensor &rels) {
-    (void) rels;
+    (void)rels;
     return embs;
 }

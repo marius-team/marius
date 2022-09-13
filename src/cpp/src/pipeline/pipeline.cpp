@@ -25,19 +25,19 @@ void LoadBatchWorker::run() {
             if ((pipeline_->batches_in_flight_ < pipeline_->staleness_bound_) && pipeline_->dataloader_->hasNextBatch()) {
                 pipeline_->admitted_batches_++;
                 pipeline_->batches_in_flight_++;
-//                lock.unlock();
+                //                lock.unlock();
 
                 shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch();
-                lock.unlock(); // TODO make sure having the unlock after getBatch doesn't introduce deadlock
+                lock.unlock();  // TODO make sure having the unlock after getBatch doesn't introduce deadlock
 
                 if (batch == nullptr) {
                     break;
                 }
 
                 if (pipeline_->model_->device_.is_cuda()) {
-                    ((PipelineGPU *) pipeline_)->loaded_batches_->blocking_push(batch);
+                    ((PipelineGPU *)pipeline_)->loaded_batches_->blocking_push(batch);
                 } else {
-                    ((PipelineCPU *) pipeline_)->loaded_batches_->blocking_push(batch);
+                    ((PipelineCPU *)pipeline_)->loaded_batches_->blocking_push(batch);
                 }
             } else {
                 // wait until we can try to grab a batch again
@@ -45,14 +45,14 @@ void LoadBatchWorker::run() {
                 lock.unlock();
             }
         }
-        nanosleep(&sleep_time_, NULL); // wait until std::thread is not paused
+        nanosleep(&sleep_time_, NULL);  // wait until std::thread is not paused
     }
 }
 
 void UpdateBatchWorker::run() {
     while (!done_) {
         while (!paused_) {
-            auto tup = ((PipelineGPU *) pipeline_)->update_batches_->blocking_pop();
+            auto tup = ((PipelineGPU *)pipeline_)->update_batches_->blocking_pop();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
 
@@ -80,15 +80,14 @@ void UpdateBatchWorker::run() {
 void WriteNodesWorker::run() {
     while (!done_) {
         while (!paused_) {
-
             shared_ptr<Batch> batch;
             bool popped = false;
             if (pipeline_->model_->device_.is_cuda()) {
-                auto tup = ((PipelineGPU *) pipeline_)->update_batches_->blocking_pop();
+                auto tup = ((PipelineGPU *)pipeline_)->update_batches_->blocking_pop();
                 popped = std::get<0>(tup);
                 batch = std::get<1>(tup);
             } else {
-                auto tup = ((PipelineCPU *) pipeline_)->update_batches_->blocking_pop();
+                auto tup = ((PipelineCPU *)pipeline_)->update_batches_->blocking_pop();
                 popped = std::get<0>(tup);
                 batch = std::get<1>(tup);
             }
@@ -142,4 +141,3 @@ shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id) {
     worker->spawn();
     return worker;
 }
-

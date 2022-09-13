@@ -9,36 +9,36 @@
 
 #include "torch/torch.h"
 
-struct MariusRuntimeException : public std::runtime_error
-{
-public:
+struct MariusRuntimeException : public std::runtime_error {
+   public:
     MariusRuntimeException(const std::string &message) : runtime_error(message) {}
 };
 
 struct UndefinedTensorException : public MariusRuntimeException {
-public:
+   public:
     UndefinedTensorException() : MariusRuntimeException("Tensor undefined") {}
 };
 
 struct NANTensorException : public MariusRuntimeException {
-public:
+   public:
     NANTensorException() : MariusRuntimeException("Tensor contains NANs") {}
 };
 
 struct OOMTensorException : public MariusRuntimeException {
-public:
+   public:
     OOMTensorException() : MariusRuntimeException("Tensor results in OOM") {}
 };
 
 struct TensorSizeMismatchException : public MariusRuntimeException {
-public:
-//    TensorSizeMismatchException(torch::Tensor input, std::string message) : MariusRuntimeException((std::stringstream("Tensor size mismatch. Size: ") << input.sizes() << " " << message).str()) {}
+   public:
+    //    TensorSizeMismatchException(torch::Tensor input, std::string message) : MariusRuntimeException((std::stringstream("Tensor size mismatch. Size: ") <<
+    //    input.sizes() << " " << message).str()) {}
     TensorSizeMismatchException(torch::Tensor input, std::string message) : MariusRuntimeException(message) {}
 };
 
 struct UnexpectedNullPtrException : public MariusRuntimeException {
-public:
+   public:
     UnexpectedNullPtrException(std::string message = "") : MariusRuntimeException(message) {}
 };
 
-#endif //MARIUS_EXCEPTION_H
+#endif  // MARIUS_EXCEPTION_H

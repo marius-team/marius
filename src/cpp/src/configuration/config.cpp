@@ -2,10 +2,9 @@
 // Created by Jason Mohoney on 10/8/21.
 //
 
-#include <common/pybind_headers.h>
-
 #include "configuration/config.h"
 
+#include <common/pybind_headers.h>
 #include <stdlib.h>
 
 bool check_missing(pyobj python_object) {
@@ -16,14 +15,14 @@ bool check_missing(pyobj python_object) {
         if (string_val == MISSING_STR) {
             missing = true;
         }
-    } catch (pybind11::cast_error) {}
+    } catch (pybind11::cast_error) {
+    }
 
     return missing;
 }
 
 template <typename T>
 T cast_helper(pyobj python_object) {
-
     bool missing = check_missing(python_object);
 
     if (missing) {
@@ -147,7 +146,6 @@ shared_ptr<DatasetConfig> initDatasetConfig(pyobj python_config) {
 }
 
 shared_ptr<LayerConfig> initLayerConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }
@@ -233,7 +231,6 @@ shared_ptr<LayerConfig> initLayerConfig(pyobj python_config) {
 }
 
 shared_ptr<EncoderConfig> initEncoderConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }
@@ -249,7 +246,6 @@ shared_ptr<EncoderConfig> initEncoderConfig(pyobj python_config) {
     auto eval_sample_vec = std::vector<shared_ptr<NeighborSamplingConfig>>();
 
     for (auto py_stage : stage_python_obj) {
-
         pybind11::list stage_obj = cast_helper<pybind11::list>(pybind11::reinterpret_borrow<pyobj>(py_stage));
 
         auto stage_vec = std::vector<shared_ptr<LayerConfig>>();
@@ -279,7 +275,6 @@ shared_ptr<EncoderConfig> initEncoderConfig(pyobj python_config) {
 }
 
 shared_ptr<DecoderConfig> initDecoderConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }
@@ -304,7 +299,6 @@ shared_ptr<DecoderConfig> initDecoderConfig(pyobj python_config) {
 }
 
 shared_ptr<LossConfig> initLossConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }
@@ -330,7 +324,6 @@ shared_ptr<LossConfig> initLossConfig(pyobj python_config) {
 }
 
 shared_ptr<StorageBackendConfig> initStorageBackendConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }
@@ -362,9 +355,7 @@ shared_ptr<StorageBackendConfig> initStorageBackendConfig(pyobj python_config) {
     return ret_config;
 }
 
-
 shared_ptr<NegativeSamplingConfig> initNegativeSamplingConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }
@@ -380,7 +371,7 @@ shared_ptr<NegativeSamplingConfig> initNegativeSamplingConfig(pyobj python_confi
     } else {
         ret_config->num_chunks = 1;
         ret_config->degree_fraction = 0.0;
-        ret_config->negatives_per_positive = -1; // This is set to the proper value by the graph_batcher
+        ret_config->negatives_per_positive = -1;  // This is set to the proper value by the graph_batcher
         ret_config->local_filter_mode = LocalFilterMode::DEG;
     }
 
@@ -410,7 +401,6 @@ shared_ptr<PipelineConfig> initPipelineConfig(pyobj python_config) {
 }
 
 shared_ptr<CheckpointConfig> initCheckpointConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }
@@ -438,7 +428,6 @@ shared_ptr<ModelConfig> initModelConfig(pyobj python_config) {
 }
 
 shared_ptr<StorageConfig> initStorageConfig(pyobj python_config) {
-
     if (check_missing(python_config)) {
         return nullptr;
     }

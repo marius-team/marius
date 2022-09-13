@@ -1,7 +1,9 @@
-from marius.tools.configuration.constants import PathConstants
-from omegaconf import OmegaConf
-from marius.tools.configuration.marius_config import DatasetConfig
 from pathlib import Path
+
+from omegaconf import OmegaConf
+
+from marius.tools.configuration.constants import PathConstants
+from marius.tools.configuration.marius_config import DatasetConfig
 
 
 class TorchWriter(object):
@@ -11,17 +13,18 @@ class TorchWriter(object):
         self.output_dir = output_dir
         self.partitioned_evaluation = partitioned_evaluation
 
-    def write_to_binary(self,
-                        train_edges_tens,
-                        valid_edges_tens,
-                        test_edges_tens,
-                        num_nodes,
-                        num_rels,
-                        num_partitions,
-                        train_edges_offsets=None,
-                        valid_edges_offsets=None,
-                        test_edges_offsets=None):
-
+    def write_to_binary(
+        self,
+        train_edges_tens,
+        valid_edges_tens,
+        test_edges_tens,
+        num_nodes,
+        num_rels,
+        num_partitions,
+        train_edges_offsets=None,
+        valid_edges_offsets=None,
+        test_edges_offsets=None,
+    ):
         dataset_stats = DatasetConfig()
         dataset_stats.dataset_dir = Path(self.output_dir).absolute().__str__() + "/"
 
