@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Installing dependencies
-        run: MARIUS_NO_BINDINGS=1 python3 -m pip install .[db2graph]
+        run: MARIUS_NO_BINDINGS=1 python3 -m pip install .[db2graph,tests]
 
       - name: Running pytest
         run: pytest -s test/db2graph/test_postgres.py
