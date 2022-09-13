@@ -1,12 +1,10 @@
 import os
 import random
-import sys
 from pathlib import Path
 
 import psycopg2
 
-sys.path.append("src/python/tools/db2graph/")  # moving to the parent directory
-from marius_db2graph import connect_to_db, post_processing
+from src.python.tools.db2graph.marius_db2graph import connect_to_db, post_processing
 
 
 class TestConnector:
@@ -55,7 +53,7 @@ class TestConnector:
 
         # Create two tables - First Customers and second Orders
         cur.execute(
-            """CREATE TABLE CUSTOMERS 
+            """CREATE TABLE CUSTOMERS
                         (ID INT PRIMARY KEY NOT NULL,
                         CUSTOMERNAME TEXT NOT NULL,
                         COUNTRY TEXT NOT NULL,
@@ -63,13 +61,13 @@ class TestConnector:
         )
         conn.commit()
         cur.execute(
-            """CREATE TABLE ORDERS 
+            """CREATE TABLE ORDERS
                         (ID INT PRIMARY KEY NOT NULL,
                         CUSTOMERID INT NOT NULL,
                         AMOUNT INT NOT NULL,
                         ITEM TEXT NOT NULL,
                         CONSTRAINT fk_customer
-                            FOREIGN KEY(CUSTOMERID) 
+                            FOREIGN KEY(CUSTOMERID)
                                 REFERENCES CUSTOMERS(ID));"""
         )
         conn.commit()
@@ -262,35 +260,35 @@ class TestConnector:
         correct_output = []
 
         # expected outputs for query 1
-        correct_output.append(f"customers_customername_daiyu\tlives_in\tcustomers_country_china\n")
-        correct_output.append(f"customers_customername_donghai\tlives_in\tcustomers_country_china\n")
-        correct_output.append(f"customers_customername_hina\tlives_in\tcustomers_country_japan\n")
-        correct_output.append(f"customers_customername_johnny\tlives_in\tcustomers_country_usa\n")
-        correct_output.append(f"customers_customername_lorenzo\tlives_in\tcustomers_country_italy\n")
-        correct_output.append(f"customers_customername_lukas\tlives_in\tcustomers_country_germany\n")
-        correct_output.append(f"customers_customername_rajesh\tlives_in\tcustomers_country_india\n")
-        correct_output.append(f"customers_customername_shuchang\tlives_in\tcustomers_country_china\n")
-        correct_output.append(f"customers_customername_sofia\tlives_in\tcustomers_country_spain\n")
+        correct_output.append("customers_customername_daiyu\tlives_in\tcustomers_country_china\n")
+        correct_output.append("customers_customername_donghai\tlives_in\tcustomers_country_china\n")
+        correct_output.append("customers_customername_hina\tlives_in\tcustomers_country_japan\n")
+        correct_output.append("customers_customername_johnny\tlives_in\tcustomers_country_usa\n")
+        correct_output.append("customers_customername_lorenzo\tlives_in\tcustomers_country_italy\n")
+        correct_output.append("customers_customername_lukas\tlives_in\tcustomers_country_germany\n")
+        correct_output.append("customers_customername_rajesh\tlives_in\tcustomers_country_india\n")
+        correct_output.append("customers_customername_shuchang\tlives_in\tcustomers_country_china\n")
+        correct_output.append("customers_customername_sofia\tlives_in\tcustomers_country_spain\n")
 
         # expected outputs for query 2
-        correct_output.append(f"orders_item_chicken breast\tordered_by_people_from_country\tcustomers_country_china\n")
-        correct_output.append(f"orders_item_croissant\tordered_by_people_from_country\tcustomers_country_germany\n")
-        correct_output.append(f"orders_item_cumin\tordered_by_people_from_country\tcustomers_country_india\n")
-        correct_output.append(f"orders_item_eggs\tordered_by_people_from_country\tcustomers_country_germany\n")
-        correct_output.append(f"orders_item_fenugreek\tordered_by_people_from_country\tcustomers_country_india\n")
-        correct_output.append(f"orders_item_meatballs\tordered_by_people_from_country\tcustomers_country_germany\n")
-        correct_output.append(f"orders_item_onions\tordered_by_people_from_country\tcustomers_country_usa\n")
-        correct_output.append(f"orders_item_onions\tordered_by_people_from_country\tcustomers_country_china\n")
-        correct_output.append(f"orders_item_oregano\tordered_by_people_from_country\tcustomers_country_italy\n")
-        correct_output.append(f"orders_item_rice\tordered_by_people_from_country\tcustomers_country_china\n")
-        correct_output.append(f"orders_item_root beer\tordered_by_people_from_country\tcustomers_country_usa\n")
-        correct_output.append(f"orders_item_salmon\tordered_by_people_from_country\tcustomers_country_japan\n")
-        correct_output.append(f"orders_item_sourdough bread\tordered_by_people_from_country\tcustomers_country_italy\n")
-        correct_output.append(f"orders_item_soy sauce\tordered_by_people_from_country\tcustomers_country_japan\n")
-        correct_output.append(f"orders_item_soy sauce\tordered_by_people_from_country\tcustomers_country_china\n")
-        correct_output.append(f"orders_item_taco sauce\tordered_by_people_from_country\tcustomers_country_spain\n")
-        correct_output.append(f"orders_item_tomato\tordered_by_people_from_country\tcustomers_country_spain\n")
-        correct_output.append(f"orders_item_wasabi\tordered_by_people_from_country\tcustomers_country_japan\n")
+        correct_output.append("orders_item_chicken breast\tordered_by_people_from_country\tcustomers_country_china\n")
+        correct_output.append("orders_item_croissant\tordered_by_people_from_country\tcustomers_country_germany\n")
+        correct_output.append("orders_item_cumin\tordered_by_people_from_country\tcustomers_country_india\n")
+        correct_output.append("orders_item_eggs\tordered_by_people_from_country\tcustomers_country_germany\n")
+        correct_output.append("orders_item_fenugreek\tordered_by_people_from_country\tcustomers_country_india\n")
+        correct_output.append("orders_item_meatballs\tordered_by_people_from_country\tcustomers_country_germany\n")
+        correct_output.append("orders_item_onions\tordered_by_people_from_country\tcustomers_country_usa\n")
+        correct_output.append("orders_item_onions\tordered_by_people_from_country\tcustomers_country_china\n")
+        correct_output.append("orders_item_oregano\tordered_by_people_from_country\tcustomers_country_italy\n")
+        correct_output.append("orders_item_rice\tordered_by_people_from_country\tcustomers_country_china\n")
+        correct_output.append("orders_item_root beer\tordered_by_people_from_country\tcustomers_country_usa\n")
+        correct_output.append("orders_item_salmon\tordered_by_people_from_country\tcustomers_country_japan\n")
+        correct_output.append("orders_item_sourdough bread\tordered_by_people_from_country\tcustomers_country_italy\n")
+        correct_output.append("orders_item_soy sauce\tordered_by_people_from_country\tcustomers_country_japan\n")
+        correct_output.append("orders_item_soy sauce\tordered_by_people_from_country\tcustomers_country_china\n")
+        correct_output.append("orders_item_taco sauce\tordered_by_people_from_country\tcustomers_country_spain\n")
+        correct_output.append("orders_item_tomato\tordered_by_people_from_country\tcustomers_country_spain\n")
+        correct_output.append("orders_item_wasabi\tordered_by_people_from_country\tcustomers_country_japan\n")
         with open(output_dir / "edges.txt", "r") as file:
             for line in file:
                 assert line in correct_output

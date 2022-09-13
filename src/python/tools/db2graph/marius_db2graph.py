@@ -242,7 +242,8 @@ def clean_token(token):
 
 def get_init_fetch_size():
     """
-    In an initial pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory()
+    In an initial pass, estimates the optimal maximum possible fetch_size
+    for given query based on memory usage report of virtual_memory()
 
     :return limit_fetch_size: the optimal maximum possible fetch_size for database engine
     """
@@ -308,13 +309,8 @@ def post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_serve
         logging.error("Number of queries in edges_queries_list must match number of edges in edge_rel_list")
         exit(1)
 
-    src_rel_dst = pd.DataFrame()
     open(output_dir / Path(OUTPUT_FILE_NAME), "w").close()  # Clearing the output file
     logging.info("\nProcessing queries to generate edges")
-
-    # These are just for metrics - Only correct when not batch processing
-    num_uniq = []  # number of entities
-    num_edge_type = []  # number of edges
 
     fetch_size = FETCH_SIZE
     # generating edges entity node to entity nodes
@@ -323,14 +319,12 @@ def post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_serve
         first_pass = True
 
         # Executing the query and timing it
-        add_time1 = time.time()
         query = edges_queries_list[i]
         cursor_name = "edge_entity_entity_cursor" + str(
             i
         )  # Name imp because: https://www.psycopg.org/docs/usage.html#server-side-cursors
         cursor = get_cursor(cnx, db_server, cursor_name)
         cursor.execute(query)
-        # logging.info(f'Cursor.execute time is: {time.time() - add_time1:.3f}')
 
         # Getting Basic Details
         table_name_list = re.split(" ", query)  # table name of the query to execute
@@ -342,7 +336,8 @@ def post_processing(output_dir, cnx, edges_queries_list, edge_rel_list, db_serve
         # Processing each batch of cursor on client
         rows_completed = 0
 
-        # In an initial sample pass, estimates the optimal maximum possible fetch_size for given query based on memory usage report of virtual_memory()
+        # In an initial sample pass, estimates the optimal maximum possible fetch_size for
+        # given query based on memory usage report of virtual_memory()
         # process data with fetch_size=10000, record the amount of memory used,
         # increase fetch_size if the amount of memory used is less than half of machine's total available memory,
         # Note: all unit size are in bytes, fetch_size limited between 10000 and 100000000 bytes
