@@ -1,0 +1,48 @@
+name: Testing DB2GRAPH using postgres
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  db2graph:
+    runs-on: ubuntu-latest
+    container: ${{ matrix.python_container }}
+    strategy:
+      matrix:
+        python_container: ["python:3.6", "python:3.7", "python:3.8", "python:3.9", "python:3.10"]
+
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # Downloads a copy of the code in your repository before running CI tests
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Installing dependencies
+        run: MARIUS_NO_BINDINGS=1 python3 -m pip install .[db2graph,tests]
+
+      - name: Running pytest
+        run: MARIUS_NO_BINDINGS=1 pytest -s test/db2graph/test_postgres.py
+        # Environment variables used in the test
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_HOST: postgres
+          # The default PostgreSQL port - using default port
+          POSTGRES_PORT: 5432
