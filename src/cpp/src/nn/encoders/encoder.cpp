@@ -30,55 +30,10 @@ GeneralEncoder::GeneralEncoder(std::vector<std::vector<shared_ptr<Layer>>> layer
     layers_ = layers;
     device_ = layers_[0][0]->device_;
 
-    int stage_id = 0;
-    for (auto stage : layers_) {
-        int layer_id = 0;
-        for (auto layer : stage) {
-            if (layer->device_ != device_) {
-                throw MariusRuntimeException("All layers of the encoder must use the same device.");
-            }
+    has_features_ = false;
+    has_embeddings_ = false;
 
-            // TODO unify with initLayer functions
-            string name;
-            if (instance_of<Layer, EmbeddingLayer>(layer)) {
-                name = "embedding:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                register_module<EmbeddingLayer>(name, std::dynamic_pointer_cast<EmbeddingLayer>(layer));
-            } else if (instance_of<Layer, FeatureLayer>(layer)) {
-                name = "feature:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                register_module<FeatureLayer>(name, std::dynamic_pointer_cast<FeatureLayer>(layer));
-            } else if (instance_of<Layer, ReductionLayer>(layer)) {
-                if (instance_of<Layer, LinearReduction>(layer)) {
-                    name = "linear_reduction:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                    register_module<LinearReduction>(name, std::dynamic_pointer_cast<LinearReduction>(layer));
-                } else if (instance_of<Layer, ConcatReduction>(layer)) {
-                    name = "concat_reduction:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                    register_module<ConcatReduction>(name, std::dynamic_pointer_cast<ConcatReduction>(layer));
-                } else {
-                    throw std::runtime_error("Unrecognized reduction layer type");
-                }
-            } else if (instance_of<Layer, GNNLayer>(layer)) {
-                if (instance_of<Layer, GraphSageLayer>(layer)) {
-                    string name = "graph_sage_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                    register_module<GraphSageLayer>(name, std::dynamic_pointer_cast<GraphSageLayer>(layer));
-                } else if (instance_of<Layer, GATLayer>(layer)) {
-                    string name = "gat_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                    register_module<GATLayer>(name, std::dynamic_pointer_cast<GATLayer>(layer));
-                } else if (instance_of<Layer, GCNLayer>(layer)) {
-                    string name = "gcn_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                    register_module<GCNLayer>(name, std::dynamic_pointer_cast<GCNLayer>(layer));
-                } else if (instance_of<Layer, RGCNLayer>(layer)) {
-                    string name = "rgcn_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
-                    register_module<RGCNLayer>(name, std::dynamic_pointer_cast<RGCNLayer>(layer));
-                } else {
-                    throw std::runtime_error("Unrecognized GNN layer type");
-                }
-            } else {
-                throw std::runtime_error("Unsupported layer type");
-            }
-            layer_id++;
-        }
-        stage_id++;
-    }
+    reset();
     encoder_config_ = nullptr;
 }
 
@@ -184,10 +139,55 @@ void GeneralEncoder::reset() {
             stage_id++;
         }
     } else {
+        int stage_id = 0;
         for (auto stage : layers_) {
+            int layer_id = 0;
             for (auto layer : stage) {
-                layer->reset();
+
+                if (layer->device_ != device_) {
+                    throw MariusRuntimeException("All layers of the encoder must use the same device.");
+                }
+
+                // TODO unify with initLayer functions
+                string name;
+                if (instance_of<Layer, EmbeddingLayer>(layer)) {
+                    name = "embedding:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                    register_module<EmbeddingLayer>(name, std::dynamic_pointer_cast<EmbeddingLayer>(layer));
+                } else if (instance_of<Layer, FeatureLayer>(layer)) {
+                    name = "feature:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                    register_module<FeatureLayer>(name, std::dynamic_pointer_cast<FeatureLayer>(layer));
+                } else if (instance_of<Layer, ReductionLayer>(layer)) {
+                    if (instance_of<Layer, LinearReduction>(layer)) {
+                        name = "linear_reduction:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                        register_module<LinearReduction>(name, std::dynamic_pointer_cast<LinearReduction>(layer));
+                    } else if (instance_of<Layer, ConcatReduction>(layer)) {
+                        name = "concat_reduction:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                        register_module<ConcatReduction>(name, std::dynamic_pointer_cast<ConcatReduction>(layer));
+                    } else {
+                        throw std::runtime_error("Unrecognized reduction layer type");
+                    }
+                } else if (instance_of<Layer, GNNLayer>(layer)) {
+                    if (instance_of<Layer, GraphSageLayer>(layer)) {
+                        string name = "graph_sage_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                        register_module<GraphSageLayer>(name, std::dynamic_pointer_cast<GraphSageLayer>(layer));
+                    } else if (instance_of<Layer, GATLayer>(layer)) {
+                        string name = "gat_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                        register_module<GATLayer>(name, std::dynamic_pointer_cast<GATLayer>(layer));
+                    } else if (instance_of<Layer, GCNLayer>(layer)) {
+                        string name = "gcn_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                        register_module<GCNLayer>(name, std::dynamic_pointer_cast<GCNLayer>(layer));
+                    } else if (instance_of<Layer, RGCNLayer>(layer)) {
+                        string name = "rgcn_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                        register_module<RGCNLayer>(name, std::dynamic_pointer_cast<RGCNLayer>(layer));
+                    } else {
+                        throw std::runtime_error("Unrecognized GNN layer type");
+                    }
+                } else {
+                    throw std::runtime_error("Unsupported layer type");
+                }
+                layer_id++;
             }
+            stage_id++;
         }
     }
 }
