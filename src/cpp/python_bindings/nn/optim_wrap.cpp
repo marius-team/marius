@@ -15,8 +15,8 @@ class PyOptimizer : Optimizer {
 void init_optim(py::module &m) {
     py::class_<Optimizer, PyOptimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
         .def_readwrite("num_steps", &Optimizer::num_steps_)
-        //        .def_readwrite("state_dict", &Optimizer::state_dict_)
-        //        .def_readwrite("param_dict", &Optimizer::param_dict_)
+        .def_readwrite("state_dict", &Optimizer::state_dict_)
+        .def_readwrite("param_dict", &Optimizer::param_dict_)
         // TODO need to provide bindings for torch::serialize::InputArchive and torch::serialize::OutputArchive
         //        .def("save", &Optimizer::save, py::arg("output_archive"))
         //        .def("load", &Optimizer::load, py::arg("input_archive"))
