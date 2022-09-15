@@ -27,15 +27,15 @@ class Optimizer {
 
     virtual void step() = 0;
 
-    virtual std::shared_ptr<Optimizer> clone() = 0;
+    virtual std::shared_ptr<Optimizer> clone(torch::OrderedDict<std::string, torch::Tensor> param_dict) = 0;
 };
 
 class SGDOptimizer : public Optimizer {
    public:
     float learning_rate_;
 
-    SGDOptimizer(const SGDOptimizer &optim) {
-        param_dict_ = optim.param_dict_;
+    SGDOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_dict, const SGDOptimizer &optim) {
+        param_dict_ = param_dict;
         learning_rate_ = optim.learning_rate_;
         reset_state();
     }
@@ -46,7 +46,7 @@ class SGDOptimizer : public Optimizer {
 
     void step() override;
 
-    std::shared_ptr<Optimizer> clone() override;
+    std::shared_ptr<Optimizer> clone(torch::OrderedDict<std::string, torch::Tensor> param_dict) override;
 };
 
 class AdagradOptimizer : public Optimizer {
@@ -57,8 +57,8 @@ class AdagradOptimizer : public Optimizer {
     float weight_decay_;
     float init_value_;
 
-    AdagradOptimizer(const AdagradOptimizer &optim) {
-        param_dict_ = optim.param_dict_;
+    AdagradOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_dict, const AdagradOptimizer &optim) {
+        param_dict_ = param_dict;
         learning_rate_ = optim.learning_rate_;
         eps_ = optim.eps_;
         lr_decay_ = optim.lr_decay_;
@@ -73,7 +73,7 @@ class AdagradOptimizer : public Optimizer {
 
     void step() override;
 
-    std::shared_ptr<Optimizer> clone() override;
+    std::shared_ptr<Optimizer> clone(torch::OrderedDict<std::string, torch::Tensor> param_dict) override;
 };
 
 class AdamOptimizer : public Optimizer {
@@ -85,8 +85,8 @@ class AdamOptimizer : public Optimizer {
     float weight_decay_;
     bool amsgrad_;
 
-    AdamOptimizer(const AdamOptimizer &optim) {
-        param_dict_ = optim.param_dict_;
+    AdamOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_dict, const AdamOptimizer &optim) {
+        param_dict_ = param_dict;
         learning_rate_ = optim.learning_rate_;
         eps_ = optim.eps_;
         beta_1_ = optim.beta_1_;
@@ -102,7 +102,7 @@ class AdamOptimizer : public Optimizer {
 
     void step() override;
 
-    std::shared_ptr<Optimizer> clone() override;
+    std::shared_ptr<Optimizer> clone(torch::OrderedDict<std::string, torch::Tensor> param_dict) override;
 };
 
 #endif  // MARIUS_OPTIM_H

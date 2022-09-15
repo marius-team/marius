@@ -78,11 +78,12 @@ void SGDOptimizer::step() {
     }
 }
 
-std::shared_ptr<Optimizer> SGDOptimizer::clone() { return std::make_shared<SGDOptimizer>(*this); }
+std::shared_ptr<Optimizer> SGDOptimizer::clone(torch::OrderedDict<std::string, torch::Tensor> param_dict) {
+    return std::make_shared<SGDOptimizer>(param_dict, *this);
+}
 
 AdagradOptimizer::AdagradOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_dict, std::shared_ptr<AdagradOptions> options) {
     param_dict_ = param_dict;
-
     learning_rate_ = options->learning_rate;
     eps_ = options->eps;
     lr_decay_ = options->lr_decay;
@@ -144,7 +145,9 @@ void AdagradOptimizer::step() {
     num_steps_++;
 }
 
-std::shared_ptr<Optimizer> AdagradOptimizer::clone() { return std::make_shared<AdagradOptimizer>(*this); }
+std::shared_ptr<Optimizer> AdagradOptimizer::clone(torch::OrderedDict<std::string, torch::Tensor> param_dict) {
+    return std::make_shared<AdagradOptimizer>(param_dict, *this);
+}
 
 AdamOptimizer::AdamOptimizer(torch::OrderedDict<std::string, torch::Tensor> param_dict, std::shared_ptr<AdamOptions> options) {
     param_dict_ = param_dict;
@@ -231,4 +234,6 @@ void AdamOptimizer::step() {
     num_steps_++;
 }
 
-std::shared_ptr<Optimizer> AdamOptimizer::clone() { return std::make_shared<AdamOptimizer>(*this); }
+std::shared_ptr<Optimizer> AdamOptimizer::clone(torch::OrderedDict<std::string, torch::Tensor> param_dict) {
+    return std::make_shared<AdamOptimizer>(param_dict, *this);
+}
