@@ -363,17 +363,24 @@ void Model::broadcast(std::vector<torch::Device> devices) {
     for (auto device : devices) {
         SPDLOG_INFO("Broadcast to GPU {}", device.index());
         if (device != device_) {
+            SPDLOG_INFO("Clone Encoder {}", device.index());
             shared_ptr<GeneralEncoder> encoder = encoder_clone_helper(encoder_, device);
+            SPDLOG_INFO("Clone Decoder {}", device.index());
             shared_ptr<Decoder> decoder = decoder_clone_helper(decoder_, device);
+
+            SPDLOG_INFO("Create Child Model {}", device.index());
             device_models_[i] = std::make_shared<Model>(encoder, decoder, loss_function_, reporter_);
 
+            SPDLOG_INFO("Clone Optimizer {}", device.index());
             for (auto optim : optimizers_) {
                 device_models_[i]->optimizers_.emplace_back(optim->clone());
                 device_models_[i]->sparse_lr_ = sparse_lr_;
             }
         } else {
+            SPDLOG_INFO("Mirror Parent {}", device.index());
             device_models_[i] = std::dynamic_pointer_cast<Model>(shared_from_this());
         }
+        SPDLOG_INFO("Finish Clone {}", device.index());
         i++;
     }
 }
