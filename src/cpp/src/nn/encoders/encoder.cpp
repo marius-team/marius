@@ -143,7 +143,6 @@ void GeneralEncoder::reset() {
         for (auto stage : layers_) {
             int layer_id = 0;
             for (auto layer : stage) {
-
                 if (layer->device_ != device_) {
                     throw MariusRuntimeException("All layers of the encoder must use the same device.");
                 }
