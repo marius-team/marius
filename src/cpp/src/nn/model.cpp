@@ -373,7 +373,7 @@ void Model::broadcast(std::vector<torch::Device> devices) {
             device_models_[i] = std::make_shared<Model>(encoder, decoder, loss_function_, reporter_);
 
             for (auto optim : optimizers_) {
-                std::cout << optim << '\n';
+                std::cout << optim->state_dict_.keys() << '\n';
                 device_models_[i]->optimizers_.emplace_back(optim->clone());
                 device_models_[i]->sparse_lr_ = sparse_lr_;
             }
