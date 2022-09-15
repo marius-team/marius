@@ -17,7 +17,7 @@ class EmbeddingLayer : public Layer {
 
     torch::Tensor forward(torch::Tensor input);
 
-    torch::Tensor init_embeddings(int64_t num_nodes);
+    torch::Tensor init_embeddings(int64_t num_nodes, torch::Device device);
 
     void reset() override;
 };

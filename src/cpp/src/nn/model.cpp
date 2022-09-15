@@ -20,6 +20,8 @@ Model::Model(shared_ptr<GeneralEncoder> encoder, shared_ptr<Decoder> decoder, sh
     : device_(torch::Device(torch::kCPU)) {
     encoder_ = encoder;
     decoder_ = decoder;
+    device_ = encoder_->device_;
+
     loss_function_ = loss;
     reporter_ = reporter;
     optimizers_ = optimizers;

@@ -20,7 +20,7 @@ void init_embedding_layer(py::module &m) {
              }),
              py::arg("dimension"), py::arg("device"), py::arg("init") = InitConfig(InitDistribution::GLOROT_UNIFORM, nullptr), py::arg("bias") = false,
              py::arg("bias_init") = InitConfig(InitDistribution::ZEROS, nullptr), py::arg("activation") = "none", py::arg("offset") = 0)
-        .def("init_embeddings", &EmbeddingLayer::init_embeddings, py::arg("num_nodes"))
+        .def("init_embeddings", &EmbeddingLayer::init_embeddings, py::arg("num_nodes"), py::arg("device"))
         .def("forward", &EmbeddingLayer::forward, py::arg("input"))
         .def("reset", &EmbeddingLayer::reset);
 }
