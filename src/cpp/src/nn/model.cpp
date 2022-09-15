@@ -375,7 +375,7 @@ void Model::broadcast(std::vector<torch::Device> devices) {
                 device_models_[i]->sparse_lr_ = sparse_lr_;
             }
         } else {
-            SPDLOG_INFO("Use parent")
+            SPDLOG_INFO("Use parent");
             device_models_[i] = std::dynamic_pointer_cast<Model>(shared_from_this());
         }
         i++;
