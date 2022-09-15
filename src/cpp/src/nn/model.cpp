@@ -367,9 +367,6 @@ void Model::broadcast(std::vector<torch::Device> devices) {
 
     for (auto device : devices) {
         SPDLOG_INFO("Broadcast to GPU {}", device.index());
-
-        std::cout << device << '\n';
-        std::cout << device_ << '\n';
         if (device.index() != device_.index()) {
             shared_ptr<GeneralEncoder> encoder = encoder_clone_helper(encoder_, device);
             shared_ptr<Decoder> decoder = decoder_clone_helper(decoder_, device);
@@ -380,7 +377,6 @@ void Model::broadcast(std::vector<torch::Device> devices) {
                 device_models_[i]->sparse_lr_ = sparse_lr_;
             }
         } else {
-            SPDLOG_INFO("Use parent");
             device_models_[i] = std::dynamic_pointer_cast<Model>(shared_from_this());
         }
         i++;
