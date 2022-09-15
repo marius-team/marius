@@ -366,8 +366,8 @@ void Model::broadcast(std::vector<torch::Device> devices) {
     for (auto device : devices) {
         SPDLOG_INFO("Broadcast to GPU {}", device.index());
 
-        std::cout << device.index() << '\n';
-        std::cout << device_.index() << '\n';
+        std::cout << device << '\n';
+        std::cout << device_ << '\n';
         if (device.index() != device_.index()) {
             shared_ptr<GeneralEncoder> encoder = encoder_clone_helper(encoder_, device);
             shared_ptr<Decoder> decoder = decoder_clone_helper(decoder_, device);
