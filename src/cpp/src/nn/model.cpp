@@ -360,6 +360,9 @@ void Model::evaluate_batch(shared_ptr<Batch> batch) {
 
 void Model::broadcast(std::vector<torch::Device> devices) {
     int i = 0;
+
+    device_models_ = std::vector<shared_ptr<Model>>(devices.size());
+
     for (auto device : devices) {
         SPDLOG_INFO("Broadcast to GPU {}", device.index());
         if (device != device_) {
