@@ -24,7 +24,8 @@ void BatchToDeviceWorker::run() {
 
             batch->to(pipeline_->model_->device_models_[queue_choice]->device_);
 
-            SPDLOG_INFO("Pushed {}: to queue {}", batch->node_embeddings_.device().index(), queue_choice);
+            SPDLOG_INFO("Pushed {}: to queue {}, device_model: {}", batch->node_embeddings_.device().index(), queue_choice,
+                        pipeline_->model_->device_models_[queue_choice]->device_().index());
 
             ((PipelineGPU *)pipeline_)->device_loaded_batches_[queue_choice]->blocking_push(batch);
         }
