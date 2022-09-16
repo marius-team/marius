@@ -42,7 +42,9 @@ void ComputeWorkerGPU::run() {
 
             if (pipeline_->isTrain()) {
                 bool will_sync = false;
-                if (pipeline_->model_->device_models_.size() > 1) {
+
+                bool is_multi_gpu = pipeline_->model_->device_models_.size() > 1;
+                if (is_multi_gpu) {
                     ((PipelineGPU *)pipeline_)->gpu_sync_lock_->lock();
                     ((PipelineGPU *)pipeline_)->batches_since_last_sync_++;
 
@@ -62,7 +64,7 @@ void ComputeWorkerGPU::run() {
 
                 batch->dense_graph_.performMap();
 
-                pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
+                pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, !is_multi_gpu);
 
                 if (will_sync) {
                     // we already have the lock acquired, it is safe to sync?
