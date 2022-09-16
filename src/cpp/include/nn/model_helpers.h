@@ -17,7 +17,9 @@ std::shared_ptr<Decoder> decoder_clone_helper(std::shared_ptr<Decoder> decoder, 
 }
 
 std::shared_ptr<GeneralEncoder> encoder_clone_helper(std::shared_ptr<GeneralEncoder> encoder, torch::Device device) {
-    return std::dynamic_pointer_cast<GeneralEncoder>(encoder->clone(device));
+    auto ret = std::dynamic_pointer_cast<GeneralEncoder>(encoder->clone(device));
+    ret->device_ = device;
+    return ret;
 }
 
 std::shared_ptr<Decoder> get_edge_decoder(DecoderType decoder_type, EdgeDecoderMethod edge_decoder_method, int num_relations, int embedding_dim,
