@@ -40,7 +40,7 @@ void ComputeWorkerGPU::run() {
                 break;
             }
 
-            SPDLOG_INFO("Popped {}: on gpu_id {}", batch->node_embeddings_.device.index(), gpu_id_);
+            SPDLOG_INFO("Popped {}: on gpu_id {}", batch->node_embeddings_.device().index(), gpu_id_);
 
             pipeline_->dataloader_->loadGPUParameters(batch);
 
