@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
@@ -57,8 +56,7 @@ class OGBLCitation2(LinkPredictionDataset):
         valid_list = np.array([valid_idx.get("source_node"), valid_idx.get("target_node")]).T
         test_list = np.array([test_idx.get("source_node"), test_idx.get("target_node")]).T
 
-        converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
-        converter = converter(
+        converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=train_list,
             valid_edges=valid_list,

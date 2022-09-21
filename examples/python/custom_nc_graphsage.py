@@ -7,7 +7,6 @@ from omegaconf import OmegaConf
 
 import marius as m
 from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import NodeClassificationDataset
 from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
@@ -108,8 +107,7 @@ class MYDATASET(NodeClassificationDataset):
         test_nodes = np.genfromtxt(self.input_test_nodes_file, delimiter=",").astype(np.int32)
 
         # Calling the convert function to generate the preprocessed files
-        converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
-        converter = converter(
+        converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=self.input_edge_list_file,
             num_partitions=num_partitions,
