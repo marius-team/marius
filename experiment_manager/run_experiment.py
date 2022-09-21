@@ -29,6 +29,7 @@ from system_comparisons.freebase86m_gs_disk_time import run_freebase86m_gs_disk_
 # from system_comparisons.ogb_wikikg90mv2_disk import run_ogb_wikikg90mv2_disk
 
 from sampling.train_trace import run_train_trace
+from sampling.sampling import run_sampling_livejournal
 # from sampling.sampling import run_sampling_obgn_papers100m
 
 from disk.freebase86m_beta_battles import run_freebase86m_beta_battles
@@ -65,6 +66,7 @@ if __name__ == "__main__":
         # "ogb_wikikg90mv2_disk": run_ogb_wikikg90mv2_disk,
 
         "training_trace": run_train_trace,
+        "sampling_livejournal": run_sampling_livejournal,
         # "sampling_papers100m": run_sampling_obgn_papers100m,
 
         "freebase86m_beta_battles": run_freebase86m_beta_battles,
