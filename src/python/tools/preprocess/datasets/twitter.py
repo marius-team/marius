@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
@@ -30,8 +29,7 @@ class Twitter(LinkPredictionDataset):
             extract_file(archive_path, remove_input=True)
 
     def preprocess(self, num_partitions=1, remap_ids=True, splits=[0.9, 0.05, 0.05], sequential_train_nodes=False):
-        converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
-        converter = converter(
+        converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=self.input_edges,
             delim=" ",

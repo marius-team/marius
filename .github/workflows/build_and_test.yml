@@ -32,10 +32,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Install Torch
+    - name: Install dependencies
       working-directory: ${{github.workspace}}
       shell: bash
       run:   |
+        sudo python3 -m pip install pyarrow
+
         if [ "$RUNNER_OS" == "Linux" ]; then
              sudo python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
         elif [ "$RUNNER_OS" == "macOS" ]; then

@@ -6,7 +6,6 @@ import torch
 from omegaconf import OmegaConf
 
 from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import NodeClassificationDataset
 from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
@@ -75,8 +74,7 @@ class OGBMag240M(NodeClassificationDataset):
         # test_nodes = split_dict['test'].astype(np.int32)
         test_nodes = valid_nodes
 
-        converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
-        converter = converter(
+        converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=citation_edges,
             num_partitions=num_partitions,

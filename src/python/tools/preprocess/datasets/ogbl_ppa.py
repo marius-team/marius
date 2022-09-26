@@ -2,7 +2,6 @@ from pathlib import Path
 
 import torch
 
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
@@ -52,8 +51,7 @@ class OGBLPpa(LinkPredictionDataset):
         valid_idx = torch.load(self.input_valid_edges_file).get("edge")
         test_idx = torch.load(self.input_test_edges_file).get("edge")
 
-        converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
-        converter = converter(
+        converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=train_idx,
             valid_edges=valid_idx,

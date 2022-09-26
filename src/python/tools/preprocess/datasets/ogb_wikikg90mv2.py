@@ -4,7 +4,6 @@ import numpy as np
 from omegaconf import OmegaConf
 
 from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
@@ -60,8 +59,7 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
 
         valid_edges = np.concatenate((valid_edges_sr, np.reshape(valid_edges_d, (-1, 1))), axis=1).astype(np.int32)
 
-        converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
-        converter = converter(
+        converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=train_edges,
             valid_edges=valid_edges,

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from marius.tools.preprocess.converters.spark_converter import SparkEdgeListConverter
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
@@ -44,8 +43,7 @@ class Freebase86m(LinkPredictionDataset):
     def preprocess(
         self, num_partitions=1, remap_ids=True, splits=None, sequential_train_nodes=False, partitioned_eval=False
     ):
-        converter = SparkEdgeListConverter if self.spark else TorchEdgeListConverter
-        converter = converter(
+        converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=self.input_train_edges_file,
             valid_edges=self.input_valid_edges_file,
