@@ -118,7 +118,8 @@ class SparkEdgeListConverter(object):
         spark_executor_memory: str = "4g",
     ):
         self.output_dir = output_dir
-
+        self.use_s3 = True if train_edges.startswith("s3a://") else False
+        
         self.spark = (
             SparkSession.builder.appName(SPARK_APP_NAME)
             .config("spark.driver.memory", spark_driver_memory)
@@ -143,7 +144,7 @@ class SparkEdgeListConverter(object):
         else:
             self.partitioner = None
 
-        self.writer = SparkWriter(self.spark, self.output_dir, partitioned_evaluation)
+        self.writer = SparkWriter(self.spark, self.output_dir, self.use_s3, partitioned_evaluation)
 
         self.train_split = None
         self.valid_split = None
@@ -232,7 +233,7 @@ class SparkEdgeListConverter(object):
             train_edges_df, valid_edges_df, test_edges_df = self.partitioner.partition_edges(
                 train_edges_df, valid_edges_df, test_edges_df, nodes_df, self.num_partitions
             )
-
+        
         return self.writer.write_to_binary(
             train_edges_df, valid_edges_df, test_edges_df, nodes_df, rels_df, self.num_partitions
         )
