@@ -77,6 +77,19 @@ Datasets in delimited file formats such as CSVs can be preprocessed with ``mariu
 
 See this `example <custom_dataset_example_>`_.
 
+Custom datasets stored in s3 can also be preprocessed using spark mode of ``marius_preprocess``. If the supplied 
+edge paths start with ``s3a://``, then the spark preprocessor reads files from s3 and writes back the processed 
+output to both local and the given s3 bucket (read from an environment variable).
+
+``S3_BUCKET``, ``AWS_ACCESS_KEY_ID``, and ``AWS_SECRET_ACCESS_KEY`` environment variables need to be set for this 
+to work. 
+
+.. code-block:: bash
+   $ export S3_BUCKET=<bucket to which the preprocessed files will be written>
+   $ export AWS_ACCESS_KEY_ID=<...>
+   $ export AWS_SECRET_ACCESS_KEY=<...>
+   $ marius_preprocess --edges s3a://fb15k237/train.txt s3a://fb15k237/valid.txt s3a://fb15k237/test.txt 
+                      --output_directory datasets/custom_spark_s3/ --spark
 
 Usage
 -----------------------
