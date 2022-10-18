@@ -10,3 +10,6 @@
 [submodule "src/cpp/third_party/parallel-hashmap"]
 	path = src/cpp/third_party/parallel-hashmap
 	url = https://github.com/greg7mdp/parallel-hashmap.git
+[submodule "src/cpp/third_party/aws-sdk-cpp"]
+	path = src/cpp/third_party/aws-sdk-cpp
+	url = https://github.com/aws/aws-sdk-cpp.git
