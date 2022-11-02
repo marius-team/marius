@@ -21,8 +21,8 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getEdgeBucketOrdering(E
             return getTwoLevelBetaOrdering(num_partitions, buffer_capacity, 1, 0, true);
         case EdgeBucketOrdering::ALL_BETA:
             return getCustomEdgeBucketOrdering();
-        case EdgeBucketOrdering::TWO_LEVEL_BETA:
-            SPDLOG_INFO("Generating Two Level Beta Ordering");
+        case EdgeBucketOrdering::COMET:
+            SPDLOG_INFO("Generating COMET Ordering");
             return getTwoLevelBetaOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, randomly_assign_edge_buckets);
         case EdgeBucketOrdering::CUSTOM:
             return getCustomEdgeBucketOrdering();

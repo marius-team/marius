@@ -1,14 +1,18 @@
-# Marius #
+# Marius and MariusGNN #
 
-Marius is a system for training graph neural networks and embeddings for large-scale graphs on a single machine.
+This repository contains the code for the Marius and MariusGNN papers. 
+We have combined the two works into one unified system for training 
+graph embeddings and graph neural networks over large-scale graphs 
+on a single machine using the entire memory hierarchy.
 
-Marius ([OSDI '21 Paper](https://www.usenix.org/conference/osdi21/presentation/mohoney)) is designed to mitigate/reduce data movement overheads using:
+Marius ([OSDI '21 Paper](https://www.usenix.org/conference/osdi21/presentation/mohoney)) is designed to mitigate/reduce data movement overheads for graph embeddings using:
 - Pipelined training and IO
-- Partition caching and buffer-aware data orderings
+- Partition caching and a buffer-aware data ordering to minimize IO for disk-based training (called BETA)
 
-We scale graph neural network training ([preprint](https://arxiv.org/abs/2202.02365)) through:
-- Optimized datastructures for neighbor sampling and GNN aggregation
-- Out-of-core GNN training 
+MariusGNN ([arxiv](https://arxiv.org/abs/2202.02365), to appear in EuroSys '23) 
+utilizes the data movement optimizations from Marius and adds support for scalable graph neural network training through:
+- An optimized data structure for neighbor sampling and GNN aggregation (called DENSE)
+- An improved data ordering for disk-based training (called COMET) which minimizes IO and maximizes model accuracy (note that COMET subsumes BETA)
 
 ## Build and Install ##
 
@@ -41,17 +45,20 @@ The following command line tools will be installed:
 
 ## Command Line Interface ##
 
-The command line interface supports performant in-memory and out-of-core training and evaluation of graph learning models. Experimental results from our papers can be reproduced by using this interface. 
+The command line interface supports performant in-memory and out-of-core 
+training and evaluation of graph learning models. Experimental results 
+from our papers can be reproduced using this interface (we also provide
+an exact experiment artifact for each paper in separate branches).
 
 ### Quick Start: ###
 
-First make sure marius is installed with `pip3 install .` 
+First make sure Marius is installed with `pip3 install .` 
 
-Preprocess dataset the FB15K_237 dataset with `marius_preprocess --dataset fb15k_237 --output_dir datasets/fb15k_237_example/`
+Preprocess the FB15K_237 dataset with `marius_preprocess --dataset fb15k_237 --output_dir datasets/fb15k_237_example/`
 
-Train example configuration file (assuming we are in the repo root directory) `marius_train examples/configuration/fb15k_237.yaml`
+Train using the example configuration file (assuming we are in the root directory of the repository) `marius_train examples/configuration/fb15k_237.yaml`
 
-After running this configuration, the MRR output by the system should be about .25 after 10 epochs.
+After running this configuration file, the MRR output by the system should be about .25 after 10 epochs.
 
 Perform batch inference on the test set with `marius_predict --config examples/configuration/fb15k_237.yaml --metrics mrr --save_scores --save_ranks`
 
@@ -80,14 +87,14 @@ Marius (out-of-core graph embeddings)
 }
 ```
 
-Marius++ (out-of-core GNN training)
+MariusGNN (out-of-core GNN training)
 ```
 @misc{waleffe2022marius,
   doi = {10.48550/ARXIV.2202.02365},
   url = {https://arxiv.org/abs/2202.02365},
   author = {Waleffe, Roger and Mohoney, Jason and Rekatsinas, Theodoros and Venkataraman, Shivaram},
   keywords = {Machine Learning (cs.LG), Databases (cs.DB), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {Marius++: Large-Scale Training of Graph Neural Networks on a Single Machine},
+  title = {MariusGNN: Resource-Efficient Out-of-Core Training of Graph Neural Networks},
   publisher = {arXiv},
   year = {2022},
 ```
