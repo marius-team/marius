@@ -3,8 +3,7 @@ import os
 from pathlib import Path
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, monotonically_increasing_id, rand, row_number
-from pyspark.sql.window import Window
+from pyspark.sql.functions import col
 
 from marius.tools.preprocess.converters.partitioners.spark_partitioner import SparkPartitioner
 from marius.tools.preprocess.converters.readers.spark_readers import SparkDelimitedFileReader
@@ -57,8 +56,8 @@ def assign_ids(df, index_col_id):
         return None
     columns = [*df.columns]
     df_with_index = df.rdd.zipWithIndex().toDF()
-    for col in columns:
-        df_with_index = df_with_index.withColumn(col, df_with_index['_1'].getItem(col))
+    for column in columns:
+        df_with_index = df_with_index.withColumn(column, df_with_index['_1'].getItem(column))
     return df_with_index.withColumnRenamed('_2', index_col_id).select(*columns, index_col_id)
 
 
