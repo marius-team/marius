@@ -241,8 +241,8 @@ EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val) {
         return EdgeBucketOrdering::NEW_BETA;
     } else if (string_val == "ALL_BETA") {
         return EdgeBucketOrdering::ALL_BETA;
-    } else if (string_val == "TWO_LEVEL_BETA") {
-        return EdgeBucketOrdering::TWO_LEVEL_BETA;
+    } else if (string_val == "COMET") {
+        return EdgeBucketOrdering::COMET;
     } else if (string_val == "CUSTOM") {
         return EdgeBucketOrdering::CUSTOM;
     } else {

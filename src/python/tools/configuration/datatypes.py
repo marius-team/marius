@@ -164,7 +164,7 @@ class PartitionBufferOptions(StorageOptions):
     prefetching: bool = True
     fine_to_coarse_ratio: int = 1
     num_cache_partitions: int = 0
-    edge_bucket_ordering: str = "NEW_BETA"
+    edge_bucket_ordering: str = "COMET"
     node_partition_ordering: str = "DISPERSED"
     randomly_assign_edge_buckets: bool = True
 

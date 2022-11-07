@@ -110,7 +110,7 @@ void init_options(py::module &m) {
         .value("OLD_BETA", EdgeBucketOrdering::OLD_BETA)
         .value("NEW_BETA", EdgeBucketOrdering::NEW_BETA)
         .value("ALL_BETA", EdgeBucketOrdering::ALL_BETA)
-        .value("TWO_LEVEL_BETA", EdgeBucketOrdering::TWO_LEVEL_BETA)
+        .value("COMET", EdgeBucketOrdering::COMET)
         .value("CUSTOM", EdgeBucketOrdering::CUSTOM);
 
     m.def("getEdgeBucketOrderingEnum", &getEdgeBucketOrderingEnum, py::arg("string_val"));

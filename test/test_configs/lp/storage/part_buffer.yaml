@@ -12,7 +12,7 @@ embeddings:
     prefetching: false
     fine_to_coarse_ratio: 2
     num_cache_partitions: 0
-    edge_bucket_ordering: TWO_LEVEL_BETA
+    edge_bucket_ordering: COMET
     randomly_assign_edge_buckets: true
 features:
   type: PARTITION_BUFFER
@@ -22,6 +22,6 @@ features:
     prefetching: false
     fine_to_coarse_ratio: 2
     num_cache_partitions: 0
-    edge_bucket_ordering: TWO_LEVEL_BETA
+    edge_bucket_ordering: COMET
     randomly_assign_edge_buckets: true
 save_model: true
