@@ -13,7 +13,6 @@ from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
 from marius.tools.preprocess.converters.spark_constants import (
     DST_EDGE_BUCKET_COL,
-    EDGES_INDEX_COL,
     INDEX_COL,
     REL_INDEX_COL,
     SRC_EDGE_BUCKET_COL,
@@ -120,16 +119,13 @@ class SparkWriter(object):
         dataset_stats = DatasetConfig()
         dataset_stats.dataset_dir = Path(self.output_dir).absolute().__str__()
 
-        dataset_stats.num_edges = get_df_count(train_edges_df, EDGES_INDEX_COL)
-        train_edges_df = train_edges_df.drop(EDGES_INDEX_COL)
+        dataset_stats.num_edges = train_edges_df.count()
         dataset_stats.num_train = dataset_stats.num_edges
 
         if valid_edges_df is not None:
-            dataset_stats.num_valid = get_df_count(valid_edges_df, EDGES_INDEX_COL)
-            valid_edges_df = valid_edges_df.drop(EDGES_INDEX_COL)
+            dataset_stats.num_valid = valid_edges_df.count()
         if test_edges_df is not None:
-            dataset_stats.num_test = get_df_count(test_edges_df, EDGES_INDEX_COL)
-            test_edges_df = test_edges_df.drop(EDGES_INDEX_COL)
+            dataset_stats.num_test = test_edges_df.count()
 
         dataset_stats.num_nodes = get_df_count(nodes_df, INDEX_COL)
 

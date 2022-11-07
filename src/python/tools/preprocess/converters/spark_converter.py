@@ -10,7 +10,6 @@ from marius.tools.preprocess.converters.partitioners.spark_partitioner import Sp
 from marius.tools.preprocess.converters.readers.spark_readers import SparkDelimitedFileReader
 from marius.tools.preprocess.converters.spark_constants import (
     DST_COL,
-    EDGES_INDEX_COL,
     INDEX_COL,
     NODE_LABEL,
     REL_COL,
@@ -38,11 +37,8 @@ def get_nodes_df(edges_df):
         edges_df.select(col(SRC_COL).alias(NODE_LABEL))
         .union(edges_df.select(col(DST_COL).alias(NODE_LABEL)))
         .distinct()
-        .repartition(1)
-        .orderBy(rand())
-        .cache()
     )
-    nodes = assign_ids(nodes, INDEX_COL)
+    nodes = assign_ids(nodes, INDEX_COL).cache()
     return nodes
 
 
@@ -50,40 +46,41 @@ def get_relations_df(edges_df):
     rels = (
         edges_df.drop(SRC_COL, DST_COL)
         .distinct()
-        .repartition(1)
-        .orderBy(rand())
         .withColumnRenamed(REL_COL, RELATION_LABEL)
-        .cache()
     )
-    rels = assign_ids(rels, REL_INDEX_COL)
+    rels = assign_ids(rels, REL_INDEX_COL).cache()
     return rels
 
 
-def assign_ids(df, col_id):
+def assign_ids(df, index_col_id):
     if df is None:
         return None
-    return df.withColumn(col_id, row_number().over(Window.orderBy(monotonically_increasing_id())) - 1)
+    columns = [*df.columns]
+    df_with_index = df.rdd.zipWithIndex().toDF()
+    for col in columns:
+        df_with_index = df_with_index.withColumn(col, df_with_index['_1'].getItem(col))
+    return df_with_index.withColumnRenamed('_2', index_col_id).select(*columns, index_col_id)
 
 
 def remap_edges(edges_df, nodes, rels):
     if rels is not None:
         remapped_edges_df = (
-            edges_df.join(nodes.hint("merge"), edges_df.src == nodes.node_label)
+            edges_df.join(nodes.hint("broadcast"), edges_df.src == nodes.node_label)
             .drop(NODE_LABEL, SRC_COL)
             .withColumnRenamed(INDEX_COL, SRC_COL)
-            .join(rels.hint("merge"), edges_df.rel == rels.relation_label)
+            .join(rels.hint("broadcast"), edges_df.rel == rels.relation_label)
             .drop(RELATION_LABEL, REL_COL)
             .withColumnRenamed(INDEX_COL, REL_COL)
-            .join(nodes.hint("merge"), edges_df.dst == nodes.node_label)
+            .join(nodes.hint("broadcast"), edges_df.dst == nodes.node_label)
             .drop(NODE_LABEL, DST_COL)
             .withColumnRenamed(INDEX_COL, DST_COL)
         )
     else:
         remapped_edges_df = (
-            edges_df.join(nodes.hint("merge"), edges_df.src == nodes.node_label)
+            edges_df.join(nodes.hint("broadcast"), edges_df.src == nodes.node_label)
             .drop(NODE_LABEL, SRC_COL)
             .withColumnRenamed(INDEX_COL, SRC_COL)
-            .join(nodes.hint("merge"), edges_df.dst == nodes.node_label)
+            .join(nodes.hint("broadcast"), edges_df.dst == nodes.node_label)
             .drop(NODE_LABEL, DST_COL)
             .withColumnRenamed(INDEX_COL, DST_COL)
         )
@@ -220,12 +217,6 @@ class SparkEdgeListConverter(object):
                     train_edges_df, test_edges_df = all_edges_df.randomSplit([self.train_split, self.test_split])
             else:
                 train_edges_df = all_edges_df
-        all_edges_df, train_edges_df, valid_edges_df, test_edges_df = (
-            assign_ids(all_edges_df, EDGES_INDEX_COL),
-            assign_ids(train_edges_df, EDGES_INDEX_COL),
-            assign_ids(valid_edges_df, EDGES_INDEX_COL),
-            assign_ids(test_edges_df, EDGES_INDEX_COL),
-        )
 
         if self.partitioner is not None:
             print("Partition nodes into {} partitions".format(self.num_partitions))
