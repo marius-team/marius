@@ -42,11 +42,7 @@ def get_nodes_df(edges_df):
 
 
 def get_relations_df(edges_df):
-    rels = (
-        edges_df.drop(SRC_COL, DST_COL)
-        .distinct()
-        .withColumnRenamed(REL_COL, RELATION_LABEL)
-    )
+    rels = edges_df.drop(SRC_COL, DST_COL).distinct().withColumnRenamed(REL_COL, RELATION_LABEL)
     rels = assign_ids(rels, REL_INDEX_COL).cache()
     return rels
 
@@ -57,8 +53,8 @@ def assign_ids(df, index_col_id):
     columns = [*df.columns]
     df_with_index = df.rdd.zipWithIndex().toDF()
     for column in columns:
-        df_with_index = df_with_index.withColumn(column, df_with_index['_1'].getItem(column))
-    return df_with_index.withColumnRenamed('_2', index_col_id).select(*columns, index_col_id)
+        df_with_index = df_with_index.withColumn(column, df_with_index["_1"].getItem(column))
+    return df_with_index.withColumnRenamed("_2", index_col_id).select(*columns, index_col_id)
 
 
 def remap_edges(edges_df, nodes, rels):

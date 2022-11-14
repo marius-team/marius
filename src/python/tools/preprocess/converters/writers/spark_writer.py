@@ -1,6 +1,5 @@
 import glob
 import os
-import re
 import sys
 from pathlib import Path
 from random import randint
@@ -57,40 +56,35 @@ def write_partitioned_df_to_csv(partition_triples, num_partitions, output_filena
 
     print(partition_triples.rdd.getNumPartitions())
 
-    # for edges, the order needs to be maintained. all edges that belong to bucket [i, j]
-    # should appear before [i, j+1] and that of [i, j+1] should appear before [i+1, j].
-    # repartitionByRange makes sure that all edges belonging to src bucket i, fall in the
-    # same partition. Also, this function will output at most `num_partitions` partitions.
-    partition_triples.repartitionByRange(num_partitions, SRC_EDGE_BUCKET_COL).sortWithinPartitions(
-        SRC_EDGE_BUCKET_COL, DST_EDGE_BUCKET_COL
-    ).drop(DST_EDGE_BUCKET_COL, SRC_EDGE_BUCKET_COL).write.csv(
+    partition_triples.write.partitionBy([SRC_EDGE_BUCKET_COL, DST_EDGE_BUCKET_COL]).csv(
         TMP_DATA_DIRECTORY + "_edges", mode="overwrite", sep="\t"
     )
 
-    # for partition offset counts, the ordering of dst_buckets does not matter since we
-    # read the value before setting the offset in line number 92.
-    # dst_buckets = counts.iloc[:, 0].values.
-    # we make use of partitionBy to parallelize writes.
     bucket_counts.write.partitionBy(SRC_EDGE_BUCKET_COL).csv(TMP_DATA_DIRECTORY + "_counts", mode="overwrite", sep="\t")
 
     partition_offsets = []
 
     os.system("rm -rf {}".format(output_filename))
-    for i in range(num_partitions):
-        # looks like there is no way in glob to restrict to the pattern [0]*{i}- alone.
-        # it matches things like part-00004-sdfvf0-sdf.csv when given part-[0]*0-*.csv
-        tmp_edges_files = glob.glob("{}/part-[0]*{}-*.csv".format(TMP_DATA_DIRECTORY + "_edges", str(i)))
+    for src_part in range(num_partitions):
+        for dst_part in range(num_partitions):
+            tmp_edges_files = glob.glob(
+                "{}/{}={}/{}={}/*.csv".format(
+                    TMP_DATA_DIRECTORY + "_edges",
+                    SRC_EDGE_BUCKET_COL,
+                    str(src_part),
+                    DST_EDGE_BUCKET_COL,
+                    str(dst_part),
+                )
+            )
+
+            for tmp_edges_file in tmp_edges_files:
+                os.system("cat {} >> {}".format(tmp_edges_file, output_filename))
 
         tmp_counts_files = glob.glob(
-            "{}/{}={}/*.csv".format(TMP_DATA_DIRECTORY + "_counts", SRC_EDGE_BUCKET_COL, str(i))
+            "{}/{}={}/*.csv".format(TMP_DATA_DIRECTORY + "_counts", SRC_EDGE_BUCKET_COL, str(src_part))
         )
 
         edges_bucket_counts = np.zeros(num_partitions, dtype=np.int)
-        edge_file_pattern = re.compile(r"{}/part-[0]*{}-.*\.csv".format(TMP_DATA_DIRECTORY + "_edges", str(i)))
-        for tmp_edges_file in tmp_edges_files:
-            if edge_file_pattern.match(tmp_edges_file):
-                os.system("cat {} >> {}".format(tmp_edges_file, output_filename))
-
         for tmp_counts_file in tmp_counts_files:
             counts = pd.read_csv(tmp_counts_file, sep="\t", header=None)
 
