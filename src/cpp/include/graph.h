@@ -127,6 +127,8 @@ class GNNGraph : public MariusGraph {
       */
     Indices getNeighborIDs(bool incoming = true, bool global = false);
 
+    std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> getCombinedNeighborIDs();
+
     /**
       * Gets the offset of the node ids in the outermost layer.
       * @return Layer offset

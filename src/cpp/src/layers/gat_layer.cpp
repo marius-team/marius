@@ -6,10 +6,12 @@
 
 #include "layers/layer_helpers.h"
 
-GATLayer::GATLayer(shared_ptr<GNNLayerConfig> layer_config, torch::Device device) : device_(torch::Device(torch::kCPU)) {
+GATLayer::GATLayer(shared_ptr<GNNLayerConfig> layer_config, bool use_incoming, bool use_outgoing, torch::Device device) : device_(torch::Device(torch::kCPU)) {
 
     layer_config_ = layer_config;
     options_ = std::dynamic_pointer_cast<GATLayerOptions>(layer_config->options);
+    use_incoming_ = use_incoming;
+    use_outgoing_ = use_outgoing;
     input_dim_ = layer_config->options->input_dim;
     output_dim_ = layer_config->options->output_dim;
 
@@ -64,14 +66,27 @@ Embeddings GATLayer::forward(Embeddings inputs, GNNGraph gnn_graph, bool train) 
     relu_opts.negative_slope(options_->negative_slope);
     auto leaky_relu = torch::nn::LeakyReLU(relu_opts);
 
-    Indices incoming_neighbors = gnn_graph.getNeighborIDs(true, false);
-    Indices incoming_neighbor_offsets = gnn_graph.getNeighborOffsets(true);
-
-    torch::Tensor incoming_total_neighbors = gnn_graph.getNumNeighbors(true);
+    Indices neighbors;
+    Indices neighbor_offsets;
+    Indices total_neighbors;
+    if (use_outgoing_ && use_incoming_) {
+        auto tup = gnn_graph.getCombinedNeighborIDs();
+        neighbors = std::get<2>(tup);
+        neighbor_offsets = std::get<0>(tup);
+        total_neighbors = std::get<1>(tup);
+    } else if (use_incoming_) {
+        neighbors = gnn_graph.getNeighborIDs(true, false);
+        neighbor_offsets = gnn_graph.getNeighborOffsets(true);
+        total_neighbors = gnn_graph.getNumNeighbors(true);
+    } else if (use_outgoing_) {
+        neighbors = gnn_graph.getNeighborIDs(false, false);
+        neighbor_offsets = gnn_graph.getNeighborOffsets(false);
+        total_neighbors = gnn_graph.getNumNeighbors(false);
+    }
 
     int64_t layer_offset = gnn_graph.getLayerOffset();
-    torch::Tensor parent_ids = torch::arange(inputs.size(0) - layer_offset, incoming_total_neighbors.options())
-            .repeat_interleave(incoming_total_neighbors);
+    torch::Tensor parent_ids = torch::arange(inputs.size(0) - layer_offset, total_neighbors.options())
+            .repeat_interleave(total_neighbors);
 
     if (train && input_dropout_ > 0) {
         auto dropout_opts = torch::nn::DropoutOptions().p(input_dropout_).inplace(false);
@@ -79,12 +94,12 @@ Embeddings GATLayer::forward(Embeddings inputs, GNNGraph gnn_graph, bool train) 
         inputs = dropout(inputs);
     }
 
-    Embeddings incoming_embeddings = inputs.index_select(0, incoming_neighbors);
-    Embeddings incoming_transforms = torch::matmul(weight_matrices_, incoming_embeddings.transpose(0, 1));
-    incoming_transforms = incoming_transforms.reshape({options_->num_heads, head_dim_, -1});
+    Embeddings nbr_embeddings = inputs.index_select(0, neighbors);
+    Embeddings nbr_transforms = torch::matmul(weight_matrices_, nbr_embeddings.transpose(0, 1));
+    nbr_transforms = nbr_transforms.reshape({options_->num_heads, head_dim_, -1});
 
     // free memory as this tensor can become large with large numbers of neighbors
-    incoming_embeddings = torch::Tensor();
+    nbr_embeddings = torch::Tensor();
 
     Embeddings self_embs = inputs.narrow(0, layer_offset, inputs.size(0) - layer_offset);
     Embeddings self_transforms = torch::matmul(weight_matrices_, self_embs.transpose(0, 1));
@@ -95,15 +110,15 @@ Embeddings GATLayer::forward(Embeddings inputs, GNNGraph gnn_graph, bool train) 
     self_atn_weights = leaky_relu(self_atn_weights);
 
     self_transforms_l = self_transforms_l.index_select(-1, parent_ids);
-    torch::Tensor nbr_atn_weights = self_transforms_l + torch::matmul(a_r_, incoming_transforms);
+    torch::Tensor nbr_atn_weights = self_transforms_l + torch::matmul(a_r_, nbr_transforms);
     nbr_atn_weights = leaky_relu(nbr_atn_weights);
 
     nbr_atn_weights = nbr_atn_weights.transpose(0, 2);   // [total_num_nbrs, 1, num_heads_]
     self_atn_weights = self_atn_weights.transpose(0, 2); // [num_to_encode, 1, num_heads_]
 
     std::tie(nbr_atn_weights, self_atn_weights) = attention_softmax(nbr_atn_weights, self_atn_weights,
-                                                                    incoming_neighbor_offsets, parent_ids,
-                                                                    incoming_total_neighbors);
+                                                                    neighbor_offsets, parent_ids,
+                                                                    total_neighbors);
 
     nbr_atn_weights = nbr_atn_weights.transpose(0, 2);
     self_atn_weights = self_atn_weights.transpose(0, 2);
@@ -118,8 +133,8 @@ Embeddings GATLayer::forward(Embeddings inputs, GNNGraph gnn_graph, bool train) 
 
     nbr_atn_weights = nbr_atn_weights.repeat({1, head_dim_, 1});
 
-    torch::Tensor tmp = (incoming_transforms * nbr_atn_weights).transpose(0, 2);
-    torch::Tensor h_i = segmented_sum(tmp, parent_ids, incoming_total_neighbors.size(0));
+    torch::Tensor tmp = (nbr_transforms * nbr_atn_weights).transpose(0, 2);
+    torch::Tensor h_i = segmented_sum(tmp, parent_ids, total_neighbors.size(0));
     h_i = h_i.transpose(0, 2);
 
     tmp = self_transforms * self_atn_weights;

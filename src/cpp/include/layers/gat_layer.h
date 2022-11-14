@@ -11,6 +11,8 @@ class GATLayer : public GNNLayer, public torch::nn::Cloneable<GATLayer> {
 public:
     shared_ptr<GNNLayerConfig> layer_config_;
     shared_ptr<GATLayerOptions> options_;
+    bool use_incoming_;
+    bool use_outgoing_;
     int head_dim_;
     float input_dropout_;
     float attention_dropout_;
@@ -20,7 +22,7 @@ public:
     torch::Tensor bias_;
     torch::Device device_;
 
-    GATLayer(shared_ptr<GNNLayerConfig> layer_config, torch::Device device);
+    GATLayer(shared_ptr<GNNLayerConfig> layer_config, bool use_incoming, bool use_outgoing, torch::Device device);
 
     void reset() override;
 

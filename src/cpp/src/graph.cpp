@@ -634,6 +634,28 @@ Indices GNNGraph::getNeighborIDs(bool incoming, bool global_ids) {
     }
 }
 
+std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> GNNGraph::getCombinedNeighborIDs() {
+    torch::Tensor new_offsets = in_offsets_ + out_offsets_;
+    torch::Tensor new_num_neighbors = in_num_neighbors_ + out_num_neighbors_;
+    torch::Tensor new_mapping = torch::empty(in_neighbors_mapping_.size(0) + out_neighbors_mapping_.size(0), in_neighbors_mapping_.options());
+
+    torch::Tensor repeated_starts = new_offsets.repeat_interleave(in_num_neighbors_);
+    torch::Tensor repeated_offsets = in_offsets_.repeat_interleave(in_num_neighbors_);
+    torch::Tensor arange = torch::arange(repeated_offsets.size(0), repeated_offsets.options());
+    torch::Tensor incoming_indices = repeated_starts + arange - repeated_offsets;
+
+    torch::Tensor global_offsets = new_offsets + in_num_neighbors_;
+    repeated_starts = global_offsets.repeat_interleave(out_num_neighbors_);
+    repeated_offsets = out_offsets_.repeat_interleave(out_num_neighbors_);
+    arange = torch::arange(repeated_offsets.size(0), repeated_offsets.options());
+    torch::Tensor outgoing_indices = repeated_starts + arange - repeated_offsets;
+
+    new_mapping.index_copy_(0, incoming_indices, in_neighbors_mapping_);
+    new_mapping.index_copy_(0, outgoing_indices, out_neighbors_mapping_);
+
+    return std::forward_as_tuple(new_offsets, new_num_neighbors, new_mapping);
+}
+
 
 void GNNGraph::performMap() {
     auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids_.device());

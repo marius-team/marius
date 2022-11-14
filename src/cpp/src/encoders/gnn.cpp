@@ -28,10 +28,10 @@ void GeneralGNN::reset() {
             layer = std::make_shared<GraphSageLayer>(layer_config, encoder_config_->use_incoming_nbrs, encoder_config_->use_outgoing_nbrs, device_);
             register_module<GraphSageLayer>("layer:" + std::to_string(layer_id++), std::dynamic_pointer_cast<GraphSageLayer>(layer));
         } else if (layer_config->type == GNNLayerType::GAT) {
-            layer = std::make_shared<GATLayer>(layer_config, device_);
+            layer = std::make_shared<GATLayer>(layer_config, encoder_config_->use_incoming_nbrs, encoder_config_->use_outgoing_nbrs, device_);
             register_module<GATLayer>("layer:" + std::to_string(layer_id++), std::dynamic_pointer_cast<GATLayer>(layer));
         } else if (layer_config->type == GNNLayerType::GCN) {
-            layer = std::make_shared<GCNLayer>(layer_config, encoder_config_->use_incoming_nbrs, encoder_config_->use_outgoing_nbrs,device_);
+            layer = std::make_shared<GCNLayer>(layer_config, encoder_config_->use_incoming_nbrs, encoder_config_->use_outgoing_nbrs, device_);
             register_module<GCNLayer>("layer:" + std::to_string(layer_id++), std::dynamic_pointer_cast<GCNLayer>(layer));
         } else if (layer_config->type == GNNLayerType::RGCN) {
             layer = std::make_shared<RGCNLayer>(layer_config, num_relations_, encoder_config_->use_incoming_nbrs, encoder_config_->use_outgoing_nbrs, device_);
