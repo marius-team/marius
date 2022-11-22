@@ -28,7 +28,14 @@ class Twitter(LinkPredictionDataset):
             archive_path = download_url(self.dataset_url, self.output_directory, overwrite)
             extract_file(archive_path, remove_input=True)
 
-    def preprocess(self, num_partitions=1, remap_ids=True, splits=[0.9, 0.05, 0.05], sequential_train_nodes=False):
+    def preprocess(
+        self,
+        num_partitions=1,
+        remap_ids=True,
+        splits=[0.9, 0.05, 0.05],
+        sequential_train_nodes=False,
+        partitioned_eval=False,
+    ):
         converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
             train_edges=self.input_edges,
