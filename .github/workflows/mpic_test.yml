@@ -1,0 +1,27 @@
+name: Testing Marius Script Compiler
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  mpic:
+    runs-on: ubuntu-latest
+    container: ${{ matrix.python_container }}
+    strategy:
+      matrix:
+        python_container: ["python:3.10"]
+
+    steps:
+      # Downloads a copy of the code in your repository before running CI tests
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Installing dependencies
+        run: MARIUS_NO_BINDINGS=1 python3 -m pip install .[tests,mpic]
+
+      - name: Running pytest
+        run: MARIUS_NO_BINDINGS=1 pytest -s test/mpic/test_codegen.py -s test/mpic/test_error_handling.py
