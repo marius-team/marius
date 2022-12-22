@@ -16,6 +16,7 @@ using std::shared_ptr;
 
 struct NeighborSamplingConfig {
     NeighborSamplingLayer type;
+    bool use_hashmap_sets;
     shared_ptr<NeighborSamplingOptions> options;
 };
 
@@ -64,7 +65,6 @@ struct EncoderConfig {
     shared_ptr<OptimizerConfig> optimizer;
     bool use_incoming_nbrs;
     bool use_outgoing_nbrs;
-    bool use_hashmap_sets;
 };
 
 struct DecoderConfig {

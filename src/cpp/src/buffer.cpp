@@ -465,7 +465,11 @@ torch::Tensor PartitionBuffer::getBufferState() {
 
 // indices a relative to the local node ids
 torch::Tensor PartitionBuffer::indexRead(torch::Tensor indices) {
-    return buffer_tensor_view_.index_select(0, indices);
+    auto out_options = torch::TensorOptions().dtype(torch::kFloat32).pinned_memory(true);
+    torch::Tensor out = torch::empty({indices.size(0), buffer_tensor_view_.size(1)}, out_options);
+    torch::index_select_out(out, buffer_tensor_view_, 0, indices);
+
+    return out;
 }
 
 Indices PartitionBuffer::getRandomIds(int64_t size) {

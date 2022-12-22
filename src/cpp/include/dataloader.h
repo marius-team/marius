@@ -112,7 +112,7 @@ class DataLoader {
      * Loads CPU embedding parameters
      * @return The next batch
      */
-    Batch *getBatch();
+    Batch *getBatch(int worker_id = 0);
 
     /**
      * Calls getBatch and splits the batch into `num_devices` sub batches. In link prediction the split is done by the edges and in node classification by the nodes.
@@ -123,13 +123,13 @@ class DataLoader {
      * Loads edges and samples negatives to construct a batch
      * @param batch: Batch object to load edges and samples into.
      */
-    void linkPredictionSample(Batch *batch);
+    void linkPredictionSample(Batch *batch, int worker_id = 0);
 
     /**
      * Loads edges and samples negatives to construct a batch
      * @param batch: Batch object to load edges and samples into.
      */
-    void nodeClassificationSample(Batch *batch);
+    void nodeClassificationSample(Batch *batch, int worker_id = 0);
 
     /**
      * Loads CPU parameters into batch

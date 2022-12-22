@@ -19,6 +19,7 @@ from hydra.core.config_store import ConfigStore
 @dataclass
 class NeighborSamplingConfig:
     type: str = NeighborSamplingLayer.ALL.name
+    use_hashmap_sets: bool = False
     options: NeighborSamplingOptions = NeighborSamplingOptions()
 
     def merge(self, input_config: DictConfig):
@@ -29,6 +30,9 @@ class NeighborSamplingConfig:
         """
 
         self.type = input_config.type.upper()
+
+        if "use_hashmap_sets" in input_config.keys():
+            self.use_hashmap_sets = input_config.use_hashmap_sets
 
         new_options = NeighborSamplingOptions()
 
@@ -193,6 +197,16 @@ class GNNLayerConfig:
     bias: bool = True
     bias_init: InitConfig = InitConfig(type="ZEROS")
 
+    def __init__(self):
+        self.type: str = "GRAPH_SAGE"
+        self.options: GNNLayerOptions = GraphSageLayerOptions(input_dim=50, output_dim=50)
+        self.train_neighbor_sampling: NeighborSamplingConfig = NeighborSamplingConfig()
+        self.eval_neighbor_sampling: NeighborSamplingConfig = NeighborSamplingConfig()
+        self.init: InitConfig = InitConfig(type="GLOROT_UNIFORM")
+        self.activation: str = "NONE"
+        self.bias: bool = True
+        self.bias_init: InitConfig = InitConfig(type="ZEROS")
+
 
     def merge(self, input_config: DictConfig):
         """
@@ -245,7 +259,6 @@ class EncoderConfig:
     optimizer: OptimizerConfig = OptimizerConfig()
     use_incoming_nbrs: bool = True
     use_outgoing_nbrs: bool = True
-    use_hashmap_sets: bool = True
 
     def __post_init__(self):
 
@@ -285,9 +298,6 @@ class EncoderConfig:
 
         if "use_outgoing_nbrs" in input_config.keys():
             self.use_outgoing_nbrs = input_config.use_outgoing_nbrs
-
-        if "use_hashmap_sets" in input_config.keys():
-            self.use_hashmap_sets = input_config.use_hashmap_sets
 
         self.__post_init__()
 

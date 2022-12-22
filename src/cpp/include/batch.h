@@ -38,6 +38,9 @@ class Batch {
     bool train_;                                            /**< If true, this batch is a training batch and requires gradient tracking */
     int device_id_;                                         /**< ID of the device the batch is assigned to */
 
+//    double node_classification_sample_;
+//    double load_cpu_parameters_;
+
     Timestamp load_timestamp_;                              /**< Timestamp of when the embeddings for the batch have been loaded from storage */
     Timestamp compute_timestamp_;                           /**< Timestamp of when the gradients for the batch have been computed */
     CudaEvent device_transfer_;                             /**< Used as a sync point when transferring from host to device */

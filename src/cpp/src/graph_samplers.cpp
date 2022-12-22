@@ -59,16 +59,27 @@ torch::Tensor FilteredNegativeSampler::getNegatives(Batch *batch, bool src) {
 LayeredNeighborSampler::LayeredNeighborSampler(GraphModelStorage *storage,
                                                std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
                                                bool incoming,
-                                               bool outgoing,
-                                               bool use_hashmap_sets) {
+                                               bool outgoing) {
     storage_ = storage;
     sampling_layers_ = layer_configs;
     incoming_ = incoming;
     outgoing_ = outgoing;
-    use_hashmap_sets_ = use_hashmap_sets;
+    use_hashmap_sets_ = false;
+    use_bitmaps_ = false;
+
+    for (int i = 0; i < sampling_layers_.size(); i++) {
+        if (use_bitmaps_ && sampling_layers_[i]->use_hashmap_sets) {
+            throw std::runtime_error("Layers with hashmap sets equal to true must come before those set to false.");
+        }
+        if (sampling_layers_[i]->use_hashmap_sets) {
+            use_hashmap_sets_ = true;
+        } else {
+            use_bitmaps_ = true;
+        }
+    }
 }
 
-GNNGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids) {
+GNNGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, int worker_id) {
     Indices hop_offsets;
     torch::Tensor incoming_edges;
     Indices incoming_offsets;
@@ -93,7 +104,7 @@ GNNGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids) {
 
     // data structures for calculating the delta_ids
     torch::Tensor hash_map;
-    void *hash_map_mem;
+//    void *hash_map_mem;
     auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(node_ids.device());
 
     phmap::flat_hash_set<int64_t> seen_unique_nodes;
@@ -103,10 +114,10 @@ GNNGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids) {
     if (gpu) {
         hash_map = torch::zeros({num_nodes_in_memory}, bool_device_options);
     } else {
-        if (!use_hashmap_sets_) {
-            hash_map_mem = malloc(num_nodes_in_memory);
-            hash_map = torch::from_blob(hash_map_mem, {num_nodes_in_memory}, bool_device_options);
-        } else {
+        if (use_bitmaps_) {
+            hash_map = storage_->current_subgraph_state_->in_memory_subgraph_->hash_maps_[worker_id];
+        }
+        if (use_hashmap_sets_) {
             seen_unique_nodes.reserve(node_ids.size(0));
         }
     }
@@ -183,7 +194,7 @@ GNNGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids) {
             delta_ids = hash_map.nonzero().flatten(0, 1);
         } else {
 
-            if (!use_hashmap_sets_) {
+            if (!sampling_layers_[i]->use_hashmap_sets) {
                 delta_ids = computeDeltaIdsHelperMethod1(hash_map, node_ids, delta_incoming_edges, delta_outgoing_edges,
                                                          num_nodes_in_memory);
             } else {
@@ -235,10 +246,6 @@ GNNGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids) {
 
     GNNGraph ret = GNNGraph(hop_offsets, node_ids, incoming_offsets, incoming_edges_vec, in_neighbors_mapping, outgoing_offsets, outgoing_edges_vec, out_neighbors_mapping, num_nodes_in_memory);
 
-    if (!gpu and !use_hashmap_sets_) {
-        free(hash_map_mem);
-    }
-
     return ret;
 }
 
@@ -248,12 +255,6 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
                                                                    int64_t num_nodes_in_memory) {
     auto hash_map_accessor = hash_map.accessor<bool, 1>();
     auto nodes_accessor = node_ids.accessor<int64_t , 1>();
-
-    // zero hash map
-    #pragma omp parallel for
-    for (int64_t j = 0; j < hash_map.size(0); j++) {
-        hash_map_accessor[j] = 0;
-    }
 
     if (delta_incoming_edges.size(0) > 0) {
         auto incoming_accessor = delta_incoming_edges.accessor<int64_t , 2>();
@@ -327,7 +328,7 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
     }
 
     auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
-    torch::Tensor delta_ids = torch::zeros({count}, device_options);
+    torch::Tensor delta_ids = torch::empty({count}, device_options);
     auto delta_ids_accessor = delta_ids.accessor<int64_t, 1>();
 
     #pragma omp parallel
@@ -345,12 +346,31 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
             end = num_nodes_in_memory;
         }
 
-        int k = 0;
+        int k = sub_offsets[tid];
 
         for (int64_t j = start; j < end; j++) {
             if (hash_map_accessor[j]) {
-                delta_ids_accessor[sub_offsets[tid] + (k++)] = j;
+                delta_ids_accessor[k++] = j;
             }
+        }
+    }
+
+    // zero hash map
+    if (delta_incoming_edges.size(0) > 0) {
+        auto incoming_accessor = delta_incoming_edges.accessor<int64_t , 2>();
+
+        #pragma omp parallel for
+        for (int64_t j = 0; j < delta_incoming_edges.size(0); j++) {
+            hash_map_accessor[incoming_accessor[j][0]] = 0;
+        }
+    }
+    if (delta_outgoing_edges.size(0) > 0) {
+        auto outgoing_accessor = delta_outgoing_edges.accessor<int64_t , 2>();
+        int column_idx = delta_outgoing_edges.size(1) - 1; // RW: -1 has some weird bug for accessor
+
+        #pragma omp parallel for
+        for (int64_t j = 0; j < delta_outgoing_edges.size(0); j++) {
+            hash_map_accessor[outgoing_accessor[j][column_idx]] = 0;
         }
     }
 

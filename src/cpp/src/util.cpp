@@ -112,3 +112,12 @@ int64_t pwrite_wrapper(int fd, const void *buf, int64_t count, int64_t offset) {
 
     return count;
 }
+
+torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device) {
+    if (input.defined()) {
+        auto device_options = torch::TensorOptions().device(device).pinned_memory(true);
+        input = input.to(device_options, true, false);
+//        input.record_stream(at::cuda::getCurrentCUDAStream(device.index()));
+    }
+    return input;
+}

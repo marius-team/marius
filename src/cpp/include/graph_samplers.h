@@ -98,22 +98,22 @@ class NeighborSampler {
      * @param node_ids Nodes to get neighbors from
      * @return The neighbors sampled using strategy
      */
-    virtual GNNGraph getNeighbors(torch::Tensor node_ids) = 0;
+    virtual GNNGraph getNeighbors(torch::Tensor node_ids, int worker_id = 0) = 0;
 };
 
 class LayeredNeighborSampler : public NeighborSampler {
 public:
     bool use_hashmap_sets_;
+    bool use_bitmaps_;
 
     std::vector<shared_ptr<NeighborSamplingConfig>> sampling_layers_;
 
     LayeredNeighborSampler(GraphModelStorage *storage,
                            std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
                            bool incoming,
-                           bool outgoing,
-                           bool use_hashmap_sets);
+                           bool outgoing);
 
-    GNNGraph getNeighbors(torch::Tensor node_ids) override;
+    GNNGraph getNeighbors(torch::Tensor node_ids, int worker_id = 0) override;
 
     torch::Tensor computeDeltaIdsHelperMethod1(torch::Tensor hash_map, torch::Tensor node_ids,
                                                torch::Tensor delta_incoming_edges, torch::Tensor delta_outgoing_edges,

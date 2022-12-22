@@ -31,10 +31,12 @@ class MariusGraph  {
     int max_out_num_neighbors_;
     int max_in_num_neighbors_;
 
+    int num_hash_maps_;
+    std::vector<torch::Tensor> hash_maps_;
 
     MariusGraph();
 
-    MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory);
+    MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps);
 
     ~MariusGraph();
 

@@ -63,4 +63,6 @@ int64_t pread_wrapper(int fd, void *buf, int64_t count, int64_t offset);
 
 int64_t pwrite_wrapper(int fd, const void *buf, int64_t count, int64_t offset);
 
+torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device);
+
 #endif //MARIUS_UTIL_H
