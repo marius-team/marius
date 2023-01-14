@@ -88,7 +88,7 @@ void BatchToDeviceWorker::run() {
 
             #pragma omp parallel for
             for (int i = 0; i < batches.size(); i++) {
-                batches[i]->to(pipeline_->model_->devices_[i]);
+                batches[i]->to(pipeline_->model_->devices_[i], pipeline_->dataloader_->compute_stream_);
             }
 
             *status_ = ThreadStatus::WaitPush;
@@ -133,8 +133,9 @@ void ComputeWorkerCPU::run() {
 }
 
 void ComputeWorkerGPU::run() {
-    at::cuda::CUDAStream compute_stream_ = at::cuda::getStreamFromPool(true, 0);
-    at::cuda::CUDAStreamGuard stream_guard(compute_stream_);
+    at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
+    pipeline_->dataloader_->compute_stream_ = &compute_stream;
+    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
 
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {

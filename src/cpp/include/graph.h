@@ -149,7 +149,7 @@ class GNNGraph : public MariusGraph {
      */
     void clear();
 
-    void to(torch::Device device);
+    void to(torch::Device device, at::cuda::CUDAStream *compute_stream = nullptr, at::cuda::CUDAStream *transfer_stream = nullptr);
 };
 
 

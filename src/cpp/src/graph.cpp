@@ -602,23 +602,23 @@ void GNNGraph::clear() {
     node_properties_ = torch::Tensor();
 }
 
-void GNNGraph::to(torch::Device device) {
-    node_ids_ = transfer_tensor(node_ids_, device);
-    hop_offsets_ = transfer_tensor(hop_offsets_, device);
+void GNNGraph::to(torch::Device device, at::cuda::CUDAStream *compute_stream, at::cuda::CUDAStream *transfer_stream) {
+    node_ids_ = transfer_tensor(node_ids_, device, compute_stream, transfer_stream);
+    hop_offsets_ = transfer_tensor(hop_offsets_, device, compute_stream, transfer_stream);
 
-    out_offsets_ = transfer_tensor(out_offsets_, device);
+    out_offsets_ = transfer_tensor(out_offsets_, device, compute_stream, transfer_stream);
 
-    in_offsets_ = transfer_tensor(in_offsets_, device);
+    in_offsets_ = transfer_tensor(in_offsets_, device, compute_stream, transfer_stream);
 
     for (int i = 0; i < in_neighbors_vec_.size(); i++) {
-        in_neighbors_vec_[i] = transfer_tensor(in_neighbors_vec_[i], device);
+        in_neighbors_vec_[i] = transfer_tensor(in_neighbors_vec_[i], device, compute_stream, transfer_stream);
     }
 
     for (int i = 0; i < out_neighbors_vec_.size(); i++) {
-        out_neighbors_vec_[i] = transfer_tensor(out_neighbors_vec_[i], device);
+        out_neighbors_vec_[i] = transfer_tensor(out_neighbors_vec_[i], device, compute_stream, transfer_stream);
     }
 
-    node_properties_ = transfer_tensor(node_properties_, device);
+    node_properties_ = transfer_tensor(node_properties_, device, compute_stream, transfer_stream);
 }
 
 int64_t GNNGraph::getLayerOffset() {

@@ -69,6 +69,8 @@ class DataLoader {
     shared_ptr<TrainingConfig> training_config_;
     shared_ptr<EvaluationConfig> evaluation_config_;
 
+    at::cuda::CUDAStream *compute_stream_;
+
     /**
      * Constructor
      */

@@ -102,7 +102,7 @@ class Batch {
 
     void localSample();                                     /**< Sample additional negatives from the batch */
 
-    void to(torch::Device device);                          /**< Transfers embeddings, optimizer state, and indices to specified device */
+    void to(torch::Device device, at::cuda::CUDAStream *compute_stream = nullptr);                          /**< Transfers embeddings, optimizer state, and indices to specified device */
 
     void prepareBatch();                                    /**< Populates the src_pos_embeddings, dst_post_embeddings, src_neg_embeddings, and dst_neg_embeddings tensors for model computation */
 

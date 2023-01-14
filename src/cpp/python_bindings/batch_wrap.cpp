@@ -73,7 +73,9 @@ void init_batch(py::module &m) {
         .def(py::init<std::vector<Batch *>>(), py::arg("sub_batches"))
         .def("setUniqueNodes", &Batch::setUniqueNodes, py::arg("use_neighbors") = false, py::arg("set_mapping") = false)
         .def("localSample", &Batch::localSample)
-        .def("to", &Batch::to, py::arg("device"))
+        .def("to", [](Batch &batch, torch::Device device) {
+            batch.to(device, nullptr);
+        }, py::arg("device"))
         .def("prepareBatch", &Batch::prepareBatch)
         .def("accumulateGradients", &Batch::accumulateGradients, py::arg("learning_rate"))
         .def("embeddingsToHost", &Batch::embeddingsToHost)

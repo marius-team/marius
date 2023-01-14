@@ -71,6 +71,7 @@ DataLoader::DataLoader(GraphModelStorage *graph_storage,
         evaluation_neighbor_sampler_ = nullptr;
     }
 
+    compute_stream_ = nullptr;
 }
 
 DataLoader::~DataLoader() {
@@ -100,6 +101,8 @@ DataLoader::~DataLoader() {
             delete evaluation_neighbor_sampler_;
         }
     }
+
+    delete compute_stream_;
 }
 
 void DataLoader::nextEpoch() {

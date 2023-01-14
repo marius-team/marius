@@ -55,5 +55,7 @@ void init_graph(py::module &m) {
         .def("performMap", &GNNGraph::performMap)
         .def("setNodeProperties", &GNNGraph::setNodeProperties, py::arg("node_properties"))
         .def("clear", &GNNGraph::clear)
-        .def("to", &GNNGraph::to, py::arg("device"));
+        .def("to", [](GNNGraph &graph, torch::Device device) {
+            graph.to(device, nullptr, nullptr);
+        }, py::arg("device"));
 }

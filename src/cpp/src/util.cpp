@@ -113,11 +113,14 @@ int64_t pwrite_wrapper(int fd, const void *buf, int64_t count, int64_t offset) {
     return count;
 }
 
-torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device) {
+torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device, at::cuda::CUDAStream *compute_stream, at::cuda::CUDAStream *transfer_stream) {
     if (input.defined()) {
         input = input.pin_memory().to(device, false);
 
-        input.record_stream(at::cuda::getCurrentCUDAStream(device.index()));
+        if (compute_stream != nullptr)
+            input.record_stream(*compute_stream);
+        if (transfer_stream != nullptr)
+            input.record_stream(*transfer_stream);
     }
     return input;
 }
