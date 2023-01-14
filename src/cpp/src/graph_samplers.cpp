@@ -273,7 +273,7 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
         if (delta_incoming_edges.size(0) > 0) {
             auto incoming_accessor = delta_incoming_edges.accessor<int64_t , 2>();
 
-            #pragma omp for nowait
+            #pragma omp for //nowait -> can't have this because of the below if statement skipping directly to node ids for loop
             for (int64_t j = 0; j < delta_incoming_edges.size(0); j++) {
                 if (!hash_map_accessor[incoming_accessor[j][0]]) {
                     hash_map_accessor[incoming_accessor[j][0]] = 1;
@@ -336,9 +336,8 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
                 hash_map_accessor[j] = 0;
 
                 if (private_count == upper_bound) {
-                    //TODO: need to expand sub_delta for next iteration
-                    std::cout<<"Not implemented\n";
-                    exit(1);
+                    sub_deltas[tid] = torch::cat({sub_deltas[tid], torch::empty({upper_bound}, device_options)}, 0);
+                    delta_ids_accessor = sub_deltas[tid].accessor<int64_t, 1>();
                 }
             }
         }
