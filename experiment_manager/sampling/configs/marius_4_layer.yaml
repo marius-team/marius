@@ -1,7 +1,7 @@
 model:
   learning_task: NODE_CLASSIFICATION
   encoder:
-    use_hashmap_sets: false
+#    use_hashmap_sets: false
     use_incoming_nbrs: true
     use_outgoing_nbrs: true
     layers:

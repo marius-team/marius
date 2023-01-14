@@ -43,7 +43,7 @@ def run_marius_sampler(dataset_dir, configs, output_dir):
 
     edge_storage = m.initializeEdges(storage_config)
     edge_storage.load()
-    edge_storage.initializeInMemorySubGraph(torch.tensor([0]))
+    edge_storage.initializeInMemorySubGraph(torch.tensor([0]), 1)
 
     results = []
     for config in configs:
@@ -51,8 +51,7 @@ def run_marius_sampler(dataset_dir, configs, output_dir):
         nbr_sampler = m.LayeredNeighborSampler(edge_storage,
                                                config.num_neighbors,
                                                config.incoming,
-                                               config.outgoing,
-                                               config.use_hash_map_sets)
+                                               config.outgoing)
 
         # torch.set_num_threads(config.num_threads)
         input_nodes = torch.randperm(dataset_config.num_nodes)[:config.num_input_nodes]
@@ -60,7 +59,7 @@ def run_marius_sampler(dataset_dir, configs, output_dir):
             input_nodes = input_nodes.to(torch.device("cuda"))
 
         t0 = time.time()
-        ret = nbr_sampler.getNeighbors(input_nodes)
+        ret = nbr_sampler.getNeighbors(input_nodes, 0)
         t1 = time.time()
 
         config.sample_time = t1 - t0

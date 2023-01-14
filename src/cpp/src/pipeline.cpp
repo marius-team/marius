@@ -133,6 +133,9 @@ void ComputeWorkerCPU::run() {
 }
 
 void ComputeWorkerGPU::run() {
+    at::cuda::CUDAStream compute_stream_ = at::cuda::getStreamFromPool(true, 0);
+    at::cuda::CUDAStreamGuard stream_guard(compute_stream_);
+
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
             *status_ = ThreadStatus::WaitPop;

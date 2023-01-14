@@ -1,7 +1,7 @@
 model:
   learning_task: NODE_CLASSIFICATION
   encoder:
-    use_hashmap_sets: true
+#    use_hashmap_sets: true
     use_incoming_nbrs: true
     use_outgoing_nbrs: true
     layers:
@@ -70,7 +70,7 @@ storage:
   device_type: cuda
   dataset:
     base_directory: datasets/ogbn_arxiv/
-    num_edges: 1166242
+    num_edges: 1166243
     num_nodes: 169343
     num_relations: 1
     num_train: 90941

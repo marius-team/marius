@@ -133,13 +133,15 @@ void Batch::setUniqueNodes(bool use_neighbors, bool set_mapping) {
 }
 
 void Batch::to(torch::Device device) {
-//    at::cuda::CUDAStream transfer_stream = at::cuda::getStreamFromPool(false, device.index());
-//    at::cuda::CUDAStreamGuard stream_guard(transfer_stream);
+    Timer t = Timer(false);
+    t.start();
 
-    device_id_ = device.index();
+    at::cuda::CUDAStream transfer_stream = at::cuda::getStreamFromPool(false, device.index());
+    at::cuda::CUDAStreamGuard stream_guard(transfer_stream);
 
-    device_transfer_ = CudaEvent(device_id_);
-    host_transfer_ = CudaEvent(device_id_);
+    if (device.is_cuda()) {
+        host_transfer_ = CudaEvent(device.index());
+    }
 
     rel_indices_ = transfer_tensor(rel_indices_, device);
 
@@ -166,8 +168,13 @@ void Batch::to(torch::Device device) {
     if (gnn_graph_.node_ids_.defined()) {
         gnn_graph_.to(device);
     }
-    device_transfer_.record();
+
+    transfer_stream.synchronize();
+
     status_ = BatchStatus::TransferredToDevice;
+
+    t.stop();
+    transfer_ = t.getDuration();
 }
 
 void Batch::prepareBatch() {

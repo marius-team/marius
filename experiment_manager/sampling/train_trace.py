@@ -164,7 +164,7 @@ def _marius_train_trace(config_path: Path,
             batch = dataloader.getNextBatch()
 
             t0 = time.time()
-            dataloader.nodeClassificationSample(batch)
+            dataloader.nodeClassificationSample(batch, 0)
             t1 = time.time()
 
             dataloader.loadCPUParameters(batch)

@@ -8,7 +8,7 @@ model:
         mean: 0
         std: 0.001
   encoder:
-    use_hashmap_sets: false
+#    use_hashmap_sets: false
     use_incoming_nbrs: true
     use_outgoing_nbrs: true
     layers:

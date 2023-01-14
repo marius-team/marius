@@ -54,7 +54,9 @@
              dataloader->setTestSet();
          }
 
-         dataloader->loadStorage();
+         if (load_storage) {
+             dataloader->loadStorage();
+         }
 
          return std::make_tuple(model, dataloader);
      }, py::arg("filename"),py::arg("train"), py::arg("load_storage") = true);

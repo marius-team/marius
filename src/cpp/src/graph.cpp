@@ -126,8 +126,8 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
 
     Indices in_memory_ids;
     torch::Tensor mask;
-    torch::Tensor num_neighbors = torch::zeros_like(node_ids);
-    Indices global_offsets = torch::zeros_like(node_ids);
+    torch::Tensor num_neighbors = torch::empty_like(node_ids);
+    Indices global_offsets = torch::empty_like(node_ids);
 
     if (incoming) {
         if (gpu) {
@@ -169,9 +169,14 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
 
     int num_columns = src_sorted_edges_.size(1);
 
-    torch::Tensor summed_num_neighbors = num_neighbors.cumsum(0);
-    Indices local_offsets = summed_num_neighbors - num_neighbors;
-    int64_t total_neighbors = summed_num_neighbors[-1].item<int64_t>();
+    torch::Tensor summed_num_neighbors;
+    Indices local_offsets;
+    int64_t total_neighbors;
+    if (neighbor_sampling_layer != NeighborSamplingLayer::UNIFORM or gpu) {
+        summed_num_neighbors = num_neighbors.cumsum(0);
+        local_offsets = summed_num_neighbors - num_neighbors;
+        total_neighbors = summed_num_neighbors[-1].item<int64_t>();
+    }
 
     std::tuple<torch::Tensor, torch::Tensor> ret;
 
@@ -301,7 +306,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                 auto capped_num_neighbors_accessor = capped_num_neighbors.accessor<int64_t, 1>();
                 int64_t *capped_num_neighbors_mem = capped_num_neighbors.data_ptr<int64_t>();
 
-                #pragma omp parallel for
+                #pragma omp parallel for schedule(runtime)
                 for (int i = 0; i < node_ids.size(0); i++) {
                     if (capped_num_neighbors_accessor[i] > max_neighbors_size) {
                         *(capped_num_neighbors_mem + i) = max_neighbors_size;
@@ -383,7 +388,10 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                         }
                     }
                 } else {
-                    #pragma omp parallel
+                    #pragma omp parallel default(none) \
+                        shared(tid_seeds, node_ids, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, \
+                        num_neighbors_accessor, num_neighbors, max_neighbors_size, sorted_list_ptr, dst_sorted_edges_, src_sorted_edges_, \
+                        ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
                     {
                         #ifdef MARIUS_OMP
                         unsigned int seed = tid_seeds[omp_get_thread_num()];
@@ -394,7 +402,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
 //                        int64_t column_offset = 0;
 //                        if (!incoming) column_offset = 1;
 
-                        #pragma omp for
+                        #pragma omp for schedule(runtime)
                         for (int i = 0; i < node_ids.size(0); i++) {
                             int64_t local_offset = local_offsets_accessor[i];
                             int64_t global_offset = global_offsets_accessor[i];
@@ -403,6 +411,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                             if (num_edges > max_neighbors_size) {
                                 int count = 0;
                                 int64_t rand_id = 0;
+                                #pragma unroll
                                 for (int64_t j = 0; j < max_neighbors_size; j++) {
 
                                     rand_id = 2 * (global_offset + (rand_r(&seed) % num_edges));
@@ -414,6 +423,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                                 }
                             } else {
                                 int count = 0;
+                                #pragma unroll
                                 for (int64_t j = global_offset; j < global_offset + num_edges; j++) {
 
 //                                    *(ret_neighbor_id_edges_mem + local_offset + count) = *(sorted_list_ptr + (2 * j) + column_offset);

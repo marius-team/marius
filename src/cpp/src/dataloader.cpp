@@ -520,6 +520,8 @@ void DataLoader::linkPredictionSample(Batch *batch, int worker_id) {
 }
 
 void DataLoader::nodeClassificationSample(Batch *batch, int worker_id) {
+    Timer t = Timer(false);
+    t.start();
 
     if (!batch->root_node_indices_.defined()) {
         batch->root_node_indices_ = graph_storage_->getNodeIdsRange(batch->start_idx_, batch->batch_size_).to(torch::kInt64);
@@ -533,9 +535,14 @@ void DataLoader::nodeClassificationSample(Batch *batch, int worker_id) {
 
     // update the mapping with the neighbors
     batch->unique_node_indices_ = batch->gnn_graph_.getNodeIDs();
+
+    t.stop();
+    batch->sample_ = t.getDuration();
 }
 
 void DataLoader::loadCPUParameters(Batch *batch) {
+    Timer t = Timer(false);
+    t.start();
 
     if (graph_storage_->storage_config_->embeddings != nullptr) {
         if (graph_storage_->storage_config_->embeddings->type != StorageBackend::DEVICE_MEMORY) {
@@ -554,6 +561,9 @@ void DataLoader::loadCPUParameters(Batch *batch) {
 
     batch->status_ = BatchStatus::LoadedEmbeddings;
     batch->load_timestamp_ = timestamp_;
+
+    t.stop();
+    batch->load_ = t.getDuration();
 }
 
 void DataLoader::loadGPUParameters(Batch *batch) {
