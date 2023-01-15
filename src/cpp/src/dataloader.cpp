@@ -101,8 +101,6 @@ DataLoader::~DataLoader() {
             delete evaluation_neighbor_sampler_;
         }
     }
-
-    delete compute_stream_;
 }
 
 void DataLoader::nextEpoch() {
@@ -474,6 +472,8 @@ std::vector<Batch *> DataLoader::getSubBatches() {
 }
 
 void DataLoader::linkPredictionSample(Batch *batch, int worker_id) {
+    Timer t = Timer(false);
+    t.start();
 
     if (!batch->src_pos_indices_.defined()) {
         EdgeList pos_batch = edge_sampler_->getEdges(batch);
@@ -520,6 +520,9 @@ void DataLoader::linkPredictionSample(Batch *batch, int worker_id) {
     if (!train_ && graph_storage_->filtered_eval_) {
         graph_storage_->setEvalFilter(batch);
     }
+
+    t.stop();
+    batch->sample_ = t.getDuration();
 }
 
 void DataLoader::nodeClassificationSample(Batch *batch, int worker_id) {

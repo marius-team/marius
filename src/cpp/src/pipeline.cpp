@@ -135,7 +135,6 @@ void ComputeWorkerCPU::run() {
 void ComputeWorkerGPU::run() {
     at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
     pipeline_->dataloader_->compute_stream_ = &compute_stream;
-    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
 
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
@@ -158,6 +157,7 @@ void ComputeWorkerGPU::run() {
                 if (batches.size() > 1) {
                     pipeline_->model_->train_batch(batches);
                 } else {
+                    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
                     pipeline_->model_->train_batch(batches[0]);
                 }
 
