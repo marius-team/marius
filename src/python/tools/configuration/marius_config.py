@@ -193,6 +193,16 @@ class GNNLayerConfig:
     bias: bool = True
     bias_init: InitConfig = InitConfig(type="ZEROS")
 
+    def __init__(self):
+        self.type: str = "GRAPH_SAGE"
+        self.options: GNNLayerOptions = GraphSageLayerOptions(input_dim=50, output_dim=50)
+        self.train_neighbor_sampling: NeighborSamplingConfig = NeighborSamplingConfig()
+        self.eval_neighbor_sampling: NeighborSamplingConfig = NeighborSamplingConfig()
+        self.init: InitConfig = InitConfig(type="GLOROT_UNIFORM")
+        self.activation: str = "NONE"
+        self.bias: bool = True
+        self.bias_init: InitConfig = InitConfig(type="ZEROS")
+
 
     def merge(self, input_config: DictConfig):
         """
