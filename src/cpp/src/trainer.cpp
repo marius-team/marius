@@ -89,12 +89,6 @@ void SynchronousTrainer::train(int num_epochs) {
     Timer timer = Timer(false);
 
     for (int epoch = 0; epoch < num_epochs; epoch++) {
-        double sample = 0.0;
-        double load = 0.0;
-        double transfer = 0.0;
-        double compute = 0.0;
-        double num = 0.0;
-
         timer.start();
         SPDLOG_INFO("################ Starting training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
         while (dataloader_->hasNextBatch()) {
@@ -132,19 +126,8 @@ void SynchronousTrainer::train(int num_epochs) {
 
             // log progress
             progress_reporter_->addResult(batch->batch_size_);
-
-            sample += batch->sample_;
-            load += batch->load_;
-            transfer += batch->transfer_;
-            compute += batch->compute_;
-            num += 1;
         }
         SPDLOG_INFO("################ Finished training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
-        SPDLOG_INFO("Num batches: {}", num);
-        SPDLOG_INFO("Sample avg: {}", sample/num);
-        SPDLOG_INFO("Load avg: {}", load/num);
-        SPDLOG_INFO("Transfer avg: {}", transfer/num);
-        SPDLOG_INFO("Compute avg: {}", compute/num);
 
         // notify that the epoch has been completed
         dataloader_->nextEpoch();

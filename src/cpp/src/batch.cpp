@@ -133,8 +133,6 @@ void Batch::setUniqueNodes(bool use_neighbors, bool set_mapping) {
 }
 
 void Batch::to(torch::Device device, at::cuda::CUDAStream *compute_stream) {
-    Timer t = Timer(false);
-    t.start();
 
     at::cuda::CUDAStream transfer_stream = at::cuda::getStreamFromPool(false, device.index());
     at::cuda::CUDAStreamGuard stream_guard(transfer_stream);
@@ -172,9 +170,6 @@ void Batch::to(torch::Device device, at::cuda::CUDAStream *compute_stream) {
 //    transfer_stream.synchronize();
 
     status_ = BatchStatus::TransferredToDevice;
-
-    t.stop();
-    transfer_ = t.getDuration();
 }
 
 void Batch::prepareBatch() {

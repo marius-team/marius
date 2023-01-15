@@ -224,8 +224,6 @@ Labels NodeClassificationModel::forward(Batch *batch, bool train) {
 }
 
 void NodeClassificationModel::train_batch(Batch *batch) {
-    Timer t = Timer(false);
-    t.start();
 
     zero_grad();
 
@@ -236,9 +234,6 @@ void NodeClassificationModel::train_batch(Batch *batch) {
     loss.backward();
 
     step();
-
-    t.stop();
-    batch->compute_ = t.getDuration();
 }
 
 void NodeClassificationModel::train_batch(std::vector<Batch *> sub_batches) {
