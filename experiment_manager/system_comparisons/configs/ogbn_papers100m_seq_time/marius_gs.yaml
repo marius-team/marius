@@ -1,15 +1,17 @@
 model:
   learning_task: NODE_CLASSIFICATION
   encoder:
-    use_hashmap_sets: true
+#    use_hashmap_sets: true
     use_incoming_nbrs: true
     use_outgoing_nbrs: true
     layers:
       - train_neighbor_sampling:
+          use_hashmap_sets: true
           type: UNIFORM
           options:
             max_neighbors: 15
         eval_neighbor_sampling:
+          use_hashmap_sets: true
           type: UNIFORM
           options:
             max_neighbors: 15
@@ -50,7 +52,7 @@ model:
         eval_neighbor_sampling:
           type: UNIFORM
           options:
-            max_neighbors: 11
+            max_neighbors: 5
         init:
           type: GLOROT_NORMAL
         type: GRAPH_SAGE

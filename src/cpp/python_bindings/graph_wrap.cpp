@@ -21,7 +21,7 @@ void init_graph(py::module &m) {
         .def_readwrite("max_out_num_neighbors_", &MariusGraph::max_out_num_neighbors_)
         .def_readwrite("max_in_num_neighbors_", &MariusGraph::max_in_num_neighbors_)
         .def(py::init<>())
-        .def(py::init<EdgeList, EdgeList, int64_t>(), py::arg("src_sorted_edges"), py::arg("dst_sorted_edges"), py::arg("num_nodes_in_memory"))
+        .def(py::init<EdgeList, EdgeList, int64_t, int>(), py::arg("src_sorted_edges"), py::arg("dst_sorted_edges"), py::arg("num_nodes_in_memory"), py::arg("num_hash_maps"))
         .def("getEdges", &MariusGraph::getEdges, py::arg("incoming") = true)
         .def("getRelationIDs", &MariusGraph::getRelationIDs, py::arg("incoming") = true)
         .def("getNeighborOffsets", &MariusGraph::getNeighborOffsets, py::arg("incoming") = true)
@@ -55,5 +55,7 @@ void init_graph(py::module &m) {
         .def("performMap", &GNNGraph::performMap)
         .def("setNodeProperties", &GNNGraph::setNodeProperties, py::arg("node_properties"))
         .def("clear", &GNNGraph::clear)
-        .def("to", &GNNGraph::to, py::arg("device"));
+        .def("to", [](GNNGraph &graph, torch::Device device) {
+            graph.to(device, nullptr, nullptr);
+        }, py::arg("device"));
 }

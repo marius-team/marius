@@ -8,6 +8,7 @@ void init_config(py::module &m) {
 
     py::class_<NeighborSamplingConfig>(m, "NeighborSamplingConfig")
         .def_readwrite("type", &NeighborSamplingConfig::type)
+        .def_readwrite("use_hashmap_sets", &NeighborSamplingConfig::use_hashmap_sets)
         .def_readwrite("options", &NeighborSamplingConfig::options);
 
     py::class_<OptimizerConfig>(m, "OptimizerConfig")

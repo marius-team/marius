@@ -11,7 +11,7 @@
 
 MariusGraph::MariusGraph() {};
 
-MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory) {
+MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps) {
 
     num_nodes_in_memory_ = num_nodes_in_memory;
 
@@ -32,6 +32,14 @@ MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, i
 
     max_out_num_neighbors_ = torch::max(out_num_neighbors_).item<int>();
     max_in_num_neighbors_ = torch::max(in_num_neighbors_).item<int>();
+
+    num_hash_maps_ = num_hash_maps;
+    if (num_hash_maps_ > 0) {
+        auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(contiguous_src.device());
+        for (int i; i < num_hash_maps_; i++) {
+            hash_maps_.emplace_back(torch::zeros({num_nodes_in_memory}, bool_device_options));
+        }
+    }
 }
 
 MariusGraph::~MariusGraph() {
@@ -51,7 +59,7 @@ Indices MariusGraph::getEdges(bool incoming) {
 }
 
 Indices MariusGraph::getRelationIDs(bool incoming) {
-
+    // NOTE: need to update for GNNGraph if we no longer store "self" in the edges
     if (src_sorted_edges_.size(1) == 2) {
         return torch::Tensor();
     } else {
@@ -90,6 +98,11 @@ void MariusGraph::clear() {
     in_sorted_uniques_ = torch::Tensor();
     in_offsets_ = torch::Tensor();
     in_num_neighbors_ = torch::Tensor();
+
+    for (int i; i < hash_maps_.size(); i++) {
+        hash_maps_[i] = torch::Tensor();
+    }
+    hash_maps_ = {};
 }
 
 void MariusGraph::to(torch::Device device) {
@@ -111,12 +124,10 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
         gpu = 1;
     }
 
-    auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
-
     Indices in_memory_ids;
     torch::Tensor mask;
-    torch::Tensor num_neighbors = torch::zeros_like(node_ids);
-    Indices global_offsets = torch::zeros_like(node_ids);
+    torch::Tensor num_neighbors = torch::empty_like(node_ids);
+    Indices global_offsets = torch::empty_like(node_ids);
 
     if (incoming) {
         if (gpu) {
@@ -158,9 +169,14 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
 
     int num_columns = src_sorted_edges_.size(1);
 
-    torch::Tensor summed_num_neighbors = num_neighbors.cumsum(0);
-    Indices local_offsets = summed_num_neighbors - num_neighbors;
-    int64_t total_neighbors = summed_num_neighbors[-1].item<int64_t>();
+    torch::Tensor summed_num_neighbors;
+    Indices local_offsets;
+    int64_t total_neighbors;
+    if (neighbor_sampling_layer != NeighborSamplingLayer::UNIFORM or gpu) {
+        summed_num_neighbors = num_neighbors.cumsum(0);
+        local_offsets = summed_num_neighbors - num_neighbors;
+        total_neighbors = summed_num_neighbors[-1].item<int64_t>();
+    }
 
     std::tuple<torch::Tensor, torch::Tensor> ret;
 
@@ -169,6 +185,8 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
         case NeighborSamplingLayer::ALL: {
 
             if (gpu) {
+                auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
+
                 torch::Tensor repeated_starts = global_offsets.repeat_interleave(num_neighbors);
                 torch::Tensor repeated_offsets = local_offsets.repeat_interleave(num_neighbors);
                 torch::Tensor arange = torch::arange(repeated_offsets.size(0), device_options);
@@ -181,6 +199,8 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                 }
 
             } else {
+                auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device()).pinned_memory(true);
+
                 auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
                 auto local_offsets_accessor = local_offsets.accessor<int64_t, 1>();
                 auto num_neighbors_accessor = num_neighbors.accessor<int64_t, 1>();
@@ -244,6 +264,8 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
         case NeighborSamplingLayer::UNIFORM: {
 
             if (gpu) {
+                auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
+
                 torch::Tensor mask = num_neighbors > max_neighbors_size;
 
                 torch::Tensor capped_num_neighbors = num_neighbors.masked_fill(mask, max_neighbors_size);
@@ -275,6 +297,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                 }
 
             } else {
+                auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device()).pinned_memory(true);
 
                 auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
                 auto num_neighbors_accessor = num_neighbors.accessor<int64_t, 1>();
@@ -283,7 +306,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                 auto capped_num_neighbors_accessor = capped_num_neighbors.accessor<int64_t, 1>();
                 int64_t *capped_num_neighbors_mem = capped_num_neighbors.data_ptr<int64_t>();
 
-                #pragma omp parallel for
+                #pragma omp parallel for schedule(runtime)
                 for (int i = 0; i < node_ids.size(0); i++) {
                     if (capped_num_neighbors_accessor[i] > max_neighbors_size) {
                         *(capped_num_neighbors_mem + i) = max_neighbors_size;
@@ -296,6 +319,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
 
                 auto local_offsets_accessor = local_offsets.accessor<int64_t, 1>();
 
+//                Indices ret_neighbor_id_edges = torch::empty({total_neighbors, num_columns-1}, device_options);
                 Indices ret_neighbor_id_edges = torch::empty({total_neighbors, num_columns}, device_options);
                 int64_t *ret_neighbor_id_edges_mem = ret_neighbor_id_edges.data_ptr<int64_t>();
 
@@ -364,7 +388,10 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                         }
                     }
                 } else {
-                    #pragma omp parallel
+                    #pragma omp parallel default(none) \
+                        shared(tid_seeds, node_ids, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, \
+                        num_neighbors_accessor, num_neighbors, max_neighbors_size, sorted_list_ptr, dst_sorted_edges_, src_sorted_edges_, \
+                        ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
                     {
                         #ifdef MARIUS_OMP
                         unsigned int seed = tid_seeds[omp_get_thread_num()];
@@ -372,7 +399,10 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                         unsigned int seed = tid_seeds[0];
                         #endif
 
-                        #pragma omp for
+//                        int64_t column_offset = 0;
+//                        if (!incoming) column_offset = 1;
+
+                        #pragma omp for schedule(runtime)
                         for (int i = 0; i < node_ids.size(0); i++) {
                             int64_t local_offset = local_offsets_accessor[i];
                             int64_t global_offset = global_offsets_accessor[i];
@@ -381,17 +411,22 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                             if (num_edges > max_neighbors_size) {
                                 int count = 0;
                                 int64_t rand_id = 0;
+                                #pragma unroll
                                 for (int64_t j = 0; j < max_neighbors_size; j++) {
 
                                     rand_id = 2 * (global_offset + (rand_r(&seed) % num_edges));
 
+//                                    *(ret_neighbor_id_edges_mem + local_offset + count) = *(sorted_list_ptr + rand_id + column_offset);
                                     *(ret_neighbor_id_edges_mem + (2 * (local_offset + count))) = *(sorted_list_ptr + rand_id);
                                     *(ret_neighbor_id_edges_mem + (2 * (local_offset + count)) + 1) = *(sorted_list_ptr + rand_id + 1);
                                     count++;
                                 }
                             } else {
                                 int count = 0;
+                                #pragma unroll
                                 for (int64_t j = global_offset; j < global_offset + num_edges; j++) {
+
+//                                    *(ret_neighbor_id_edges_mem + local_offset + count) = *(sorted_list_ptr + (2 * j) + column_offset);
                                     *(ret_neighbor_id_edges_mem + (2 * (local_offset + count))) = *(sorted_list_ptr + (2 * j));
                                     *(ret_neighbor_id_edges_mem + (2 * (local_offset + count)) + 1) = *(sorted_list_ptr + (2 * j) + 1);
                                     count++;
@@ -408,6 +443,8 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
         case NeighborSamplingLayer::DROPOUT: {
 
             if (gpu) {
+                auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
+
                 torch::Tensor repeated_starts = global_offsets.repeat_interleave(num_neighbors);
                 torch::Tensor repeated_offsets = local_offsets.repeat_interleave(num_neighbors);
                 torch::Tensor arange = torch::arange(repeated_offsets.size(0), device_options);
@@ -429,6 +466,8 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                 }
 
             } else {
+                auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device()).pinned_memory(true);
+
                 auto global_offsets_accessor = global_offsets.accessor<int64_t, 1>();
                 auto local_offsets_accessor = local_offsets.accessor<int64_t, 1>();
                 auto num_neighbors_accessor = num_neighbors.accessor<int64_t, 1>();
@@ -563,29 +602,23 @@ void GNNGraph::clear() {
     node_properties_ = torch::Tensor();
 }
 
-void GNNGraph::to(torch::Device device) {
-    node_ids_ = node_ids_.to(device);
-    hop_offsets_ = hop_offsets_.to(device);
+void GNNGraph::to(torch::Device device, at::cuda::CUDAStream *compute_stream, at::cuda::CUDAStream *transfer_stream) {
+    node_ids_ = transfer_tensor(node_ids_, device, compute_stream, transfer_stream);
+    hop_offsets_ = transfer_tensor(hop_offsets_, device, compute_stream, transfer_stream);
 
-    if (out_offsets_.defined()) {
-        out_offsets_ = out_offsets_.to(device);
-    }
+    out_offsets_ = transfer_tensor(out_offsets_, device, compute_stream, transfer_stream);
 
-    if (in_offsets_.defined()) {
-        in_offsets_ = in_offsets_.to(device);
-    }
+    in_offsets_ = transfer_tensor(in_offsets_, device, compute_stream, transfer_stream);
 
     for (int i = 0; i < in_neighbors_vec_.size(); i++) {
-        in_neighbors_vec_[i] = in_neighbors_vec_[i].to(device);
+        in_neighbors_vec_[i] = transfer_tensor(in_neighbors_vec_[i], device, compute_stream, transfer_stream);
     }
 
     for (int i = 0; i < out_neighbors_vec_.size(); i++) {
-        out_neighbors_vec_[i] = out_neighbors_vec_[i].to(device);
+        out_neighbors_vec_[i] = transfer_tensor(out_neighbors_vec_[i], device, compute_stream, transfer_stream);
     }
 
-    if (node_properties_.defined()) {
-        node_properties_ = node_properties_.to(device);
-    }
+    node_properties_ = transfer_tensor(node_properties_, device, compute_stream, transfer_stream);
 }
 
 int64_t GNNGraph::getLayerOffset() {

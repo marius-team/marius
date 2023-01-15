@@ -57,7 +57,7 @@ void init_graph_storage(py::module &m) {
             py::arg("filtered_eval"))
         .def("load", &GraphModelStorage::load)
         .def("unload", &GraphModelStorage::unload, py::arg("write"))
-        .def("initializeInMemorySubGraph", &GraphModelStorage::initializeInMemorySubGraph, py::arg("buffer_state"))
+        .def("initializeInMemorySubGraph", &GraphModelStorage::initializeInMemorySubGraph, py::arg("buffer_state"), py::arg("num_hash_maps"))
         .def("updateInMemorySubGraph", &GraphModelStorage::updateInMemorySubGraph)
         .def("setEvalFilter", &GraphModelStorage::setEvalFilter, py::arg("batch"))
         .def("setEdgesStorage", &GraphModelStorage::setEdgesStorage, py::arg("edge_storage"))

@@ -132,55 +132,43 @@ void Batch::setUniqueNodes(bool use_neighbors, bool set_mapping) {
     }
 }
 
-void Batch::to(torch::Device device) {
+void Batch::to(torch::Device device, at::cuda::CUDAStream *compute_stream) {
 
-    device_id_ = device.index();
+    at::cuda::CUDAStream transfer_stream = at::cuda::getStreamFromPool(false, device.index());
+    at::cuda::CUDAStreamGuard stream_guard(transfer_stream);
 
-    device_transfer_ = CudaEvent(device_id_);
-    host_transfer_ = CudaEvent(device_id_);
-
-    if (rel_indices_.defined()) {
-        rel_indices_ = rel_indices_.to(device);
+    if (device.is_cuda()) {
+        host_transfer_ = CudaEvent(device.index());
     }
 
-    if (root_node_indices_.defined()) {
-        root_node_indices_ = root_node_indices_.to(device);
+    rel_indices_ = transfer_tensor(rel_indices_, device, compute_stream, &transfer_stream);
+
+    root_node_indices_ = transfer_tensor(root_node_indices_, device, compute_stream, &transfer_stream);
+
+    unique_node_indices_ = transfer_tensor(unique_node_indices_, device, compute_stream, &transfer_stream);
+
+    unique_node_labels_ = transfer_tensor(unique_node_labels_, device, compute_stream, &transfer_stream);
+
+    src_pos_indices_mapping_ = transfer_tensor(src_pos_indices_mapping_, device, compute_stream, &transfer_stream);
+    dst_pos_indices_mapping_ = transfer_tensor(dst_pos_indices_mapping_, device, compute_stream, &transfer_stream);
+    src_neg_indices_mapping_ = transfer_tensor(src_neg_indices_mapping_, device, compute_stream, &transfer_stream);
+    dst_neg_indices_mapping_ = transfer_tensor(dst_neg_indices_mapping_, device, compute_stream, &transfer_stream);
+
+    unique_node_embeddings_ = transfer_tensor(unique_node_embeddings_, device, compute_stream, &transfer_stream);
+    if (train_) {
+        unique_node_embeddings_state_ = transfer_tensor(unique_node_embeddings_state_, device, compute_stream, &transfer_stream);
     }
 
-    if (unique_node_indices_.defined()) {
-        unique_node_indices_ = unique_node_indices_.to(device);
-    }
+    unique_node_features_ = transfer_tensor(unique_node_features_, device, compute_stream, &transfer_stream);
 
-    if (unique_node_labels_.defined()) {
-        unique_node_labels_ = unique_node_labels_.to(device);
-    }
-
-    if (src_pos_indices_mapping_.defined()) {
-        src_pos_indices_mapping_ = src_pos_indices_mapping_.to(device);
-        dst_pos_indices_mapping_ = dst_pos_indices_mapping_.to(device);
-        src_neg_indices_mapping_ = src_neg_indices_mapping_.to(device);
-        dst_neg_indices_mapping_ = dst_neg_indices_mapping_.to(device);
-    }
-
-    if (unique_node_embeddings_.defined()) {
-        unique_node_embeddings_ = unique_node_embeddings_.to(device);
-        if (train_) {
-            unique_node_embeddings_state_ = unique_node_embeddings_state_.to(device);
-        }
-    }
-
-    if (unique_node_features_.defined()) {
-        unique_node_features_ = unique_node_features_.to(device);
-    }
-
-    if (encoded_uniques_.defined()) {
-        encoded_uniques_ = encoded_uniques_.to(device);
-    }
+    encoded_uniques_ = transfer_tensor(encoded_uniques_, device, compute_stream, &transfer_stream);
 
     if (gnn_graph_.node_ids_.defined()) {
-        gnn_graph_.to(device);
+        gnn_graph_.to(device, compute_stream, &transfer_stream);
     }
-    device_transfer_.record();
+
+//    transfer_stream.synchronize();
+
     status_ = BatchStatus::TransferredToDevice;
 }
 

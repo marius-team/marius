@@ -15,12 +15,13 @@ Queue<T>::Queue(int max_size) {
     expecting_data_ = true;
 }
 
-Worker::Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status) {
+Worker::Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) {
     pipeline_ = pipeline;
     sleep_time_.tv_sec = 0;
     sleep_time_.tv_nsec = WAIT_TIME;
     paused_ = paused;
     status_ = status;
+    worker_id_ = worker_id;
 }
 
 void LoadEmbeddingsWorker::run() {
@@ -43,7 +44,7 @@ void LoadEmbeddingsWorker::run() {
                     if (pipeline_->model_->devices_.size() > 1) {
                         batches = pipeline_->dataloader_->getSubBatches();
                     } else {
-                        batches = {pipeline_->dataloader_->getBatch()};
+                        batches = {pipeline_->dataloader_->getBatch(worker_id_)};
                     }
 
                     if (batches[0] == nullptr) {
@@ -53,7 +54,7 @@ void LoadEmbeddingsWorker::run() {
                     *status_ = ThreadStatus::WaitPush;
                     ((PipelineGPU *) pipeline_)->loaded_batches_->blocking_push(batches);
                 } else {
-                    Batch *batch = pipeline_->dataloader_->getBatch();
+                    Batch *batch = pipeline_->dataloader_->getBatch(worker_id_);
 
                     if (batch == nullptr) {
                         break;
@@ -87,7 +88,7 @@ void BatchToDeviceWorker::run() {
 
             #pragma omp parallel for
             for (int i = 0; i < batches.size(); i++) {
-                batches[i]->to(pipeline_->model_->devices_[i]);
+                batches[i]->to(pipeline_->model_->devices_[i], pipeline_->dataloader_->compute_stream_);
             }
 
             *status_ = ThreadStatus::WaitPush;
@@ -132,6 +133,9 @@ void ComputeWorkerCPU::run() {
 }
 
 void ComputeWorkerGPU::run() {
+    at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
+    pipeline_->dataloader_->compute_stream_ = &compute_stream;
+
     while (*status_ != ThreadStatus::Done) {
         while (!*paused_) {
             *status_ = ThreadStatus::WaitPop;
@@ -153,6 +157,7 @@ void ComputeWorkerGPU::run() {
                 if (batches.size() > 1) {
                     pipeline_->model_->train_batch(batches);
                 } else {
+                    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
                     pipeline_->model_->train_batch(batches[0]);
                 }
 
@@ -323,30 +328,30 @@ Pipeline::~Pipeline() {
     delete pipeline_lock_;
 }
 
-thread Pipeline::initThreadOfType(int worker_type, bool *paused, ThreadStatus *status) {
+thread Pipeline::initThreadOfType(int worker_type, bool *paused, ThreadStatus *status, int worker_id) {
     thread t;
 
     if (worker_type == EMBEDDINGS_LOADER_ID) {
         auto load_embeddings_func = [](LoadEmbeddingsWorker w) { w.run(); };
-        t = thread(load_embeddings_func, LoadEmbeddingsWorker(this, paused, status));
+        t = thread(load_embeddings_func, LoadEmbeddingsWorker(this, paused, status, worker_id));
     } else if (worker_type == EMBEDDINGS_TRANSFER_ID) {
         auto embeddings_to_device_func = [](BatchToDeviceWorker w) { w.run(); };
-        t = thread(embeddings_to_device_func, BatchToDeviceWorker(this, paused, status));
+        t = thread(embeddings_to_device_func, BatchToDeviceWorker(this, paused, status, worker_id));
     } else if (worker_type == CPU_COMPUTE_ID) {
         auto compute_func = [](ComputeWorkerCPU w) { w.run(); };
-        t = thread(compute_func, ComputeWorkerCPU(this, paused, status));
+        t = thread(compute_func, ComputeWorkerCPU(this, paused, status, worker_id));
     } else if (worker_type == GPU_COMPUTE_ID) {
         auto compute_func = [](ComputeWorkerGPU w) { w.run(); };
-        t = thread(compute_func, ComputeWorkerGPU(this, paused, status));
+        t = thread(compute_func, ComputeWorkerGPU(this, paused, status, worker_id));
     } else if (worker_type == CPU_ACCUMULATE_ID) {
         auto compute_func = [](AccumulateGradientsWorker w) { w.run(); };
-        t = thread(compute_func, AccumulateGradientsWorker(this, paused, status));
+        t = thread(compute_func, AccumulateGradientsWorker(this, paused, status, worker_id));
     } else if (worker_type == UPDATE_TRANSFER_ID) {
         auto gradients_to_host_func = [](GradientsToHostWorker w) { w.run(); };
-        t = thread(gradients_to_host_func, GradientsToHostWorker(this, paused, status));
+        t = thread(gradients_to_host_func, GradientsToHostWorker(this, paused, status, worker_id));
     } else if (worker_type == UPDATE_EMBEDDINGS_ID) {
         auto update_embeddings_func = [](UpdateEmbeddingsWorker w) { w.run(); };
-        t = thread(update_embeddings_func, UpdateEmbeddingsWorker(this, paused, status));
+        t = thread(update_embeddings_func, UpdateEmbeddingsWorker(this, paused, status, worker_id));
     }
     return t;
 }
@@ -434,7 +439,7 @@ void PipelineCPU::addWorkersToPool(int pool_id, int worker_type, int num_workers
         status = new ThreadStatus(ThreadStatus::Paused);
         pool_paused_[pool_id]->emplace_back(paused);
         pool_status_[pool_id]->emplace_back(status);
-        pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status));
+        pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, i));
     }
 }
 
@@ -568,7 +573,7 @@ void PipelineGPU::addWorkersToPool(int pool_id, int worker_type, int num_workers
         status = new ThreadStatus(ThreadStatus::Paused);
         pool_paused_[pool_id]->emplace_back(paused);
         pool_status_[pool_id]->emplace_back(status);
-        pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status));
+        pool_[pool_id]->emplace_back(initThreadOfType(worker_type, paused, status, i));
     }
 }
 

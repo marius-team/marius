@@ -737,7 +737,30 @@ void InMemory::checkpoint(int epoch_id) {
 
 torch::Tensor InMemory::indexRead(Indices indices) {
     if (data_.defined()) {
-        return data_.index_select(0, indices.to(device_));
+        if (data_.device().is_cuda()) {
+            return data_.index_select(0, indices.to(device_));
+        } else {
+            torch::Tensor out;
+
+            if (dtype_ == torch::kFloat32) {
+                auto out_options = torch::TensorOptions().dtype(torch::kFloat32).pinned_memory(true);
+                out = torch::empty({indices.size(0), dim1_size_}, out_options);
+                torch::index_select_out(out, data_, 0, indices);
+            } else if (dtype_ == torch::kInt64) {
+                auto out_options = torch::TensorOptions().dtype(torch::kInt64).pinned_memory(true);
+                out = torch::empty({indices.size(0), dim1_size_}, out_options);
+                torch::index_select_out(out, data_, 0, indices);
+            } else if (dtype_ == torch::kInt32) {
+                auto out_options = torch::TensorOptions().dtype(torch::kInt32).pinned_memory(true);
+                out = torch::empty({indices.size(0), dim1_size_}, out_options);
+                torch::index_select_out(out, data_, 0, indices);
+            } else {
+                SPDLOG_ERROR("Not yet implemented");
+                throw std::runtime_error("");
+            }
+
+            return out;
+        }
     } else {
         return torch::Tensor();
     }

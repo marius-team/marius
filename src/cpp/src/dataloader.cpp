@@ -60,8 +60,8 @@ DataLoader::DataLoader(GraphModelStorage *graph_storage,
                 }
 
             }
-            training_neighbor_sampler_ = new LayeredNeighborSampler(graph_storage_, train_nbr_config, encoder_config->use_incoming_nbrs, encoder_config->use_outgoing_nbrs, encoder_config->use_hashmap_sets);
-            evaluation_neighbor_sampler_ = new LayeredNeighborSampler(graph_storage_, eval_nbr_config, encoder_config->use_incoming_nbrs, encoder_config->use_outgoing_nbrs, encoder_config->use_hashmap_sets);
+            training_neighbor_sampler_ = new LayeredNeighborSampler(graph_storage_, train_nbr_config, encoder_config->use_incoming_nbrs, encoder_config->use_outgoing_nbrs);
+            evaluation_neighbor_sampler_ = new LayeredNeighborSampler(graph_storage_, eval_nbr_config, encoder_config->use_incoming_nbrs, encoder_config->use_outgoing_nbrs);
         } else {
             training_neighbor_sampler_ = nullptr;
             evaluation_neighbor_sampler_ = nullptr;
@@ -71,6 +71,7 @@ DataLoader::DataLoader(GraphModelStorage *graph_storage,
         evaluation_neighbor_sampler_ = nullptr;
     }
 
+    compute_stream_ = nullptr;
 }
 
 DataLoader::~DataLoader() {
@@ -376,7 +377,7 @@ void DataLoader::finishedBatch() {
 }
 
 
-Batch *DataLoader::getBatch() {
+Batch *DataLoader::getBatch(int worker_id) {
 
     Batch *batch = getNextBatch();
     if (batch == nullptr) {
@@ -384,9 +385,9 @@ Batch *DataLoader::getBatch() {
     }
 
     if (graph_storage_->learning_task_ == LearningTask::LINK_PREDICTION) {
-        linkPredictionSample(batch);
+        linkPredictionSample(batch, worker_id);
     } else if (graph_storage_->learning_task_ == LearningTask::NODE_CLASSIFICATION) {
-        nodeClassificationSample(batch);
+        nodeClassificationSample(batch, worker_id);
     }
 
     loadCPUParameters(batch);
@@ -470,7 +471,7 @@ std::vector<Batch *> DataLoader::getSubBatches() {
     return sub_batches;
 }
 
-void DataLoader::linkPredictionSample(Batch *batch) {
+void DataLoader::linkPredictionSample(Batch *batch, int worker_id) {
 
     if (!batch->src_pos_indices_.defined()) {
         EdgeList pos_batch = edge_sampler_->getEdges(batch);
@@ -506,7 +507,7 @@ void DataLoader::linkPredictionSample(Batch *batch) {
 
         batch->setUniqueNodes(false, false);
 
-        batch->gnn_graph_ = neighbor_sampler_->getNeighbors(batch->unique_node_indices_);
+        batch->gnn_graph_ = neighbor_sampler_->getNeighbors(batch->unique_node_indices_, worker_id);
 
         // update the mapping with the neighbors
         batch->setUniqueNodes(true, true);
@@ -519,7 +520,7 @@ void DataLoader::linkPredictionSample(Batch *batch) {
     }
 }
 
-void DataLoader::nodeClassificationSample(Batch *batch) {
+void DataLoader::nodeClassificationSample(Batch *batch, int worker_id) {
 
     if (!batch->root_node_indices_.defined()) {
         batch->root_node_indices_ = graph_storage_->getNodeIdsRange(batch->start_idx_, batch->batch_size_).to(torch::kInt64);
@@ -529,7 +530,7 @@ void DataLoader::nodeClassificationSample(Batch *batch) {
         }
     }
 
-    batch->gnn_graph_ = neighbor_sampler_->getNeighbors(batch->root_node_indices_);
+    batch->gnn_graph_ = neighbor_sampler_->getNeighbors(batch->root_node_indices_, worker_id);
 
     // update the mapping with the neighbors
     batch->unique_node_indices_ = batch->gnn_graph_.getNodeIDs();
@@ -602,10 +603,25 @@ void DataLoader::loadStorage() {
     total_batches_processed_ = 0;
     all_read_ = false;
 
-    if (!buffer_states_.empty()) {
-        graph_storage_->initializeInMemorySubGraph(buffer_states_[0]);
+    int num_hash_maps = 0;
+    if (train_) {
+        if (training_config_->pipeline->sync) {
+            num_hash_maps = 1;
+        } else {
+            num_hash_maps = training_config_->pipeline->batch_loader_threads;
+        }
     } else {
-        graph_storage_->initializeInMemorySubGraph(torch::empty({}));
+        if (evaluation_config_->pipeline->sync) {
+            num_hash_maps = 1;
+        } else {
+            num_hash_maps = evaluation_config_->pipeline->batch_loader_threads;
+        }
+    }
+
+    if (!buffer_states_.empty()) {
+        graph_storage_->initializeInMemorySubGraph(buffer_states_[0], num_hash_maps);
+    } else {
+        graph_storage_->initializeInMemorySubGraph(torch::empty({}), num_hash_maps);
     }
 
     initializeBatches();

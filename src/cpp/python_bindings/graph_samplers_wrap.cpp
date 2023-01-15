@@ -21,8 +21,8 @@ class PyNegativeSampler : NegativeSampler {
 class PyNeighborSampler : NeighborSampler {
   public:
     using NeighborSampler::NeighborSampler;
-    GNNGraph getNeighbors(torch::Tensor node_ids) override {
-        PYBIND11_OVERRIDE_PURE_NAME(GNNGraph, NeighborSampler, "getNeighbors", getNeighbors, node_ids); }
+    GNNGraph getNeighbors(torch::Tensor node_ids, int worker_id) override {
+        PYBIND11_OVERRIDE_PURE_NAME(GNNGraph, NeighborSampler, "getNeighbors", getNeighbors, node_ids, worker_id); }
 };
 
 void init_graph_samplers(py::module &m) {
@@ -59,7 +59,7 @@ void init_graph_samplers(py::module &m) {
         .def_readwrite("storage", &NeighborSampler::storage_)
         .def_readwrite("incoming", &NeighborSampler::incoming_)
         .def_readwrite("outgoing", &NeighborSampler::outgoing_)
-        .def("getNeighbors", &NeighborSampler::getNeighbors, py::arg("node_ids"));
+        .def("getNeighbors", &NeighborSampler::getNeighbors, py::arg("node_ids"), py::arg("worker_id"));
 
 //    py::class_<LayeredNeighborSampler, NeighborSampler>(m, "LayeredNeighborSampler")
 //        .def_readwrite("sampling_layers", &LayeredNeighborSampler::sampling_layers_)
@@ -71,7 +71,7 @@ void init_graph_samplers(py::module &m) {
 
     py::class_<LayeredNeighborSampler, NeighborSampler>(m, "LayeredNeighborSampler")
             .def_readwrite("sampling_layers", &LayeredNeighborSampler::sampling_layers_)
-            .def(py::init([](GraphModelStorage *storage, std::vector<int> num_neighbors, bool incoming, bool outgoing, bool use_hashmap_sets) {
+            .def(py::init([](GraphModelStorage *storage, std::vector<int> num_neighbors, bool incoming, bool outgoing) {
 
                 std::vector<shared_ptr<NeighborSamplingConfig>> sampling_layers;
 
@@ -79,15 +79,17 @@ void init_graph_samplers(py::module &m) {
                     shared_ptr<NeighborSamplingConfig> ptr = std::make_shared<NeighborSamplingConfig>();
                     if (n == -1) {
                         ptr->type = NeighborSamplingLayer::ALL;
+                        ptr->use_hashmap_sets = false;
                         ptr->options = std::make_shared<NeighborSamplingOptions>();
                     } else {
                         ptr->type = NeighborSamplingLayer::UNIFORM;
+                        ptr->use_hashmap_sets = false;
                         auto opts = std::make_shared<UniformSamplingOptions>();
                         opts->max_neighbors = n;
                         ptr->options = opts;
                     }
                     sampling_layers.emplace_back(ptr);
                 }
-                return std::unique_ptr<LayeredNeighborSampler>(new LayeredNeighborSampler(storage, sampling_layers, incoming, outgoing, use_hashmap_sets));
+                return std::unique_ptr<LayeredNeighborSampler>(new LayeredNeighborSampler(storage, sampling_layers, incoming, outgoing));
             }));
 }

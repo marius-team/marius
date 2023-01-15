@@ -34,6 +34,7 @@ shared_ptr<NeighborSamplingConfig> initNeighborSamplingConfig(pyobj python_objec
     shared_ptr<NeighborSamplingConfig> ret_config = std::make_shared<NeighborSamplingConfig>();
 
     ret_config->type = getNeighborSamplingLayer(cast_helper<string>(python_object.attr("type")));
+    ret_config->use_hashmap_sets = cast_helper<bool>(python_object.attr("use_hashmap_sets"));
 
     pyobj py_options = python_object.attr("options");
 
@@ -220,7 +221,6 @@ shared_ptr<EncoderConfig> initEncoderConfig(pyobj python_config) {
 
     ret_config->use_incoming_nbrs = cast_helper<bool>(python_config.attr("use_incoming_nbrs"));
     ret_config->use_outgoing_nbrs = cast_helper<bool>(python_config.attr("use_outgoing_nbrs"));
-    ret_config->use_hashmap_sets = cast_helper<bool>(python_config.attr("use_hashmap_sets"));
 
     return ret_config;
 }

@@ -176,7 +176,7 @@ class Pipeline {
 
     ~Pipeline();
 
-    thread initThreadOfType(int worker_type, bool *paused, ThreadStatus *status);
+    thread initThreadOfType(int worker_type, bool *paused, ThreadStatus *status, int worker_id);
 
     virtual void addWorkersToPool(int pool_id, int worker_type, int num_workers) = 0;
 
@@ -272,65 +272,66 @@ class Worker {
     struct timespec sleep_time_;
     bool *paused_;
     ThreadStatus *status_;
+    int worker_id_;
 
   public:
-    Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status);
+    Worker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id);
 
     virtual void run() = 0;
 };
 
 class LoadEmbeddingsWorker : protected Worker {
   public:
-    LoadEmbeddingsWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    LoadEmbeddingsWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {};
 
     void run() override;
 };
 
 class BatchToDeviceWorker : protected Worker {
   public:
-    BatchToDeviceWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    BatchToDeviceWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {};
 
     void run() override;
 };
 
 class PrepareBatchWorker : protected Worker {
   public:
-    PrepareBatchWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    PrepareBatchWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {};
 
     void run() override;
 };
 
 class ComputeWorkerCPU : protected Worker {
   public:
-    ComputeWorkerCPU(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {}
+    ComputeWorkerCPU(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {}
 
     void run() override;
 };
 
 class ComputeWorkerGPU : protected Worker {
   public:
-    ComputeWorkerGPU(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {}
+    ComputeWorkerGPU(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {}
 
     void run() override;
 };
 
 class AccumulateGradientsWorker : protected Worker {
   public:
-    AccumulateGradientsWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    AccumulateGradientsWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {};
 
     void run() override;
 };
 
 class GradientsToHostWorker : protected Worker {
   public:
-    GradientsToHostWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    GradientsToHostWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {};
 
     void run() override;
 };
 
 class UpdateEmbeddingsWorker : protected Worker {
   public:
-    UpdateEmbeddingsWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status) : Worker{pipeline, paused, status} {};
+    UpdateEmbeddingsWorker(Pipeline *pipeline, bool *paused, ThreadStatus *status, int worker_id) : Worker{pipeline, paused, status, worker_id} {};
 
     void run() override;
 };

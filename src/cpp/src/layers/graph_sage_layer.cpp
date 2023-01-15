@@ -105,5 +105,6 @@ Embeddings GraphSageLayer::forward(Embeddings inputs, GNNGraph gnn_graph, bool t
         throw std::runtime_error("Unrecognized aggregator");
     }
 
+    // TODO: this should be if bias_ exists
     return outputs + bias_;
 }
