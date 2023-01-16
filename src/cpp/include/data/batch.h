@@ -37,6 +37,11 @@ class Batch {
     bool train_;        /**< If true, this batch is a training batch and requires gradient tracking */
     int device_id_;     /**< ID of the device the batch is assigned to */
 
+    double sample_;
+    double load_;
+    double transfer_;
+    double compute_;
+
     LearningTask task_;
 
     Timestamp load_timestamp_;    /**< Timestamp of when the embeddings for the batch have been loaded from storage */

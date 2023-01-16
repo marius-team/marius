@@ -11,6 +11,8 @@ CTestTestfile.cmake
 cmake-*/
 logs/
 data/
+!src/cpp/src/data
+!src/cpp/include/data
 test/test_data/generated/
 *.dylib
 

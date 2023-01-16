@@ -19,6 +19,9 @@ Batch::Batch(bool train) : device_transfer_(0), host_transfer_(0), timer_(false)
 Batch::~Batch() { clear(); }
 
 void Batch::to(torch::Device device) {
+    Timer t = Timer(false);
+    t.start();
+
     device_id_ = device.index();
 
     if (device.is_cuda()) {
@@ -87,6 +90,9 @@ void Batch::to(torch::Device device) {
     }
 
     status_ = BatchStatus::TransferredToDevice;
+
+    t.stop();
+    transfer_ = t.getDuration();
 }
 
 void Batch::accumulateGradients(float learning_rate) {

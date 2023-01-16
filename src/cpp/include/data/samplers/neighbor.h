@@ -46,13 +46,23 @@ class NeighborSampler {
 
 class LayeredNeighborSampler : public NeighborSampler {
    public:
+    bool use_incoming_nbrs_;
+    bool use_outgoing_nbrs_;
     std::vector<shared_ptr<NeighborSamplingConfig>> sampling_layers_;
 
-    LayeredNeighborSampler(shared_ptr<GraphModelStorage> storage, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs);
+    bool use_hashmap_sets_;
+    bool use_bitmaps_;
 
-    LayeredNeighborSampler(shared_ptr<MariusGraph> graph, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs);
+    LayeredNeighborSampler(shared_ptr<GraphModelStorage> storage, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
+                           bool use_incoming_nbrs, bool use_outgoing_nbrs);
 
-    LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs);
+    LayeredNeighborSampler(shared_ptr<MariusGraph> graph, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
+                           bool use_incoming_nbrs, bool use_outgoing_nbrs);
+
+    LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
+                           bool use_incoming_nbrs, bool use_outgoing_nbrs);
+
+    void checkLayerConfigs();
 
     DENSEGraph getNeighbors(torch::Tensor node_ids, shared_ptr<MariusGraph> graph = nullptr) override;
 

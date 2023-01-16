@@ -45,10 +45,14 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
 
     if (encoder_config != nullptr) {
         if (!encoder_config->train_neighbor_sampling.empty()) {
-            training_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->train_neighbor_sampling);
+            training_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->train_neighbor_sampling,
+                                                                                  encoder_config->use_incoming_nbrs,
+                                                                                  encoder_config->use_outgoing_nbrs);
 
             if (!encoder_config->eval_neighbor_sampling.empty()) {
-                evaluation_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->eval_neighbor_sampling);
+                evaluation_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->eval_neighbor_sampling,
+                                                                                        encoder_config->use_incoming_nbrs,
+                                                                                        encoder_config->use_incoming_nbrs);
             } else {
                 evaluation_neighbor_sampler_ = training_neighbor_sampler_;
             }
@@ -380,6 +384,9 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 }
 
 void DataLoader::edgeSample(shared_ptr<Batch> batch) {
+    Timer t = Timer(false);
+    t.start();
+
     if (!batch->edges_.defined()) {
         batch->edges_ = edge_sampler_->getEdges(batch);
     }
@@ -460,9 +467,15 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch) {
 
     batch->src_neg_indices_mapping_ = src_neg_mapping;
     batch->dst_neg_indices_mapping_ = dst_neg_mapping;
+
+    t.stop();
+    batch->sample_ = t.getDuration();
 }
 
 void DataLoader::nodeSample(shared_ptr<Batch> batch) {
+    Timer t = Timer(false);
+    t.start();
+
     if (batch->task_ == LearningTask::ENCODE) {
         torch::TensorOptions node_opts = torch::TensorOptions().dtype(torch::kInt64).device(graph_storage_->storage_ptrs_.edges->device_);
         batch->root_node_indices_ = torch::arange(batch->start_idx_, batch->start_idx_ + batch->batch_size_, node_opts);
@@ -484,6 +497,9 @@ void DataLoader::nodeSample(shared_ptr<Batch> batch) {
     } else {
         batch->unique_node_indices_ = batch->root_node_indices_;
     }
+
+    t.stop();
+    batch->sample_ = t.getDuration();
 }
 
 void DataLoader::negativeSample(shared_ptr<Batch> batch) {
@@ -494,6 +510,9 @@ void DataLoader::negativeSample(shared_ptr<Batch> batch) {
 }
 
 void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
+    Timer t = Timer(false);
+    t.start();
+
     if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
         if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
             batch->node_embeddings_ = graph_storage_->getNodeEmbeddings(batch->unique_node_indices_);
@@ -515,6 +534,9 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
 
     batch->status_ = BatchStatus::LoadedEmbeddings;
     batch->load_timestamp_ = timestamp_;
+
+    t.stop();
+    batch->load_ = t.getDuration();
 }
 
 void DataLoader::loadGPUParameters(shared_ptr<Batch> batch) {

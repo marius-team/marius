@@ -332,22 +332,47 @@ std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges,
     return std::forward_as_tuple(ret_neighbor_id_edges, new_local_offsets);
 }
 
-LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<GraphModelStorage> storage, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs) {
+LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<GraphModelStorage> storage, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
+                                               bool use_incoming_nbrs, bool use_outgoing_nbrs) {
     storage_ = storage;
     graph_ = nullptr;
     sampling_layers_ = layer_configs;
+    use_incoming_nbrs_ = use_incoming_nbrs;
+    use_outgoing_nbrs_ = use_outgoing_nbrs;
 }
 
-LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<MariusGraph> graph, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs) {
+LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<MariusGraph> graph, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
+                                               bool use_incoming_nbrs, bool use_outgoing_nbrs) {
     graph_ = graph;
     storage_ = nullptr;
     sampling_layers_ = layer_configs;
+    use_incoming_nbrs_ = use_incoming_nbrs;
+    use_outgoing_nbrs_ = use_outgoing_nbrs;
 }
 
-LayeredNeighborSampler::LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs) {
+LayeredNeighborSampler::LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
+                                               bool use_incoming_nbrs, bool use_outgoing_nbrs) {
     graph_ = nullptr;
     storage_ = nullptr;
     sampling_layers_ = layer_configs;
+    use_incoming_nbrs_ = use_incoming_nbrs;
+    use_outgoing_nbrs_ = use_outgoing_nbrs;
+}
+
+void LayeredNeighborSampler::checkLayerConfigs() {
+    use_hashmap_sets_ = false;
+    use_bitmaps_ = false;
+
+    for (int i = 0; i < sampling_layers_.size(); i++) {
+        if (use_bitmaps_ && sampling_layers_[i]->use_hashmap_sets) {
+            throw std::runtime_error("Layers with use_hashmap_sets equal to true must come before those set to false.");
+        }
+        if (sampling_layers_[i]->use_hashmap_sets) {
+            use_hashmap_sets_ = true;
+        } else {
+            use_bitmaps_ = true;
+        }
+    }
 }
 
 DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_ptr<MariusGraph> graph) {
@@ -392,21 +417,14 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
     phmap::flat_hash_set<int64_t>::const_iterator found;
     vector<int64_t> delta_ids_vec;
 
-    bool use_hashmap_sets = false;
-
-    for (int i = 0; i < sampling_layers_.size(); i++) {
-        if (sampling_layers_[i]->use_hashmap_sets) {
-            use_hashmap_sets = true;
-        }
-    }
-
     if (gpu) {
         hash_map = torch::zeros({num_nodes_in_memory}, bool_device_options);
     } else {
-        if (!use_hashmap_sets) {
+        if (use_bitmaps_) {
             hash_map_mem = malloc(num_nodes_in_memory);
             hash_map = torch::from_blob(hash_map_mem, {num_nodes_in_memory}, bool_device_options);
-        } else {
+        }
+        if (use_hashmap_sets_) {
             seen_unique_nodes.reserve(node_ids.size(0));
         }
     }
@@ -429,13 +447,13 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
         }
 
         if (delta_ids.size(0) > 0) {
-            if (sampling_layers_[i]->use_incoming_nbrs) {
+            if (use_incoming_nbrs_) {
                 auto tup = graph->getNeighborsForNodeIds(delta_ids, true, layer_type, max_neighbors, rate);
                 delta_incoming_edges = std::get<0>(tup);
                 delta_incoming_offsets = std::get<1>(tup);
             }
 
-            if (sampling_layers_[i]->use_outgoing_nbrs) {
+            if (use_outgoing_nbrs_) {
                 auto tup = graph->getNeighborsForNodeIds(delta_ids, false, layer_type, max_neighbors, rate);
                 delta_outgoing_edges = std::get<0>(tup);
                 delta_outgoing_offsets = std::get<1>(tup);
@@ -533,7 +551,7 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
     DENSEGraph ret = DENSEGraph(hop_offsets, node_ids, incoming_offsets, incoming_edges_vec, in_neighbors_mapping, outgoing_offsets, outgoing_edges_vec,
                                 out_neighbors_mapping, num_nodes_in_memory);
 
-    if (!gpu and !use_hashmap_sets) {
+    if (!gpu and use_bitmaps_) {
         free(hash_map_mem);
     }
 
