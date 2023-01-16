@@ -100,6 +100,7 @@ void GraphModelStorage::_unload(shared_ptr<Storage> storage, bool write) {
 void GraphModelStorage::load() {
     _load(storage_ptrs_.edges);
     _load(storage_ptrs_.train_edges);
+    _load(storage_ptrs_.train_edges_dst_sort);
     _load(storage_ptrs_.nodes);
 
     if (train_) {
@@ -133,6 +134,7 @@ void GraphModelStorage::load() {
 void GraphModelStorage::unload(bool write) {
     _unload(storage_ptrs_.edges, false);
     _unload(storage_ptrs_.train_edges, false);
+    _unload(storage_ptrs_.train_edges_dst_sort, false);
     _unload(storage_ptrs_.validation_edges, false);
     _unload(storage_ptrs_.test_edges, false);
     _unload(storage_ptrs_.nodes, false);
@@ -446,20 +448,47 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
             }
         }
     } else {
+        // Either nothing buffered (in memory training) or eval and doing full graph evaluation
         current_subgraph_state_ = std::make_shared<InMemorySubgraphState>();
+
+        bool embeddings_buffered = false;
+        bool features_buffered = false;
+
+        if (storage_ptrs_.node_embeddings != nullptr) {
+            if (instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
+                embeddings_buffered = true;
+            }
+        }
+
+        if (storage_ptrs_.node_features != nullptr) {
+            if (instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
+                features_buffered = true;
+            }
+        }
+
+        bool something_buffered = embeddings_buffered || features_buffered;
+        bool should_sort = false;
 
         EdgeList src_sort;
         EdgeList dst_sort;
         if (storage_ptrs_.train_edges != nullptr) {
             src_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
-            dst_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
+            if (!something_buffered) {
+                dst_sort = storage_ptrs_.train_edges_dst_sort->range(0, storage_ptrs_.train_edges_dst_sort->getDim0()).to(torch::kInt64);
+            } else {
+                dst_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
+                should_sort = true;
+            }
         } else {
             src_sort = storage_ptrs_.edges->range(0, storage_ptrs_.edges->getDim0()).to(torch::kInt64);
             dst_sort = storage_ptrs_.edges->range(0, storage_ptrs_.edges->getDim0()).to(torch::kInt64);
+            should_sort = true;
         }
 
-        src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0))).to(torch::kInt64);
-        dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1))).to(torch::kInt64);
+        if (should_sort) {
+            src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0))).to(torch::kInt64);
+            dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1))).to(torch::kInt64);
+        }
 
         current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(src_sort, dst_sort, getNumNodesInMemory());
     }

@@ -22,6 +22,8 @@ const string training = "train_";
 const string validation = "validation_";
 const string test = "test_";
 
+const string dst_sort = "_dst_sort";
+
 const string edges_directory = "edges/";
 const string edges_file = "edges";
 const string edge_partition_offsets_file = "partition_offsets.txt";
