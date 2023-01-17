@@ -120,12 +120,6 @@ void SynchronousTrainer::train(int num_epochs) {
                 dataloader_->loadGPUParameters(batch);
             }
 
-            if (batch->node_embeddings_.defined()) {
-                batch->node_embeddings_.requires_grad_();
-            }
-
-            batch->dense_graph_.performMap();
-
             // compute forward and backward pass of the model
             model_->train_batch(batch);
 

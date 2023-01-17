@@ -66,7 +66,6 @@ void SynchronousGraphEncoder::encode(bool separate_layers) {
         batch->to(model_->device_);
         dataloader_->loadGPUParameters(batch);
 
-        batch->dense_graph_.performMap();
         torch::Tensor encoded_nodes = model_->encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, false);
         batch->clear();
 

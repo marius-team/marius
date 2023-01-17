@@ -25,10 +25,9 @@ void LoadBatchWorker::run() {
             if ((pipeline_->batches_in_flight_ < pipeline_->staleness_bound_) && pipeline_->dataloader_->hasNextBatch()) {
                 pipeline_->admitted_batches_++;
                 pipeline_->batches_in_flight_++;
-                //                lock.unlock();
+                lock.unlock();
 
                 shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch();
-                lock.unlock();  // TODO make sure having the unlock after getBatch doesn't introduce deadlock
 
                 if (batch == nullptr) {
                     break;

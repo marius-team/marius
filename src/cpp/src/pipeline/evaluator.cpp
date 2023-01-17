@@ -83,7 +83,6 @@ void SynchronousEvaluator::evaluate(bool validation) {
         batch->to(model_->device_);
         dataloader_->loadGPUParameters(batch);
 
-        batch->dense_graph_.performMap();
         model_->evaluate_batch(batch);
 
         dataloader_->finishedBatch();

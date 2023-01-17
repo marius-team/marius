@@ -372,13 +372,13 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
         if (device.value().is_cuda()) {
             batch->to(device.value());
             loadGPUParameters(batch);
-            batch->dense_graph_.performMap();
+//            batch->dense_graph_.performMap();
         }
     }
 
-    if (perform_map) {
-        batch->dense_graph_.performMap();
-    }
+//    if (perform_map) {
+//        batch->dense_graph_.performMap();
+//    }
 
     return batch;
 }

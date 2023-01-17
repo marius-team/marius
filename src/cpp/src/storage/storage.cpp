@@ -210,19 +210,7 @@ FlatFile::FlatFile(string filename, int64_t dim0_size, int64_t dim1_size, torch:
     device_ = torch::kCPU;
 
     if (alloc) {
-        int64_t dtype_size = 0;
-
-        if (dtype_ == torch::kFloat64) {
-            dtype_size = 8;
-        } else if (dtype_ == torch::kFloat32) {
-            dtype_size = 4;
-        } else if (dtype_ == torch::kFloat16) {
-            dtype_size = 2;
-        } else if (dtype_ == torch::kInt64) {
-            dtype_size = 8;
-        } else if (dtype_ == torch::kInt32) {
-            dtype_size = 4;
-        }
+        int64_t dtype_size = get_dtype_size_wrapper(dtype_);
 
         std::ofstream ofs(filename_, std::ios::binary | std::ios::out);
         ofs.seekp(dim0_size_ * dim1_size_ * dtype_size - 1);

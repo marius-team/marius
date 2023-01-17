@@ -58,12 +58,6 @@ void ComputeWorkerGPU::run() {
                     }
                 }
 
-                if (batch->node_embeddings_.defined()) {
-                    batch->node_embeddings_.requires_grad_();
-                }
-
-                batch->dense_graph_.performMap();
-
                 pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
 
                 if (will_sync) {
@@ -110,7 +104,6 @@ void EncodeNodesWorkerGPU::run() {
 
             pipeline_->dataloader_->loadGPUParameters(batch);
 
-            batch->dense_graph_.performMap();
             torch::Tensor encoded =
                 pipeline_->model_->device_models_[gpu_id_].get()->encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, false);
             batch->clear();
