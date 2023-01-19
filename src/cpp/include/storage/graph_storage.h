@@ -81,7 +81,7 @@ class GraphModelStorage {
 
     void unload(bool write);
 
-    void initializeInMemorySubGraph(torch::Tensor buffer_state);
+    void initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps = 1);
 
     void updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState> subgraph, std::pair<std::vector<int>, std::vector<int>> swap_ids);
 

@@ -334,7 +334,7 @@ bool GraphModelStorage::embeddingsOffDevice() {
     }
 }
 
-void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
+void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps) {
     if (useInMemorySubGraph()) {
         current_subgraph_state_ = std::make_shared<InMemorySubgraphState>();
 
@@ -434,7 +434,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
             current_subgraph_state_->in_memory_subgraph_ = nullptr;
         }
 
-        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory());
+        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory(), num_hash_maps);
 
         current_subgraph_state_->in_memory_partition_ids_ = new_in_mem_partition_ids;
         current_subgraph_state_->in_memory_edge_bucket_ids_ = in_mem_edge_bucket_ids;
@@ -474,7 +474,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
             dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1))).to(torch::kInt64);
         }
 
-        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(src_sort, dst_sort, getNumNodesInMemory());
+        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(src_sort, dst_sort, getNumNodesInMemory(), num_hash_maps);
     }
 }
 
@@ -715,11 +715,13 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
     mapped_edges = mapped_edges.to(torch::kInt64);
     mapped_edges_dst_sort = mapped_edges_dst_sort.to(torch::kInt64);
 
+    int num_hash_maps = current_subgraph_state_->in_memory_subgraph_->num_hash_maps_;
+
     if (subgraph->in_memory_subgraph_ != nullptr) {
         subgraph->in_memory_subgraph_ = nullptr;
     }
 
-    subgraph->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory());
+    subgraph->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory(), num_hash_maps);
 
     // update state
     subgraph->in_memory_partition_ids_ = new_in_mem_partition_ids;

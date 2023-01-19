@@ -70,6 +70,8 @@ class DataLoader {
 
     LearningTask learning_task_;
 
+    at::cuda::CUDAStream *compute_stream_;
+
     DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, shared_ptr<TrainingConfig> training_config,
                shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config);
 
@@ -108,13 +110,14 @@ class DataLoader {
      * Loads CPU embedding parameters
      * @return The next batch
      */
-    shared_ptr<Batch> getBatch(at::optional<torch::Device> device = c10::nullopt, bool perform_map = false);
+    shared_ptr<Batch> getBatch(int worker_id = 0, at::optional<torch::Device> device = c10::nullopt, bool perform_map = false);
+    //TODO: this change to getBatch may affect python examples, docs, tests
 
     /**
      * Loads edges and samples negatives to construct a batch
      * @param batch: Batch object to load edges into.
      */
-    void edgeSample(shared_ptr<Batch> batch);
+    void edgeSample(shared_ptr<Batch> batch, int worker_id = 0);
 
     /**
      * Creates a mapping from global node ids into batch local node ids
@@ -126,7 +129,7 @@ class DataLoader {
      * Loads edges and samples negatives to construct a batch
      * @param batch: Batch object to load nodes into.
      */
-    void nodeSample(shared_ptr<Batch> batch);
+    void nodeSample(shared_ptr<Batch> batch, int worker_id = 0);
 
     /**
      * Samples negatives for the batch using the dataloader's negative sampler

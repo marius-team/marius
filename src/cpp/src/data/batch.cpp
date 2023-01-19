@@ -18,75 +18,45 @@ Batch::Batch(bool train) : device_transfer_(0), host_transfer_(0), timer_(false)
 
 Batch::~Batch() { clear(); }
 
-void Batch::to(torch::Device device) {
+void Batch::to(torch::Device device, at::cuda::CUDAStream *compute_stream) {
     Timer t = Timer(false);
     t.start();
 
-    device_id_ = device.index();
+    at::cuda::CUDAStream transfer_stream = at::cuda::getStreamFromPool(false, device.index());
+    at::cuda::CUDAStreamGuard stream_guard(transfer_stream);
 
     if (device.is_cuda()) {
-        device_transfer_ = CudaEvent(device_id_);
-        host_transfer_ = CudaEvent(device_id_);
+        host_transfer_ = CudaEvent(device.index());
     }
 
-    if (edges_.defined()) {
-        edges_ = edges_.to(device);
-    }
+    edges_ = transfer_tensor(edges_, device, compute_stream, &transfer_stream);
 
-    if (neg_edges_.defined()) {
-        neg_edges_ = neg_edges_.to(device);
-    }
+    neg_edges_ = transfer_tensor(neg_edges_, device, compute_stream, &transfer_stream);
 
-    if (root_node_indices_.defined()) {
-        root_node_indices_ = root_node_indices_.to(device);
-    }
+    root_node_indices_ = transfer_tensor(root_node_indices_, device, compute_stream, &transfer_stream);
 
-    if (unique_node_indices_.defined()) {
-        unique_node_indices_ = unique_node_indices_.to(device);
-    }
+    unique_node_indices_ = transfer_tensor(unique_node_indices_, device, compute_stream, &transfer_stream);
 
-    if (node_labels_.defined()) {
-        node_labels_ = node_labels_.to(device);
-    }
+    node_labels_ = transfer_tensor(node_labels_, device, compute_stream, &transfer_stream);
 
-    if (src_neg_indices_mapping_.defined()) {
-        src_neg_indices_mapping_ = src_neg_indices_mapping_.to(device);
-    }
+    src_neg_indices_mapping_ = transfer_tensor(src_neg_indices_mapping_, device, compute_stream, &transfer_stream);
 
-    if (dst_neg_indices_mapping_.defined()) {
-        dst_neg_indices_mapping_ = dst_neg_indices_mapping_.to(device);
-    }
+    dst_neg_indices_mapping_ = transfer_tensor(dst_neg_indices_mapping_, device, compute_stream, &transfer_stream);
 
-    if (src_neg_filter_.defined()) {
-        src_neg_filter_ = src_neg_filter_.to(device);
-    }
+    src_neg_filter_ = transfer_tensor(src_neg_filter_, device, compute_stream, &transfer_stream);
 
-    if (dst_neg_filter_.defined()) {
-        dst_neg_filter_ = dst_neg_filter_.to(device);
-    }
+    dst_neg_filter_ = transfer_tensor(dst_neg_filter_, device, compute_stream, &transfer_stream);
 
-    if (node_embeddings_.defined()) {
-        node_embeddings_ = node_embeddings_.to(device);
-    }
+    node_embeddings_ = transfer_tensor(node_embeddings_, device, compute_stream, &transfer_stream);
 
-    if (node_embeddings_state_.defined()) {
-        node_embeddings_state_ = node_embeddings_state_.to(device);
-    }
+    node_embeddings_state_ = transfer_tensor(node_embeddings_state_, device, compute_stream, &transfer_stream);
 
-    if (node_features_.defined()) {
-        node_features_ = node_features_.to(device);
-    }
+    node_features_ = transfer_tensor(node_features_, device, compute_stream, &transfer_stream);
 
-    if (encoded_uniques_.defined()) {
-        encoded_uniques_ = encoded_uniques_.to(device);
-    }
+    encoded_uniques_ = transfer_tensor(encoded_uniques_, device, compute_stream, &transfer_stream);
 
     if (dense_graph_.node_ids_.defined()) {
-        dense_graph_.to(device);
-    }
-
-    if (device.is_cuda()) {
-        device_transfer_.record();
+        dense_graph_.to(device, compute_stream, &transfer_stream);
     }
 
     status_ = BatchStatus::TransferredToDevice;

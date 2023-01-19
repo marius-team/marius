@@ -65,6 +65,8 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
         training_neighbor_sampler_ = nullptr;
         evaluation_neighbor_sampler_ = nullptr;
     }
+
+    compute_stream_ = nullptr;
 }
 
 DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler,
@@ -354,16 +356,16 @@ void DataLoader::finishedBatch() {
     batch_cv_->notify_all();
 }
 
-shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool perform_map) {
+shared_ptr<Batch> DataLoader::getBatch(int worker_id, at::optional<torch::Device> device, bool perform_map) {
     shared_ptr<Batch> batch = getNextBatch();
     if (batch == nullptr) {
         return batch;
     }
 
     if (batch->task_ == LearningTask::LINK_PREDICTION) {
-        edgeSample(batch);
+        edgeSample(batch, worker_id);
     } else if (batch->task_ == LearningTask::NODE_CLASSIFICATION || batch->task_ == LearningTask::ENCODE) {
-        nodeSample(batch);
+        nodeSample(batch, worker_id);
     }
 
     loadCPUParameters(batch);
@@ -383,7 +385,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
     return batch;
 }
 
-void DataLoader::edgeSample(shared_ptr<Batch> batch) {
+void DataLoader::edgeSample(shared_ptr<Batch> batch, int worker_id) {
     Timer t = Timer(false);
     t.start();
 
@@ -417,7 +419,8 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch) {
         batch->root_node_indices_ = std::get<0>(torch::_unique(torch::cat(all_ids)));
 
         // sample neighbors and get unique nodes
-        batch->dense_graph_ = neighbor_sampler_->getNeighbors(batch->root_node_indices_, graph_storage_->current_subgraph_state_->in_memory_subgraph_);
+        batch->dense_graph_ = neighbor_sampler_->getNeighbors(batch->root_node_indices_, graph_storage_->current_subgraph_state_->in_memory_subgraph_,
+                                                              worker_id);
         batch->unique_node_indices_ = batch->dense_graph_.getNodeIDs();
 
         // map edges and negatives to their corresponding index in unique_node_indices_
@@ -472,7 +475,7 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch) {
     batch->sample_ = t.getDuration();
 }
 
-void DataLoader::nodeSample(shared_ptr<Batch> batch) {
+void DataLoader::nodeSample(shared_ptr<Batch> batch, int worker_id) {
     Timer t = Timer(false);
     t.start();
 
@@ -492,7 +495,8 @@ void DataLoader::nodeSample(shared_ptr<Batch> batch) {
     }
 
     if (neighbor_sampler_ != nullptr) {
-        batch->dense_graph_ = neighbor_sampler_->getNeighbors(batch->root_node_indices_, graph_storage_->current_subgraph_state_->in_memory_subgraph_);
+        batch->dense_graph_ = neighbor_sampler_->getNeighbors(batch->root_node_indices_, graph_storage_->current_subgraph_state_->in_memory_subgraph_,
+                                                              worker_id);
         batch->unique_node_indices_ = batch->dense_graph_.getNodeIDs();
     } else {
         batch->unique_node_indices_ = batch->root_node_indices_;
@@ -585,10 +589,25 @@ void DataLoader::loadStorage() {
     total_batches_processed_ = 0;
     all_read_ = false;
 
-    if (!buffer_states_.empty()) {
-        graph_storage_->initializeInMemorySubGraph(buffer_states_[0]);
+    int num_hash_maps = 0;
+    if (train_) {
+        if (training_config_->pipeline->sync) {
+            num_hash_maps = 1;
+        } else {
+            num_hash_maps = training_config_->pipeline->batch_loader_threads;
+        }
     } else {
-        graph_storage_->initializeInMemorySubGraph(torch::empty({}));
+        if (evaluation_config_->pipeline->sync) {
+            num_hash_maps = 1;
+        } else {
+            num_hash_maps = evaluation_config_->pipeline->batch_loader_threads;
+        }
+    }
+
+    if (!buffer_states_.empty()) {
+        graph_storage_->initializeInMemorySubGraph(buffer_states_[0], num_hash_maps);
+    } else {
+        graph_storage_->initializeInMemorySubGraph(torch::empty({}), num_hash_maps);
     }
 
     if (negative_sampler_ != nullptr) {

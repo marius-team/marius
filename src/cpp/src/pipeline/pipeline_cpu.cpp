@@ -120,7 +120,7 @@ void Pipeline::waitComplete() {
 
 void PipelineCPU::addWorkersToPool(int pool_id, int worker_type, int num_workers, int gpu_id) {
     for (int i = 0; i < num_workers; i++) {
-        pool_[pool_id].emplace_back(initWorkerOfType(worker_type, gpu_id));
+        pool_[pool_id].emplace_back(initWorkerOfType(worker_type, gpu_id, i));
     }
 }
 

@@ -27,7 +27,7 @@ void LoadBatchWorker::run() {
                 pipeline_->batches_in_flight_++;
                 lock.unlock();
 
-                shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch();
+                shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch(worker_id_);
 
                 if (batch == nullptr) {
                     break;
@@ -114,11 +114,11 @@ Pipeline::~Pipeline() {
     delete pipeline_lock_;
 }
 
-shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id) {
+shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id, int worker_id) {
     shared_ptr<Worker> worker;
 
     if (worker_type == LOAD_BATCH_ID) {
-        worker = std::make_shared<LoadBatchWorker>(this);
+        worker = std::make_shared<LoadBatchWorker>(this, worker_id);
     } else if (worker_type == H2D_TRANSFER_ID) {
         worker = std::make_shared<BatchToDeviceWorker>(this);
     } else if (worker_type == CPU_COMPUTE_ID) {

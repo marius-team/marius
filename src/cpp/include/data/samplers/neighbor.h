@@ -41,7 +41,7 @@ class NeighborSampler {
      * @param node_ids Nodes to get neighbors from
      * @return The neighbors sampled using strategy
      */
-    virtual DENSEGraph getNeighbors(torch::Tensor node_ids, shared_ptr<MariusGraph> graph = nullptr) = 0;
+    virtual DENSEGraph getNeighbors(torch::Tensor node_ids, shared_ptr<MariusGraph> graph = nullptr, int worker_id = 0) = 0;
 };
 
 class LayeredNeighborSampler : public NeighborSampler {
@@ -53,18 +53,20 @@ class LayeredNeighborSampler : public NeighborSampler {
     bool use_hashmap_sets_;
     bool use_bitmaps_;
 
+    //TODO: this change may affect test, docs, python examples
     LayeredNeighborSampler(shared_ptr<GraphModelStorage> storage, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
-                           bool use_incoming_nbrs, bool use_outgoing_nbrs);
+                           bool use_incoming_nbrs = true, bool use_outgoing_nbrs = true);
 
     LayeredNeighborSampler(shared_ptr<MariusGraph> graph, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
-                           bool use_incoming_nbrs, bool use_outgoing_nbrs);
+                           bool use_incoming_nbrs = true, bool use_outgoing_nbrs = true);
 
     LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
-                           bool use_incoming_nbrs, bool use_outgoing_nbrs);
+                           bool use_incoming_nbrs = true, bool use_outgoing_nbrs = true);
 
     void checkLayerConfigs();
 
-    DENSEGraph getNeighbors(torch::Tensor node_ids, shared_ptr<MariusGraph> graph = nullptr) override;
+    DENSEGraph getNeighbors(torch::Tensor node_ids, shared_ptr<MariusGraph> graph = nullptr, int worker_id = 0) override;
+    //TODO this change may affect test_nn.py
 
     torch::Tensor computeDeltaIdsHelperMethod1(torch::Tensor hash_map, torch::Tensor node_ids, torch::Tensor delta_incoming_edges,
                                                torch::Tensor delta_outgoing_edges, int64_t num_nodes_in_memory);

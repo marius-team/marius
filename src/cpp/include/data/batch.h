@@ -83,7 +83,7 @@ class Batch {
 
     ~Batch(); /**< Destructor */
 
-    void to(torch::Device device); /**< Transfers embeddings, optimizer state, and indices to specified device */
+    void to(torch::Device device, at::cuda::CUDAStream *compute_stream = nullptr); /**< Transfers embeddings, optimizer state, and indices to specified device */
 
     void accumulateGradients(float learning_rate); /**< Accumulates gradients into the unique_node_gradients, and applies optimizer update rule to create the
                                                       unique_node_gradients2 tensor */

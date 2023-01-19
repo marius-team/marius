@@ -47,7 +47,9 @@ class Worker {
 
 class LoadBatchWorker : public Worker {
    public:
-    LoadBatchWorker(Pipeline *pipeline) : Worker{pipeline} {};
+    int worker_id_;
+
+    LoadBatchWorker(Pipeline *pipeline, int worker_id) : Worker{pipeline}, worker_id_{worker_id} {};
 
     void run() override;
 };
@@ -96,7 +98,7 @@ class Pipeline {
 
     ~Pipeline();
 
-    shared_ptr<Worker> initWorkerOfType(int worker_type, int gpu_id = 0);
+    shared_ptr<Worker> initWorkerOfType(int worker_type, int gpu_id = 0, int worker_id = 0);
 
     virtual void addWorkersToPool(int pool_id, int worker_type, int num_workers, int num_gpus = 1) = 0;
 

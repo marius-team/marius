@@ -31,6 +31,9 @@ class MariusGraph {
     int max_out_num_neighbors_;
     int max_in_num_neighbors_;
 
+    int num_hash_maps_;
+    std::vector<torch::Tensor> hash_maps_;
+
     // used for filtering negatives
     EdgeList all_src_sorted_edges_;
     EdgeList all_dst_sorted_edges_;
@@ -39,7 +42,8 @@ class MariusGraph {
 
     MariusGraph(EdgeList edges);
 
-    MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory);
+    MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps = 1);
+    //TODO: this change may affect some cpp and python tests
 
     ~MariusGraph();
 
@@ -135,6 +139,8 @@ class DENSEGraph : public MariusGraph {
      */
     Indices getNeighborIDs(bool incoming = true, bool global = false);
 
+    std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> getCombinedNeighborIDs();
+
     /**
      * Gets the offset of the node ids in the outermost layer.
      * @return Layer offset
@@ -153,7 +159,7 @@ class DENSEGraph : public MariusGraph {
      */
     void clear();
 
-    void to(torch::Device device);
+    void to(torch::Device device, at::cuda::CUDAStream *compute_stream = nullptr, at::cuda::CUDAStream *transfer_stream = nullptr);
 };
 
 #endif  // MARIUS_SRC_CPP_INCLUDE_GRAPH_H_

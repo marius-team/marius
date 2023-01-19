@@ -80,7 +80,9 @@ void SynchronousEvaluator::evaluate(bool validation) {
 
     while (dataloader_->hasNextBatch()) {
         shared_ptr<Batch> batch = dataloader_->getBatch();
-        batch->to(model_->device_);
+        if (dataloader_->graph_storage_->embeddingsOffDevice()) {
+            batch->to(model_->device_);
+        }
         dataloader_->loadGPUParameters(batch);
 
         model_->evaluate_batch(batch);
