@@ -386,8 +386,6 @@ shared_ptr<Batch> DataLoader::getBatch(int worker_id, at::optional<torch::Device
 }
 
 void DataLoader::edgeSample(shared_ptr<Batch> batch, int worker_id) {
-    Timer t = Timer(false);
-    t.start();
 
     if (!batch->edges_.defined()) {
         batch->edges_ = edge_sampler_->getEdges(batch);
@@ -471,13 +469,9 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch, int worker_id) {
     batch->src_neg_indices_mapping_ = src_neg_mapping;
     batch->dst_neg_indices_mapping_ = dst_neg_mapping;
 
-    t.stop();
-    batch->sample_ = t.getDuration();
 }
 
 void DataLoader::nodeSample(shared_ptr<Batch> batch, int worker_id) {
-    Timer t = Timer(false);
-    t.start();
 
     if (batch->task_ == LearningTask::ENCODE) {
         torch::TensorOptions node_opts = torch::TensorOptions().dtype(torch::kInt64).device(graph_storage_->storage_ptrs_.edges->device_);
@@ -502,8 +496,6 @@ void DataLoader::nodeSample(shared_ptr<Batch> batch, int worker_id) {
         batch->unique_node_indices_ = batch->root_node_indices_;
     }
 
-    t.stop();
-    batch->sample_ = t.getDuration();
 }
 
 void DataLoader::negativeSample(shared_ptr<Batch> batch) {
@@ -514,8 +506,6 @@ void DataLoader::negativeSample(shared_ptr<Batch> batch) {
 }
 
 void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
-    Timer t = Timer(false);
-    t.start();
 
     if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
         if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
@@ -539,8 +529,6 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
     batch->status_ = BatchStatus::LoadedEmbeddings;
     batch->load_timestamp_ = timestamp_;
 
-    t.stop();
-    batch->load_ = t.getDuration();
 }
 
 void DataLoader::loadGPUParameters(shared_ptr<Batch> batch) {

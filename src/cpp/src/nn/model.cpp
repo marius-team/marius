@@ -288,8 +288,6 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Model::fo
 }
 
 void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
-    Timer t = Timer(false);
-    t.start();
 
     if (call_step) {
         clear_grad();
@@ -334,8 +332,6 @@ void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
         batch->accumulateGradients(sparse_lr_);
     }
 
-    t.stop();
-    batch->compute_ = t.getDuration();
 }
 
 void Model::evaluate_batch(shared_ptr<Batch> batch) {
