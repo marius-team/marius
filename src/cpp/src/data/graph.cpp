@@ -231,8 +231,8 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
 }
 
 void MariusGraph::sortAllEdges(EdgeList all_edges) {
-    all_src_sorted_edges_ = all_edges.index_select(0, all_edges.select(1, 0).argsort(0)).to(torch::kInt64);
-    all_dst_sorted_edges_ = all_edges.index_select(0, all_edges.select(1, -1).argsort(0)).to(torch::kInt64);
+    all_src_sorted_edges_ = all_edges.index_select(0, all_edges.select(1, 0).argsort(0, false)).to(torch::kInt64);
+    all_dst_sorted_edges_ = all_edges.index_select(0, all_edges.select(1, -1).argsort(0, false)).to(torch::kInt64);
 }
 
 DENSEGraph::DENSEGraph(){};
