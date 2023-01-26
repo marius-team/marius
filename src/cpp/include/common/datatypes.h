@@ -53,11 +53,6 @@ typedef at::cuda::CUDAEvent CudaEvent;
 typedef DummyCuda CudaEvent;
 #endif
 
-// TODO enable direct IO support
-//#if __linux__
-//    #define IO_FLAGS O_DIRECT
-//#endif
-
 #ifndef IO_FLAGS
 #define IO_FLAGS 0
 #endif
