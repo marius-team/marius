@@ -143,10 +143,8 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
     }
 
     if (num_columns == 3) {
-#pragma omp parallel default(none) \
-    shared(tid_seeds, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, \
-    num_neighbors_accessor, num_neighbors, max_neighbors, sorted_list_ptr, edges, \
-    ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
+#pragma omp parallel default(none) shared(tid_seeds, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, num_neighbors_accessor, \
+                                          num_neighbors, max_neighbors, sorted_list_ptr, edges, ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
         {
 #ifdef MARIUS_OMP
             unsigned int seed = tid_seeds[omp_get_thread_num()];
@@ -185,10 +183,8 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
             }
         }
     } else {
-#pragma omp parallel default(none) \
-    shared(tid_seeds, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, \
-    num_neighbors_accessor, num_neighbors, max_neighbors, sorted_list_ptr, edges, \
-    ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
+#pragma omp parallel default(none) shared(tid_seeds, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, num_neighbors_accessor, \
+                                          num_neighbors, max_neighbors, sorted_list_ptr, edges, ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
         {
 #ifdef MARIUS_OMP
             unsigned int seed = tid_seeds[omp_get_thread_num()];
@@ -364,8 +360,7 @@ LayeredNeighborSampler::LayeredNeighborSampler(shared_ptr<MariusGraph> graph, st
     checkLayerConfigs();
 }
 
-LayeredNeighborSampler::LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs,
-                                               bool use_incoming_nbrs, bool use_outgoing_nbrs) {
+LayeredNeighborSampler::LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs, bool use_incoming_nbrs, bool use_outgoing_nbrs) {
     graph_ = nullptr;
     storage_ = nullptr;
     sampling_layers_ = layer_configs;
@@ -426,7 +421,7 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
 
     // data structures for calculating the delta_ids
     torch::Tensor hash_map;
-//    void *hash_map_mem;
+    //    void *hash_map_mem;
     auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(node_ids.device());
 
     phmap::flat_hash_set<int64_t> seen_unique_nodes;
@@ -566,9 +561,9 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
     DENSEGraph ret = DENSEGraph(hop_offsets, node_ids, incoming_offsets, incoming_edges_vec, in_neighbors_mapping, outgoing_offsets, outgoing_edges_vec,
                                 out_neighbors_mapping, num_nodes_in_memory);
 
-//    if (!gpu and use_bitmaps_) {
-//        free(hash_map_mem);
-//    }
+    //    if (!gpu and use_bitmaps_) {
+    //        free(hash_map_mem);
+    //    }
 
     return ret;
 }
@@ -577,25 +572,24 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
                                                                    torch::Tensor delta_outgoing_edges, int64_t num_nodes_in_memory) {
     unsigned int num_threads = 1;
 #ifdef MARIUS_OMP
-    #pragma omp parallel
+#pragma omp parallel
     {
-        #pragma omp single
+#pragma omp single
         num_threads = omp_get_num_threads();
     }
 #endif
 
-    int64_t chunk_size = ceil((double) num_nodes_in_memory / num_threads);
+    int64_t chunk_size = ceil((double)num_nodes_in_memory / num_threads);
 
     auto hash_map_accessor = hash_map.accessor<bool, 1>();
-    auto nodes_accessor = node_ids.accessor<int64_t , 1>();
+    auto nodes_accessor = node_ids.accessor<int64_t, 1>();
 
-#pragma omp parallel default(none) \
-         shared(delta_incoming_edges, delta_outgoing_edges, hash_map_accessor, hash_map, node_ids, nodes_accessor)
+#pragma omp parallel default(none) shared(delta_incoming_edges, delta_outgoing_edges, hash_map_accessor, hash_map, node_ids, nodes_accessor)
     {
         if (delta_incoming_edges.size(0) > 0) {
-            auto incoming_accessor = delta_incoming_edges.accessor<int64_t , 2>();
+            auto incoming_accessor = delta_incoming_edges.accessor<int64_t, 2>();
 
-#pragma omp for //nowait -> can't have this because of the below if statement skipping directly to node ids for loop
+#pragma omp for  // nowait -> can't have this because of the below if statement skipping directly to node ids for loop
             for (int64_t j = 0; j < delta_incoming_edges.size(0); j++) {
                 if (!hash_map_accessor[incoming_accessor[j][0]]) {
                     hash_map_accessor[incoming_accessor[j][0]] = 1;
@@ -604,8 +598,8 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
         }
 
         if (delta_outgoing_edges.size(0) > 0) {
-            auto outgoing_accessor = delta_outgoing_edges.accessor<int64_t , 2>();
-            int column_idx = delta_outgoing_edges.size(1) - 1; // RW: -1 has some weird bug for accessor
+            auto outgoing_accessor = delta_outgoing_edges.accessor<int64_t, 2>();
+            int column_idx = delta_outgoing_edges.size(1) - 1;  // RW: -1 has some weird bug for accessor
 
 #pragma omp for
             for (int64_t j = 0; j < delta_outgoing_edges.size(0); j++) {
@@ -625,14 +619,13 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
 
     auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
     std::vector<torch::Tensor> sub_deltas = std::vector<torch::Tensor>(num_threads);
-    int64_t upper_bound = (int64_t) (delta_incoming_edges.size(0)+delta_outgoing_edges.size(0))/num_threads;
+    int64_t upper_bound = (int64_t)(delta_incoming_edges.size(0) + delta_outgoing_edges.size(0)) / num_threads;
 
     std::vector<int> sub_counts = std::vector<int>(num_threads, 0);
     std::vector<int> sub_offsets = std::vector<int>(num_threads, 0);
 
 #pragma omp parallel
     {
-
 #ifdef MARIUS_OMP
         int tid = omp_get_thread_num();
 #else
@@ -671,8 +664,8 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
         count += c;
     }
 
-    for (int k = 0; k < num_threads-1; k++) {
-        sub_offsets[k+1] = sub_offsets[k] + sub_counts[k];
+    for (int k = 0; k < num_threads - 1; k++) {
+        sub_offsets[k + 1] = sub_offsets[k] + sub_counts[k];
     }
 
     torch::Tensor delta_ids = torch::empty({count}, device_options);

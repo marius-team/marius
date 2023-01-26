@@ -288,7 +288,6 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Model::fo
 }
 
 void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
-
     if (call_step) {
         clear_grad();
     }
@@ -331,7 +330,6 @@ void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
     if (batch->node_embeddings_.defined()) {
         batch->accumulateGradients(sparse_lr_);
     }
-
 }
 
 void Model::evaluate_batch(shared_ptr<Batch> batch) {

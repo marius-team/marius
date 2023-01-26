@@ -18,8 +18,8 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared
     string test_filename =
         storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edges_file + PathConstants::file_ext;
 
-    string train_dst_sort_filename = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edges_file
-                                     + PathConstants::dst_sort + PathConstants::file_ext;
+    string train_dst_sort_filename = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training +
+                                     PathConstants::edges_file + PathConstants::dst_sort + PathConstants::file_ext;
 
     shared_ptr<Storage> train_edge_storage = nullptr;
     shared_ptr<Storage> train_edge_storage_dst_sort = nullptr;
@@ -377,7 +377,8 @@ shared_ptr<Storage> initializeNodeLabels(shared_ptr<Model> model, shared_ptr<Sto
 
 shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
                                                               shared_ptr<InitConfig> init_config) {
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages =
+        initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
 
     GraphModelStoragePtrs storage_ptrs = {};
@@ -400,7 +401,8 @@ shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> 
 
 shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize,
                                                                   bool train, shared_ptr<InitConfig> init_config) {
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages =
+        initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> node_id_storages = initializeNodeIds(storage_config);
     shared_ptr<Storage> node_features = initializeNodeFeatures(model, storage_config);
     shared_ptr<Storage> node_labels = initializeNodeLabels(model, storage_config);

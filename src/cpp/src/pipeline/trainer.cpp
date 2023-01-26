@@ -135,7 +135,6 @@ void SynchronousTrainer::train(int num_epochs) {
 
             // log progress
             progress_reporter_->addResult(batch->batch_size_);
-
         }
         SPDLOG_INFO("################ Finished training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
 

@@ -129,10 +129,8 @@ torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device, at::cud
     if (input.defined()) {
         input = input.pin_memory().to(device, false);
 
-        if (compute_stream != nullptr)
-            input.record_stream(*compute_stream);
-        if (transfer_stream != nullptr)
-            input.record_stream(*transfer_stream);
+        if (compute_stream != nullptr) input.record_stream(*compute_stream);
+        if (transfer_stream != nullptr) input.record_stream(*transfer_stream);
     }
     return input;
 }

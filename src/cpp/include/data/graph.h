@@ -43,7 +43,7 @@ class MariusGraph {
     MariusGraph(EdgeList edges);
 
     MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps = 1);
-    //TODO: this change may affect some cpp and python tests
+    // TODO: this change may affect some cpp and python tests
 
     ~MariusGraph();
 

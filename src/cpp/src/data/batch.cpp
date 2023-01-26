@@ -19,7 +19,6 @@ Batch::Batch(bool train) : device_transfer_(0), host_transfer_(0), timer_(false)
 Batch::~Batch() { clear(); }
 
 void Batch::to(torch::Device device, at::cuda::CUDAStream *compute_stream) {
-
     at::cuda::CUDAStream transfer_stream = at::cuda::getStreamFromPool(false, device.index());
     at::cuda::CUDAStreamGuard stream_guard(transfer_stream);
 
@@ -58,7 +57,6 @@ void Batch::to(torch::Device device, at::cuda::CUDAStream *compute_stream) {
     }
 
     status_ = BatchStatus::TransferredToDevice;
-
 }
 
 void Batch::accumulateGradients(float learning_rate) {

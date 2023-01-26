@@ -134,7 +134,7 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
         gpu = 1;
     }
 
-//    auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
+    //    auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
 
     Indices in_memory_ids;
     torch::Tensor mask;

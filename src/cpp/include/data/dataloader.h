@@ -111,7 +111,7 @@ class DataLoader {
      * @return The next batch
      */
     shared_ptr<Batch> getBatch(int worker_id = 0, at::optional<torch::Device> device = c10::nullopt, bool perform_map = false);
-    //TODO: this change to getBatch may affect python examples, docs, tests
+    // TODO: this change to getBatch may affect python examples, docs, tests
 
     /**
      * Loads edges and samples negatives to construct a batch
