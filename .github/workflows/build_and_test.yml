@@ -42,9 +42,9 @@ jobs:
         sudo python3 -m pip install pyarrow
 
         if [ "$RUNNER_OS" == "Linux" ]; then
-             sudo pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
+             sudo python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
         elif [ "$RUNNER_OS" == "macOS" ]; then
-             sudo pip3 install torch
+             sudo python3 -m pip install torch
         else
              echo "$RUNNER_OS not supported"
              exit 1
