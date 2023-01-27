@@ -45,5 +45,5 @@ void init_graph(py::module &m) {
         .def("performMap", &DENSEGraph::performMap)
         .def("setNodeProperties", &DENSEGraph::setNodeProperties, py::arg("node_properties"))
         .def("clear", &DENSEGraph::clear)
-        .def("to", &DENSEGraph::to, py::arg("device"));
+        .def("to", &DENSEGraph::to, py::arg("device"), py::arg("compute_stream") = nullptr, py::arg("transfer_stream") = nullptr);
 }

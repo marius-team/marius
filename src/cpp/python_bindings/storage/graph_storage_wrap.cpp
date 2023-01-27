@@ -91,7 +91,7 @@ void init_graph_storage(py::module &m) {
 
         .def("load", &GraphModelStorage::load)
         .def("unload", &GraphModelStorage::unload, py::arg("write"))
-        .def("init_subgraph", &GraphModelStorage::initializeInMemorySubGraph, py::arg("buffer_state"))
+        .def("init_subgraph", &GraphModelStorage::initializeInMemorySubGraph, py::arg("buffer_state"), py::arg("num_hash_maps") = 1)
         .def("update_subgraph", &GraphModelStorage::updateInMemorySubGraph)
         .def("sort_all_edges", &GraphModelStorage::sortAllEdges)
         .def("set_edge_storage", &GraphModelStorage::setEdgesStorage, py::arg("edge_storage"))

@@ -48,7 +48,7 @@ void init_batch(py::module &m) {
         .def_readwrite("dst_neg_filter", &Batch::dst_neg_filter_)
 
         .def(py::init<bool>(), py::arg("train"))
-        .def("to", &Batch::to, py::arg("device"))
+        .def("to", &Batch::to, py::arg("device"), py::arg("stream") = nullptr)
         .def("accumulateGradients", &Batch::accumulateGradients, py::arg("learning_rate"))
         .def("embeddingsToHost", &Batch::embeddingsToHost)
         .def("clear", &Batch::clear);

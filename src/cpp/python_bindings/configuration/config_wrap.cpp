@@ -6,9 +6,7 @@ void init_config(py::module &m) {
         .def(py::init<>())
         .def_readwrite("type", &NeighborSamplingConfig::type)
         .def_readwrite("options", &NeighborSamplingConfig::options)
-        .def_readwrite("use_hashmap_sets", &NeighborSamplingConfig::use_hashmap_sets)
-        .def_readwrite("use_incoming_nbrs", &NeighborSamplingConfig::use_incoming_nbrs)
-        .def_readwrite("use_outgoing_nbrs", &NeighborSamplingConfig::use_outgoing_nbrs);
+        .def_readwrite("use_hashmap_sets", &NeighborSamplingConfig::use_hashmap_sets);
 
     py::class_<OptimizerConfig, std::shared_ptr<OptimizerConfig>>(m, "OptimizerConfig")
         .def(py::init<>())
@@ -41,7 +39,10 @@ void init_config(py::module &m) {
         .def(py::init<>())
         .def_readwrite("layers", &EncoderConfig::layers)
         .def_readwrite("train_neighbor_sampling", &EncoderConfig::train_neighbor_sampling)
-        .def_readwrite("eval_neighbor_sampling", &EncoderConfig::eval_neighbor_sampling);
+        .def_readwrite("eval_neighbor_sampling", &EncoderConfig::eval_neighbor_sampling)
+        .def_readwrite("use_incoming_nbrs", &EncoderConfig::use_incoming_nbrs)
+        .def_readwrite("use_outgoing_nbrs", &EncoderConfig::use_outgoing_nbrs);
+
 
     py::class_<DecoderConfig, std::shared_ptr<DecoderConfig>>(m, "DecoderConfig")
         .def(py::init<>())
