@@ -70,7 +70,7 @@ class DataLoader {
 
     LearningTask learning_task_;
 
-    at::cuda::CUDAStream *compute_stream_;
+    CudaStream *compute_stream_;
 
     DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, shared_ptr<TrainingConfig> training_config,
                shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config);

@@ -31,7 +31,7 @@ void BatchToDeviceWorker::run() {
 }
 
 void ComputeWorkerGPU::run() {
-    at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
+    CudaStream compute_stream = getStreamFromPool(true, 0);
     if (pipeline_->dataloader_->learning_task_ == LearningTask::NODE_CLASSIFICATION) {
         pipeline_->dataloader_->compute_stream_ = &compute_stream;
     }
@@ -65,7 +65,7 @@ void ComputeWorkerGPU::run() {
                 }
 
                 if (pipeline_->dataloader_->compute_stream_ != nullptr) {
-                    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
+                    CudaStreamGuard stream_guard(compute_stream);
                     pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
                 } else {
                     pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);

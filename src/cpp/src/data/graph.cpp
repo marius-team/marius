@@ -266,7 +266,7 @@ void DENSEGraph::clear() {
     node_properties_ = torch::Tensor();
 }
 
-void DENSEGraph::to(torch::Device device, at::cuda::CUDAStream *compute_stream, at::cuda::CUDAStream *transfer_stream) {
+void DENSEGraph::to(torch::Device device, CudaStream *compute_stream, CudaStream *transfer_stream) {
     node_ids_ = transfer_tensor(node_ids_, device, compute_stream, transfer_stream);
     hop_offsets_ = transfer_tensor(hop_offsets_, device, compute_stream, transfer_stream);
 

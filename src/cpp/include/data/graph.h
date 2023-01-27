@@ -159,7 +159,7 @@ class DENSEGraph : public MariusGraph {
      */
     void clear();
 
-    void to(torch::Device device, at::cuda::CUDAStream *compute_stream = nullptr, at::cuda::CUDAStream *transfer_stream = nullptr);
+    void to(torch::Device device, CudaStream *compute_stream = nullptr, CudaStream *transfer_stream = nullptr);
 };
 
 #endif  // MARIUS_SRC_CPP_INCLUDE_GRAPH_H_
