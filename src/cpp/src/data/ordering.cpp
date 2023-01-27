@@ -2,7 +2,7 @@
 // Created by Jason Mohoney on 7/17/20.
 //
 #ifdef MARIUS_OMP
-#include "omp.h"
+    #include "omp.h"
 #endif
 
 #include "common/datatypes.h"
@@ -183,9 +183,9 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
     // setup seeds
     unsigned int num_threads = 1;
 #ifdef MARIUS_OMP
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp single
+    #pragma omp single
         num_threads = omp_get_num_threads();
     }
 #endif

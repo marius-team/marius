@@ -55,12 +55,12 @@ class DummyCudaStreamGuard {
 };
 
 #ifdef MARIUS_CUDA
-#include <ATen/cuda/CUDAContext.h>
-#include <ATen/cuda/CUDAEvent.h>
-#include <ATen/cuda/Exceptions.h>
-#include <c10/cuda/CUDAGuard.h>
-#include <c10/cuda/CUDAStream.h>
-#include <c10/util/Exception.h>
+    #include <ATen/cuda/CUDAContext.h>
+    #include <ATen/cuda/CUDAEvent.h>
+    #include <ATen/cuda/Exceptions.h>
+    #include <c10/cuda/CUDAGuard.h>
+    #include <c10/cuda/CUDAStream.h>
+    #include <c10/util/Exception.h>
 
 typedef at::cuda::CUDAEvent CudaEvent;
 typedef at::cuda::CUDAStream CudaStream;
@@ -77,7 +77,7 @@ inline CudaStream getStreamFromPool(bool = false, int = 0) { return CudaStream()
 #endif
 
 #ifndef IO_FLAGS
-#define IO_FLAGS 0
+    #define IO_FLAGS 0
 #endif
 
 /** Typedefs */

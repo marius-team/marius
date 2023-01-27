@@ -442,7 +442,10 @@ torch::Tensor PartitionBuffer::indexRead(torch::Tensor indices) {
         throw std::runtime_error("");
     }
 
-    auto out_options = torch::TensorOptions().dtype(torch::kFloat32).pinned_memory(true);
+    auto out_options = torch::TensorOptions().dtype(torch::kFloat32);
+#ifdef MARIUS_CUDA
+    out_options = out_options.pinned_memory(true);
+#endif
     torch::Tensor out = torch::empty({indices.size(0), buffer_tensor_view_.size(1)}, out_options);
     torch::index_select_out(out, buffer_tensor_view_, 0, indices);
 

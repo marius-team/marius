@@ -8,7 +8,7 @@
 #include "data/samplers/neighbor.h"
 
 #ifdef MARIUS_OMP
-#include "omp.h"
+    #include "omp.h"
 #endif
 
 MariusGraph::MariusGraph(){};

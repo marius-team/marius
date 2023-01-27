@@ -5,7 +5,7 @@
 #include "nn/model.h"
 
 #ifdef MARIUS_CUDA
-#include <torch/csrc/cuda/nccl.h>
+    #include <torch/csrc/cuda/nccl.h>
 #endif
 
 #include "configuration/constants.h"

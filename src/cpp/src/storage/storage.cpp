@@ -616,15 +616,24 @@ torch::Tensor InMemory::indexRead(Indices indices) {
             torch::Tensor out;
 
             if (dtype_ == torch::kFloat32) {
-                auto out_options = torch::TensorOptions().dtype(torch::kFloat32).pinned_memory(true);
+                auto out_options = torch::TensorOptions().dtype(torch::kFloat32);
+#ifdef MARIUS_CUDA
+                out_options = out_options.pinned_memory(true);
+#endif
                 out = torch::empty({indices.size(0), dim1_size_}, out_options);
                 torch::index_select_out(out, data_, 0, indices);
             } else if (dtype_ == torch::kInt64) {
-                auto out_options = torch::TensorOptions().dtype(torch::kInt64).pinned_memory(true);
+                auto out_options = torch::TensorOptions().dtype(torch::kInt64);
+#ifdef MARIUS_CUDA
+                out_options = out_options.pinned_memory(true);
+#endif
                 out = torch::empty({indices.size(0), dim1_size_}, out_options);
                 torch::index_select_out(out, data_, 0, indices);
             } else if (dtype_ == torch::kInt32) {
-                auto out_options = torch::TensorOptions().dtype(torch::kInt32).pinned_memory(true);
+                auto out_options = torch::TensorOptions().dtype(torch::kInt32);
+#ifdef MARIUS_CUDA
+                out_options = out_options.pinned_memory(true);
+#endif
                 out = torch::empty({indices.size(0), dim1_size_}, out_options);
                 torch::index_select_out(out, data_, 0, indices);
             } else {

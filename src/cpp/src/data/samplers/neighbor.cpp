@@ -24,7 +24,12 @@ std::tuple<torch::Tensor, torch::Tensor> sample_all_cpu(torch::Tensor edges, tor
 
     int num_columns = edges.size(1);
 
-    Indices ret_neighbor_id_edges = torch::empty({total_neighbors, num_columns}, edges.options().pinned_memory(true));
+    auto options = edges.options();
+#ifdef MARIUS_CUDA
+    options = options.pinned_memory(true);
+#endif
+
+    Indices ret_neighbor_id_edges = torch::empty({total_neighbors, num_columns}, options);
     int64_t *ret_neighbor_id_edges_mem = ret_neighbor_id_edges.data_ptr<int64_t>();
 
     int64_t *sorted_list_ptr = edges.data_ptr<int64_t>();
@@ -120,7 +125,11 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
 
     auto local_offsets_accessor = local_offsets.accessor<int64_t, 1>();
 
-    Indices ret_neighbor_id_edges = torch::empty({total_neighbors, num_columns}, edges.options().pinned_memory(true));
+    auto options = edges.options();
+#ifdef MARIUS_CUDA
+    options = options.pinned_memory(true);
+#endif
+    Indices ret_neighbor_id_edges = torch::empty({total_neighbors, num_columns}, options);
     int64_t *ret_neighbor_id_edges_mem = ret_neighbor_id_edges.data_ptr<int64_t>();
 
     int64_t *sorted_list_ptr = edges.data_ptr<int64_t>();
@@ -129,9 +138,9 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
     unsigned int num_threads = 1;
 
 #ifdef MARIUS_OMP
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp single
+    #pragma omp single
         num_threads = omp_get_num_threads();
     }
 #endif
@@ -280,7 +289,11 @@ std::tuple<torch::Tensor, torch::Tensor> sample_dropout_cpu(torch::Tensor edges,
 
     auto new_local_offsets_accessor = new_local_offsets.accessor<int64_t, 1>();
 
-    Indices ret_neighbor_id_edges = torch::empty({total_neighbors, 3}, edges.options().pinned_memory(true));
+    auto options = edges.options();
+#ifdef MARIUS_CUDA
+    options = options.pinned_memory(true);
+#endif
+    Indices ret_neighbor_id_edges = torch::empty({total_neighbors, 3}, options);
     int64_t *ret_neighbor_id_edges_mem = ret_neighbor_id_edges.data_ptr<int64_t>();
 
     int64_t *sorted_list_ptr = edges.data_ptr<int64_t>();
@@ -572,9 +585,9 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
                                                                    torch::Tensor delta_outgoing_edges, int64_t num_nodes_in_memory) {
     unsigned int num_threads = 1;
 #ifdef MARIUS_OMP
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp single
+    #pragma omp single
         num_threads = omp_get_num_threads();
     }
 #endif
