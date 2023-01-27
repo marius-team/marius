@@ -100,6 +100,7 @@ void GraphModelStorage::_unload(shared_ptr<Storage> storage, bool write) {
 void GraphModelStorage::load() {
     _load(storage_ptrs_.edges);
     _load(storage_ptrs_.train_edges);
+    _load(storage_ptrs_.train_edges_dst_sort);
     _load(storage_ptrs_.nodes);
 
     if (train_) {
@@ -133,6 +134,7 @@ void GraphModelStorage::load() {
 void GraphModelStorage::unload(bool write) {
     _unload(storage_ptrs_.edges, false);
     _unload(storage_ptrs_.train_edges, false);
+    _unload(storage_ptrs_.train_edges_dst_sort, false);
     _unload(storage_ptrs_.validation_edges, false);
     _unload(storage_ptrs_.test_edges, false);
     _unload(storage_ptrs_.nodes, false);
@@ -332,7 +334,7 @@ bool GraphModelStorage::embeddingsOffDevice() {
     }
 }
 
-void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
+void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps) {
     if (useInMemorySubGraph()) {
         current_subgraph_state_ = std::make_shared<InMemorySubgraphState>();
 
@@ -432,7 +434,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
             current_subgraph_state_->in_memory_subgraph_ = nullptr;
         }
 
-        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory());
+        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory(), num_hash_maps);
 
         current_subgraph_state_->in_memory_partition_ids_ = new_in_mem_partition_ids;
         current_subgraph_state_->in_memory_edge_bucket_ids_ = in_mem_edge_bucket_ids;
@@ -446,22 +448,33 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state) {
             }
         }
     } else {
+        // Either nothing buffered (in memory training) or eval and doing full graph evaluation
         current_subgraph_state_ = std::make_shared<InMemorySubgraphState>();
+
+        bool should_sort = false;
 
         EdgeList src_sort;
         EdgeList dst_sort;
         if (storage_ptrs_.train_edges != nullptr) {
             src_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
-            dst_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
+            if (storage_ptrs_.train_edges_dst_sort != nullptr) {
+                dst_sort = storage_ptrs_.train_edges_dst_sort->range(0, storage_ptrs_.train_edges_dst_sort->getDim0()).to(torch::kInt64);
+            } else {
+                dst_sort = storage_ptrs_.train_edges->range(0, storage_ptrs_.train_edges->getDim0()).to(torch::kInt64);
+                should_sort = true;
+            }
         } else {
             src_sort = storage_ptrs_.edges->range(0, storage_ptrs_.edges->getDim0()).to(torch::kInt64);
             dst_sort = storage_ptrs_.edges->range(0, storage_ptrs_.edges->getDim0()).to(torch::kInt64);
+            should_sort = true;
         }
 
-        src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0))).to(torch::kInt64);
-        dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1))).to(torch::kInt64);
+        if (should_sort) {
+            src_sort = src_sort.index_select(0, torch::argsort(src_sort.select(1, 0))).to(torch::kInt64);
+            dst_sort = dst_sort.index_select(0, torch::argsort(dst_sort.select(1, -1))).to(torch::kInt64);
+        }
 
-        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(src_sort, dst_sort, getNumNodesInMemory());
+        current_subgraph_state_->in_memory_subgraph_ = std::make_shared<MariusGraph>(src_sort, dst_sort, getNumNodesInMemory(), num_hash_maps);
     }
 }
 
@@ -702,11 +715,13 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
     mapped_edges = mapped_edges.to(torch::kInt64);
     mapped_edges_dst_sort = mapped_edges_dst_sort.to(torch::kInt64);
 
+    int num_hash_maps = current_subgraph_state_->in_memory_subgraph_->num_hash_maps_;
+
     if (subgraph->in_memory_subgraph_ != nullptr) {
         subgraph->in_memory_subgraph_ = nullptr;
     }
 
-    subgraph->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory());
+    subgraph->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory(), num_hash_maps);
 
     // update state
     subgraph->in_memory_partition_ids_ = new_in_mem_partition_ids;
