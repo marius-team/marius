@@ -128,8 +128,7 @@ int64_t pwrite_wrapper(int fd, const void *buf, int64_t count, int64_t offset) {
 torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device, CudaStream *compute_stream, CudaStream *transfer_stream) {
     if (input.defined()) {
 #ifdef MARIUS_CUDA
-        input = input.pin_memory()
-        if (compute_stream != nullptr) input.record_stream(*compute_stream);
+        input = input.pin_memory() if (compute_stream != nullptr) input.record_stream(*compute_stream);
         if (transfer_stream != nullptr) input.record_stream(*transfer_stream);
 #endif
         input = input.to(device, false);
