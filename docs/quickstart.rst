@@ -11,7 +11,7 @@ Requirements
 * CUDA >= 10.1
 * CuDNN >= 7
 * pytorch >= 1.8
-* python >= 3.6
+* python >= 3.7
 * GCC >= 7 (On Linux) or Clang 12.0 (On MacOS)
 * cmake >= 3.12
 * make >= 3.8
