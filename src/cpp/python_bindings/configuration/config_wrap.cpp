@@ -43,7 +43,6 @@ void init_config(py::module &m) {
         .def_readwrite("use_incoming_nbrs", &EncoderConfig::use_incoming_nbrs)
         .def_readwrite("use_outgoing_nbrs", &EncoderConfig::use_outgoing_nbrs);
 
-
     py::class_<DecoderConfig, std::shared_ptr<DecoderConfig>>(m, "DecoderConfig")
         .def(py::init<>())
         .def_readwrite("type", &DecoderConfig::type)

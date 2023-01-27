@@ -161,7 +161,8 @@ void init_dataloader(py::module &m) {
         .def("hasNextBatch", &DataLoader::hasNextBatch)
         .def("getNextBatch", &DataLoader::getNextBatch, py::return_value_policy::reference)
         .def("finishedBatch", &DataLoader::finishedBatch)
-        .def("getBatch", &DataLoader::getBatch, py::arg("device") = py::none(), py::arg("perform_map") = true, py::arg("worker_id") = 0, py::return_value_policy::reference)
+        .def("getBatch", &DataLoader::getBatch, py::arg("device") = py::none(), py::arg("perform_map") = true, py::arg("worker_id") = 0,
+             py::return_value_policy::reference)
         .def("edgeSample", &DataLoader::edgeSample, py::arg("batch"), py::arg("worker_id") = 0)
         .def("nodeSample", &DataLoader::nodeSample, py::arg("batch"), py::arg("worker_id") = 0)
         .def("loadCPUParameters", &DataLoader::loadCPUParameters, py::arg("batch"))
