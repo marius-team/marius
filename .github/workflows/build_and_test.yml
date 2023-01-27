@@ -19,13 +19,13 @@ jobs:
       matrix:
         config:
         - {
-            name: "Ubuntu Latest GCC", artifact: "Linux.7z",
-            os: ubuntu-latest,
+            name: "Ubuntu 20.04 GCC", artifact: "Linux.7z",
+            os: ubuntu-20.04,
             cc: "gcc", cxx: "g++"
           }
         - {
-            name: "macOS Latest Clang", artifact: "macOS.7z",
-            os: macos-latest,
+            name: "macOS 11 Clang", artifact: "macOS.7z",
+            os: macos-11,
             cc: "clang", cxx: "clang++"
           }
 
@@ -36,12 +36,15 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: bash
       run:   |
+        
+        python3 --version
+      
         sudo python3 -m pip install pyarrow
 
         if [ "$RUNNER_OS" == "Linux" ]; then
-             sudo python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
+             sudo pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
         elif [ "$RUNNER_OS" == "macOS" ]; then
-             sudo python3 -m pip install torch
+             sudo pip3 install torch
         else
              echo "$RUNNER_OS not supported"
              exit 1
@@ -50,7 +53,9 @@ jobs:
     - name: Install Marius
       working-directory: ${{github.workspace}}
       shell: bash
-      run: sudo python3 -m pip install .[tests] --verbose
+      run: |
+        sudo pip3 install .[tests] --verbose
+        marius_env_info
 
     - name: Run Tests
       working-directory: ${{github.workspace}}
