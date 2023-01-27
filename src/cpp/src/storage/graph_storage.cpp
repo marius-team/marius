@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <random>
 
-// #include <omp.h>
-
 #include "data/ordering.h"
 #include "reporting/logger.h"
 
