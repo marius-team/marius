@@ -24,8 +24,8 @@ jobs:
             cc: "gcc", cxx: "g++"
           }
         - {
-            name: "macOS 11 Clang", artifact: "macOS.7z",
-            os: macos-11,
+            name: "macOS Latest Clang", artifact: "macOS.7z",
+            os: macos-latest,
             cc: "clang", cxx: "clang++"
           }
 
