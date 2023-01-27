@@ -23,19 +23,8 @@ jobs:
             os: ubuntu-20.04,
             cc: "gcc", cxx: "g++"
           }
-        - {
-            name: "macOS Latest Clang", artifact: "macOS.7z",
-            os: macos-latest,
-            cc: "clang", cxx: "clang++"
-          }
-
     steps:
     - uses: actions/checkout@v2
-
-    - uses: conda-incubator/setup-miniconda@v2
-      with:
-        auto-update-conda: true
-        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
       working-directory: ${{github.workspace}}
@@ -48,8 +37,6 @@ jobs:
 
         if [ "$RUNNER_OS" == "Linux" ]; then
              sudo pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-             conda install pytorch -c pytorch
         else
              echo "$RUNNER_OS not supported"
              exit 1
