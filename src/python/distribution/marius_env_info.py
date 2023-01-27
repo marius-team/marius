@@ -62,12 +62,11 @@ def get_python_info():
         try:
             imported_dep = __import__(dep)
             py_deps_version[dep + "_version"] = imported_dep.__version__
-        except RuntimeError:
+        except ModuleNotFoundError:
             py_deps_version[dep + "_version"] = "N/A"
 
     pytorch_info = {
-        "version": "{}.{}.{}".format(sys.version_info[0], sys.version_info[1], sys.version_info[2]),
-        "compiler": re.sub(r"\[|\]", "", sys.version.split("\n")[1]),
+        "version": sys.version,
         "deps": py_deps_version,
     }
     return pytorch_info

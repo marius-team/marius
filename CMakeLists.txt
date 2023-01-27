@@ -141,7 +141,12 @@ add_library(${PROJECT_NAME}
             ${project_CUDA_THIRD_PARTY_HEADERS}
             ${project_CUDA_THIRD_PARTY_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} ${Python3_LIBRARIES})
+if(NOT APPLE)
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${PYTHON_LIBRARIES})
+else()
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+endif()
+
 target_link_libraries(${PROJECT_NAME} ${TORCH_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} spdlog)
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${project_HEADERS}")
