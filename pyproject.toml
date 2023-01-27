@@ -11,5 +11,5 @@ pythonpath = [
 ]
 
 [build-system]
-requires = ["setuptools==44.0"]
+requires = ["setuptools==44.0", "torch>=1.7.1"]
 build-backend = "setuptools.build_meta"
