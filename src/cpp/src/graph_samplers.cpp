@@ -328,16 +328,19 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
         }
 
         int private_count = 0;
+        int grow_count = 0;
 
         #pragma unroll
         for (int64_t j = start; j < end; j++) {
             if (hash_map_accessor[j]) {
                 delta_ids_accessor[private_count++] = j;
                 hash_map_accessor[j] = 0;
+                grow_count++;
 
-                if (private_count == upper_bound) {
+                if (grow_count == upper_bound) {
                     sub_deltas[tid] = torch::cat({sub_deltas[tid], torch::empty({upper_bound}, device_options)}, 0);
                     delta_ids_accessor = sub_deltas[tid].accessor<int64_t, 1>();
+                    grow_count = 0;
                 }
             }
         }
