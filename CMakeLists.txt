@@ -148,6 +148,7 @@ add_library(${PROJECT_NAME}
 
 if (APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${PYTHON3_LIBRARIES})
 
