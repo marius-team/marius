@@ -42,7 +42,12 @@ execute_process(
         COMMAND python3 -c "import torch; import os; print(os.path.dirname(torch.__file__), end='')"
         OUTPUT_VARIABLE TorchPath
 )
-list(APPEND CMAKE_PREFIX_PATH ${TorchPath})
+list(PREPEND CMAKE_PREFIX_PATH ${TorchPath})
+
+# favor conda packages over system packages
+if (EXISTS $ENV{CONDA_PREFIX})
+    set(CMAKE_PREFIX_PATH $ENV{CONDA_PREFIX} ${CMAKE_PREFIX_PATH})
+endif ()
 
 execute_process(
         COMMAND python3 -c "import torch; print(torch.__version__, end='')"
@@ -95,8 +100,8 @@ endif ()
 message(STATUS "project_CUDA_THIRD_PARTY_HEADERS ${project_CUDA_THIRD_PARTY_HEADERS}")
 message(STATUS "project_CUDA_THIRD_PARTY_SOURCES ${project_CUDA_THIRD_PARTY_SOURCES}")
 
-find_package(Python3 COMPONENTS Development Interpreter REQUIRED)
 find_package(Torch REQUIRED)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
 execute_process(
         COMMAND python3 -c "import torch; print(torch._C._PYBIND11_COMPILER_TYPE, end='')"
@@ -141,11 +146,8 @@ add_library(${PROJECT_NAME}
             ${project_CUDA_THIRD_PARTY_HEADERS}
             ${project_CUDA_THIRD_PARTY_SOURCES})
 
-if(NOT APPLE)
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${PYTHON_LIBRARIES})
-else()
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-endif()
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PYTHON3_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME} ${TORCH_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} spdlog)
