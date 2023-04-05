@@ -19,3 +19,5 @@ initialize_submodule(parallel-hashmap)
 add_subdirectory(googletest EXCLUDE_FROM_ALL)
 add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
 add_subdirectory(spdlog EXCLUDE_FROM_ALL)
+
+set_property(TARGET spdlog PROPERTY POSITION_INDEPENDENT_CODE ON)
