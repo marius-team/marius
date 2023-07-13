@@ -27,7 +27,7 @@ void LoadBatchWorker::run() {
                 pipeline_->batches_in_flight_++;
                 lock.unlock();
 
-                shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch(c10::nullopt, false, worker_id_);
+                shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch(worker_id_);
 
                 if (batch == nullptr) {
                     break;

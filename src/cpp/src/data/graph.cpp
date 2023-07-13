@@ -37,7 +37,7 @@ MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, i
     num_hash_maps_ = num_hash_maps;
     if (num_hash_maps_ > 0) {
         auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(contiguous_src.device());
-        for (int i = 0; i < num_hash_maps_; i++) {
+        for (int i; i < num_hash_maps_; i++) {
             hash_maps_.emplace_back(torch::zeros({num_nodes_in_memory}, bool_device_options));
         }
     }

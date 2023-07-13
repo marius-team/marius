@@ -110,7 +110,8 @@ class DataLoader {
      * Loads CPU embedding parameters
      * @return The next batch
      */
-    shared_ptr<Batch> getBatch(at::optional<torch::Device> device = c10::nullopt, bool perform_map = false, int worker_id = 0);
+    shared_ptr<Batch> getBatch(int worker_id = 0, at::optional<torch::Device> device = c10::nullopt, bool perform_map = false);
+    // TODO: this change to getBatch may affect python examples, docs, tests
 
     /**
      * Loads edges and samples negatives to construct a batch

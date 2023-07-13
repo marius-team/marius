@@ -89,9 +89,6 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
     negative_sampler_ = negative_sampler;
     neighbor_sampler_ = neighbor_sampler;
 
-    training_config_ = nullptr;
-    evaluation_config_ = nullptr;
-
     training_negative_sampler_ = nullptr;
     evaluation_negative_sampler_ = nullptr;
 
@@ -357,7 +354,7 @@ void DataLoader::finishedBatch() {
     batch_cv_->notify_all();
 }
 
-shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool perform_map, int worker_id) {
+shared_ptr<Batch> DataLoader::getBatch(int worker_id, at::optional<torch::Device> device, bool perform_map) {
     shared_ptr<Batch> batch = getNextBatch();
     if (batch == nullptr) {
         return batch;
@@ -379,9 +376,9 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
         }
     }
 
-    if (perform_map) {
-        batch->dense_graph_.performMap();
-    }
+    //    if (perform_map) {
+    //        batch->dense_graph_.performMap();
+    //    }
 
     return batch;
 }
@@ -572,13 +569,17 @@ void DataLoader::loadStorage() {
     total_batches_processed_ = 0;
     all_read_ = false;
 
-    int num_hash_maps = 1;
+    int num_hash_maps = 0;
     if (train_) {
-        if (training_config_ != nullptr && !training_config_->pipeline->sync) {
+        if (training_config_->pipeline->sync) {
+            num_hash_maps = 1;
+        } else {
             num_hash_maps = training_config_->pipeline->batch_loader_threads;
         }
     } else {
-        if (evaluation_config_ != nullptr && !evaluation_config_->pipeline->sync) {
+        if (evaluation_config_->pipeline->sync) {
+            num_hash_maps = 1;
+        } else {
             num_hash_maps = evaluation_config_->pipeline->batch_loader_threads;
         }
     }
