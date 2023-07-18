@@ -220,8 +220,8 @@ Import marius and preprocess ogbn_arxiv for node classifcation.
 
     .. code-block:: python
 
-        import torch
         import marius as m
+        import torch
         from marius.tools.preprocess.datasets.ogbn_arxiv import OGBNArxiv
 
         # initialize and preprocess dataset

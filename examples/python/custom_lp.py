@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import torch
 from omegaconf import OmegaConf
 
 import marius as m
@@ -8,6 +7,7 @@ from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConv
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
 
+import torch
 
 class MYDATASET(LinkPredictionDataset):
     def __init__(self, output_directory: Path, spark=False):

@@ -1,10 +1,11 @@
 from pathlib import Path
 
-import torch
 from omegaconf import OmegaConf
 
 import marius as m
 from marius.tools.preprocess.datasets.fb15k_237 import FB15K237
+
+import torch
 
 
 def init_model(embedding_dim, num_nodes, num_relations, device, dtype):

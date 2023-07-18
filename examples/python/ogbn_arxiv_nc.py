@@ -1,10 +1,11 @@
 from pathlib import Path
 
-import torch
 from omegaconf import OmegaConf
 
 import marius as m
 from marius.tools.preprocess.datasets.ogbn_arxiv import OGBNArxiv
+
+import torch
 
 
 def init_model(feature_dim, num_classes, device):
