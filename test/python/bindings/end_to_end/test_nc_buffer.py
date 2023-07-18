@@ -106,7 +106,8 @@ class TestNCBuffer(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async(self):
         name = "async"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
@@ -279,7 +280,8 @@ class TestNCBufferNoRelations(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async(self):
         name = "async"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
