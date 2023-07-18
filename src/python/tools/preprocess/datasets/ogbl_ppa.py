@@ -1,10 +1,10 @@
 from pathlib import Path
 
-import torch
-
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
+
+import torch
 
 
 class OGBLPpa(LinkPredictionDataset):

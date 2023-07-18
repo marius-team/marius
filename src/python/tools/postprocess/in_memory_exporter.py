@@ -3,10 +3,10 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 from omegaconf import OmegaConf
 
 from marius.tools.configuration.constants import PathConstants
+import torch
 
 SUPPORTED_FORMATS = ["CSV", "PARQUET", "BINARY", "BIN"]
 

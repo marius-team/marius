@@ -3,12 +3,13 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.preprocess.converters.partitioners.torch_partitioner import TorchPartitioner
 from marius.tools.preprocess.converters.readers.pandas_readers import PandasDelimitedFileReader
 from marius.tools.preprocess.converters.writers.torch_writer import TorchWriter
+
+import torch
 
 SUPPORTED_DELIM_FORMATS = ["CSV", "TSV", "TXT", "DELIM", "DELIMITED"]
 SUPPORTED_IN_MEMORY_FORMATS = ["NUMPY", "NP", "PYTORCH", "TORCH"]
