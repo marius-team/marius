@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.4.0-cudnn8-devel-ubuntu18.04
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 RUN apt update
 
 RUN apt install -y g++ \
@@ -25,4 +25,7 @@ RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
 # install pytorch
-RUN python3 -m pip install torch==1.9.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+RUN python3 -m pip install torch==2.0.1+cu118 -f https://download.pytorch.org/whl/torch_stable.html
+
+RUN mkdir /working_dir
+WORKDIR /working_dir
