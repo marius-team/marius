@@ -105,4 +105,5 @@ MariusGNN (out-of-core GNN training)
     pages = {144–161},
     url = {https://doi.org/10.1145/3552326.3567501},
     publisher = {Association for Computing Machinery}
+}
 ```
