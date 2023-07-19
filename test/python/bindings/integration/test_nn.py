@@ -10,7 +10,7 @@ from marius.nn.encoders import GeneralEncoder
 from marius.nn.layers import EmbeddingLayer
 from marius.report import LinkPredictionReporter, NodeClassificationReporter
 
-import torch
+import torch  # isort:skip
 
 edge_list = torch.tensor([[0, 0, 1], [0, 0, 2], [1, 1, 4], [2, 0, 3], [3, 1, 0], [4, 0, 1]])
 batch_edges = torch.tensor(

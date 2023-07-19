@@ -1,3 +1,4 @@
+# isort: skip_file
 import os
 import sys
 
@@ -9,8 +10,8 @@ if not only_python:
         # import torch  # noqa F401
 
         # load main modules
-        from . import _config as config # RW: import first due to marius/torch omp linking
-        import torch
+        from . import _config as config  # RW: import first due to marius/torch omp linking
+        import torch  # noqa F401
 
         # from . import _config as config
         from . import _data as data

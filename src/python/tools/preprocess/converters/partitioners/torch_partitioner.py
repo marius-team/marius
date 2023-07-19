@@ -2,7 +2,7 @@ import numpy as np
 
 from marius.tools.preprocess.converters.partitioners.partitioner import Partitioner
 
-import torch
+import torch  # isort:skip
 
 
 def dataframe_to_tensor(input_dataframe):

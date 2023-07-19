@@ -11,7 +11,7 @@ from marius.tools.preprocess.dataset import NodeClassificationDataset
 from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
 from marius.tools.preprocess.utils import download_url, extract_file
 
-import torch
+import torch  # isort:skip
 
 
 def switch_to_num(row):

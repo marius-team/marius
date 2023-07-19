@@ -19,7 +19,7 @@ from marius.tools.preprocess.converters.torch_converter import (
     dataframe_to_tensor,
 )
 
-import torch
+import torch  # isort:skip
 
 
 def str2bool(v):

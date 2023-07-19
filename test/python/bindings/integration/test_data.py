@@ -3,7 +3,7 @@ import unittest
 from marius.data import Batch, DataLoader
 from marius.data.samplers import CorruptNodeNegativeSampler, LayeredNeighborSampler
 
-import torch
+import torch  # isort:skip
 
 
 class TestBatch(unittest.TestCase):

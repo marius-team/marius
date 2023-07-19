@@ -6,7 +6,7 @@ from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConv
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
 
-import torch
+import torch  # isort:skip
 
 
 class OGBLWikiKG2(LinkPredictionDataset):

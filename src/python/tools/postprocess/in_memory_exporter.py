@@ -6,7 +6,8 @@ import pandas as pd
 from omegaconf import OmegaConf
 
 from marius.tools.configuration.constants import PathConstants
-import torch
+
+import torch  # isort:skip
 
 SUPPORTED_FORMATS = ["CSV", "PARQUET", "BINARY", "BIN"]
 

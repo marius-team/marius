@@ -12,7 +12,7 @@ from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 
-import torch
+import torch  # isort:skip
 
 test_files = ["train_edges.txt", "valid_edges.txt", "test_edges.txt"]
 

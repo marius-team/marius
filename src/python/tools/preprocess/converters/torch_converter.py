@@ -9,7 +9,7 @@ from marius.tools.preprocess.converters.partitioners.torch_partitioner import To
 from marius.tools.preprocess.converters.readers.pandas_readers import PandasDelimitedFileReader
 from marius.tools.preprocess.converters.writers.torch_writer import TorchWriter
 
-import torch
+import torch  # isort:skip
 
 SUPPORTED_DELIM_FORMATS = ["CSV", "TSV", "TXT", "DELIM", "DELIMITED"]
 SUPPORTED_IN_MEMORY_FORMATS = ["NUMPY", "NP", "PYTORCH", "TORCH"]

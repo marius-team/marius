@@ -314,7 +314,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
             model_names=["distmult"],
             storage_names=["part_buffer"],
             training_names=["sync"],
-            evaluation_names=["sync"], #, "async", "async_deg", "async_filtered"], # RW: async test currently flakey
+            evaluation_names=["sync"],  # , "async", "async_deg", "async_filtered"], # RW: async test currently flakey
             task="lp",
         )
 
