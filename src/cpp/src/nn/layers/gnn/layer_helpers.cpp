@@ -5,7 +5,7 @@
 #include "nn/layers/gnn/layer_helpers.h"
 
 #ifdef MARIUS_CUDA
-#include "pytorch_scatter/segment_max.h"
+    #include "pytorch_scatter/segment_max.h"
 #endif
 
 torch::Tensor segment_ids_from_offsets(torch::Tensor segment_offsets, int64_t input_size) {

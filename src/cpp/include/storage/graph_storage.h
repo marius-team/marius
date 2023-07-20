@@ -12,6 +12,7 @@
 struct GraphModelStoragePtrs {
     shared_ptr<Storage> edges = nullptr;
     shared_ptr<Storage> train_edges = nullptr;
+    shared_ptr<Storage> train_edges_dst_sort = nullptr;
     shared_ptr<Storage> validation_edges = nullptr;
     shared_ptr<Storage> test_edges = nullptr;
     shared_ptr<Storage> nodes = nullptr;
@@ -80,7 +81,7 @@ class GraphModelStorage {
 
     void unload(bool write);
 
-    void initializeInMemorySubGraph(torch::Tensor buffer_state);
+    void initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps = 1);
 
     void updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState> subgraph, std::pair<std::vector<int>, std::vector<int>> swap_ids);
 

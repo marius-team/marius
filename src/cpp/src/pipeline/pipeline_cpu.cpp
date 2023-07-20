@@ -18,19 +18,12 @@ void ComputeWorkerCPU::run() {
                 break;
             }
             if (pipeline_->isTrain()) {
-                if (batch->node_embeddings_.defined()) {
-                    batch->node_embeddings_.requires_grad_();
-                }
-
-                batch->dense_graph_.performMap();
-
                 pipeline_->model_->train_batch(batch);
                 batch->status_ = BatchStatus::ComputedGradients;
                 shared_ptr<Queue<shared_ptr<Batch>>> push_queue = ((PipelineCPU *)pipeline_)->update_batches_;
 
                 push_queue->blocking_push(batch);
             } else {
-                batch->dense_graph_.performMap();
                 pipeline_->model_->evaluate_batch(batch);
                 pipeline_->batches_in_flight_--;
                 pipeline_->dataloader_->finishedBatch();
@@ -53,7 +46,6 @@ void EncodeNodesWorkerCPU::run() {
                 break;
             }
 
-            batch->dense_graph_.performMap();
             torch::Tensor encoded = pipeline_->model_->encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, false);
             batch->clear();
             batch->encoded_uniques_ = encoded.contiguous();
@@ -128,7 +120,7 @@ void Pipeline::waitComplete() {
 
 void PipelineCPU::addWorkersToPool(int pool_id, int worker_type, int num_workers, int gpu_id) {
     for (int i = 0; i < num_workers; i++) {
-        pool_[pool_id].emplace_back(initWorkerOfType(worker_type, gpu_id));
+        pool_[pool_id].emplace_back(initWorkerOfType(worker_type, gpu_id, i));
     }
 }
 

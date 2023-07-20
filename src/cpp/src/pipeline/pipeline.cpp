@@ -25,10 +25,9 @@ void LoadBatchWorker::run() {
             if ((pipeline_->batches_in_flight_ < pipeline_->staleness_bound_) && pipeline_->dataloader_->hasNextBatch()) {
                 pipeline_->admitted_batches_++;
                 pipeline_->batches_in_flight_++;
-                //                lock.unlock();
+                lock.unlock();
 
-                shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch();
-                lock.unlock();  // TODO make sure having the unlock after getBatch doesn't introduce deadlock
+                shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch(c10::nullopt, false, worker_id_);
 
                 if (batch == nullptr) {
                     break;
@@ -115,11 +114,11 @@ Pipeline::~Pipeline() {
     delete pipeline_lock_;
 }
 
-shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id) {
+shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id, int worker_id) {
     shared_ptr<Worker> worker;
 
     if (worker_type == LOAD_BATCH_ID) {
-        worker = std::make_shared<LoadBatchWorker>(this);
+        worker = std::make_shared<LoadBatchWorker>(this, worker_id);
     } else if (worker_type == H2D_TRANSFER_ID) {
         worker = std::make_shared<BatchToDeviceWorker>(this);
     } else if (worker_type == CPU_COMPUTE_ID) {

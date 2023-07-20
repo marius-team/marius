@@ -52,5 +52,5 @@ jobs:
     - name: Run Tests
       working-directory: ${{github.workspace}}
       shell: bash
-      run: MARIUS_TEST_HOME=test/ python3 -m pytest test/python --verbose
+      run: OMP_NUM_THREADS=1 MARIUS_TEST_HOME=test/ python3 -m pytest test/python --verbose
 

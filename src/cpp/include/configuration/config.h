@@ -17,8 +17,6 @@ struct NeighborSamplingConfig {
     NeighborSamplingLayer type;
     shared_ptr<NeighborSamplingOptions> options = nullptr;
     bool use_hashmap_sets;
-    bool use_incoming_nbrs;
-    bool use_outgoing_nbrs;
 };
 
 struct OptimizerConfig {
@@ -52,6 +50,8 @@ struct LayerConfig {
 };
 
 struct EncoderConfig {
+    bool use_incoming_nbrs;
+    bool use_outgoing_nbrs;
     std::vector<std::vector<shared_ptr<LayerConfig>>> layers;
     std::vector<shared_ptr<NeighborSamplingConfig>> train_neighbor_sampling;
     std::vector<shared_ptr<NeighborSamplingConfig>> eval_neighbor_sampling;
@@ -136,6 +136,7 @@ struct StorageConfig {
     bool export_encoded_nodes;
     std::string model_dir;
     spdlog::level::level_enum log_level;
+    bool train_edges_pre_sorted;
 };
 
 struct TrainingConfig {

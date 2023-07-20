@@ -5,7 +5,6 @@ from argparse import RawDescriptionHelpFormatter
 
 import numpy as np
 import pandas as pd
-import torch
 
 import marius as m
 from marius.tools.configuration.constants import PathConstants
@@ -19,6 +18,8 @@ from marius.tools.preprocess.converters.torch_converter import (
     apply_mapping_edges,
     dataframe_to_tensor,
 )
+
+import torch  # isort:skip
 
 
 def str2bool(v):

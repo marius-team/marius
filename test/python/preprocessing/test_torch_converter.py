@@ -6,12 +6,13 @@ from test.python.constants import TESTING_DATA_DIR, TMP_TEST_DIR
 
 import numpy as np
 import pandas as pd
-import torch
 from omegaconf import MISSING, OmegaConf
 
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
+
+import torch  # isort:skip
 
 test_files = ["train_edges.txt", "valid_edges.txt", "test_edges.txt"]
 

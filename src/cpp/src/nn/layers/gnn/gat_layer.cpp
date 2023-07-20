@@ -51,13 +51,29 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
     relu_opts.negative_slope(options_->negative_slope);
     auto leaky_relu = torch::nn::LeakyReLU(relu_opts);
 
-    Indices incoming_neighbors = dense_graph.getNeighborIDs(true, false);
-    Indices incoming_neighbor_offsets = dense_graph.getNeighborOffsets(true);
+    Indices neighbors;
+    Indices neighbor_offsets;
+    Indices total_neighbors;
 
-    torch::Tensor incoming_total_neighbors = dense_graph.getNumNeighbors(true);
+    if (dense_graph.out_neighbors_mapping_.defined() && dense_graph.in_neighbors_mapping_.defined()) {
+        auto tup = dense_graph.getCombinedNeighborIDs();
+        neighbors = std::get<2>(tup);
+        neighbor_offsets = std::get<0>(tup);
+        total_neighbors = std::get<1>(tup);
+    } else if (dense_graph.in_neighbors_mapping_.defined()) {
+        neighbors = dense_graph.getNeighborIDs(true, false);
+        neighbor_offsets = dense_graph.getNeighborOffsets(true);
+        total_neighbors = dense_graph.getNumNeighbors(true);
+    } else if (dense_graph.out_neighbors_mapping_.defined()) {
+        neighbors = dense_graph.getNeighborIDs(false, false);
+        neighbor_offsets = dense_graph.getNeighborOffsets(false);
+        total_neighbors = dense_graph.getNumNeighbors(false);
+    } else {
+        throw MariusRuntimeException("No neighbors defined.");
+    }
 
     int64_t layer_offset = dense_graph.getLayerOffset();
-    torch::Tensor parent_ids = torch::arange(inputs.size(0) - layer_offset, incoming_total_neighbors.options()).repeat_interleave(incoming_total_neighbors);
+    torch::Tensor parent_ids = torch::arange(inputs.size(0) - layer_offset, total_neighbors.options()).repeat_interleave(total_neighbors);
 
     if (train && input_dropout_ > 0) {
         auto dropout_opts = torch::nn::DropoutOptions().p(input_dropout_).inplace(false);
@@ -65,12 +81,12 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
         inputs = dropout(inputs);
     }
 
-    torch::Tensor incoming_embeddings = inputs.index_select(0, incoming_neighbors);
-    torch::Tensor incoming_transforms = torch::matmul(weight_matrices_, incoming_embeddings.transpose(0, 1));
-    incoming_transforms = incoming_transforms.reshape({options_->num_heads, head_dim_, -1});
+    torch::Tensor nbr_embeddings = inputs.index_select(0, neighbors);
+    torch::Tensor nbr_transforms = torch::matmul(weight_matrices_, nbr_embeddings.transpose(0, 1));
+    nbr_transforms = nbr_transforms.reshape({options_->num_heads, head_dim_, -1});
 
     // free memory as this tensor can become large with large numbers of neighbors
-    incoming_embeddings = torch::Tensor();
+    nbr_embeddings = torch::Tensor();
 
     torch::Tensor self_embs = inputs.narrow(0, layer_offset, inputs.size(0) - layer_offset);
     torch::Tensor self_transforms = torch::matmul(weight_matrices_, self_embs.transpose(0, 1));
@@ -81,14 +97,13 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
     self_atn_weights = leaky_relu(self_atn_weights);
 
     self_transforms_l = self_transforms_l.index_select(-1, parent_ids);
-    torch::Tensor nbr_atn_weights = self_transforms_l + torch::matmul(a_r_, incoming_transforms);
+    torch::Tensor nbr_atn_weights = self_transforms_l + torch::matmul(a_r_, nbr_transforms);
     nbr_atn_weights = leaky_relu(nbr_atn_weights);
 
     nbr_atn_weights = nbr_atn_weights.transpose(0, 2);    // [total_num_nbrs, 1, num_heads_]
     self_atn_weights = self_atn_weights.transpose(0, 2);  // [num_to_encode, 1, num_heads_]
 
-    std::tie(nbr_atn_weights, self_atn_weights) =
-        attention_softmax(nbr_atn_weights, self_atn_weights, incoming_neighbor_offsets, parent_ids, incoming_total_neighbors);
+    std::tie(nbr_atn_weights, self_atn_weights) = attention_softmax(nbr_atn_weights, self_atn_weights, neighbor_offsets, parent_ids, total_neighbors);
 
     nbr_atn_weights = nbr_atn_weights.transpose(0, 2);
     self_atn_weights = self_atn_weights.transpose(0, 2);
@@ -103,8 +118,8 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
 
     nbr_atn_weights = nbr_atn_weights.repeat({1, head_dim_, 1});
 
-    torch::Tensor tmp = (incoming_transforms * nbr_atn_weights).transpose(0, 2);
-    torch::Tensor h_i = segmented_sum(tmp, parent_ids, incoming_total_neighbors.size(0));
+    torch::Tensor tmp = (nbr_transforms * nbr_atn_weights).transpose(0, 2);
+    torch::Tensor h_i = segmented_sum(tmp, parent_ids, total_neighbors.size(0));
     h_i = h_i.transpose(0, 2);
 
     tmp = self_transforms * self_atn_weights;
@@ -118,9 +133,10 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
 
     h_i = h_i.transpose(0, 1);
 
-    if (config_->bias) {
-        h_i = h_i + bias_;
-    }
+    // this has been moved to the post_hook
+    //    if (config_->bias) {
+    //        h_i = h_i + bias_;
+    //    }
 
     return h_i;
 }

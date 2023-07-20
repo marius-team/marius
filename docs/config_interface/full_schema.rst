@@ -187,6 +187,14 @@ Encoder Configuration
      - Type
      - Description
      - Required
+   * - use_incoming_nbrs
+     - Boolean
+     - Whether to use incoming neighbors for the encoder. One of use_incoming_nbrs or use_outgoing_nbrs must be set to true.
+     - No
+    * - use_outgoing_nbrs
+     - Boolean
+     - Whether to use outgoing neighbors for the encoder. One of use_incoming_nbrs or use_outgoing_nbrs must be set to true.
+     - No
    * - layers
      - List[List[:ref:`LayerConfig<layer-conf-section>`]]
      - Defines architecture of the encoder. Layers of the encoder are grouped into stages, where the layers within a stage are executed in parallel and the output of stage is the input to the successive stage.
@@ -266,16 +274,6 @@ The below example depicts a configuration where there is one embedding layer, fo
      - NeighborSamplingOptions
      - Specific options depending on the type of sampling layer.
      - No
-
-In the following configuration snippet, the GNN layer samples all neighbors for a given node during training. All neighbors with incoming
-edges to the given node are sampled while the outgoing edges are ignored. 
-
-.. code-block:: yaml 
-
-   train_neighbor_sampling:
-     - type: ALL
-       use_incoming_nbrs: true
-       use_outgoing_nbrs: false
 
 
 .. list-table:: UniformSamplingOptions[NeighborSamplingOptions]

@@ -18,7 +18,8 @@
 #include "storage/graph_storage.h"
 #include "storage/storage.h"
 
-std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config, LearningTask learning_task);
+std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config,
+                                                                                                               LearningTask learning_task);
 
 std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeEmbeddings(std::shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config,
                                                                               bool reinitialize, bool train, std::shared_ptr<InitConfig> init_config);

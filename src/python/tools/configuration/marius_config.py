@@ -60,9 +60,7 @@ def get_model_dir_path(dataset_dir):
 class NeighborSamplingConfig:
     type: str = "ALL"
     options: NeighborSamplingOptions = NeighborSamplingOptions()
-    use_incoming_nbrs: bool = True
-    use_outgoing_nbrs: bool = True
-    use_hashmap_sets: bool = True
+    use_hashmap_sets: bool = False
 
     def merge(self, input_config: DictConfig):
         """
@@ -88,6 +86,9 @@ class NeighborSamplingConfig:
                     new_options.__setattr__(key, val)
 
         self.options = new_options
+
+        if "use_hashmap_sets" in input_config.keys():
+            self.use_hashmap_sets = input_config.use_hashmap_sets
 
 
 @dataclass
@@ -255,6 +256,8 @@ class LayerConfig:
 
 @dataclass
 class EncoderConfig:
+    use_incoming_nbrs: bool = True
+    use_outgoing_nbrs: bool = True
     layers: List[List[LayerConfig]] = field(default_factory=list)
     train_neighbor_sampling: List[NeighborSamplingConfig] = field(default_factory=list)
     eval_neighbor_sampling: List[NeighborSamplingConfig] = field(default_factory=list)
@@ -266,6 +269,11 @@ class EncoderConfig:
         :param input_config: The input configuration dictionary
         :return: Structured output config
         """
+        if "use_incoming_nbrs" in input_config.keys():
+            self.use_incoming_nbrs = input_config.use_incoming_nbrs
+
+        if "use_outgoing_nbrs" in input_config.keys():
+            self.use_outgoing_nbrs = input_config.use_outgoing_nbrs
 
         new_layers = []
         if "layers" in input_config.keys():
@@ -517,6 +525,7 @@ class StorageConfig:
     export_encoded_nodes: bool = False
     model_dir: str = MISSING
     log_level: str = "info"
+    train_edges_pre_sorted: bool = False
 
     SUPPORTED_EMBEDDING_BACKENDS = ["PARTITION_BUFFER", "DEVICE_MEMORY", "HOST_MEMORY"]
     SUPPORTED_EDGE_BACKENDS = ["FLAT_FILE", "DEVICE_MEMORY", "HOST_MEMORY"]
@@ -589,6 +598,9 @@ class StorageConfig:
 
         if "log_level" in input_config.keys():
             self.log_level = input_config.log_level
+
+        if "train_edges_pre_sorted" in input_config.keys():
+            self.train_edges_pre_sorted = input_config.train_edges_pre_sorted
 
 
 @dataclass

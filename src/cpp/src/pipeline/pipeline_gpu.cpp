@@ -22,7 +22,7 @@ void BatchToDeviceWorker::run() {
             }
             int queue_choice = pipeline_->assign_id_++ % ((PipelineGPU *)pipeline_)->device_loaded_batches_.size();
 
-            batch->to(pipeline_->model_->device_models_[queue_choice]->device_);
+            batch->to(pipeline_->model_->device_models_[queue_choice]->device_, pipeline_->dataloader_->compute_stream_);
 
             ((PipelineGPU *)pipeline_)->device_loaded_batches_[queue_choice]->blocking_push(batch);
         }
@@ -31,6 +31,12 @@ void BatchToDeviceWorker::run() {
 }
 
 void ComputeWorkerGPU::run() {
+    CudaStream compute_stream = getStreamFromPool(true, 0);
+    if (pipeline_->dataloader_->learning_task_ == LearningTask::NODE_CLASSIFICATION) {
+        pipeline_->dataloader_->compute_stream_ = &compute_stream;
+    }
+    // TODO: streams for LP need a bit more work
+
     while (!done_) {
         while (!paused_) {
             auto tup = ((PipelineGPU *)pipeline_)->device_loaded_batches_[gpu_id_]->blocking_pop();
@@ -58,13 +64,12 @@ void ComputeWorkerGPU::run() {
                     }
                 }
 
-                if (batch->node_embeddings_.defined()) {
-                    batch->node_embeddings_.requires_grad_();
+                if (pipeline_->dataloader_->compute_stream_ != nullptr) {
+                    CudaStreamGuard stream_guard(compute_stream);
+                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
+                } else {
+                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
                 }
-
-                batch->dense_graph_.performMap();
-
-                pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
 
                 if (will_sync) {
                     // we already have the lock acquired, it is safe to sync?
@@ -110,7 +115,6 @@ void EncodeNodesWorkerGPU::run() {
 
             pipeline_->dataloader_->loadGPUParameters(batch);
 
-            batch->dense_graph_.performMap();
             torch::Tensor encoded =
                 pipeline_->model_->device_models_[gpu_id_].get()->encoder_->forward(batch->node_embeddings_, batch->node_features_, batch->dense_graph_, false);
             batch->clear();
@@ -210,7 +214,7 @@ PipelineGPU::~PipelineGPU() {
 void PipelineGPU::addWorkersToPool(int pool_id, int worker_type, int num_workers, int num_gpus) {
     for (int i = 0; i < num_workers; i++) {
         for (int j = 0; j < num_gpus; j++) {
-            pool_[pool_id].emplace_back(initWorkerOfType(worker_type, j));
+            pool_[pool_id].emplace_back(initWorkerOfType(worker_type, j, i));
         }
     }
 }

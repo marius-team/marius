@@ -28,9 +28,10 @@ using std::unique_ptr;
 
 /** Deployment configs */
 
-class DummyCuda {
+// Dummy CUDA objects so we don't break the CPU-only build
+class DummyCudaEvent {
    public:
-    DummyCuda(int val) { (void)val; }
+    DummyCudaEvent(int val) { (void)val; }
 
     void start(){};
 
@@ -38,23 +39,45 @@ class DummyCuda {
 
     void synchronize(){};
 
-    int elapsed_time(DummyCuda) { return 0; }
+    int elapsed_time(DummyCudaEvent) { return 0; }
+};
+
+class DummyCudaStream {
+   public:
+    DummyCudaStream() {}
+
+    void synchronize(){};
+};
+
+class DummyCudaStreamGuard {
+   public:
+    DummyCudaStreamGuard(DummyCudaStream) {}
 };
 
 #ifdef MARIUS_CUDA
-#include <ATen/cuda/CUDAContext.h>
-#include <ATen/cuda/CUDAEvent.h>
-#include <ATen/cuda/Exceptions.h>
-#include <c10/cuda/CUDAGuard.h>
-#include <c10/cuda/CUDAStream.h>
-#include <c10/util/Exception.h>
+    #include <ATen/cuda/CUDAContext.h>
+    #include <ATen/cuda/CUDAEvent.h>
+    #include <ATen/cuda/Exceptions.h>
+    #include <c10/cuda/CUDAGuard.h>
+    #include <c10/cuda/CUDAStream.h>
+    #include <c10/util/Exception.h>
+
 typedef at::cuda::CUDAEvent CudaEvent;
+typedef at::cuda::CUDAStream CudaStream;
+typedef at::cuda::CUDAStreamGuard CudaStreamGuard;
+
+using at::cuda::getStreamFromPool;
+
 #else
-typedef DummyCuda CudaEvent;
+typedef DummyCudaEvent CudaEvent;
+typedef DummyCudaStream CudaStream;
+typedef DummyCudaStreamGuard CudaStreamGuard;
+
+inline CudaStream getStreamFromPool(bool = false, int = 0) { return CudaStream(); }
 #endif
 
 #ifndef IO_FLAGS
-#define IO_FLAGS 0
+    #define IO_FLAGS 0
 #endif
 
 /** Typedefs */

@@ -9,10 +9,10 @@ Marius ([OSDI '21 Paper](https://www.usenix.org/conference/osdi21/presentation/m
 - Pipelined training and IO
 - Partition caching and a buffer-aware data ordering to minimize IO for disk-based training (called BETA)
 
-MariusGNN ([arxiv](https://arxiv.org/abs/2202.02365), to appear in EuroSys '23) 
+MariusGNN ([EuroSys '23 Paper](https://dl.acm.org/doi/abs/10.1145/3552326.3567501)) 
 utilizes the data movement optimizations from Marius and adds support for scalable graph neural network training through:
 - An optimized data structure for neighbor sampling and GNN aggregation (called DENSE)
-- An improved data ordering for disk-based training (called COMET) which minimizes IO and maximizes model accuracy (note that COMET subsumes BETA)
+- An improved data ordering for disk-based training (called COMET) which minimizes IO and maximizes model accuracy (with COMET now subsuming BETA)
 
 ## Build and Install ##
 
@@ -20,24 +20,32 @@ utilizes the data movement optimizations from Marius and adds support for scalab
 
 * CUDA >= 10.1
 * CuDNN >= 7 
-* pytorch >= 1.8
-* python >= 3.7
+* PyTorch >= 1.8
+* Python >= 3.7
 * GCC >= 7 (On Linux) or Clang >= 11.0 (On MacOS)
-* cmake >= 3.12
-* make >= 3.8
+* CMake >= 3.12
+* Make >= 3.8
+
+### Docker Installation ###
+We recommend using Docker for build and installation. 
+We provide a Dockerfile which installs all the necessary 
+requirements and provide end-to-end instructions in `examples/docker/`.
+
 
 ### Pip Installation ###
+With the required dependencies installed, Marius and MariusGNN can be built using Pip:  
 
 ```
 git clone https://github.com/marius-team/marius.git
+cd marius
 pip3 install .
 ```
 
+### Installation Result ###
 
+After installation, the Python API can be accessed with ``import marius``.
 
-The Python API can be accessed with ``import marius``
-
-The following command line tools will be installed:
+The following command line tools will be also be installed:
 - marius_train: Train models using configuration files and the command line
 - marius_eval: Command line model evaluation
 - marius_preprocess: Built-in dataset downloading and preprocessing
@@ -52,7 +60,7 @@ an exact experiment artifact for each paper in separate branches).
 
 ### Quick Start: ###
 
-First make sure Marius is installed with `pip3 install .` 
+First make sure Marius is installed. 
 
 Preprocess the FB15K_237 dataset with `marius_preprocess --dataset fb15k_237 --output_dir datasets/fb15k_237_example/`
 
@@ -68,33 +76,34 @@ See the [full example](http://marius-project.org/marius/examples/config/lp_fb15k
 
 The Python API is currently experimental and can be used to perform in-memory training and evaluation of graph learning models. 
 
-See the [documentation](http://marius-project.org/marius/examples/python/index.html#) for Python API usage and examples.
+See the [documentation](http://marius-project.org/marius/examples/python/index.html#) and `examples/python/` for Python API usage and examples.
 
 
-## Citing Marius ##
+## Citing Marius or MariusGNN ##
 Marius (out-of-core graph embeddings)
 ```
-@inproceedings {273733,
+@inproceedings{Marius,
     author = {Jason Mohoney and Roger Waleffe and Henry Xu and Theodoros Rekatsinas and Shivaram Venkataraman},
     title = {Marius: Learning Massive Graph Embeddings on a Single Machine},
     booktitle = {15th {USENIX} Symposium on Operating Systems Design and Implementation ({OSDI} 21)},
     year = {2021},
-    isbn = {978-1-939133-22-9},
+    isbn = {9781939133229},
     pages = {533--549},
     url = {https://www.usenix.org/conference/osdi21/presentation/mohoney},
-    publisher = {{USENIX} Association},
-    month = jul,
+    publisher = {{USENIX} Association}
 }
 ```
 
 MariusGNN (out-of-core GNN training)
 ```
-@misc{waleffe2022marius,
-  doi = {10.48550/ARXIV.2202.02365},
-  url = {https://arxiv.org/abs/2202.02365},
-  author = {Waleffe, Roger and Mohoney, Jason and Rekatsinas, Theodoros and Venkataraman, Shivaram},
-  keywords = {Machine Learning (cs.LG), Databases (cs.DB), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {MariusGNN: Resource-Efficient Out-of-Core Training of Graph Neural Networks},
-  publisher = {arXiv},
-  year = {2022},
+@inproceedings{MariusGNN, 
+    author = {Roger Waleffe and Jason Mohoney and Theodoros Rekatsinas and Shivaram Venkataraman},
+    title = {MariusGNN: Resource-Efficient Out-of-Core Training of Graph Neural Networks}, 
+    booktitle = {Proceedings of the Eighteenth European Conference on Computer Systems}, 
+    year = {2023}, 
+    isbn = {9781450394871}, 
+    pages = {144–161},
+    url = {https://doi.org/10.1145/3552326.3567501},
+    publisher = {Association for Computing Machinery}
+}
 ```

@@ -210,19 +210,7 @@ FlatFile::FlatFile(string filename, int64_t dim0_size, int64_t dim1_size, torch:
     device_ = torch::kCPU;
 
     if (alloc) {
-        int64_t dtype_size = 0;
-
-        if (dtype_ == torch::kFloat64) {
-            dtype_size = 8;
-        } else if (dtype_ == torch::kFloat32) {
-            dtype_size = 4;
-        } else if (dtype_ == torch::kFloat16) {
-            dtype_size = 2;
-        } else if (dtype_ == torch::kInt64) {
-            dtype_size = 8;
-        } else if (dtype_ == torch::kInt32) {
-            dtype_size = 4;
-        }
+        int64_t dtype_size = get_dtype_size_wrapper(dtype_);
 
         std::ofstream ofs(filename_, std::ios::binary | std::ios::out);
         ofs.seekp(dim0_size_ * dim1_size_ * dtype_size - 1);
@@ -622,7 +610,39 @@ torch::Tensor InMemory::indexRead(Indices indices) {
     }
 
     if (data_.defined()) {
-        return data_.index_select(0, indices.to(device_));
+        if (data_.device().is_cuda()) {
+            return data_.index_select(0, indices.to(device_));
+        } else {
+            torch::Tensor out;
+
+            if (dtype_ == torch::kFloat32) {
+                auto out_options = torch::TensorOptions().dtype(torch::kFloat32);
+#ifdef MARIUS_CUDA
+                out_options = out_options.pinned_memory(true);
+#endif
+                out = torch::empty({indices.size(0), dim1_size_}, out_options);
+                torch::index_select_out(out, data_, 0, indices);
+            } else if (dtype_ == torch::kInt64) {
+                auto out_options = torch::TensorOptions().dtype(torch::kInt64);
+#ifdef MARIUS_CUDA
+                out_options = out_options.pinned_memory(true);
+#endif
+                out = torch::empty({indices.size(0), dim1_size_}, out_options);
+                torch::index_select_out(out, data_, 0, indices);
+            } else if (dtype_ == torch::kInt32) {
+                auto out_options = torch::TensorOptions().dtype(torch::kInt32);
+#ifdef MARIUS_CUDA
+                out_options = out_options.pinned_memory(true);
+#endif
+                out = torch::empty({indices.size(0), dim1_size_}, out_options);
+                torch::index_select_out(out, data_, 0, indices);
+            } else {
+                SPDLOG_ERROR("Not yet implemented");
+                throw std::runtime_error("");
+            }
+
+            return out;
+        }
     } else {
         return torch::Tensor();
     }

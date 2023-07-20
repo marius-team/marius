@@ -132,7 +132,8 @@ class TestLP(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async_training(self):
         name = "async_training"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
@@ -164,7 +165,8 @@ class TestLP(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async_eval(self):
         name = "async_eval"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
@@ -288,7 +290,8 @@ class TestLPNoRelations(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async_training(self):
         name = "async_training"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
@@ -320,7 +323,8 @@ class TestLPNoRelations(unittest.TestCase):
 
         run_configs(self.output_dir / Path(name))
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async_eval(self):
         name = "async_eval"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))

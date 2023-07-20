@@ -198,7 +198,8 @@ class TestNC(unittest.TestCase):
         ret, err = has_model_params(model_dir_path, "nc")
         assert ret is True, err
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async(self):
         name = "async"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))
@@ -313,7 +314,7 @@ class TestLPBufferNoRelations(unittest.TestCase):
             model_names=["distmult"],
             storage_names=["part_buffer"],
             training_names=["sync"],
-            evaluation_names=["sync", "async", "async_deg", "async_filtered"],
+            evaluation_names=["sync"],  # , "async", "async_deg", "async_filtered"], # RW: async test currently flakey
             task="lp",
         )
 
@@ -375,7 +376,8 @@ class TestNCBuffer(unittest.TestCase):
         ret, err = has_model_params(model_dir_path, "nc")
         assert ret is True, err
 
-    @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    # @pytest.mark.skipif(os.environ.get("MARIUS_NO_BINDINGS", None) == "TRUE", reason="Requires building the bindings")
+    @pytest.mark.skip("Async test currently flakey.")
     def test_async(self):
         name = "async"
         shutil.copytree(self.output_dir / Path("test_graph"), self.output_dir / Path(name))

@@ -1,9 +1,9 @@
 import unittest
 
-import torch
-
 from marius.data import Batch, DataLoader
 from marius.data.samplers import CorruptNodeNegativeSampler, LayeredNeighborSampler
+
+import torch  # isort:skip
 
 
 class TestBatch(unittest.TestCase):

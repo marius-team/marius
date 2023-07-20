@@ -54,8 +54,6 @@ shared_ptr<NeighborSamplingConfig> initNeighborSamplingConfig(pyobj python_objec
     }
 
     ret_config->use_hashmap_sets = cast_helper<bool>(python_object.attr("use_hashmap_sets"));
-    ret_config->use_incoming_nbrs = cast_helper<bool>(python_object.attr("use_incoming_nbrs"));
-    ret_config->use_outgoing_nbrs = cast_helper<bool>(python_object.attr("use_outgoing_nbrs"));
 
     return ret_config;
 }
@@ -270,6 +268,8 @@ shared_ptr<EncoderConfig> initEncoderConfig(pyobj python_config) {
     ret_config->layers = layer_vec;
     ret_config->train_neighbor_sampling = train_sample_vec;
     ret_config->eval_neighbor_sampling = eval_sample_vec;
+    ret_config->use_incoming_nbrs = cast_helper<bool>(python_config.attr("use_incoming_nbrs"));
+    ret_config->use_outgoing_nbrs = cast_helper<bool>(python_config.attr("use_outgoing_nbrs"));
 
     return ret_config;
 }
@@ -457,6 +457,7 @@ shared_ptr<StorageConfig> initStorageConfig(pyobj python_config) {
     ret_config->export_encoded_nodes = cast_helper<bool>(python_config.attr("export_encoded_nodes"));
 
     ret_config->log_level = getLogLevel(cast_helper<string>(python_config.attr("log_level")));
+    ret_config->train_edges_pre_sorted = cast_helper<bool>(python_config.attr("train_edges_pre_sorted"));
     return ret_config;
 }
 

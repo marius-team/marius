@@ -75,6 +75,8 @@ int64_t pread_wrapper(int fd, void *buf, int64_t count, int64_t offset);
 
 int64_t pwrite_wrapper(int fd, const void *buf, int64_t count, int64_t offset);
 
+torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device, CudaStream *compute_stream = nullptr, CudaStream *transfer_stream = nullptr);
+
 int64_t get_dtype_size_wrapper(torch::Dtype dtype_);
 
 std::string get_directory(std::string path);

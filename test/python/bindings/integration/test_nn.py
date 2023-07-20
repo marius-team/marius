@@ -1,7 +1,5 @@
 import unittest
 
-import torch
-
 from marius.config import LearningTask, LossOptions, LossReduction
 from marius.data import Batch, DENSEGraph, MariusGraph
 from marius.data.samplers import LayeredNeighborSampler
@@ -11,6 +9,8 @@ from marius.nn.decoders.node import NoOpNodeDecoder
 from marius.nn.encoders import GeneralEncoder
 from marius.nn.layers import EmbeddingLayer
 from marius.report import LinkPredictionReporter, NodeClassificationReporter
+
+import torch  # isort:skip
 
 edge_list = torch.tensor([[0, 0, 1], [0, 0, 2], [1, 1, 4], [2, 0, 3], [3, 1, 0], [4, 0, 1]])
 batch_edges = torch.tensor(

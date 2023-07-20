@@ -9,8 +9,8 @@
 #include "nn/model.h"
 #include "reporting/logger.h"
 
-std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config,
-                                                                                          LearningTask learning_task) {
+std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config,
+                                                                                                               LearningTask learning_task) {
     string train_filename =
         storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edges_file + PathConstants::file_ext;
     string valid_filename =
@@ -18,7 +18,11 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initia
     string test_filename =
         storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edges_file + PathConstants::file_ext;
 
+    string train_dst_sort_filename = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training +
+                                     PathConstants::edges_file + PathConstants::dst_sort + PathConstants::file_ext;
+
     shared_ptr<Storage> train_edge_storage = nullptr;
+    shared_ptr<Storage> train_edge_storage_dst_sort = nullptr;
     shared_ptr<Storage> valid_edge_storage = nullptr;
     shared_ptr<Storage> test_edge_storage = nullptr;
 
@@ -60,6 +64,10 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initia
         case StorageBackend::HOST_MEMORY: {
             if (num_train != -1) {
                 train_edge_storage = std::make_shared<InMemory>(train_filename, num_train, num_columns, dtype, torch::kCPU);
+                if (!storage_config->train_edges_pre_sorted) {
+                    copyFile(train_filename, train_dst_sort_filename);
+                }
+                train_edge_storage_dst_sort = std::make_shared<InMemory>(train_dst_sort_filename, num_train, num_columns, dtype, torch::kCPU);
             }
             if (num_valid != -1) {
                 valid_edge_storage = std::make_shared<InMemory>(valid_filename, num_valid, num_columns, dtype, torch::kCPU);
@@ -72,6 +80,10 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initia
         case StorageBackend::DEVICE_MEMORY: {
             if (num_train != -1) {
                 train_edge_storage = std::make_shared<InMemory>(train_filename, num_train, num_columns, dtype, storage_config->device_type);
+                if (!storage_config->train_edges_pre_sorted) {
+                    copyFile(train_filename, train_dst_sort_filename);
+                }
+                train_edge_storage_dst_sort = std::make_shared<InMemory>(train_dst_sort_filename, num_train, num_columns, dtype, storage_config->device_type);
             }
             if (num_valid != -1) {
                 valid_edge_storage = std::make_shared<InMemory>(valid_filename, num_valid, num_columns, dtype, storage_config->device_type);
@@ -119,20 +131,24 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initia
             test_edge_storage->readPartitionSizes(test_edges_partitions);
         }
     } else {
-        if (storage_config->shuffle_input) {
-            if (train_edge_storage != nullptr) {
-                train_edge_storage->shuffle();
-            }
-            if (valid_edge_storage != nullptr) {
-                valid_edge_storage->shuffle();
-            }
-            if (test_edge_storage != nullptr) {
-                test_edge_storage->shuffle();
+        if (train_edge_storage != nullptr) {
+            if (!storage_config->train_edges_pre_sorted) {
+                train_edge_storage->sort(true);
+                train_edge_storage_dst_sort->sort(false);
             }
         }
     }
 
-    return std::forward_as_tuple(train_edge_storage, valid_edge_storage, test_edge_storage);
+    if (storage_config->shuffle_input) {
+        if (valid_edge_storage != nullptr) {
+            valid_edge_storage->shuffle();
+        }
+        if (test_edge_storage != nullptr) {
+            test_edge_storage->shuffle();
+        }
+    }
+
+    return std::forward_as_tuple(train_edge_storage, train_edge_storage_dst_sort, valid_edge_storage, test_edge_storage);
 }
 
 std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeEmbeddings(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config,
@@ -361,14 +377,16 @@ shared_ptr<Storage> initializeNodeLabels(shared_ptr<Model> model, shared_ptr<Sto
 
 shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
                                                               shared_ptr<InitConfig> init_config) {
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages =
+        initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
 
     GraphModelStoragePtrs storage_ptrs = {};
 
     storage_ptrs.train_edges = std::get<0>(edge_storages);
-    storage_ptrs.validation_edges = std::get<1>(edge_storages);
-    storage_ptrs.test_edges = std::get<2>(edge_storages);
+    storage_ptrs.train_edges_dst_sort = std::get<1>(edge_storages);
+    storage_ptrs.validation_edges = std::get<2>(edge_storages);
+    storage_ptrs.test_edges = std::get<3>(edge_storages);
 
     storage_ptrs.node_features = initializeNodeFeatures(model, storage_config);
     storage_ptrs.node_embeddings = std::get<0>(node_embeddings);
@@ -383,7 +401,8 @@ shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> 
 
 shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize,
                                                                   bool train, shared_ptr<InitConfig> init_config) {
-    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
+    std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages =
+        initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> node_id_storages = initializeNodeIds(storage_config);
     shared_ptr<Storage> node_features = initializeNodeFeatures(model, storage_config);
     shared_ptr<Storage> node_labels = initializeNodeLabels(model, storage_config);
@@ -391,6 +410,7 @@ shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Mod
     GraphModelStoragePtrs storage_ptrs = {};
 
     storage_ptrs.train_edges = std::get<0>(edge_storages);
+    storage_ptrs.train_edges_dst_sort = std::get<1>(edge_storages);
     storage_ptrs.edges = storage_ptrs.train_edges;
 
     storage_ptrs.train_nodes = std::get<0>(node_id_storages);

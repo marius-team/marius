@@ -1,3 +1,4 @@
+# isort: skip_file
 import os
 import sys
 
@@ -6,10 +7,13 @@ only_python = os.environ.get("MARIUS_NO_BINDINGS", None)
 
 if not only_python:
     try:
-        import torch  # noqa F401
+        # import torch  # noqa F401
 
         # load main modules
-        from . import _config as config
+        from . import _config as config  # RW: import first due to marius/torch omp linking
+        import torch  # noqa F401
+
+        # from . import _config as config
         from . import _data as data
         from . import _manager as manager
         from . import _nn as nn

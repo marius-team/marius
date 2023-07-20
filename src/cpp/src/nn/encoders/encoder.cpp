@@ -193,6 +193,8 @@ void GeneralEncoder::reset() {
 }
 
 torch::Tensor GeneralEncoder::forward(at::optional<torch::Tensor> embeddings, at::optional<torch::Tensor> features, DENSEGraph dense_graph, bool train) {
+    dense_graph.performMap();
+
     std::vector<torch::Tensor> outputs = {};
 
     for (int i = 0; i < layers_.size(); i++) {
