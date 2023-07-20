@@ -59,9 +59,19 @@ void UpdateBatchWorker::run() {
                 break;
             }
 
-            // transfer gradients and update parameters
-            if (batch->node_embeddings_.defined()) {
-                pipeline_->dataloader_->updateEmbeddings(batch, false);
+            if (batch->sub_batches_.size() > 0) {
+                #pragma omp parallel for // TODO: maybe not parallel for better perf?
+                for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                    if (batch->sub_batches_[i]->node_gradients_.defined()) {
+                        pipeline_->dataloader_->updateEmbeddings(batch->sub_batches_[i], false);
+                    }
+                }
+                batch->clear();
+            } else {
+                // transfer gradients and update parameters
+                if (batch->node_gradients_.defined()) {
+                    pipeline_->dataloader_->updateEmbeddings(batch, false);
+                }
             }
 
             pipeline_->reporter_->addResult(batch->batch_size_);

@@ -54,6 +54,11 @@ class DummyCudaStreamGuard {
     DummyCudaStreamGuard(DummyCudaStream) {}
 };
 
+class DummyCudaMultiStreamGuard {
+   public:
+    DummyCudaMultiStreamGuard(DummyCudaStream []) {}
+};
+
 #ifdef MARIUS_CUDA
     #include <ATen/cuda/CUDAContext.h>
     #include <ATen/cuda/CUDAEvent.h>
@@ -65,15 +70,19 @@ class DummyCudaStreamGuard {
 typedef at::cuda::CUDAEvent CudaEvent;
 typedef at::cuda::CUDAStream CudaStream;
 typedef at::cuda::CUDAStreamGuard CudaStreamGuard;
+typedef at::cuda::CUDAMultiStreamGuard CudaMultiStreamGuard;
 
 using at::cuda::getStreamFromPool;
+using at::cuda::getCurrentCUDAStream;
 
 #else
 typedef DummyCudaEvent CudaEvent;
 typedef DummyCudaStream CudaStream;
 typedef DummyCudaStreamGuard CudaStreamGuard;
+typedef DummyCudaMultiStreamGuard CudaMultiStreamGuard;
 
 inline CudaStream getStreamFromPool(bool = false, int = 0) { return CudaStream(); }
+inline CudaStream getCurrentCUDAStream(int = 0) { return CudaStream(); }
 #endif
 
 #ifndef IO_FLAGS

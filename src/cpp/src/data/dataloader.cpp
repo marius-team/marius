@@ -64,7 +64,7 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
         evaluation_neighbor_sampler_ = nullptr;
     }
 
-    compute_stream_ = nullptr;
+    compute_streams_ = {nullptr, nullptr}; //TODO: general multi-gpu
 }
 
 DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler,
@@ -363,6 +363,70 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
         return batch;
     }
 
+    // TODO: general multi-gpu
+    if (train_ and graph_storage_->num_gpus_ > 1) {
+        std::vector <shared_ptr<Batch>> sub_batches;
+        int num_devices = 2; //graph_storage_->storage_config_->device_ids.size();
+
+        if (batch->task_ == LearningTask::LINK_PREDICTION) {
+            torch::Tensor edges = edge_sampler_->getEdges(batch);
+            int64_t num_edges = edges.size(0);
+
+            int64_t edges_per_batch = num_edges / num_devices;
+
+            int64_t offset = 0;
+            for (int i = 0; i < num_devices; i++) {
+                shared_ptr<Batch> sub_batch = std::make_shared<Batch>(train_);
+                if (offset + edges_per_batch > num_edges) {
+                    edges_per_batch = num_edges - offset;
+                }
+
+                sub_batch->batch_id_ = batch->batch_id_;
+                sub_batch->start_idx_ = batch->start_idx_ + offset;
+                sub_batch->batch_size_ = edges_per_batch;
+
+//                sub_batch->root_node_indices_ = node_ids.narrow(0, offset, nodes_per_batch);
+                offset += edges_per_batch;
+
+                edgeSample(sub_batch, worker_id);
+                loadCPUParameters(sub_batch);
+                sub_batches.emplace_back(sub_batch);
+            }
+
+
+        } else {
+            torch::Tensor node_ids = graph_storage_->getNodeIdsRange(batch->start_idx_, batch->batch_size_).to(
+                    torch::kInt64);
+            int64_t num_nodes = node_ids.size(0);
+
+            int64_t nodes_per_batch = num_nodes / num_devices;
+
+            int64_t offset = 0;
+            for (int i = 0; i < num_devices; i++) {
+                shared_ptr<Batch> sub_batch = std::make_shared<Batch>(train_);
+                if (offset + nodes_per_batch > num_nodes) {
+                    nodes_per_batch = num_nodes - offset;
+                }
+
+                sub_batch->batch_id_ = batch->batch_id_;
+                sub_batch->start_idx_ = batch->start_idx_ + offset;
+                sub_batch->batch_size_ = nodes_per_batch;
+
+//                sub_batch->root_node_indices_ = node_ids.narrow(0, offset, nodes_per_batch);
+                offset += nodes_per_batch;
+
+                nodeSample(sub_batch, worker_id);
+                loadCPUParameters(sub_batch);
+                sub_batches.emplace_back(sub_batch);
+            }
+        }
+
+        batch->sub_batches_ = sub_batches;
+
+        return batch;
+    }
+
+    // single GPU
     if (batch->task_ == LearningTask::LINK_PREDICTION) {
         edgeSample(batch, worker_id);
     } else if (batch->task_ == LearningTask::NODE_CLASSIFICATION || batch->task_ == LearningTask::ENCODE) {
@@ -554,7 +618,7 @@ void DataLoader::updateEmbeddings(shared_ptr<Batch> batch, bool gpu) {
             graph_storage_->updateAddNodeEmbeddingState(batch->unique_node_indices_, batch->node_state_update_);
         }
     } else {
-        batch->host_transfer_.synchronize();
+//        batch->host_transfer_.synchronize();
         if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
             graph_storage_->updateAddNodeEmbeddings(batch->unique_node_indices_, batch->node_gradients_);
             graph_storage_->updateAddNodeEmbeddingState(batch->unique_node_indices_, batch->node_state_update_);

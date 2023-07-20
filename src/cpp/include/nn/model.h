@@ -27,6 +27,7 @@ class Model : public torch::nn::Module {
 
     // Multi-GPU training
     std::vector<shared_ptr<Model>> device_models_;
+    shared_ptr<ModelConfig> model_config_;
 
     Model(shared_ptr<GeneralEncoder> encoder, shared_ptr<Decoder> decoder, shared_ptr<LossFunction> loss, shared_ptr<Reporter> reporter = nullptr,
           std::vector<shared_ptr<Optimizer>> optimizers_ = {});

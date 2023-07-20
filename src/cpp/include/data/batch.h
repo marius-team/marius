@@ -74,6 +74,12 @@ class Batch {
     torch::Tensor src_neg_filter_; /**< Used to filter out false negatives for source corrupted negatives */
     torch::Tensor dst_neg_filter_; /**< Used to filter out false negatives for destination corrupted negatives */
 
+    std::vector<shared_ptr<Batch>> sub_batches_;
+
+    double getBatch_;
+    double transfer_;
+    double compute_;
+
     Batch(bool train); /**< Constructor */
 
     ~Batch(); /**< Destructor */

@@ -20,22 +20,56 @@ void BatchToDeviceWorker::run() {
             if (!popped) {
                 break;
             }
-            int queue_choice = pipeline_->assign_id_++ % ((PipelineGPU *)pipeline_)->device_loaded_batches_.size();
 
-            batch->to(pipeline_->model_->device_models_[queue_choice]->device_, pipeline_->dataloader_->compute_stream_);
+            if (batch->sub_batches_.size() > 0) {
+                #pragma omp parallel for
+                for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                    batch->sub_batches_[i]->to(pipeline_->model_->device_models_[i]->device_, pipeline_->dataloader_->compute_streams_[i]);
+//                    std::cout<<"to: "<<pipeline_->model_->device_models_[i]->device_<<"\n";
+//                    ((PipelineGPU *)pipeline_)->device_loaded_batches_[i]->blocking_push(batch->sub_batches_[i]);
+                }
+            } else {
+                batch->to(pipeline_->model_->device_models_[0]->device_, pipeline_->dataloader_->compute_streams_[0]);
+            }
 
-            ((PipelineGPU *)pipeline_)->device_loaded_batches_[queue_choice]->blocking_push(batch);
+            ((PipelineGPU *)pipeline_)->device_loaded_batches_[0]->blocking_push(batch);
+
         }
         nanosleep(&sleep_time_, NULL);
     }
 }
 
 void ComputeWorkerGPU::run() {
-    CudaStream compute_stream = getStreamFromPool(true, 0);
-    if (pipeline_->dataloader_->learning_task_ == LearningTask::NODE_CLASSIFICATION) {
-        pipeline_->dataloader_->compute_stream_ = &compute_stream;
-    }
-    // TODO: streams for LP need a bit more work
+//    at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
+//    if (pipeline_->dataloader_->learning_task_ == LearningTask::NODE_CLASSIFICATION) {
+//        pipeline_->dataloader_->compute_streams_[0] = &compute_stream;
+//    }
+//    //TODO: streams for LP need a bit more work
+
+
+
+//    std::cout<<"start: "<<gpu_id_<<"\n";
+    CudaStream compute_stream = getStreamFromPool(true, gpu_id_);
+    pipeline_->dataloader_->compute_streams_[gpu_id_] = &compute_stream;
+
+
+
+//    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
+//    std::cout<<compute_stream<<"\n";
+//    at::cuda::setCurrentCUDAStream(compute_stream);
+
+//    {
+//        at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
+//        pipeline_->dataloader_->compute_streams_[0] = &compute_stream;
+//    }
+//
+//    for (int i = 0; i < 2; i++) {
+//        at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, i);
+//        pipeline_->dataloader_->compute_streams_[i] = &compute_stream;
+//    }
+
+
+
 
     while (!done_) {
         while (!paused_) {
@@ -46,39 +80,126 @@ void ComputeWorkerGPU::run() {
                 break;
             }
 
-            pipeline_->dataloader_->loadGPUParameters(batch);
+//            t.start();
+            pipeline_->dataloader_->loadGPUParameters(batch); // TODO for sub_batches
+//            t.stop();
+//            std::cout<<"load: "<<t.getDuration()<<"\n";
+//            std::cout<<"load\n";
 
             if (pipeline_->isTrain()) {
                 bool will_sync = false;
-                if (pipeline_->model_->device_models_.size() > 1) {
-                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->lock();
-                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_++;
+//                if (pipeline_->model_->device_models_.size() > 1) {
+//                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->lock();
+//                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_++;
+//
+//                    if (((PipelineGPU *)pipeline_)->batches_since_last_sync_ == ((PipelineGPU *)pipeline_)->gpu_sync_interval_) {
+//                        will_sync = true;
+//                    }
+//
+//                    // only release the lock if we don't need to synchronize the GPUs
+//                    if (!will_sync) {
+//                        ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
+//                    }
+//                }
 
-                    if (((PipelineGPU *)pipeline_)->batches_since_last_sync_ == ((PipelineGPU *)pipeline_)->gpu_sync_interval_) {
-                        will_sync = true;
+//                if (pipeline_->dataloader_->compute_streams_[0] != nullptr) {
+//                    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
+//                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *) pipeline_)->pipeline_options_->gpu_model_average);
+//                } else {
+//                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *) pipeline_)->pipeline_options_->gpu_model_average);
+//                }
+
+
+
+
+                if (batch->sub_batches_.size() > 0) {
+                    int i = gpu_id_;
+//                    std::cout<<gpu_id_<<"\n";
+//                    std::cout<<"on: "<<batch->node_features_.device()<<"\n";
+//                    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
+//                    at::cuda::CUDAStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[gpu_id_]));
+//                    pipeline_->model_->device_models_[1].get()->train_batch(batch->sub_batches_[1], true);
+
+
+//                    t.start();
+//                    at::cuda::CUDAMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
+//                                                                *(pipeline_->dataloader_->compute_streams_[1])});
+//                    std::cout<<"guard\n";
+//                    t.stop();
+//                    std::cout<<"stream guard: "<<t.getDuration()<<"\n";
+//                    pipeline_->model_->clear_grad_all();
+
+//                    t.start();
+                    #pragma omp parallel
+                    {
+                        #pragma omp for
+                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                            CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
+                            pipeline_->model_->device_models_[i]->clear_grad();
+                            pipeline_->model_->device_models_[i]->train_batch(batch->sub_batches_[i], false);
+
+//                            pipeline_->model_->device_models_[i]->step();
+//                            pipeline_->model_->device_models_[i]->train_batch(batch, true);
+//                            std::cout<<"train_batch: "<<i<<"\n";
+                        }
+
+
+                        #pragma omp single
+                        {
+//                            at::cuda::setCurrentCUDAStream(*(pipeline_->dataloader_->compute_streams_[0]);
+//                            at::cuda::setCurrentCUDAStream(*(pipeline_->dataloader_->compute_streams_[1]));
+                            CudaMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
+                                                              *(pipeline_->dataloader_->compute_streams_[1])}); // TODO: general multi-gpu
+//                            std::vector<at::cuda::CUDAStream *> streams = {pipeline_->dataloader_->compute_streams_[0],
+//                                                                           pipeline_->dataloader_->compute_streams_[1]};
+//                            pipeline_->model_->all_reduce(streams);
+
+                            pipeline_->model_->all_reduce();
+////                            std::cout<<"all reduce\n";
+                        }
+
+                        #pragma omp for
+                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                            CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
+                            pipeline_->model_->device_models_[i]->step();
+//                            std::cout<<"step: "<<i<<"\n";
+                        }
                     }
 
-                    // only release the lock if we don't need to synchronize the GPUs
-                    if (!will_sync) {
-                        ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
-                    }
-                }
+//                    t.stop();
+//                    std::cout<<"train_batch: "<<t.getDuration()<<"\n";
 
-                if (pipeline_->dataloader_->compute_stream_ != nullptr) {
-                    CudaStreamGuard stream_guard(compute_stream);
-                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
+//                    t.start();
+//                    pipeline_->model_->all_reduce();
+//                    t.stop();
+//                    std::cout<<"all_reduce: "<<t.getDuration()<<"\n";
+
+//                    t.start();
+//                    pipeline_->model_->step_all();
+//                    t.stop();
+//                    std::cout<<"step: "<<t.getDuration()<<"\n";
+
+
                 } else {
-                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *)pipeline_)->pipeline_options_->gpu_model_average);
+                    CudaStreamGuard stream_guard(compute_stream);
+                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, true);
                 }
 
-                if (will_sync) {
-                    // we already have the lock acquired, it is safe to sync?
-                    pipeline_->model_->all_reduce();
 
-                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_ = 0;
-                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
-                }
 
+
+
+
+
+//                if (will_sync) {
+//                    // we already have the lock acquired, it is safe to sync?
+//                    pipeline_->model_->all_reduce();
+//
+//                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_ = 0;
+//                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
+//                }
+
+//                t.start();
                 if (!pipeline_->has_embeddings()) {
                     batch->clear();
                     pipeline_->reporter_->addResult(batch->batch_size_);
@@ -87,7 +208,7 @@ void ComputeWorkerGPU::run() {
                     pipeline_->max_batches_cv_->notify_one();
                     pipeline_->edges_processed_ += batch->batch_size_;
                 } else {
-                    pipeline_->dataloader_->updateEmbeddings(batch, true);
+                    pipeline_->dataloader_->updateEmbeddings(batch, true); // TODO: if sub_batches
                     ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
                 }
             } else {
@@ -136,7 +257,19 @@ void BatchToHostWorker::run() {
                 break;
             }
 
-            batch->embeddingsToHost();
+            if (batch->sub_batches_.size() > 0) {
+                #pragma omp parallel for
+                for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                    CudaStream transfer_stream = getStreamFromPool(false, i);
+                    CudaStreamGuard stream_guard(transfer_stream);
+                    batch->sub_batches_[i]->embeddingsToHost();
+                }
+            }
+            else {
+                CudaStream transfer_stream = getStreamFromPool(false, gpu_id_);
+                CudaStreamGuard stream_guard(transfer_stream);
+                batch->embeddingsToHost();
+            }
 
             ((PipelineGPU *)pipeline_)->update_batches_->blocking_push(batch);
         }

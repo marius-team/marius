@@ -19,12 +19,22 @@ Batch::Batch(bool train) : device_transfer_(0), host_transfer_(0), timer_(false)
 Batch::~Batch() { clear(); }
 
 void Batch::to(torch::Device device, CudaStream *compute_stream) {
+
+    if (sub_batches_.size() > 0) {
+        std::vector<torch::Device> tmp = {torch::Device(torch::kCUDA, 0), torch::Device(torch::kCUDA, 1)}; // TODO: general multi-gpu
+        #pragma omp parallel for
+        for (int i = 0; i < sub_batches_.size(); i++) {
+            sub_batches_[i]->to(tmp[i]);
+        }
+        return;
+    }
+
     CudaStream transfer_stream = getStreamFromPool(false, device.index());
     CudaStreamGuard stream_guard(transfer_stream);
 
-    if (device.is_cuda()) {
-        host_transfer_ = CudaEvent(device.index());
-    }
+//    if (device.is_cuda()) {
+//        host_transfer_ = CudaEvent(device.index());
+//    }
 
     edges_ = transfer_tensor(edges_, device, compute_stream, &transfer_stream);
 
@@ -71,34 +81,65 @@ void Batch::accumulateGradients(float learning_rate) {
         SPDLOG_TRACE("Batch: {} adjusted gradients", batch_id_);
     }
 
+    root_node_indices_ = torch::Tensor();
+    node_embeddings_ = torch::Tensor();
     node_embeddings_state_ = torch::Tensor();
+
+    node_features_ = torch::Tensor();
+    node_labels_ = torch::Tensor();
+
+    src_neg_indices_mapping_ = torch::Tensor();
+    dst_neg_indices_mapping_ = torch::Tensor();
+
+    edges_ = torch::Tensor();
+    neg_edges_ = torch::Tensor();
+    src_neg_indices_ = torch::Tensor();
+    dst_neg_indices_ = torch::Tensor();
+
+    dense_graph_.clear();
+    encoded_uniques_ = torch::Tensor();
+
+    src_neg_filter_ = torch::Tensor();
+    dst_neg_filter_ = torch::Tensor();
 
     SPDLOG_TRACE("Batch: {} cleared gpu embeddings and gradients", batch_id_);
 
     status_ = BatchStatus::AccumulatedGradients;
+
+    getCurrentCudaStream(node_gradients_.device().index()).synchronize();
 }
 
 void Batch::embeddingsToHost() {
     if (node_gradients_.defined() && node_gradients_.device().is_cuda()) {
         auto grad_opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU).pinned_memory(true);
         Gradients temp_grads = torch::empty(node_gradients_.sizes(), grad_opts);
-        temp_grads.copy_(node_gradients_, true);
+        temp_grads.copy_(node_gradients_, false);
+
         Gradients temp_grads2 = torch::empty(node_state_update_.sizes(), grad_opts);
-        temp_grads2.copy_(node_state_update_, true);
+        temp_grads2.copy_(node_state_update_, false);
+
         node_gradients_ = temp_grads;
         node_state_update_ = temp_grads2;
     }
 
     if (unique_node_indices_.defined()) {
-        unique_node_indices_ = unique_node_indices_.to(torch::kCPU);
+        auto opts = torch::TensorOptions().dtype(unique_node_indices_.dtype()).device(torch::kCPU).pinned_memory(true);
+        torch::Tensor temp = torch::empty(unique_node_indices_.sizes(), opts);
+        temp.copy_(unique_node_indices_, false);
+
+        unique_node_indices_ = temp;
     }
 
     if (encoded_uniques_.defined()) {
-        encoded_uniques_ = encoded_uniques_.to(torch::kCPU);
+        auto opts = torch::TensorOptions().dtype(encoded_uniques_.dtype()).device(torch::kCPU).pinned_memory(true);
+        torch::Tensor temp = torch::empty(encoded_uniques_.sizes(), opts);
+        temp.copy_(encoded_uniques_, false);
+
+        encoded_uniques_ = temp;
     }
 
-    host_transfer_.record();
-    host_transfer_.synchronize();
+//    host_transfer_.record();
+//    host_transfer_.synchronize();
     status_ = BatchStatus::TransferredToHost;
 }
 
@@ -126,4 +167,11 @@ void Batch::clear() {
 
     src_neg_filter_ = torch::Tensor();
     dst_neg_filter_ = torch::Tensor();
+
+    if (sub_batches_.size() > 0) {
+        #pragma omp parallel for
+        for (int i = 0; i < sub_batches_.size(); i++) {
+            sub_batches_[i]->clear();
+        }
+    }
 }

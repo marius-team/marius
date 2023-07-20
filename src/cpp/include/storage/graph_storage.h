@@ -71,6 +71,8 @@ class GraphModelStorage {
     GraphModelStoragePtrs storage_ptrs_;
     bool full_graph_evaluation_;
 
+    int num_gpus_;
+
     GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_ptr<StorageConfig> storage_config);
 
     GraphModelStorage(GraphModelStoragePtrs storage_ptrs, bool prefetch = false);

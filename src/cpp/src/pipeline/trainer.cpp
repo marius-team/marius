@@ -118,7 +118,7 @@ void SynchronousTrainer::train(int num_epochs) {
             model_->train_batch(batch);
 
             // transfer gradients and update parameters
-            if (batch->node_embeddings_.defined()) {
+            if (batch->node_gradients_.defined()) {
                 if (dataloader_->graph_storage_->embeddingsOffDevice()) {
                     batch->embeddingsToHost();
                 } else {

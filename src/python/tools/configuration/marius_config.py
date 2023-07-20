@@ -500,12 +500,16 @@ class DatasetConfig:
         """
 
         self.initialized = True
+
+        if "dataset_dir" in input_config.keys():
+            self.dataset_dir = input_config.dataset_dir
+
+        self.populate_dataset_stats()
+
         for key in self.__dict__.keys():
             if key in input_config.keys():
                 val = input_config.__getattr__(key)
                 self.__setattr__(key, val)
-
-        self.populate_dataset_stats()
 
         self.__post_init__()
 

@@ -215,7 +215,7 @@ std::vector<torch::Tensor> apply_tensor_map(torch::Tensor map, std::vector<torch
     std::vector<torch::Tensor> mapped_tensors;
 
     for (auto tensor : unmapped_tensors) {
-        mapped_tensors.emplace_back(torch::searchsorted(map, tensor));
+        mapped_tensors.emplace_back(torch::searchsorted(map, tensor.contiguous()));
     }
 
     return mapped_tensors;

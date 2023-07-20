@@ -137,6 +137,11 @@ void Model::all_reduce() {
     torch::NoGradGuard no_grad;
     int num_gpus = device_models_.size();
 
+//    std::vector<at::cuda::CUDAStream> streams;
+//    for (int i = 0; i < stream_ptrs.size(); i++) {
+//        streams.emplace_back(*stream_ptrs[i]);
+//    }
+
     for (int i = 0; i < named_parameters().keys().size(); i++) {
         string key = named_parameters().keys()[i];
 
@@ -145,17 +150,20 @@ void Model::all_reduce() {
             if (!device_models_[j]->named_parameters()[key].mutable_grad().defined()) {
                 device_models_[j]->named_parameters()[key].mutable_grad() = torch::zeros_like(device_models_[j]->named_parameters()[key]);
             }
+            // this line for averaging
+            device_models_[j]->named_parameters()[key].mutable_grad() /= (float_t) num_gpus;
 
-            input_gradients[j] = (device_models_[j]->named_parameters()[key].mutable_grad());
+            input_gradients[j] = device_models_[j]->named_parameters()[key].mutable_grad();
         }
 
 #ifdef MARIUS_CUDA
-        torch::cuda::nccl::all_reduce(input_gradients, input_gradients);
+        // TODO: want to look at the streams for this?, reduction mean on own
+        torch::cuda::nccl::all_reduce(input_gradients, input_gradients, 0);//, streams);
 #endif
     }
 
-    step_all();
-    clear_grad_all();
+//    step_all();
+//    clear_grad_all();
 }
 
 void Model::setup_optimizers(shared_ptr<ModelConfig> model_config) {
@@ -288,6 +296,64 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Model::fo
 }
 
 void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
+//    torch::cuda::nccl::ncclComm_t comms[2];
+//    int devs[2] = {0, 1};
+//    torch::cuda::nccl::ncclCommInitAll(comms, 2, devs);
+//    torch::cuda::nccl::ncclUniqueId Id;
+//    torch::cuda::nccl::get_unique_id(Id);
+//
+//    torch::cuda::nccl::ncclUniqueId Id1;
+//    torch::cuda::nccl::get_unique_id(Id1);
+//
+//    torch::cuda::nccl::ncclComm_t comm1 = torch::cuda::nccl::comm_init_rank(2, Id, 0);
+//    torch::cuda::nccl::ncclComm_t comm2 = torch::cuda::nccl::comm_init_rank(2, Id1, 1);
+
+//    Timer t = new Timer(false);
+//    t.start();
+
+//    batch->node_features_ = batch->node_features_.to(torch::Device("cuda:1"));
+//    batch->node_features_ = batch->node_features_.to(torch::Device("cuda:0"));
+
+//    torch::Tensor test = torch::zeros_like(batch->node_features_).to(torch::Device("cuda:1"));
+
+//    std::cout<<torch::cuda::nccl::detail::get_communicators({batch->node_features_})[0]<<"\n";
+//    std::cout<<at::cuda::getCurrentCUDAStream(0)<<"\n";
+//    torch::cuda::nccl::send(batch->node_features_, torch::cuda::nccl::NcclCommList, at::cuda::getCurrentCUDAStream(0), 1);
+//    torch::cuda::nccl::recv(test, torch::cuda::nccl::detail::get_communicators({test})[0], at::cuda::getCurrentCUDAStream(1), 0);
+
+//    std::cout<<test.flatten().narrow(0, 0, 2)<<"\n";
+
+//    t.stop();
+//    std::cout<<"blah: "<<t.getDuration()<<"\n\n";
+
+
+
+
+
+    if (batch->sub_batches_.size() > 0) {
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                device_models_[i]->clear_grad();
+                device_models_[i]->train_batch(batch->sub_batches_[i], false);
+            }
+
+            #pragma omp single
+            {
+                all_reduce();
+            }
+
+            #pragma omp for
+            for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                device_models_[i]->step();
+            }
+
+        }
+        return;
+    }
+
+    // single GPU
     if (call_step) {
         clear_grad();
     }
@@ -366,11 +432,28 @@ void Model::broadcast(std::vector<torch::Device> devices) {
             shared_ptr<GeneralEncoder> encoder = encoder_clone_helper(encoder_, device);
             shared_ptr<Decoder> decoder = decoder_clone_helper(decoder_, device);
             device_models_[i] = std::make_shared<Model>(encoder, decoder, loss_function_, reporter_);
+            device_models_[i]->device_ = device;
 
-            for (auto optim : optimizers_) {
-                device_models_[i]->optimizers_.emplace_back(optim->clone());
-                device_models_[i]->sparse_lr_ = sparse_lr_;
+            // encoder_clone_helper triggers a reset() call we need to undo
+            // copy to correct device, not sure why encoder_clone_helper doesn't work
+            torch::NoGradGuard no_grad;
+
+            if (encoder != nullptr) {
+                for (int i = 0; i < encoder->named_parameters().values().size(); i++) {
+                    encoder->named_parameters().values()[i].copy_(device_models_[0]->encoder_->named_parameters().values()[i]);
+                }
+                encoder->to(device);
             }
+            if (decoder != nullptr) {
+                for (int i = 0; i < std::dynamic_pointer_cast<torch::nn::Module>(decoder)->named_parameters().values().size(); i++) {
+                    std::dynamic_pointer_cast<torch::nn::Module>(decoder)->named_parameters().values()[i].copy_(
+                            std::dynamic_pointer_cast<torch::nn::Module>(device_models_[0]->decoder_)->named_parameters().values()[i]);
+                }
+                std::dynamic_pointer_cast<torch::nn::Module>(decoder)->to(device);
+            }
+
+            device_models_[i]->setup_optimizers(model_config_);
+            device_models_[i]->sparse_lr_ = sparse_lr_;
         } else {
             device_models_[i] = std::dynamic_pointer_cast<Model>(shared_from_this());
         }
@@ -418,6 +501,7 @@ shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std:
     model = std::make_shared<Model>(encoder, decoder, loss);
     model->device_ = devices[0];
     model->device_models_ = std::vector<shared_ptr<Model>>(devices.size());
+//    model->device_models_ = std::vector<shared_ptr<Model>>(2);
 
     if (train) {
         model->setup_optimizers(model_config);
@@ -431,10 +515,15 @@ shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std:
 
     if (devices.size() > 1) {
         SPDLOG_INFO("Broadcasting model to: {} GPUs", devices.size());
+        model->model_config_ = model_config;
         model->broadcast(devices);
     } else {
         model->device_models_[0] = model;
     }
+
+//    model->model_config_ = model_config;
+//    std::vector<torch::Device> tmp = {torch::Device(torch::kCUDA, 0), torch::Device(torch::kCUDA, 1)};
+//    model->broadcast(tmp);
 
     return model;
 }
