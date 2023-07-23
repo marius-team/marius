@@ -106,7 +106,7 @@ void Batch::accumulateGradients(float learning_rate) {
 
     status_ = BatchStatus::AccumulatedGradients;
 
-    getCurrentCudaStream(node_gradients_.device().index()).synchronize();
+    getCurrentCUDAStream(node_gradients_.device().index()).synchronize();
 }
 
 void Batch::embeddingsToHost() {
