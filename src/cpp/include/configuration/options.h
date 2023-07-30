@@ -9,6 +9,10 @@
 #include "reporting/logger.h"
 
 // ENUM values
+enum class WorkerType { BATCH, COMPUTE };
+
+WorkerType getWorkerType(std::string string_val);
+
 enum class LearningTask { NODE_CLASSIFICATION, LINK_PREDICTION, ENCODE };
 
 LearningTask getLearningTask(std::string string_val);
@@ -33,11 +37,7 @@ enum class OptimizerType { SGD, ADAM, ADAGRAD, DEFAULT };
 
 OptimizerType getOptimizerType(std::string string_val);
 
-enum class ReductionLayerType {
-    NONE,
-    CONCAT,
-    LINEAR,
-};
+enum class ReductionLayerType { NONE, CONCAT, LINEAR };
 
 ReductionLayerType getReductionLayerType(std::string string_val);
 
@@ -69,11 +69,11 @@ enum class StorageBackend { PARTITION_BUFFER, FLAT_FILE, HOST_MEMORY, DEVICE_MEM
 
 StorageBackend getStorageBackend(std::string string_val);
 
-enum class EdgeBucketOrdering { OLD_BETA, NEW_BETA, ALL_BETA, COMET, CUSTOM };
+enum class EdgeBucketOrdering { OLD_BETA, NEW_BETA, ALL_BETA, COMET, DIAG, CUSTOM };
 
 EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val);
 
-enum class NodePartitionOrdering { DISPERSED, SEQUENTIAL, CUSTOM };
+enum class NodePartitionOrdering { DISPERSED, SEQUENTIAL, DIAG, CUSTOM };
 
 NodePartitionOrdering getNodePartitionOrderingEnum(std::string string_val);
 
@@ -88,6 +88,15 @@ LocalFilterMode getLocalFilterMode(std::string string_val);
 torch::Dtype getDtype(std::string string_val);
 
 spdlog::level::level_enum getLogLevel(std::string string_val);
+
+struct WorkerOptions {
+    virtual ~WorkerOptions() = default;
+};
+
+struct BatchWorkerOptions : WorkerOptions {
+    bool also_compute;
+    std::vector<int> children = {};;
+};
 
 struct InitOptions {
     virtual ~InitOptions() = default;

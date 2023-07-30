@@ -14,6 +14,7 @@ from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.datatypes import (
     AdagradOptions,
     AdamOptions,
+    BatchWorkerOptions,
     ConstantInitOptions,
     DecoderOptions,
     DenseLayerOptions,
@@ -34,6 +35,7 @@ from marius.tools.configuration.datatypes import (
     StorageOptions,
     UniformInitOptions,
     UniformSamplingOptions,
+    WorkerOptions
 )
 from marius.tools.configuration.validation import (
     check_encoder_layer_dimensions,
@@ -41,6 +43,7 @@ from marius.tools.configuration.validation import (
     check_gnn_layers_alignment,
     validate_dataset_config,
     validate_storage_config,
+    validate_distributed_config
 )
 
 
@@ -54,6 +57,64 @@ def get_model_dir_path(dataset_dir):
             return str(model_dir_path)
 
     return str(model_dir_path)
+
+
+@dataclass
+class WorkerConfig:
+    type: str = "BATCH_WORKER"
+    options: WorkerOptions = WorkerOptions()
+
+    def __post_init__(self):
+        if self.type not in ["BATCH_WORKER", "COMPUTE_WORKER"]:
+            raise ValueError("worker must be of type batch or compute")
+
+    def merge(self, input_config: DictConfig):
+        """
+        Merges under specified dictionary config into the current configuration object
+        :param input_config: The input configuration dictionary
+        :return: Structured output config
+        """
+
+        self.type = input_config.type.upper()
+
+        new_options = WorkerOptions()
+
+        if self.type == "BATCH_WORKER":
+            new_options = BatchWorkerOptions()
+
+        elif self.type == "COMPUTE_WORKER":
+            pass
+
+        if "options" in input_config.keys():
+            for key in new_options.__dict__.keys():
+                if key in input_config.options.keys():
+                    val = input_config.options.__getattr__(key)
+                    new_options.__setattr__(key, val)
+
+        self.options = new_options
+
+        self.__post_init__()
+
+
+@dataclass
+class DistributedConfig:
+    workers: List[WorkerConfig] = field(default_factory=list)
+
+    def merge(self, input_config: DictConfig):
+        """
+        Merges under specified dictionary config into the current configuration object
+        :param input_config: The input configuration dictionary
+        :return: Structured output config
+        """
+
+        new_workers = []
+        if "workers" in input_config.keys():
+            for worker_config in input_config.workers:
+                base_worker = WorkerConfig()
+                base_worker.merge(worker_config)
+                new_workers.append(base_worker)
+
+        self.workers = new_workers
 
 
 @dataclass
@@ -815,6 +876,7 @@ class EvaluationConfig:
 
 @dataclass
 class MariusConfig:
+    distributed: DistributedConfig = MISSING
     model: ModelConfig = ModelConfig()
     storage: StorageConfig = StorageConfig()
     training: TrainingConfig = TrainingConfig()
@@ -844,6 +906,10 @@ def type_safe_merge(base_config: MariusConfig, input_config: DictConfig):
     :param input_config: The input configuration dictionary
     :return: Structured output config
     """
+
+    if "distributed" in input_config.keys():
+        base_config.distributed = DistributedConfig()
+        base_config.distributed.merge(input_config.distributed)
 
     if "model" in input_config.keys():
         base_config.model.merge(input_config.model)
@@ -944,6 +1010,7 @@ def load_config(input_config_path, save=False):
         infer_model_dir(output_config)
 
     # we can then perform validation, and optimization over the fully specified configuration file here before returning
+    validate_distributed_config(output_config)
     validate_dataset_config(output_config)
     validate_storage_config(output_config)
     check_encoder_layer_dimensions(output_config)

@@ -11,6 +11,19 @@ def get_lines_in_file(filepath):
     return int(os.popen("wc -l {}".format(filepath)).read().lstrip().split(" ")[0])
 
 
+def validate_distributed_config(output_config):
+    distributed_config = output_config.distributed
+
+    if distributed_config is MISSING:
+        return
+
+    assert len(distributed_config.workers) >= 1, "distributed config must have at least one worker"
+
+    for worker_config in distributed_config.workers:
+        if worker_config.type == "BATCH_WORKER":
+            assert len(worker_config.options.children) >= 1, "batch construction worker must have at least one child"
+
+
 def validate_dataset_config(output_config):
     dataset_config = output_config.storage.dataset
 

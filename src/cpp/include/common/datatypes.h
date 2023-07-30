@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <torch/csrc/distributed/c10d/ProcessGroupGloo.hpp>
+
 #include "common/exception.h"
 
 #pragma GCC diagnostic push

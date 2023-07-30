@@ -10,6 +10,13 @@
 #include "storage/checkpointer.h"
 #include "storage/io.h"
 
+//#include "torch/torch.h"
+//#include <torch/csrc/distributed/c10d/ProcessGroupNCCL.hpp>
+//#include <torch/csrc/distributed/c10d/ProcessGroupGloo.hpp>
+//#include <torch/csrc/distributed/c10d/TCPStore.hpp>
+//#include <torch/csrc/distributed/c10d/FileStore.hpp>
+//#include <torch/csrc/distributed/c10d/Store.hpp>
+
 void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<MariusConfig> marius_config) {
     shared_ptr<GraphEncoder> graph_encoder;
     if (marius_config->evaluation->pipeline->sync) {
@@ -35,7 +42,61 @@ void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mode
     graph_encoder->encode();
 }
 
-std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoader> > marius_init(shared_ptr<MariusConfig> marius_config, bool train) {
+shared_ptr<c10d::ProcessGroupGloo> distributed_init(string coord_address, int world_size, int rank, string address) {
+
+    auto store = c10::make_intrusive<c10d::TCPStore>(coord_address, 7654, world_size, rank==0);
+
+    auto options = c10d::ProcessGroupGloo::Options::create();
+    options->devices.push_back(c10d::ProcessGroupGloo::createDeviceForHostname(address));
+//    options.timeout = std::chrono::milliseconds(1000);
+//    options.threads =
+
+    auto pg_gloo = std::make_shared<c10d::ProcessGroupGloo>(store, rank, world_size, options);
+
+    return pg_gloo;
+
+
+//    createDeviceForInterface
+//    options->devices.push_back(c10d::ProcessGroupGloo::createDefaultDevice()); //this works
+//    gloo::transport::tcp::attr attr;
+//    options->devices.push_back(gloo::transport::tcp::CreateDevice(attr));
+
+//    auto options1 = c10d::ProcessGroupNCCL::Options::create();
+////    options->devices.push_back(c10d::ProcessGroupGloo::createDefaultDevice());
+////    options->is_high_priority_stream = false;
+////    options->timeout = timeout;
+//    auto pg1 = std::make_shared<c10d::ProcessGroupNCCL>(store, rank, 2, options1);
+
+
+//    std::shared_ptr<::c10d::ProcessGroup::Work> work;
+//    while (true) {
+//        work = pg.allreduce(tensors);
+//        try {
+//            work->wait();
+
+//    if (!work[i]->wait()) {
+//        throw work[i]->exception();
+//    }
+
+//    /*numWorkerThreads=*/std::max(16U, std::thread::hardware_concurrency())
+
+
+//    std::vector<torch::Tensor> vec;
+//    torch::Tensor x = torch::randint(10, {5});
+////    x = x.to(torch::Device(torch::kCUDA, 0));
+//    std::cout<<"x: "<<x<<"\n";
+//    vec.push_back(x);
+//
+//    //    pg.allreduce(vec);
+//    auto work = pg->allreduce(vec);
+////    auto work = pg1->allreduce(vec);
+//    if (!work->wait()) {
+//        throw work->exception();
+//    }
+
+}
+
+std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoader>> marius_init(shared_ptr<MariusConfig> marius_config, bool train) {
     Timer initialization_timer = Timer(false);
     initialization_timer.start();
     SPDLOG_INFO("Start initialization");
@@ -102,11 +163,15 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     return std::forward_as_tuple(model, graph_model_storage, dataloader);
 }
 
-void marius_train(shared_ptr<MariusConfig> marius_config) {
+void marius_train(shared_ptr<MariusConfig> marius_config, shared_ptr<c10d::ProcessGroupGloo> pg_gloo) {
     auto tup = marius_init(marius_config, true);
     auto model = std::get<0>(tup);
     auto graph_model_storage = std::get<1>(tup);
     auto dataloader = std::get<2>(tup);
+
+    if (pg_gloo != nullptr) {
+        dataloader->setDistPG(pg_gloo, marius_config->distributed);
+    }
 
     shared_ptr<Trainer> trainer;
     shared_ptr<Evaluator> evaluator;
@@ -195,10 +260,22 @@ void marius(int argc, char *argv[]) {
         train = false;
     }
 
+    shared_ptr<c10d::ProcessGroupGloo> pg_gloo = nullptr;
+    if (argc > 2) {
+        SPDLOG_INFO("Distributed training detected.");
+
+        string coord_address = string(argv[2]);
+        int world_size = std::atoi(argv[3]);
+        int rank = std::atoi(argv[4]);
+        string address = string(argv[5]);
+
+        pg_gloo = distributed_init(coord_address, world_size, rank, address);
+    }
+
     shared_ptr<MariusConfig> marius_config = loadConfig(config_path, true);
 
     if (train) {
-        marius_train(marius_config);
+        marius_train(marius_config, pg_gloo);
     } else {
         marius_eval(marius_config);
     }

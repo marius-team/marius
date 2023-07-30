@@ -130,6 +130,7 @@ include_directories(${project_CUDA_INCLUDE_DIR})
 include_directories(${project_CUDA_THIRD_PARTY_DIR})
 include_directories(${TORCH_INCLUDE_DIRS})
 include_directories(${project_THIRD_PARTY_DIR}/parallel-hashmap/)
+include_directories(${project_THIRD_PARTY_DIR}/gloo/)
 include_directories(${project_BINDINGS})
 
 add_library(${PROJECT_NAME}

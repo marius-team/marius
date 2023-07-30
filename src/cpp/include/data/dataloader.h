@@ -71,6 +71,9 @@ class DataLoader {
     LearningTask learning_task_;
 
     std::vector<CudaStream *> compute_streams_;
+    shared_ptr<c10d::ProcessGroupGloo> pg_gloo_;
+    shared_ptr<DistributedConfig> dist_config_;
+    bool dist_;
 
     DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, shared_ptr<TrainingConfig> training_config,
                shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config);
@@ -242,6 +245,16 @@ class DataLoader {
             loadStorage();
             initializeBatches(true);
         }
+    }
+
+    void setDistPG(shared_ptr<c10d::ProcessGroupGloo> pg_gloo, shared_ptr<DistributedConfig> dist_config) {
+        pg_gloo_ = pg_gloo;
+        dist_config_ = dist_config;
+        dist_ = true;
+
+        if (dist_config_ == nullptr) throw MariusRuntimeException("Expected distributed config to be defined.");
+
+        //TODO: set batch_worker_, compute_worker_, children, parents, num_batch_, num_compute_ here based on config
     }
 };
 

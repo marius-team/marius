@@ -33,6 +33,54 @@ T cast_helper(pyobj python_object) {
     }
 }
 
+shared_ptr<WorkerConfig> initWorkerConfig(pyobj python_object) {
+    shared_ptr<WorkerConfig> ret_config = std::make_shared<WorkerConfig>();
+
+    ret_config->type = getWorkerType(cast_helper<string>(python_object.attr("type")));
+
+    pyobj py_options = python_object.attr("options");
+
+    if (ret_config->type == WorkerType::BATCH) {
+        auto batch_options = std::make_shared<BatchWorkerOptions>();
+        batch_options->also_compute = cast_helper<bool>(py_options.attr("also_compute"));
+
+        pybind11::list children_python_obj = cast_helper<pybind11::list>(py_options.attr("children"));
+        batch_options->children = {};
+
+        for (auto py_id : children_python_obj) {
+            pyobj id_object = pybind11::reinterpret_borrow<pyobj>(py_id);
+            batch_options->children.emplace_back(cast_helper<int>(id_object));
+        }
+
+        ret_config->options = batch_options;
+    } else {
+        auto options = std::make_shared<WorkerOptions>();
+        ret_config->options = options;
+    }
+
+    return ret_config;
+}
+
+shared_ptr<DistributedConfig> initDistributedConfig(pyobj python_config) {
+    if (check_missing(python_config)) {
+        return nullptr;
+    }
+
+    shared_ptr<DistributedConfig> ret_config = std::make_shared<DistributedConfig>();
+
+    pybind11::list workers_python_obj = cast_helper<pybind11::list>(python_config.attr("workers"));
+    auto workers_vec = std::vector<shared_ptr<WorkerConfig>>();
+
+    for (auto py_layer : workers_python_obj) {
+        pyobj layer_object = pybind11::reinterpret_borrow<pyobj>(py_layer);
+        workers_vec.emplace_back(initWorkerConfig(layer_object));
+    }
+
+    ret_config->workers = workers_vec;
+
+    return ret_config;
+}
+
 shared_ptr<NeighborSamplingConfig> initNeighborSamplingConfig(pyobj python_object) {
     shared_ptr<NeighborSamplingConfig> ret_config = std::make_shared<NeighborSamplingConfig>();
 
@@ -491,6 +539,7 @@ shared_ptr<EvaluationConfig> initEvaluationConfig(pyobj python_config) {
 shared_ptr<MariusConfig> initMariusConfig(pyobj python_config) {
     shared_ptr<MariusConfig> ret_config = std::make_shared<MariusConfig>();
 
+    ret_config->distributed = initDistributedConfig(python_config.attr("distributed"));
     ret_config->model = initModelConfig(python_config.attr("model"));
     ret_config->storage = initStorageConfig(python_config.attr("storage"));
     ret_config->training = initTrainingConfig(python_config.attr("training"));

@@ -13,6 +13,15 @@
 using pyobj = pybind11::object;
 using std::shared_ptr;
 
+struct WorkerConfig {
+    WorkerType type;
+    shared_ptr<WorkerOptions> options = nullptr;
+};
+
+struct DistributedConfig {
+    std::vector<shared_ptr<WorkerConfig>> workers;
+};
+
 struct NeighborSamplingConfig {
     NeighborSamplingLayer type;
     shared_ptr<NeighborSamplingOptions> options = nullptr;
@@ -162,6 +171,7 @@ struct EvaluationConfig {
 };
 
 struct MariusConfig {
+    shared_ptr<DistributedConfig> distributed = nullptr;
     shared_ptr<ModelConfig> model = nullptr;
     shared_ptr<StorageConfig> storage = nullptr;
     shared_ptr<TrainingConfig> training = nullptr;
@@ -172,6 +182,10 @@ bool check_missing(pyobj python_object);
 
 template <typename T>
 T cast_helper(pyobj python_object);
+
+PYBIND11_EXPORT shared_ptr<WorkerConfig> initWorkerConfig(pyobj python_object);
+
+PYBIND11_EXPORT shared_ptr<DistributedConfig> initDistributedConfig(pyobj python_object);
 
 PYBIND11_EXPORT shared_ptr<NeighborSamplingConfig> initNeighborSamplingConfig(pyobj python_object);
 

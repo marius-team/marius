@@ -65,6 +65,9 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
     }
 
     compute_streams_ = {nullptr, nullptr}; //TODO: general multi-gpu
+    pg_gloo_ = nullptr;
+    dist_config_ = nullptr;
+    dist_ = false;
 }
 
 DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler,
@@ -259,7 +262,7 @@ void DataLoader::setBufferOrdering() {
     if (learning_task_ == LearningTask::LINK_PREDICTION) {
         if (graph_storage_->useInMemorySubGraph()) {
             auto tup = getEdgeBucketOrdering(options->edge_bucket_ordering, options->num_partitions, options->buffer_capacity, options->fine_to_coarse_ratio,
-                                             options->num_cache_partitions, options->randomly_assign_edge_buckets);
+                                             options->num_cache_partitions, options->randomly_assign_edge_buckets, pg_gloo_, dist_config_);
             buffer_states_ = std::get<0>(tup);
             edge_buckets_per_buffer_ = std::get<1>(tup);
 
@@ -273,7 +276,7 @@ void DataLoader::setBufferOrdering() {
             int64_t num_train_nodes = graph_storage_->storage_ptrs_.nodes->getDim0();
             auto tup = getNodePartitionOrdering(
                 options->node_partition_ordering, graph_storage_->storage_ptrs_.train_nodes->range(0, num_train_nodes).flatten(0, 1),
-                graph_storage_->getNumNodes(), options->num_partitions, options->buffer_capacity, options->fine_to_coarse_ratio, options->num_cache_partitions);
+                graph_storage_->getNumNodes(), options->num_partitions, options->buffer_capacity, options->fine_to_coarse_ratio, options->num_cache_partitions, pg_gloo_, dist_config_);
             buffer_states_ = std::get<0>(tup);
             node_ids_per_buffer_ = std::get<1>(tup);
 
@@ -282,6 +285,8 @@ void DataLoader::setBufferOrdering() {
             graph_storage_->setBufferOrdering(buffer_states_);
         }
     }
+
+    exit(0);
 }
 
 void DataLoader::clearBatches() { batches_ = std::vector<shared_ptr<Batch>>(); }

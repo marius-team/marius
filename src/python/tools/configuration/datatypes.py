@@ -1,6 +1,17 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 # This file contains enums and detailed option settings for each enum value, where applicable
+
+@dataclass
+class WorkerOptions:
+    pass
+
+
+@dataclass
+class BatchWorkerOptions(WorkerOptions):
+    also_compute: bool = False
+    children: List[int] = field(default_factory=list)
 
 
 # options dataclasses

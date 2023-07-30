@@ -4,6 +4,18 @@
 
 #include "configuration/options.h"
 
+WorkerType getWorkerType(std::string string_val) {
+    for (auto& c : string_val) c = toupper(c);
+
+    if (string_val == "BATCH_WORKER") {
+        return WorkerType::BATCH;
+    } else if (string_val == "COMPUTE_WORKER") {
+        return WorkerType::COMPUTE;
+    } else {
+        throw std::runtime_error("Unrecognized worker type string");
+    }
+}
+
 LearningTask getLearningTask(std::string string_val) {
     for (auto& c : string_val) c = toupper(c);
 
@@ -243,6 +255,8 @@ EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val) {
         return EdgeBucketOrdering::ALL_BETA;
     } else if (string_val == "COMET") {
         return EdgeBucketOrdering::COMET;
+    } else if (string_val == "DIAG") {
+        return EdgeBucketOrdering::DIAG;
     } else if (string_val == "CUSTOM") {
         return EdgeBucketOrdering::CUSTOM;
     } else {
@@ -257,7 +271,9 @@ NodePartitionOrdering getNodePartitionOrderingEnum(std::string string_val) {
         return NodePartitionOrdering::DISPERSED;
     } else if (string_val == "SEQUENTIAL") {
         return NodePartitionOrdering::SEQUENTIAL;
-    } else if (string_val == "CUSTOM") {
+    } else if (string_val == "DIAG") {
+        return NodePartitionOrdering::DIAG;
+    }else if (string_val == "CUSTOM") {
         return NodePartitionOrdering::CUSTOM;
     } else {
         throw std::runtime_error("Unrecognized node partition ordering string");

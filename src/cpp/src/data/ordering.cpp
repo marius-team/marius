@@ -11,7 +11,9 @@
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getEdgeBucketOrdering(EdgeBucketOrdering edge_bucket_ordering, int num_partitions, int buffer_capacity,
                                                                                int fine_to_coarse_ratio, int num_cache_partitions,
-                                                                               bool randomly_assign_edge_buckets) {
+                                                                               bool randomly_assign_edge_buckets,
+                                                                               shared_ptr<c10d::ProcessGroupGloo> pg_gloo,
+                                                                               shared_ptr<DistributedConfig> dist_config) {
     switch (edge_bucket_ordering) {
         case EdgeBucketOrdering::OLD_BETA:
             SPDLOG_INFO("Generating Old Beta Ordering");
@@ -24,6 +26,10 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getEdgeBucketOrdering(E
         case EdgeBucketOrdering::COMET:
             SPDLOG_INFO("Generating COMET Ordering");
             return getTwoLevelBetaOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, randomly_assign_edge_buckets);
+        case EdgeBucketOrdering::DIAG:
+            SPDLOG_INFO("Generating Diag Ordering");
+            return getDiagOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, randomly_assign_edge_buckets,
+                                   torch::Tensor(), -1, pg_gloo, dist_config);
         case EdgeBucketOrdering::CUSTOM:
             return getCustomEdgeBucketOrdering();
         default:
@@ -35,7 +41,9 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getEdgeBucketOrdering(E
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getNodePartitionOrdering(NodePartitionOrdering node_partition_ordering, Indices train_nodes,
                                                                                   int64_t total_num_nodes, int num_partitions, int buffer_capacity,
-                                                                                  int fine_to_coarse_ratio, int num_cache_partitions) {
+                                                                                  int fine_to_coarse_ratio, int num_cache_partitions,
+                                                                                  shared_ptr<c10d::ProcessGroupGloo> pg_gloo,
+                                                                                  shared_ptr<DistributedConfig> dist_config) {
     switch (node_partition_ordering) {
         case NodePartitionOrdering::DISPERSED:
             SPDLOG_INFO("Generating Dispersed Ordering");
@@ -43,6 +51,10 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getNodePartitionOrderin
         case NodePartitionOrdering::SEQUENTIAL:
             SPDLOG_INFO("Generating Sequential Ordering");
             return getSequentialNodePartitionOrdering(train_nodes, total_num_nodes, num_partitions, buffer_capacity);
+        case NodePartitionOrdering::DIAG:
+            SPDLOG_INFO("Generating Diag Ordering");
+            return getDiagOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, true,
+                                   train_nodes, total_num_nodes, pg_gloo, dist_config);
         case NodePartitionOrdering::CUSTOM:
             return getCustomNodePartitionOrdering();
         default:
@@ -50,6 +62,67 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getNodePartitionOrderin
             std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> ret;
             return ret;
     }
+}
+
+void printBuffers(vector<vector<int>> buffer_states, bool coarse) {
+    if (coarse) {
+        std::cout<<"Logical Buffer:\n";
+    } else {
+        std::cout<<"Physical Buffer:\n";
+    }
+    for (auto b : buffer_states) {
+        std::cout<<b<<"\n";
+    }
+    std::cout<<"\n";
+}
+
+void printEdgeBuckets(vector<vector<std::pair<int, int>>> edge_buckets_per_buffer) {
+int total = 0;
+    std::cout<<"Edge Buckets:\n";
+    for (auto edge_buckets : edge_buckets_per_buffer) {
+        std::cout<<"[";
+        for (int i = 0; i < edge_buckets.size(); i++) {
+            std::cout<<"("<<std::get<0>(edge_buckets[i])<<","<<std::get<1>(edge_buckets[i])<<") ";
+            total += 1;
+        }
+        std::cout<<"]\n";
+    }
+    std::cout<<"total: "<<total<<"\n";
+}
+
+void printTrainNodes(vector<torch::Tensor> train_nodes_per_buffer) {
+    int total = 0;
+    std::cout<<"Train nodes:\n";
+    for (auto tensor : train_nodes_per_buffer) {
+        total += tensor.size(0);
+        std::cout<<tensor.size(0);
+        std::cout<<"\n";
+    }
+    std::cout<<"total: "<<total<<"\n";
+}
+
+vector<torch::Tensor> convertToVectorOfTensors(vector<vector<int>> buffer_states, torch::TensorOptions opts) {
+    vector<torch::Tensor> ret_buffer_states;
+
+    for (auto b : buffer_states) {
+        ret_buffer_states.emplace_back(torch::tensor(b, opts));
+    }
+
+    return ret_buffer_states;
+}
+
+vector<vector<int>> convertToVectorOfInts(vector<torch::Tensor> buffer_states) {
+    vector<vector<int>> ret_buffer_states;
+
+    for (int i = 0; i < buffer_states.size(); i++) {
+        int *data_ptr_ = (int *)buffer_states[i].data_ptr();
+        int *end = (int *)data_ptr_ + buffer_states[i].size(0);
+        vector<int> partitions = vector<int>(data_ptr_, end);
+
+        ret_buffer_states.emplace_back(partitions);
+    }
+
+    return ret_buffer_states;
 }
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> convertEdgeBucketOrderToTensors(vector<vector<int>> buffer_states,
@@ -162,7 +235,7 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
     torch::Tensor choices = torch::zeros({num_buckets, num_buffers}, torch::kInt32);
     int32_t *choices_mem = choices.data_ptr<int32_t>();
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < num_buffers; i++) {
         for (int j = 0; j < buffer_size; j++) {
             for (int k = j; k < buffer_size; k++) {
@@ -182,37 +255,43 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
 
     // setup seeds
     unsigned int num_threads = 1;
-#ifdef MARIUS_OMP
+    #ifdef MARIUS_OMP
     #pragma omp parallel
     {
-    #pragma omp single
+        #pragma omp single
         num_threads = omp_get_num_threads();
     }
-#endif
+    #endif
     std::vector<unsigned int> tid_seeds(num_threads);
 
     for (int i = 0; i < num_threads; i++) {
         tid_seeds[i] = rand();
     }
 
-#pragma omp parallel
+    #pragma omp parallel
     {
-#ifdef MARIUS_OMP
+        #ifdef MARIUS_OMP
         unsigned int seed = tid_seeds[omp_get_thread_num()];
-#else
+        #else
         unsigned int seed = tid_seeds[0];
-#endif
+        #endif
 
-#pragma omp for
+        #pragma omp for
         for (int i = 0; i < num_buckets; i++) {
             torch::Tensor buffer_choices = torch::nonzero(choices[i]);
             buffer_choices = torch::reshape(buffer_choices, {buffer_choices.size(0)});
-            int32_t buffer_choice = buffer_choices[rand_r(&seed) % buffer_choices.size(0)].item<int32_t>();
+
+            int32_t buffer_choice = -1;
+            if (buffer_choices.size(0) > 0) {
+                buffer_choice = buffer_choices[rand_r(&seed) % buffer_choices.size(0)].item<int32_t>();
+            }
 
             int32_t src_part = all_buckets_accessor[i][0];
             int32_t dst_part = all_buckets_accessor[i][1];
             *(pick_mem + (src_part * num_partitions + dst_part)) = buffer_choice;
-            *(pick_one_hot_mem + (src_part * num_partitions + dst_part) * num_buffers + buffer_choice) = 1;
+            if (buffer_choice != -1) {
+                *(pick_one_hot_mem + (src_part * num_partitions + dst_part) * num_buffers + buffer_choice) = 1;
+            }
         }
     }
 
@@ -225,11 +304,13 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
 
     vector<int> indices(num_buffers, 0);
     for (int i = 0; i < num_buckets; i++) {
+        int32_t buffer_choice = pick_accessor[i];
+
+        if (buffer_choice == -1) continue;
+
         int32_t src_part = all_buckets_accessor[i][0];
         int32_t dst_part = all_buckets_accessor[i][1];
         std::pair<int, int> pair = std::make_pair(src_part, dst_part);
-
-        int32_t buffer_choice = pick_accessor[i];
 
         edge_buckets_per_buffer[buffer_choice][indices[buffer_choice]] = pair;
         indices[buffer_choice] += 1;
@@ -238,16 +319,13 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
     return edge_buckets_per_buffer;
 }
 
-std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getTwoLevelBetaOrdering(int num_partitions, int buffer_capacity, int fine_to_coarse_ratio,
-                                                                                 int num_cache_partitions, bool randomly_assign_edge_buckets) {
-    int coarse_num_partitions = num_partitions / fine_to_coarse_ratio;
-    int coarse_buffer_capacity = buffer_capacity / fine_to_coarse_ratio;
+vector<vector<int>> convertToFinePartitions(vector<vector<int>> coarse_buffer_states, int num_partitions, int buffer_capacity,
+                                            int fine_to_coarse_ratio, int num_cache_partitions) {
+    // convert to fine partitions and add in cache (num_cache_partitions coarse mapped to fine partitions 0...x)
+    // todo: maybe num_cache partitions should just directly represent physical partitions, here and everywhere (e.g., diag, two level beta)?
+    //  what are the implications for the buffer if any?
 
-    coarse_num_partitions = coarse_num_partitions - num_cache_partitions;
-    coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
-
-    vector<vector<int>> coarse_buffer_states = getBetaOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
-
+    // add in cache
     int cached_fine_partitions = num_cache_partitions * fine_to_coarse_ratio;
     torch::Tensor fine_to_coarse_map = torch::arange(cached_fine_partitions, torch::kInt32);
     fine_to_coarse_map = torch::cat({fine_to_coarse_map, torch::randperm(num_partitions - cached_fine_partitions, torch::kInt32) + cached_fine_partitions});
@@ -280,6 +358,22 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getTwoLevelBetaOrdering
         buffer_states.emplace_back(fine_buffer_state);
     }
 
+    return buffer_states;
+}
+
+std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getTwoLevelBetaOrdering(int num_partitions, int buffer_capacity, int fine_to_coarse_ratio,
+                                                                                 int num_cache_partitions, bool randomly_assign_edge_buckets) {
+    int coarse_num_partitions = num_partitions / fine_to_coarse_ratio;
+    int coarse_buffer_capacity = buffer_capacity / fine_to_coarse_ratio;
+
+    coarse_num_partitions = coarse_num_partitions - num_cache_partitions;
+    coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
+
+    vector<vector<int>> coarse_buffer_states = getBetaOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
+
+    vector<vector<int>> buffer_states = convertToFinePartitions(coarse_buffer_states, num_partitions, buffer_capacity,
+                                                                fine_to_coarse_ratio, num_cache_partitions);
+
     // assign edge buckets
     vector<vector<std::pair<int, int>>> edge_buckets_per_buffer;
     if (randomly_assign_edge_buckets) {
@@ -289,6 +383,71 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getTwoLevelBetaOrdering
     }
 
     return convertEdgeBucketOrderToTensors(buffer_states, edge_buckets_per_buffer);
+}
+
+vector<torch::Tensor> getDispersedOrderingHelper(int num_partitions, int buffer_capacity) {
+    vector<torch::Tensor> buffer_states;
+    Indices all_partitions = torch::randperm(num_partitions, torch::kInt32);
+    Indices in_buffer = all_partitions.narrow(0, 0, buffer_capacity);
+    Indices on_disk = all_partitions.narrow(0, buffer_capacity, num_partitions - buffer_capacity);
+    buffer_states.emplace_back(in_buffer);
+
+    while (on_disk.size(0) > 0) {
+        in_buffer = in_buffer.index_select(0, torch::randperm(in_buffer.size(0), torch::kInt64));
+        on_disk = on_disk.index_select(0, torch::randperm(on_disk.size(0), torch::kInt64));
+
+        in_buffer[-1] = on_disk[0];
+        buffer_states.emplace_back(in_buffer);
+        on_disk = on_disk.narrow(0, 1, on_disk.size(0) - 1);
+    }
+
+    return buffer_states;
+}
+
+vector<torch::Tensor> randomlyAssignTrainNodesToBuffers(vector<torch::Tensor> buffer_states, Indices train_nodes,
+                                                        int64_t total_num_nodes, int num_partitions, int buffer_capacity) {
+    // randomly assign train nodes to buffers
+
+    int64_t partition_size = ceil((double)total_num_nodes / num_partitions);
+    torch::Tensor train_nodes_partition = train_nodes.divide(partition_size, "trunc");
+
+    std::vector<std::vector<int>> partition_buffer_states(num_partitions);
+
+    for (int i = 0; i < num_partitions; i++) {
+        for (int j = 0; j < buffer_states.size(); j++) {
+            bool partition_in_buffer = false;
+            auto buffer_state_accessor = buffer_states[j].accessor<int32_t, 1>();
+
+            for (int k = 0; k < buffer_capacity; k++) {
+                if (buffer_state_accessor[k] == i) {
+                    partition_in_buffer = true;
+                    break;
+                }
+            }
+            if (partition_in_buffer) {
+                partition_buffer_states[i].emplace_back(j);
+            }
+        }
+    }
+
+    torch::Tensor train_nodes_buffer_choice = torch::zeros_like(train_nodes) - 1;
+    std::vector<torch::Tensor> train_nodes_per_buffer(buffer_states.size());
+    auto train_nodes_partition_accessor = train_nodes_partition.accessor<int32_t, 1>();  // todo
+
+    for (int i = 0; i < train_nodes.size(0); i++) {
+        int partition_id = train_nodes_partition_accessor[i];
+        if (partition_buffer_states[partition_id].size() == 0) {
+            continue;
+        }
+        int rand_id = rand() % partition_buffer_states[partition_id].size();
+        train_nodes_buffer_choice[i] = partition_buffer_states[partition_id][rand_id];
+    }
+
+    for (int i = 0; i < buffer_states.size(); i++) {
+        train_nodes_per_buffer[i] = train_nodes.masked_select(train_nodes_buffer_choice == i);
+    }
+
+    return train_nodes_per_buffer;
 }
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDispersedNodePartitionOrdering(Indices train_nodes, int64_t total_num_nodes, int num_partitions,
@@ -301,21 +460,11 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDispersedNodePartiti
     coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
 
     // create coarse buffer states
-    vector<torch::Tensor> coarse_buffer_states;
-    Indices all_coarse_partitions = torch::randperm(coarse_num_partitions, torch::kInt32);
-    Indices in_buffer = all_coarse_partitions.narrow(0, 0, coarse_buffer_capacity);
-    Indices on_disk = all_coarse_partitions.narrow(0, coarse_buffer_capacity, coarse_num_partitions - coarse_buffer_capacity);
-    coarse_buffer_states.emplace_back(in_buffer);
+    vector<torch::Tensor> coarse_buffer_states = getDispersedOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
 
-    while (on_disk.size(0) > 0) {
-        in_buffer = in_buffer.index_select(0, torch::randperm(in_buffer.size(0), torch::kInt64));
-        on_disk = on_disk.index_select(0, torch::randperm(on_disk.size(0), torch::kInt64));
-
-        in_buffer[-1] = on_disk[0];
-        coarse_buffer_states.emplace_back(in_buffer);
-        on_disk = on_disk.narrow(0, 1, on_disk.size(0) - 1);
-    }
-
+    // add in cache partitions
+    // TODO: this isn't fully correct (cache coarse 0, but randomly mapped to fine),
+    //  can probably be more like two level beta for cache/convert to fine, but Dispersed is redundant with Diag now
     for (int i = 0; i < coarse_buffer_states.size(); i++) {
         coarse_buffer_states[i] =
             torch::cat({coarse_buffer_states[i] + num_cache_partitions, torch::arange(num_cache_partitions, coarse_buffer_states[i].options())});
@@ -345,46 +494,199 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDispersedNodePartiti
         buffer_states.emplace_back(torch::from_blob(fine_buffer_state.data(), {(int)fine_buffer_state.size()}, torch::kInt32).clone());
     }
 
-    // randomly assign train nodes to buffers
-
-    int64_t partition_size = ceil((double)total_num_nodes / num_partitions);
-    torch::Tensor train_nodes_partition = train_nodes.divide(partition_size, "trunc");
-
-    std::vector<std::vector<int>> partition_buffer_states(num_partitions);
-
-    for (int i = 0; i < num_partitions; i++) {
-        for (int j = 0; j < buffer_states.size(); j++) {
-            bool partition_in_buffer = false;
-            auto buffer_state_accessor = buffer_states[j].accessor<int32_t, 1>();
-
-            for (int k = 0; k < buffer_capacity; k++) {
-                if (buffer_state_accessor[k] == i) {
-                    partition_in_buffer = true;
-                    break;
-                }
-            }
-            if (partition_in_buffer) {
-                partition_buffer_states[i].emplace_back(j);
-            }
-        }
-    }
-
-    torch::Tensor train_nodes_buffer_choice = torch::zeros_like(train_nodes);
-    std::vector<torch::Tensor> train_nodes_per_buffer(buffer_states.size());
-    auto train_nodes_partition_accessor = train_nodes_partition.accessor<int32_t, 1>();  // todo
-
-    for (int i = 0; i < train_nodes.size(0); i++) {
-        int partition_id = train_nodes_partition_accessor[i];
-        int rand_id = rand() % partition_buffer_states[partition_id].size();
-        train_nodes_buffer_choice[i] = partition_buffer_states[partition_id][rand_id];
-    }
-
-    for (int i = 0; i < buffer_states.size(); i++) {
-        train_nodes_per_buffer[i] = train_nodes.masked_select(train_nodes_buffer_choice == i);
-    }
+    auto train_nodes_per_buffer = randomlyAssignTrainNodesToBuffers(buffer_states, train_nodes, total_num_nodes, num_partitions, buffer_capacity);
 
     return std::forward_as_tuple(buffer_states, train_nodes_per_buffer);
 }
+
+
+
+
+
+std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num_partitions, int buffer_capacity, int fine_to_coarse_ratio, int num_cache_partitions,
+                                                                         bool randomly_assign_edge_buckets, Indices train_nodes, int64_t total_num_nodes,
+                                                                         shared_ptr<c10d::ProcessGroupGloo> pg_gloo,
+                                                                         shared_ptr<DistributedConfig> dist_config) {
+    bool in_memory = false;
+//    bool sequential = true;
+
+    bool split_train_nodes = false;
+    int num_batch_workers = 0;
+
+
+    int local_num_partitions = num_partitions;
+    torch::Tensor local_machine_map;
+
+    if (pg_gloo != nullptr) {
+        // if distributed, coordinate the ordering
+        SPDLOG_INFO("Running Diag in Distributed Mode");
+
+        if (num_cache_partitions > 0) {
+            throw MariusRuntimeException("Distributed Diag with cached partitions not yet implemented."); // Todo
+        }
+
+        for (auto worker_config : dist_config->workers) {
+            if (worker_config->type == WorkerType::BATCH) {
+                num_batch_workers++;
+            }
+        }
+
+        if (in_memory) {
+            local_machine_map = torch::arange(num_partitions, torch::kInt32);
+            buffer_capacity = local_num_partitions;
+            split_train_nodes = true;
+
+            if (num_cache_partitions != 0) throw MariusRuntimeException("Cache partitions unneeded for in memory.");
+        } else {
+            torch::Tensor machine_map = torch::randperm(num_partitions, torch::kInt32);
+            int machine_chunk_size = ceil((double)num_partitions / num_batch_workers);
+
+            for (int machine_num = 0; machine_num < num_batch_workers; machine_num++) {
+                int start_index = machine_num * machine_chunk_size;
+                int end_index = (machine_num + 1) * machine_chunk_size;
+                if (machine_num == num_batch_workers - 1) end_index = num_partitions;
+
+                torch::Tensor machine_partitions = machine_map.narrow(0, start_index, end_index-start_index);
+
+                if (machine_num == pg_gloo->getRank()) {
+                    if (machine_num == 0) {
+                        local_num_partitions = end_index - start_index;
+                        local_machine_map = machine_partitions;
+                    } else {
+                        std::vector<torch::Tensor> transfer_vec;
+                        transfer_vec.push_back(machine_partitions);
+
+                        auto work = pg_gloo->recv(transfer_vec, 0, 0);
+                        if (!work->wait()) {
+                            throw work->exception();
+                        }
+
+                        local_num_partitions = end_index - start_index;
+                        local_machine_map = machine_partitions;
+                    }
+                }
+
+                if (machine_num > 0 and pg_gloo->getRank() == 0) {
+                    std::vector<torch::Tensor> transfer_vec;
+                    transfer_vec.push_back(machine_partitions);
+                    auto work = pg_gloo->send(transfer_vec, machine_num, 0);
+                    if (!work->wait()) {
+                        throw work->exception();
+                    }
+                }
+            }
+        }
+
+        std::cout<<"local_num_partitions: "<<local_num_partitions<<"\n";
+        std::cout<<"local_machine_map: "<<convertToVectorOfInts({local_machine_map})<<"\n";
+    }
+
+
+    // coarse buffers (using local partition ids)
+    int coarse_num_partitions = local_num_partitions / fine_to_coarse_ratio;
+    int coarse_buffer_capacity = buffer_capacity / fine_to_coarse_ratio;
+
+    coarse_num_partitions = coarse_num_partitions - num_cache_partitions; // TODO: probably need to not subtract here for caching with dist diag
+    coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
+
+    // create coarse buffer states
+    vector<torch::Tensor> coarse_buffer_states = getDispersedOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
+
+    //convert to fine and add cached partitions
+    vector<vector<int>> coarse_buffer_states_int = convertToVectorOfInts(coarse_buffer_states);
+    vector<vector<int>> buffer_states_int = convertToFinePartitions(coarse_buffer_states_int, local_num_partitions,
+                                                                    buffer_capacity, fine_to_coarse_ratio, num_cache_partitions);
+
+    printBuffers(coarse_buffer_states_int, true);
+    printBuffers(buffer_states_int, false);
+
+
+    if (pg_gloo != nullptr) {
+        // if distributed, map back to global partitions, from here on use global num partitions
+        int *data_ptr_ = (int *)local_machine_map.data_ptr();
+        vector<vector<int>> global_buffer_states;
+
+        for (int i = 0; i < buffer_states_int.size(); i++) {
+            vector<int> global_buffer_state(buffer_states_int[i].size(), 0);
+            for (int j = 0; j < buffer_states_int[i].size(); j++) {
+                global_buffer_state[j] = *((int *)data_ptr_ + buffer_states_int[i][j]);
+            }
+            global_buffer_states.emplace_back(global_buffer_state);
+        }
+
+        buffer_states_int = global_buffer_states;
+
+        printBuffers(buffer_states_int, false);
+    }
+
+
+    if (total_num_nodes == -1) {
+        // for link prediction, randomly assign edge buckets
+        vector<vector<std::pair<int, int>>> edge_buckets_per_buffer;
+        if (randomly_assign_edge_buckets) {
+            edge_buckets_per_buffer = randomlyAssignEdgeBucketsToBuffers(buffer_states_int, num_partitions);
+        } else {
+            edge_buckets_per_buffer = greedyAssignEdgeBucketsToBuffers(buffer_states_int, num_partitions);
+        }
+
+        printEdgeBuckets(edge_buckets_per_buffer);
+
+        return convertEdgeBucketOrderToTensors(buffer_states_int, edge_buckets_per_buffer);
+    } else {
+        // for node classification, randomly assign train nodes to buffers
+        vector<torch::Tensor> buffer_states = convertToVectorOfTensors(buffer_states_int, torch::TensorOptions().dtype(torch::kInt32));
+
+        if (split_train_nodes) {
+            torch::Tensor machine_map = torch::randperm(train_nodes.size(0), torch::kInt32);
+            int machine_chunk_size = ceil((double)train_nodes.size(0) / num_batch_workers);
+
+            for (int machine_num = 0; machine_num < num_batch_workers; machine_num++) {
+                int start_index = machine_num * machine_chunk_size;
+                int end_index = (machine_num + 1) * machine_chunk_size;
+                if (machine_num == num_batch_workers - 1) end_index = train_nodes.size(0);
+
+                torch::Tensor machine_train_nodes = train_nodes.index_select(0, machine_map.narrow(0, start_index, end_index-start_index));
+
+                if (machine_num == pg_gloo->getRank()) {
+                    if (machine_num == 0) {
+                        train_nodes = machine_train_nodes;
+                        std::cout<<train_nodes.size(0)<<"\n";
+                    } else {
+                        std::vector<torch::Tensor> transfer_vec;
+                        transfer_vec.push_back(machine_train_nodes);
+
+                        auto work = pg_gloo->recv(transfer_vec, 0, 1);
+                        if (!work->wait()) {
+                            throw work->exception();
+                        }
+
+                        train_nodes = machine_train_nodes;
+                    }
+                }
+
+                if (machine_num > 0 and pg_gloo->getRank() == 0) {
+                    std::vector<torch::Tensor> transfer_vec;
+                    transfer_vec.push_back(machine_train_nodes);
+                    auto work = pg_gloo->send(transfer_vec, machine_num, 1);
+                    if (!work->wait()) {
+                        throw work->exception();
+                    }
+                }
+            }
+        }
+
+        auto train_nodes_per_buffer = randomlyAssignTrainNodesToBuffers(buffer_states, train_nodes, total_num_nodes, num_partitions, buffer_capacity);
+
+        printTrainNodes(train_nodes_per_buffer);
+
+        return std::forward_as_tuple(buffer_states, train_nodes_per_buffer);
+    }
+
+}
+
+
+
+
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getSequentialNodePartitionOrdering(Indices train_nodes, int64_t total_num_nodes, int num_partitions,
                                                                                             int buffer_capacity) {
