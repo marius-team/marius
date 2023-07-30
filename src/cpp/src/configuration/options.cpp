@@ -273,7 +273,11 @@ NodePartitionOrdering getNodePartitionOrderingEnum(std::string string_val) {
         return NodePartitionOrdering::SEQUENTIAL;
     } else if (string_val == "DIAG") {
         return NodePartitionOrdering::DIAG;
-    }else if (string_val == "CUSTOM") {
+    } else if (string_val == "DIST_SEQUENTIAL") {
+        return NodePartitionOrdering::DIST_SEQUENTIAL;
+    } else if (string_val == "DIST_IN_MEMORY") {
+        return NodePartitionOrdering::DIST_IN_MEMORY;
+    } else if (string_val == "CUSTOM") {
         return NodePartitionOrdering::CUSTOM;
     } else {
         throw std::runtime_error("Unrecognized node partition ordering string");

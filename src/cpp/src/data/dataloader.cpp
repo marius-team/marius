@@ -286,7 +286,6 @@ void DataLoader::setBufferOrdering() {
         }
     }
 
-    exit(0);
 }
 
 void DataLoader::clearBatches() { batches_ = std::vector<shared_ptr<Batch>>(); }

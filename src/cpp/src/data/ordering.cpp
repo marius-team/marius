@@ -47,7 +47,9 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getNodePartitionOrderin
     switch (node_partition_ordering) {
         case NodePartitionOrdering::DISPERSED:
             SPDLOG_INFO("Generating Dispersed Ordering");
-            return getDispersedNodePartitionOrdering(train_nodes, total_num_nodes, num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions);
+//            return getDispersedNodePartitionOrdering(train_nodes, total_num_nodes, num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions);
+            return getDiagOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, true,
+                                   train_nodes, total_num_nodes, pg_gloo, dist_config);
         case NodePartitionOrdering::SEQUENTIAL:
             SPDLOG_INFO("Generating Sequential Ordering");
             return getSequentialNodePartitionOrdering(train_nodes, total_num_nodes, num_partitions, buffer_capacity);
@@ -55,6 +57,14 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getNodePartitionOrderin
             SPDLOG_INFO("Generating Diag Ordering");
             return getDiagOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, true,
                                    train_nodes, total_num_nodes, pg_gloo, dist_config);
+        case NodePartitionOrdering::DIST_SEQUENTIAL:
+            SPDLOG_INFO("Generating Distributed Sequential Ordering");
+            return getDiagOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, true,
+                                   train_nodes, total_num_nodes, pg_gloo, dist_config, true, false);
+        case NodePartitionOrdering::DIST_IN_MEMORY:
+            SPDLOG_INFO("Generating Distributed In Memory Ordering");
+            return getDiagOrdering(num_partitions, buffer_capacity, fine_to_coarse_ratio, num_cache_partitions, true,
+                                   train_nodes, total_num_nodes, pg_gloo, dist_config, false, true);
         case NodePartitionOrdering::CUSTOM:
             return getCustomNodePartitionOrdering();
         default:
@@ -322,7 +332,7 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
 vector<vector<int>> convertToFinePartitions(vector<vector<int>> coarse_buffer_states, int num_partitions, int buffer_capacity,
                                             int fine_to_coarse_ratio, int num_cache_partitions) {
     // convert to fine partitions and add in cache (num_cache_partitions coarse mapped to fine partitions 0...x)
-    // todo: maybe num_cache partitions should just directly represent physical partitions, here and everywhere (e.g., diag, two level beta)?
+    // TODO: maybe num_cache partitions should just directly represent physical partitions, here and everywhere (e.g., diag, two level beta)?
     //  what are the implications for the buffer if any?
 
     // add in cache
@@ -432,7 +442,7 @@ vector<torch::Tensor> randomlyAssignTrainNodesToBuffers(vector<torch::Tensor> bu
 
     torch::Tensor train_nodes_buffer_choice = torch::zeros_like(train_nodes) - 1;
     std::vector<torch::Tensor> train_nodes_per_buffer(buffer_states.size());
-    auto train_nodes_partition_accessor = train_nodes_partition.accessor<int32_t, 1>();  // todo
+    auto train_nodes_partition_accessor = train_nodes_partition.accessor<int32_t, 1>();
 
     for (int i = 0; i < train_nodes.size(0); i++) {
         int partition_id = train_nodes_partition_accessor[i];
@@ -450,85 +460,128 @@ vector<torch::Tensor> randomlyAssignTrainNodesToBuffers(vector<torch::Tensor> bu
     return train_nodes_per_buffer;
 }
 
-std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDispersedNodePartitionOrdering(Indices train_nodes, int64_t total_num_nodes, int num_partitions,
-                                                                                           int buffer_capacity, int fine_to_coarse_ratio,
-                                                                                           int num_cache_partitions) {
-    int coarse_num_partitions = num_partitions / fine_to_coarse_ratio;
-    int coarse_buffer_capacity = buffer_capacity / fine_to_coarse_ratio;
+//std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDispersedNodePartitionOrdering(Indices train_nodes, int64_t total_num_nodes, int num_partitions,
+//                                                                                           int buffer_capacity, int fine_to_coarse_ratio,
+//                                                                                           int num_cache_partitions) {
+//    int coarse_num_partitions = num_partitions / fine_to_coarse_ratio;
+//    int coarse_buffer_capacity = buffer_capacity / fine_to_coarse_ratio;
+//
+//    coarse_num_partitions = coarse_num_partitions - num_cache_partitions;
+//    coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
+//
+//    // create coarse buffer states
+//    vector<torch::Tensor> coarse_buffer_states = getDispersedOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
+//
+//    // add in cache partitions
+//    // Note: this isn't fully correct (cache coarse 0, but then randomly mapped to fine),
+//    //  can probably be more like two level beta for cache/convert to fine, but Dispersed is redundant with Diag now
+//    for (int i = 0; i < coarse_buffer_states.size(); i++) {
+//        coarse_buffer_states[i] =
+//            torch::cat({coarse_buffer_states[i] + num_cache_partitions, torch::arange(num_cache_partitions, coarse_buffer_states[i].options())});
+//    }
+//
+//    // convert to fine buffer states
+//    torch::Tensor fine_to_coarse_map = torch::randperm(num_partitions, torch::kInt32);
+//    int *data_ptr_ = (int *)fine_to_coarse_map.data_ptr();
+//
+//    vector<torch::Tensor> buffer_states;
+//
+//    for (int i = 0; i < coarse_buffer_states.size(); i++) {
+//        vector<int> fine_buffer_state(buffer_capacity, 0);
+//        torch::Tensor coarse_buffer_state = coarse_buffer_states[i];
+//        auto coarse_buffer_state_accessor = coarse_buffer_state.accessor<int32_t, 1>();
+//
+//        for (int j = 0; j < coarse_buffer_state.size(0); j++) {
+//            int *start = (int *)data_ptr_ + coarse_buffer_state_accessor[j] * fine_to_coarse_ratio;
+//            int *end = (int *)data_ptr_ + (coarse_buffer_state_accessor[j] + 1) * fine_to_coarse_ratio;
+//            vector<int> fine_partitions = vector<int>(start, end);
+//
+//            for (int k = j * fine_to_coarse_ratio; k < (j + 1) * fine_to_coarse_ratio; k++) {
+//                fine_buffer_state[k] = fine_partitions[k - j * fine_to_coarse_ratio];
+//            }
+//        }
+//
+//        buffer_states.emplace_back(torch::from_blob(fine_buffer_state.data(), {(int)fine_buffer_state.size()}, torch::kInt32).clone());
+//    }
+//
+//    auto train_nodes_per_buffer = randomlyAssignTrainNodesToBuffers(buffer_states, train_nodes, total_num_nodes, num_partitions, buffer_capacity);
+//
+//    return std::forward_as_tuple(buffer_states, train_nodes_per_buffer);
+//}
 
-    coarse_num_partitions = coarse_num_partitions - num_cache_partitions;
-    coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
+torch::Tensor splitTensorAcrossMachines(torch::Tensor input, shared_ptr<c10d::ProcessGroupGloo> pg_gloo, shared_ptr<DistributedConfig> dist_config) {
+    torch::Tensor local_split;
 
-    // create coarse buffer states
-    vector<torch::Tensor> coarse_buffer_states = getDispersedOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
-
-    // add in cache partitions
-    // TODO: this isn't fully correct (cache coarse 0, but randomly mapped to fine),
-    //  can probably be more like two level beta for cache/convert to fine, but Dispersed is redundant with Diag now
-    for (int i = 0; i < coarse_buffer_states.size(); i++) {
-        coarse_buffer_states[i] =
-            torch::cat({coarse_buffer_states[i] + num_cache_partitions, torch::arange(num_cache_partitions, coarse_buffer_states[i].options())});
+    int num_batch_workers = 0;
+    for (auto worker_config : dist_config->workers) {
+        if (worker_config->type == WorkerType::BATCH) {
+            num_batch_workers++;
+        }
     }
 
-    // convert to fine buffer states
-    torch::Tensor fine_to_coarse_map = torch::randperm(num_partitions, torch::kInt32);
-    int *data_ptr_ = (int *)fine_to_coarse_map.data_ptr();
+    int machine_chunk_size = ceil((double)input.size(0) / num_batch_workers);
 
-    vector<torch::Tensor> buffer_states;
+    for (int machine_num = 0; machine_num < num_batch_workers; machine_num++) {
+        int start_index = machine_num * machine_chunk_size;
+        int end_index = (machine_num + 1) * machine_chunk_size;
+        if (machine_num == num_batch_workers - 1) end_index = input.size(0);
 
-    for (int i = 0; i < coarse_buffer_states.size(); i++) {
-        vector<int> fine_buffer_state(buffer_capacity, 0);
-        torch::Tensor coarse_buffer_state = coarse_buffer_states[i];
-        auto coarse_buffer_state_accessor = coarse_buffer_state.accessor<int32_t, 1>();
+        torch::Tensor tmp_local_split = input.narrow(0, start_index, end_index-start_index);
 
-        for (int j = 0; j < coarse_buffer_state.size(0); j++) {
-            int *start = (int *)data_ptr_ + coarse_buffer_state_accessor[j] * fine_to_coarse_ratio;
-            int *end = (int *)data_ptr_ + (coarse_buffer_state_accessor[j] + 1) * fine_to_coarse_ratio;
-            vector<int> fine_partitions = vector<int>(start, end);
+        if (machine_num == pg_gloo->getRank()) {
+            if (machine_num == 0) {
+                local_split = tmp_local_split;
+            } else {
+                std::vector<torch::Tensor> transfer_vec;
+                transfer_vec.push_back(tmp_local_split);
 
-            for (int k = j * fine_to_coarse_ratio; k < (j + 1) * fine_to_coarse_ratio; k++) {
-                fine_buffer_state[k] = fine_partitions[k - j * fine_to_coarse_ratio];
+                auto work = pg_gloo->recv(transfer_vec, 0, 0);
+                if (!work->wait()) {
+                    throw work->exception();
+                }
+
+                local_split = tmp_local_split;
             }
         }
 
-        buffer_states.emplace_back(torch::from_blob(fine_buffer_state.data(), {(int)fine_buffer_state.size()}, torch::kInt32).clone());
+        if (machine_num > 0 and pg_gloo->getRank() == 0) {
+            std::vector<torch::Tensor> transfer_vec;
+            transfer_vec.push_back(tmp_local_split);
+            auto work = pg_gloo->send(transfer_vec, machine_num, 0);
+            if (!work->wait()) {
+                throw work->exception();
+            }
+        }
     }
 
-    auto train_nodes_per_buffer = randomlyAssignTrainNodesToBuffers(buffer_states, train_nodes, total_num_nodes, num_partitions, buffer_capacity);
-
-    return std::forward_as_tuple(buffer_states, train_nodes_per_buffer);
+    return local_split;
 }
-
-
-
-
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num_partitions, int buffer_capacity, int fine_to_coarse_ratio, int num_cache_partitions,
                                                                          bool randomly_assign_edge_buckets, Indices train_nodes, int64_t total_num_nodes,
                                                                          shared_ptr<c10d::ProcessGroupGloo> pg_gloo,
-                                                                         shared_ptr<DistributedConfig> dist_config) {
-    bool in_memory = false;
-//    bool sequential = true;
+                                                                         shared_ptr<DistributedConfig> dist_config,
+                                                                         bool sequential, bool in_memory) {
+    if ((sequential or in_memory) and pg_gloo == nullptr)
+        throw MariusRuntimeException("Use single machine orderings when not running distributed training.");
+
+    if ((sequential or in_memory) and total_num_nodes == -1)
+        throw MariusRuntimeException("LP training should not use in memory or sequential distributed orderings.");
+
+    if (sequential and in_memory)
+        throw MariusRuntimeException("Training should use in memory or sequential but not both.");
 
     bool split_train_nodes = false;
-    int num_batch_workers = 0;
-
 
     int local_num_partitions = num_partitions;
     torch::Tensor local_machine_map;
+    torch::Tensor local_train_partitions;
 
     if (pg_gloo != nullptr) {
         // if distributed, coordinate the ordering
-        SPDLOG_INFO("Running Diag in Distributed Mode");
-
         if (num_cache_partitions > 0) {
-            throw MariusRuntimeException("Distributed Diag with cached partitions not yet implemented."); // Todo
-        }
-
-        for (auto worker_config : dist_config->workers) {
-            if (worker_config->type == WorkerType::BATCH) {
-                num_batch_workers++;
-            }
+            throw MariusRuntimeException("Distributed Diag with cached partitions not yet implemented."); // TODO
+            // probably don't need to subtract cache partitions below for caching with dist diag
         }
 
         if (in_memory) {
@@ -538,87 +591,85 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
 
             if (num_cache_partitions != 0) throw MariusRuntimeException("Cache partitions unneeded for in memory.");
         } else {
-            torch::Tensor machine_map = torch::randperm(num_partitions, torch::kInt32);
-            int machine_chunk_size = ceil((double)num_partitions / num_batch_workers);
+            if (sequential) {
+                int partition_size = ceil((double)total_num_nodes / num_partitions);
+                torch::Tensor train_nodes_partition = train_nodes.divide(partition_size, "trunc");
+                int max_train_partition = torch::max(train_nodes_partition).item<int32_t>();
+                int num_train_partitions = max_train_partition + 1;
+                SPDLOG_INFO("Num Global Train Partitions: {}", num_train_partitions);
 
-            for (int machine_num = 0; machine_num < num_batch_workers; machine_num++) {
-                int start_index = machine_num * machine_chunk_size;
-                int end_index = (machine_num + 1) * machine_chunk_size;
-                if (machine_num == num_batch_workers - 1) end_index = num_partitions;
+                torch::Tensor input = torch::arange(num_train_partitions, num_partitions, torch::kInt32);
+                input = input.index_select(0, torch::randperm(input.size(0), torch::kInt64));
+                local_machine_map = splitTensorAcrossMachines(input, pg_gloo, dist_config);
 
-                torch::Tensor machine_partitions = machine_map.narrow(0, start_index, end_index-start_index);
+                input = torch::arange(num_train_partitions, torch::kInt32);
+                input = input.index_select(0, torch::randperm(input.size(0), torch::kInt64));
+                local_train_partitions = splitTensorAcrossMachines(input, pg_gloo, dist_config);
+            } else {
+                SPDLOG_INFO("Running Diag in Distributed Mode");
 
-                if (machine_num == pg_gloo->getRank()) {
-                    if (machine_num == 0) {
-                        local_num_partitions = end_index - start_index;
-                        local_machine_map = machine_partitions;
-                    } else {
-                        std::vector<torch::Tensor> transfer_vec;
-                        transfer_vec.push_back(machine_partitions);
+                torch::Tensor input = torch::randperm(num_partitions, torch::kInt32);
+                local_machine_map = splitTensorAcrossMachines(input, pg_gloo, dist_config);
+                local_num_partitions = local_machine_map.size(0);
 
-                        auto work = pg_gloo->recv(transfer_vec, 0, 0);
-                        if (!work->wait()) {
-                            throw work->exception();
-                        }
-
-                        local_num_partitions = end_index - start_index;
-                        local_machine_map = machine_partitions;
-                    }
-                }
-
-                if (machine_num > 0 and pg_gloo->getRank() == 0) {
-                    std::vector<torch::Tensor> transfer_vec;
-                    transfer_vec.push_back(machine_partitions);
-                    auto work = pg_gloo->send(transfer_vec, machine_num, 0);
-                    if (!work->wait()) {
-                        throw work->exception();
-                    }
-                }
+                std::cout<<"local_num_partitions: "<<local_num_partitions<<"\n";
+                std::cout<<"local_machine_map: "<<convertToVectorOfInts({local_machine_map})<<"\n";
             }
         }
-
-        std::cout<<"local_num_partitions: "<<local_num_partitions<<"\n";
-        std::cout<<"local_machine_map: "<<convertToVectorOfInts({local_machine_map})<<"\n";
     }
 
+    vector<vector<int>> buffer_states_int;
 
-    // coarse buffers (using local partition ids)
-    int coarse_num_partitions = local_num_partitions / fine_to_coarse_ratio;
-    int coarse_buffer_capacity = buffer_capacity / fine_to_coarse_ratio;
+    if (sequential) {
+        vector<torch::Tensor> buffer_states;
+        Indices in_buffer = local_train_partitions;
+        Indices on_disk = local_machine_map;
 
-    coarse_num_partitions = coarse_num_partitions - num_cache_partitions; // TODO: probably need to not subtract here for caching with dist diag
-    coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
+        on_disk = on_disk.index_select(0, torch::randperm(on_disk.size(0), torch::kInt64));
+        on_disk = on_disk.narrow(0, 0, buffer_capacity - in_buffer.size(0));
+        buffer_states.emplace_back(torch::cat({in_buffer, on_disk}));
 
-    // create coarse buffer states
-    vector<torch::Tensor> coarse_buffer_states = getDispersedOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
-
-    //convert to fine and add cached partitions
-    vector<vector<int>> coarse_buffer_states_int = convertToVectorOfInts(coarse_buffer_states);
-    vector<vector<int>> buffer_states_int = convertToFinePartitions(coarse_buffer_states_int, local_num_partitions,
-                                                                    buffer_capacity, fine_to_coarse_ratio, num_cache_partitions);
-
-    printBuffers(coarse_buffer_states_int, true);
-    printBuffers(buffer_states_int, false);
-
-
-    if (pg_gloo != nullptr) {
-        // if distributed, map back to global partitions, from here on use global num partitions
-        int *data_ptr_ = (int *)local_machine_map.data_ptr();
-        vector<vector<int>> global_buffer_states;
-
-        for (int i = 0; i < buffer_states_int.size(); i++) {
-            vector<int> global_buffer_state(buffer_states_int[i].size(), 0);
-            for (int j = 0; j < buffer_states_int[i].size(); j++) {
-                global_buffer_state[j] = *((int *)data_ptr_ + buffer_states_int[i][j]);
-            }
-            global_buffer_states.emplace_back(global_buffer_state);
-        }
-
-        buffer_states_int = global_buffer_states;
+        buffer_states_int = convertToVectorOfInts(buffer_states);
 
         printBuffers(buffer_states_int, false);
-    }
+    } else {
+        // coarse buffers (using local partition ids)
+        int coarse_num_partitions = local_num_partitions / fine_to_coarse_ratio;
+        int coarse_buffer_capacity = buffer_capacity / fine_to_coarse_ratio;
 
+        coarse_num_partitions = coarse_num_partitions - num_cache_partitions;
+        coarse_buffer_capacity = coarse_buffer_capacity - num_cache_partitions;
+
+        // create coarse buffer states
+        vector<torch::Tensor> coarse_buffer_states = getDispersedOrderingHelper(coarse_num_partitions, coarse_buffer_capacity);
+
+        //convert to fine and add cached partitions
+        vector<vector<int>> coarse_buffer_states_int = convertToVectorOfInts(coarse_buffer_states);
+        buffer_states_int = convertToFinePartitions(coarse_buffer_states_int, local_num_partitions,
+                                                    buffer_capacity, fine_to_coarse_ratio, num_cache_partitions);
+
+        printBuffers(coarse_buffer_states_int, true);
+        printBuffers(buffer_states_int, false);
+
+
+        if (pg_gloo != nullptr) {
+            // if distributed, map back to global partitions, from here on use global num partitions
+            int *data_ptr_ = (int *)local_machine_map.data_ptr();
+            vector<vector<int>> global_buffer_states;
+
+            for (int i = 0; i < buffer_states_int.size(); i++) {
+                vector<int> global_buffer_state(buffer_states_int[i].size(), 0);
+                for (int j = 0; j < buffer_states_int[i].size(); j++) {
+                    global_buffer_state[j] = *((int *)data_ptr_ + buffer_states_int[i][j]);
+                }
+                global_buffer_states.emplace_back(global_buffer_state);
+            }
+
+            buffer_states_int = global_buffer_states;
+
+            printBuffers(buffer_states_int, false);
+        }
+    }
 
     if (total_num_nodes == -1) {
         // for link prediction, randomly assign edge buckets
@@ -637,42 +688,9 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
         vector<torch::Tensor> buffer_states = convertToVectorOfTensors(buffer_states_int, torch::TensorOptions().dtype(torch::kInt32));
 
         if (split_train_nodes) {
-            torch::Tensor machine_map = torch::randperm(train_nodes.size(0), torch::kInt32);
-            int machine_chunk_size = ceil((double)train_nodes.size(0) / num_batch_workers);
-
-            for (int machine_num = 0; machine_num < num_batch_workers; machine_num++) {
-                int start_index = machine_num * machine_chunk_size;
-                int end_index = (machine_num + 1) * machine_chunk_size;
-                if (machine_num == num_batch_workers - 1) end_index = train_nodes.size(0);
-
-                torch::Tensor machine_train_nodes = train_nodes.index_select(0, machine_map.narrow(0, start_index, end_index-start_index));
-
-                if (machine_num == pg_gloo->getRank()) {
-                    if (machine_num == 0) {
-                        train_nodes = machine_train_nodes;
-                        std::cout<<train_nodes.size(0)<<"\n";
-                    } else {
-                        std::vector<torch::Tensor> transfer_vec;
-                        transfer_vec.push_back(machine_train_nodes);
-
-                        auto work = pg_gloo->recv(transfer_vec, 0, 1);
-                        if (!work->wait()) {
-                            throw work->exception();
-                        }
-
-                        train_nodes = machine_train_nodes;
-                    }
-                }
-
-                if (machine_num > 0 and pg_gloo->getRank() == 0) {
-                    std::vector<torch::Tensor> transfer_vec;
-                    transfer_vec.push_back(machine_train_nodes);
-                    auto work = pg_gloo->send(transfer_vec, machine_num, 1);
-                    if (!work->wait()) {
-                        throw work->exception();
-                    }
-                }
-            }
+            torch::Tensor input = torch::randperm(train_nodes.size(0), torch::kInt32);
+            torch::Tensor local_split = splitTensorAcrossMachines(input, pg_gloo, dist_config);
+            train_nodes = train_nodes.index_select(0, local_split);
         }
 
         auto train_nodes_per_buffer = randomlyAssignTrainNodesToBuffers(buffer_states, train_nodes, total_num_nodes, num_partitions, buffer_capacity);
@@ -683,10 +701,6 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
     }
 
 }
-
-
-
-
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getSequentialNodePartitionOrdering(Indices train_nodes, int64_t total_num_nodes, int num_partitions,
                                                                                             int buffer_capacity) {

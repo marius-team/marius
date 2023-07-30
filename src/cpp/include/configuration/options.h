@@ -73,7 +73,7 @@ enum class EdgeBucketOrdering { OLD_BETA, NEW_BETA, ALL_BETA, COMET, DIAG, CUSTO
 
 EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val);
 
-enum class NodePartitionOrdering { DISPERSED, SEQUENTIAL, DIAG, CUSTOM };
+enum class NodePartitionOrdering { DISPERSED, SEQUENTIAL, DIAG, DIST_SEQUENTIAL, DIST_IN_MEMORY, CUSTOM };
 
 NodePartitionOrdering getNodePartitionOrderingEnum(std::string string_val);
 

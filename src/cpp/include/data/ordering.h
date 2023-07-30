@@ -53,7 +53,8 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDispersedNodePartiti
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num_partitions, int buffer_capacity, int fine_to_coarse_ratio, int num_cache_partitions,
                                                                          bool randomly_assign_edge_buckets = true, Indices train_nodes = torch::Tensor(), int64_t total_num_nodes = -1,
                                                                          shared_ptr<c10d::ProcessGroupGloo> pg_gloo = nullptr,
-                                                                         shared_ptr<DistributedConfig> dist_config = nullptr);
+                                                                         shared_ptr<DistributedConfig> dist_config = nullptr,
+                                                                         bool sequential = false, bool in_memory = false);
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getSequentialNodePartitionOrdering(Indices train_nodes, int64_t total_num_nodes, int num_partitions,
                                                                                             int buffer_capacity);
