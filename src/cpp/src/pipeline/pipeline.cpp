@@ -59,22 +59,25 @@ void UpdateBatchWorker::run() {
                 break;
             }
 
-            if (batch->sub_batches_.size() > 0) {
-                #pragma omp parallel for // TODO: maybe not parallel for better perf?
-                for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                    if (batch->sub_batches_[i]->node_gradients_.defined()) {
-                        pipeline_->dataloader_->updateEmbeddings(batch->sub_batches_[i], false);
-                    }
-                }
-                batch->clear();
-            } else {
-                // transfer gradients and update parameters
-                if (batch->node_gradients_.defined()) {
-                    pipeline_->dataloader_->updateEmbeddings(batch, false);
-                }
-            }
+//            if (batch->sub_batches_.size() > 0) {
+//                #pragma omp parallel for // TODO: maybe not parallel for better perf?
+//                for (int i = 0; i < batch->sub_batches_.size(); i++) {
+//                    if (batch->sub_batches_[i]->node_gradients_.defined()) {
+//                        pipeline_->dataloader_->updateEmbeddings(batch->sub_batches_[i], false);
+//                    }
+//                }
+//                batch->clear();
+//            } else {
+//                // transfer gradients and update parameters
+//                if (batch->node_gradients_.defined()) {
+//                    pipeline_->dataloader_->updateEmbeddings(batch, false);
+//                }
+//            }
 
-            pipeline_->reporter_->addResult(batch->batch_size_);
+            pipeline_->dataloader_->updateEmbeddings(batch, false);
+            batch->clear();
+
+            pipeline_->reporter_->addResult(batch->batch_size_, batch->getLoss(pipeline_->model_->model_config_->loss->options->loss_reduction));
             pipeline_->batches_in_flight_--;
             pipeline_->dataloader_->finishedBatch();
             pipeline_->max_batches_cv_->notify_one();

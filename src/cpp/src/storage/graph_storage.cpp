@@ -334,9 +334,107 @@ bool GraphModelStorage::embeddingsOffDevice() {
     }
 }
 
-void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps) {
+void GraphModelStorage::decoderOnlyInMemorySubgraph(shared_ptr<InMemorySubgraphState> subgraph, bool prefetch) {
+    // TODO: not sure if the way this is used at the moment will work for node classification,
+    //  it also doesn't support all forms of negative sampling at the moment, since some of the negative sampling
+    //  accesses the in memory subgraph of which this doesn't have one
+    torch::Tensor edge_bucket_ids = *edge_buckets_per_buffer_iterator_;
+    edge_buckets_per_buffer_iterator_++;
+
+    int num_partitions = getNumPartitions();
+    int num_edge_buckets = edge_bucket_ids.size(0);
+    edge_bucket_ids = edge_bucket_ids.select(1, 0) * num_partitions + edge_bucket_ids.select(1, 1);
+    auto edge_bucket_ids_accessor = edge_bucket_ids.accessor<int64_t, 1>();
+
+    torch::Tensor in_mem_edge_bucket_sizes = torch::zeros({num_edge_buckets}, torch::kInt64);
+    torch::Tensor global_edge_bucket_starts = torch::zeros({num_edge_buckets}, torch::kInt64);
+
+    auto in_mem_edge_bucket_sizes_accessor = in_mem_edge_bucket_sizes.accessor<int64_t, 1>();
+    auto global_edge_bucket_starts_accessor = global_edge_bucket_starts.accessor<int64_t, 1>();
+
+    //TODO we don't need to do this every time
+    std::vector<int64_t> edge_bucket_sizes_ = storage_ptrs_.edges->getEdgeBucketSizes();
+    torch::Tensor edge_bucket_sizes = torch::from_blob(edge_bucket_sizes_.data(), {(int) edge_bucket_sizes_.size()}, torch::kInt64);
+    torch::Tensor edge_bucket_ends_disk = edge_bucket_sizes.cumsum(0);
+    torch::Tensor edge_bucket_starts_disk = edge_bucket_ends_disk - edge_bucket_sizes;
+    auto edge_bucket_sizes_accessor = edge_bucket_sizes.accessor<int64_t, 1>();
+    auto edge_bucket_starts_disk_accessor = edge_bucket_starts_disk.accessor<int64_t, 1>();
+    edge_bucket_ends_disk = torch::Tensor();
+
+    #pragma omp parallel for
+    for (int i = 0; i < num_edge_buckets; i++) {
+        int64_t edge_bucket_id = edge_bucket_ids_accessor[i];
+        int64_t edge_bucket_size = edge_bucket_sizes_accessor[edge_bucket_id];
+        int64_t edge_bucket_start = edge_bucket_starts_disk_accessor[edge_bucket_id];
+
+        in_mem_edge_bucket_sizes_accessor[i] = edge_bucket_size;
+        global_edge_bucket_starts_accessor[i] = edge_bucket_start;
+    }
+
+    torch::Tensor in_mem_edge_bucket_starts = in_mem_edge_bucket_sizes.cumsum(0);
+    int64_t total_size = in_mem_edge_bucket_starts[-1].item<int64_t>();
+    in_mem_edge_bucket_starts = in_mem_edge_bucket_starts - in_mem_edge_bucket_sizes;
+
+    auto in_mem_edge_bucket_starts_accessor = in_mem_edge_bucket_starts.accessor<int64_t, 1>();
+
+    int64_t partition_size = -1;
+    torch::Tensor buffer_offsets;
+    if (storage_ptrs_.node_embeddings != nullptr) {
+        buffer_offsets = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getGlobalToLocalMap(!prefetch);
+        partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->partition_size_;
+    } else if (storage_ptrs_.node_features != nullptr) {
+        buffer_offsets = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(!prefetch);
+        partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->partition_size_;
+    }
+
+    subgraph->all_in_memory_mapped_edges_ = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+    int dst_index = storage_ptrs_.edges->dim1_size_ - 1;
+    auto mapped_edges_accessor = subgraph->all_in_memory_mapped_edges_.accessor<int64_t, 2>();
+    auto buffer_offsets_accessor = buffer_offsets.accessor<int64_t, 1>();
+
+    #pragma omp parallel for
+    for (int i = 0; i < num_edge_buckets; i++) {
+        int64_t edge_bucket_size = in_mem_edge_bucket_sizes_accessor[i];
+        int64_t edge_bucket_start = global_edge_bucket_starts_accessor[i];
+        int64_t local_offset = in_mem_edge_bucket_starts_accessor[i];
+
+        torch::Tensor current_edge_bucket = torch::empty({edge_bucket_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+        current_edge_bucket.narrow(0, 0, edge_bucket_size) = storage_ptrs_.train_edges->range(edge_bucket_start, edge_bucket_size);
+        auto current_edge_bucket_accessor = current_edge_bucket.accessor<int64_t, 2>();
+
+        for (int i = 0; i < edge_bucket_size; i++) {
+            int64_t src_global_id = current_edge_bucket_accessor[i][0];
+            int64_t dst_global_id = current_edge_bucket_accessor[i][dst_index];
+
+            int64_t src_partition = src_global_id / partition_size;
+            int64_t dst_partition = dst_global_id / partition_size;
+
+            mapped_edges_accessor[local_offset+i][0] = buffer_offsets_accessor[src_partition] + src_global_id - (src_partition * partition_size);
+            if (dst_index == 2) mapped_edges_accessor[local_offset+i][1] = current_edge_bucket_accessor[i][1];
+            mapped_edges_accessor[local_offset+i][dst_index] = buffer_offsets_accessor[dst_partition] + dst_global_id - (dst_partition * partition_size);
+        }
+    }
+
+    auto opts = torch::TensorOptions().dtype(torch::kInt64).device(subgraph->all_in_memory_mapped_edges_.device());
+    subgraph->all_in_memory_mapped_edges_ = subgraph->all_in_memory_mapped_edges_.index_select(0, torch::randperm(total_size, opts));
+
+    subgraph->in_memory_subgraph_ = std::make_shared<MariusGraph>(getNumNodesInMemory());
+}
+
+void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps, bool requires_neighbors) {
     if (useInMemorySubGraph()) {
         current_subgraph_state_ = std::make_shared<InMemorySubgraphState>();
+
+        if (!requires_neighbors) {
+            decoderOnlyInMemorySubgraph(current_subgraph_state_, false);
+            if (prefetch_) {
+                if (hasSwap()) {
+                    // update next_subgraph_state_ in background
+                    getNextSubGraph(requires_neighbors);
+                }
+            }
+            return;
+        }
 
         buffer_state = buffer_state.to(torch::kInt64);
 
@@ -362,6 +460,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
         torch::Tensor edge_bucket_starts_disk = edge_bucket_ends_disk - edge_bucket_sizes;
         auto edge_bucket_sizes_accessor = edge_bucket_sizes.accessor<int64_t, 1>();
         auto edge_bucket_starts_disk_accessor = edge_bucket_starts_disk.accessor<int64_t, 1>();
+        edge_bucket_ends_disk = torch::Tensor(); //TODO: keep deleting all tensors created in this method as they aren't needed
 
 #pragma omp parallel for
         for (int i = 0; i < buffer_size; i++) {
@@ -395,32 +494,62 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
                 storage_ptrs_.edges->range(edge_bucket_start, edge_bucket_size);
         }
 
+        int64_t partition_size = -1;
+        torch::Tensor buffer_offsets;
         if (storage_ptrs_.node_embeddings != nullptr) {
-            current_subgraph_state_->global_to_local_index_map_ =
-                std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getGlobalToLocalMap(true);
+//            current_subgraph_state_->global_to_local_index_map_ =
+//                std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getGlobalToLocalMap(true);
+            buffer_offsets = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getGlobalToLocalMap(true);
+            partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->partition_size_;
         } else if (storage_ptrs_.node_features != nullptr) {
-            current_subgraph_state_->global_to_local_index_map_ =
-                std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(true);
+//            current_subgraph_state_->global_to_local_index_map_ =
+//                std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(true);
+            buffer_offsets = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(true);
+            partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->partition_size_;
+        }
+        current_subgraph_state_->buffer_offsets_ = buffer_offsets;
+        current_subgraph_state_->partition_size_ = partition_size;
+
+//        torch::Tensor mapped_edges;
+//        torch::Tensor mapped_edges_dst_sort;
+        torch::Tensor mapped_edges = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+        torch::Tensor mapped_edges_dst_sort;
+//        if (storage_ptrs_.edges->dim1_size_ == 3) {
+//            mapped_edges =
+//                torch::stack({current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, 0)),
+//                              current_subgraph_state_->all_in_memory_edges_.select(1, 1),
+//                              current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, -1))})
+//                    .transpose(0, 1);
+//        } else if (storage_ptrs_.edges->dim1_size_ == 2) {
+//            mapped_edges =
+//                torch::stack({current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, 0)),
+//                              current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, -1))})
+//                    .transpose(0, 1);
+//        } else {
+//            // TODO use a function for logging errors and throwing expections
+//            SPDLOG_ERROR("Unexpected number of edge columns");
+//            std::runtime_error("Unexpected number of edge columns");
+//        }
+
+        int dst_index = storage_ptrs_.edges->dim1_size_ - 1;
+        auto all_in_memory_edges_accessor = current_subgraph_state_->all_in_memory_edges_.accessor<int64_t, 2>();
+        auto mapped_edges_accessor = mapped_edges.accessor<int64_t, 2>();
+        auto buffer_offsets_accessor = buffer_offsets.accessor<int64_t, 1>();
+
+        #pragma omp parallel for
+        for (int i = 0; i < total_size; i++) {
+            int64_t src_global_id = all_in_memory_edges_accessor[i][0];
+            int64_t dst_global_id = all_in_memory_edges_accessor[i][dst_index];
+
+            int64_t src_partition = src_global_id / partition_size;
+            int64_t dst_partition = dst_global_id / partition_size;
+
+            mapped_edges_accessor[i][0] = buffer_offsets_accessor[src_partition] + src_global_id - (src_partition * partition_size);
+            if (dst_index == 2) mapped_edges_accessor[i][1] = all_in_memory_edges_accessor[i][1];
+            mapped_edges_accessor[i][dst_index] = buffer_offsets_accessor[dst_partition] + dst_global_id - (dst_partition * partition_size);
         }
 
-        torch::Tensor mapped_edges;
-        torch::Tensor mapped_edges_dst_sort;
-        if (storage_ptrs_.edges->dim1_size_ == 3) {
-            mapped_edges =
-                torch::stack({current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, 0)),
-                              current_subgraph_state_->all_in_memory_edges_.select(1, 1),
-                              current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, -1))})
-                    .transpose(0, 1);
-        } else if (storage_ptrs_.edges->dim1_size_ == 2) {
-            mapped_edges =
-                torch::stack({current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, 0)),
-                              current_subgraph_state_->global_to_local_index_map_.index_select(0, current_subgraph_state_->all_in_memory_edges_.select(1, -1))})
-                    .transpose(0, 1);
-        } else {
-            // TODO use a function for logging errors and throwing expections
-            SPDLOG_ERROR("Unexpected number of edge columns");
-            std::runtime_error("Unexpected number of edge columns");
-        }
+//        current_subgraph_state_->all_in_memory_edges_ = torch::Tensor();
 
         current_subgraph_state_->all_in_memory_mapped_edges_ = mapped_edges;
 
@@ -444,7 +573,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
         if (prefetch_) {
             if (hasSwap()) {
                 // update next_subgraph_state_ in background
-                getNextSubGraph();
+                getNextSubGraph(requires_neighbors);
             }
         }
     } else {
@@ -478,7 +607,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
     }
 }
 
-void GraphModelStorage::updateInMemorySubGraph() {
+void GraphModelStorage::updateInMemorySubGraph(bool requires_neighbors) {
     if (prefetch_) {
         // wait until the prefetching has been completed
         std::unique_lock lock(*subgraph_lock_);
@@ -495,25 +624,35 @@ void GraphModelStorage::updateInMemorySubGraph() {
 
         if (hasSwap()) {
             // update next_subgraph_state_ in background
-            getNextSubGraph();
+            getNextSubGraph(requires_neighbors);
         }
     } else {
         std::pair<std::vector<int>, std::vector<int>> current_swap_ids = getNextSwapIds();
         performSwap();
-        updateInMemorySubGraph_(current_subgraph_state_, current_swap_ids);
+        updateInMemorySubGraph_(current_subgraph_state_, current_swap_ids, requires_neighbors);
     }
 }
 
-void GraphModelStorage::getNextSubGraph() {
+void GraphModelStorage::getNextSubGraph(bool requires_neighbors) {
     std::pair<std::vector<int>, std::vector<int>> next_swap_ids = getNextSwapIds();
     next_subgraph_state_ = std::make_shared<InMemorySubgraphState>();
     next_subgraph_state_->in_memory_subgraph_ = nullptr;
-    std::thread(&GraphModelStorage::updateInMemorySubGraph_, this, next_subgraph_state_, next_swap_ids).detach();
+    std::thread(&GraphModelStorage::updateInMemorySubGraph_, this, next_subgraph_state_, next_swap_ids, requires_neighbors).detach();
 }
 
-void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState> subgraph, std::pair<std::vector<int>, std::vector<int>> swap_ids) {
+void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState> subgraph, std::pair<std::vector<int>, std::vector<int>> swap_ids, bool requires_neighbors) {
     if (prefetch_) {
         subgraph_lock_->lock();
+    }
+
+    if (!requires_neighbors) {
+        decoderOnlyInMemorySubgraph(subgraph, prefetch_);
+        if (prefetch_) {
+            prefetch_complete_ = true;
+            subgraph_lock_->unlock();
+            subgraph_cv_->notify_all();
+        }
+        return;
     }
 
     std::vector<int> evict_partition_ids = std::get<0>(swap_ids);
@@ -680,32 +819,62 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
 
     subgraph->all_in_memory_edges_ = new_all_in_memory_edges;
 
+    int64_t partition_size = -1;
+    torch::Tensor buffer_offsets;
     if (storage_ptrs_.node_embeddings != nullptr) {
-        subgraph->global_to_local_index_map_ =
-            std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getGlobalToLocalMap(!prefetch_);
+//        subgraph->global_to_local_index_map_ =
+//            std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getGlobalToLocalMap(!prefetch_);
+        buffer_offsets = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->getGlobalToLocalMap(!prefetch_);
+        partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->partition_size_;
     } else if (storage_ptrs_.node_features != nullptr) {
-        subgraph->global_to_local_index_map_ = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(!prefetch_);
+//        subgraph->global_to_local_index_map_ = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(!prefetch_);
+        buffer_offsets = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(!prefetch_);
+        partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->partition_size_;
     }
+    subgraph->buffer_offsets_ = buffer_offsets;
+    subgraph->partition_size_ = partition_size;
 
-    torch::Tensor mapped_edges;
+//    torch::Tensor mapped_edges;
+//    torch::Tensor mapped_edges_dst_sort;
+    torch::Tensor mapped_edges = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
     torch::Tensor mapped_edges_dst_sort;
-    if (storage_ptrs_.edges->dim1_size_ == 3) {
-        mapped_edges = torch::stack({subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, 0)),
-                                     subgraph->all_in_memory_edges_.select(1, 1),
-                                     subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, -1))})
-                           .transpose(0, 1);
-    } else if (storage_ptrs_.edges->dim1_size_ == 2) {
-        mapped_edges = torch::stack({subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, 0)),
-                                     subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, -1))})
-                           .transpose(0, 1);
-    } else {
-        // TODO use a function for logging errors and throwing expections
-        SPDLOG_ERROR("Unexpected number of edge columns");
-        std::runtime_error("Unexpected number of edge columns");
+//    if (storage_ptrs_.edges->dim1_size_ == 3) {
+//        mapped_edges = torch::stack({subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, 0)),
+//                                     subgraph->all_in_memory_edges_.select(1, 1),
+//                                     subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, -1))})
+//                           .transpose(0, 1);
+//    } else if (storage_ptrs_.edges->dim1_size_ == 2) {
+//        mapped_edges = torch::stack({subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, 0)),
+//                                     subgraph->global_to_local_index_map_.index_select(0, subgraph->all_in_memory_edges_.select(1, -1))})
+//                           .transpose(0, 1);
+//    } else {
+//        // TODO use a function for logging errors and throwing expections
+//        SPDLOG_ERROR("Unexpected number of edge columns");
+//        std::runtime_error("Unexpected number of edge columns");
+//    }
+
+    int dst_index = storage_ptrs_.edges->dim1_size_ - 1;
+    auto all_in_memory_edges_accessor = subgraph->all_in_memory_edges_.accessor<int64_t, 2>();
+    auto mapped_edges_accessor = mapped_edges.accessor<int64_t, 2>();
+    auto buffer_offsets_accessor = buffer_offsets.accessor<int64_t, 1>();
+
+    #pragma omp parallel for
+    for (int i = 0; i < total_size; i++) {
+        int64_t src_global_id = all_in_memory_edges_accessor[i][0];
+        int64_t dst_global_id = all_in_memory_edges_accessor[i][dst_index];
+
+        int64_t src_partition = src_global_id / partition_size;
+        int64_t dst_partition = dst_global_id / partition_size;
+
+        mapped_edges_accessor[i][0] = buffer_offsets_accessor[src_partition] + src_global_id - (src_partition * partition_size);
+        if (dst_index == 2) mapped_edges_accessor[i][1] = all_in_memory_edges_accessor[i][1];
+        mapped_edges_accessor[i][dst_index] = buffer_offsets_accessor[dst_partition] + dst_global_id - (dst_partition * partition_size);
     }
 
     //    assert((mapped_edges == -1).nonzero().size(0) == 0);
     //    assert((mapped_edges_dst_sort == -1).nonzero().size(0) == 0);
+
+//    subgraph->all_in_memory_edges_ = torch::Tensor();
 
     subgraph->all_in_memory_mapped_edges_ = mapped_edges;
 

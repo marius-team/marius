@@ -186,7 +186,7 @@ class PartitionBuffer {
 
     void sync();
 
-    int64_t getNumInMemory() { return buffer_tensor_view_.size(0); }
+    int64_t getNumInMemory() { return buffer_tensor_view_.size(0); } // TODO: this is maybe not correct since the last partition may not be full
 };
 
 #endif  // MARIUS_BUFFER_H

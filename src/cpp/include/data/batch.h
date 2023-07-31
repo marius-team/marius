@@ -36,6 +36,7 @@ class Batch {
     int batch_size_;    /**< Number of edges in the batch */
     bool train_;        /**< If true, this batch is a training batch and requires gradient tracking */
     int device_id_;     /**< ID of the device the batch is assigned to */
+    double loss_;
 
     LearningTask task_;
 
@@ -92,5 +93,7 @@ class Batch {
     void embeddingsToHost(); /**< Transfers gradients and embedding updates to host */
 
     void clear(); /**< Clears all tensor data in the batch */
+
+    double getLoss(LossReduction reduction_type = LossReduction::SUM);
 };
 #endif  // MARIUS_BATCH_H

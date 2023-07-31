@@ -294,6 +294,8 @@ ProgressReporter::ProgressReporter(std::string item_name, int64_t total_items, i
     total_reports_ = total_reports;
     items_per_report_ = total_items_ / total_reports_;
     next_report_ = items_per_report_;
+    current_loss_ = 0.0;
+    current_batch_count_ = 0;
 }
 
 ProgressReporter::~ProgressReporter() { clear(); }
@@ -301,20 +303,29 @@ ProgressReporter::~ProgressReporter() { clear(); }
 void ProgressReporter::clear() {
     current_item_ = 0;
     next_report_ = items_per_report_;
+    current_loss_ = 0.0;
+    current_batch_count_ = 0;
 }
 
-void ProgressReporter::addResult(int64_t items_processed) {
+void ProgressReporter::addResult(int64_t items_processed, double loss) {
     lock();
     current_item_ += items_processed;
+    current_loss_ += loss;
+    current_batch_count_ += 1;
     if (current_item_ >= next_report_) {
         report();
+        current_loss_ = 0.0;
+        current_batch_count_ = 0;
         next_report_ = std::min({current_item_ + items_per_report_, total_items_});
     }
     unlock();
 }
 
 void ProgressReporter::report() {
+//    std::string report_string = item_name_ + " processed: [" + std::to_string(current_item_) + "/" + std::to_string(total_items_) + "], " +
+//                                fmt::format("{:.2f}", 100 * (double)current_item_ / total_items_) + "%";
     std::string report_string = item_name_ + " processed: [" + std::to_string(current_item_) + "/" + std::to_string(total_items_) + "], " +
-                                fmt::format("{:.2f}", 100 * (double)current_item_ / total_items_) + "%";
+            fmt::format("{:.2f}", 100 * (double)current_item_ / total_items_) + "%; Avg batch loss since last report: " +
+            fmt::format("{:.2f}", (double) current_loss_ / current_batch_count_);
     SPDLOG_INFO(report_string);
 }

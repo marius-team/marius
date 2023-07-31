@@ -389,6 +389,8 @@ void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
 
     loss.backward();
 
+    batch->loss_ = (double) loss.item<float>();
+
     if (call_step) {
         step();
     }
@@ -513,9 +515,10 @@ shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std:
         }
     }
 
+    model->model_config_ = model_config;
+
     if (devices.size() > 1) {
         SPDLOG_INFO("Broadcasting model to: {} GPUs", devices.size());
-        model->model_config_ = model_config;
         model->broadcast(devices);
     } else {
         model->device_models_[0] = model;

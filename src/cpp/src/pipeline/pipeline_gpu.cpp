@@ -202,13 +202,13 @@ void ComputeWorkerGPU::run() {
 //                t.start();
                 if (!pipeline_->has_embeddings()) {
                     batch->clear();
-                    pipeline_->reporter_->addResult(batch->batch_size_);
+                    pipeline_->reporter_->addResult(batch->batch_size_, batch->getLoss(pipeline_->model_->model_config_->loss->options->loss_reduction));
                     pipeline_->batches_in_flight_--;
                     pipeline_->dataloader_->finishedBatch();
                     pipeline_->max_batches_cv_->notify_one();
                     pipeline_->edges_processed_ += batch->batch_size_;
                 } else {
-                    pipeline_->dataloader_->updateEmbeddings(batch, true); // TODO: if sub_batches
+                    pipeline_->dataloader_->updateEmbeddings(batch, true); // TODO: multi gpu with embeddings on device probably doesn't work
                     ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
                 }
             } else {

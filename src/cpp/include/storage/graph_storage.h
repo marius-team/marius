@@ -37,6 +37,8 @@ struct InMemorySubgraphState {
     torch::Tensor in_memory_edge_bucket_sizes_;
     torch::Tensor in_memory_edge_bucket_starts_;
     torch::Tensor global_to_local_index_map_;
+    torch::Tensor buffer_offsets_;
+    int64_t partition_size_;
     shared_ptr<MariusGraph> in_memory_subgraph_;
 };
 
@@ -71,6 +73,8 @@ class GraphModelStorage {
     GraphModelStoragePtrs storage_ptrs_;
     bool full_graph_evaluation_;
 
+    vector<torch::Tensor>::iterator edge_buckets_per_buffer_iterator_;
+
     int num_gpus_;
 
     GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_ptr<StorageConfig> storage_config);
@@ -83,13 +87,15 @@ class GraphModelStorage {
 
     void unload(bool write);
 
-    void initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps = 1);
+    void initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps = 1, bool requires_neighbors = true);
 
-    void updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState> subgraph, std::pair<std::vector<int>, std::vector<int>> swap_ids);
+    void updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState> subgraph, std::pair<std::vector<int>, std::vector<int>> swap_ids, bool requires_neighbors = true);
 
-    void updateInMemorySubGraph();
+    void updateInMemorySubGraph(bool requires_neighbors = true);
 
-    void getNextSubGraph();
+    void getNextSubGraph(bool requires_neighbors = true);
+
+    void decoderOnlyInMemorySubgraph(shared_ptr<InMemorySubgraphState> subgraph, bool prefetch);
 
     EdgeList merge_sorted_edge_buckets(EdgeList edges, torch::Tensor starts, int buffer_size, bool src);
 
@@ -207,7 +213,9 @@ class GraphModelStorage {
         }
     }
 
-    void setBufferOrdering(vector<torch::Tensor> buffer_states) {
+    void setBufferOrdering(vector<torch::Tensor> buffer_states, vector<torch::Tensor>::iterator edge_buckets_per_buffer_iterator) {
+        edge_buckets_per_buffer_iterator_ = edge_buckets_per_buffer_iterator;
+
         if (storage_ptrs_.node_embeddings != nullptr && instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
             std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->setBufferOrdering(buffer_states);
             if (storage_ptrs_.node_optimizer_state != nullptr && !train_) {

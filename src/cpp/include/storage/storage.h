@@ -88,6 +88,8 @@ class Storage {
 /** Storage which uses the partition buffer, used for node embeddings and optimizer state */
 class PartitionBufferStorage : public Storage {
    public:
+    int64_t partition_size_;
+
     bool loaded_;
 
     PartitionBuffer *buffer_;

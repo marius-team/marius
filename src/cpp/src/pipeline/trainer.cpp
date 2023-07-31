@@ -117,8 +117,8 @@ void SynchronousTrainer::train(int num_epochs) {
             // compute forward and backward pass of the model
             model_->train_batch(batch);
 
-            // transfer gradients and update parameters
-            if (batch->node_gradients_.defined()) {
+            // transfer gradients and update parameters, (this if check isn't needed now as this is checked in updateEmbeddings)
+            if (batch->node_gradients_.defined() or (batch->sub_batches_.size() > 0 and batch->sub_batches_[0]->node_gradients_.defined())) {
                 if (dataloader_->graph_storage_->embeddingsOffDevice()) {
                     batch->embeddingsToHost();
                 } else {
@@ -134,7 +134,7 @@ void SynchronousTrainer::train(int num_epochs) {
             dataloader_->finishedBatch();
 
             // log progress
-            progress_reporter_->addResult(batch->batch_size_);
+            progress_reporter_->addResult(batch->batch_size_, batch->getLoss(model_->model_config_->loss->options->loss_reduction));
         }
         SPDLOG_INFO("################ Finished training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
 

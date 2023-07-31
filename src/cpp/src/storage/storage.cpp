@@ -72,10 +72,10 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, int64_t dim0_siz
     dtype_ = options_->dtype;
     initialized_ = true;
     loaded_ = false;
-    int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
+    partition_size_ = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
-    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
+    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size_, dim1_size_, dim0_size_,
                                   dtype_, filename_, options_->prefetching);
 }
 
@@ -88,10 +88,10 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, torch::Tensor da
     append(data);
     initialized_ = true;
     loaded_ = false;
-    int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
+    partition_size_ = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
-    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
+    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size_, dim1_size_, dim0_size_,
                                   dtype_, filename_, options_->prefetching);
 }
 
@@ -102,10 +102,10 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, shared_ptr<Parti
     loaded_ = false;
     options_ = options;
     dtype_ = options_->dtype;
-    int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
+    partition_size_ = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
-    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
+    buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size_, dim1_size_, dim0_size_,
                                   dtype_, filename_, options_->prefetching);
 }
 

@@ -124,6 +124,11 @@ void DataLoader::setActiveEdges() {
     EdgeList active_edges;
 
     if (graph_storage_->useInMemorySubGraph()) {
+        if (neighbor_sampler_ == nullptr) {
+            graph_storage_->setActiveEdges(graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_);
+            return;
+        }
+
         torch::Tensor edge_bucket_ids = *edge_buckets_per_buffer_iterator_;
         edge_buckets_per_buffer_iterator_++;
 
@@ -145,7 +150,7 @@ void DataLoader::setActiveEdges() {
         torch::Tensor in_memory_id_indices = std::get<1>(tup);
         auto in_memory_id_indices_accessor = in_memory_id_indices.accessor<int64_t, 1>();
 
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < in_memory_edge_bucket_idx.size(0); i++) {
             int64_t edge_bucket_id = edge_bucket_ids_accessor[i];
             int64_t idx = torch::searchsorted(sorted_in_memory_ids, edge_bucket_id).item<int64_t>();
@@ -165,7 +170,7 @@ void DataLoader::setActiveEdges() {
         active_edges = torch::empty({total_size, graph_storage_->storage_ptrs_.edges->dim1_size_},
                                     graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.options());
 
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < in_memory_edge_bucket_idx.size(0); i++) {
             int64_t idx = in_memory_edge_bucket_idx_accessor[i];
             int64_t edge_bucket_size = edge_bucket_sizes_accessor[i];
@@ -268,7 +273,7 @@ void DataLoader::setBufferOrdering() {
 
             edge_buckets_per_buffer_iterator_ = edge_buckets_per_buffer_.begin();
 
-            graph_storage_->setBufferOrdering(buffer_states_);
+            graph_storage_->setBufferOrdering(buffer_states_, edge_buckets_per_buffer_iterator_);
         }
     } else {
         if (graph_storage_->useInMemorySubGraph()) {
@@ -282,7 +287,7 @@ void DataLoader::setBufferOrdering() {
 
             node_ids_per_buffer_iterator_ = node_ids_per_buffer_.begin();
 
-            graph_storage_->setBufferOrdering(buffer_states_);
+            graph_storage_->setBufferOrdering(buffer_states_, node_ids_per_buffer_iterator_);
         }
     }
 
@@ -318,7 +323,7 @@ shared_ptr<Batch> DataLoader::getNextBatch() {
                 batch_cv_->wait(batch_lock, [this] { return batches_left_ == 0; });
                 waiting_for_batches_ = false;
 
-                graph_storage_->updateInMemorySubGraph();
+                graph_storage_->updateInMemorySubGraph(neighbor_sampler_ != nullptr);
 
                 initializeBatches();
                 batch = *batch_iterator_;
@@ -550,8 +555,20 @@ void DataLoader::nodeSample(shared_ptr<Batch> batch, int worker_id) {
         batch->node_labels_ = graph_storage_->getNodeLabels(batch->root_node_indices_).flatten(0, 1);
     }
 
-    if (graph_storage_->current_subgraph_state_->global_to_local_index_map_.defined()) {
-        batch->root_node_indices_ = graph_storage_->current_subgraph_state_->global_to_local_index_map_.index_select(0, batch->root_node_indices_);
+    if (graph_storage_->useInMemorySubGraph()) {
+//        batch->root_node_indices_ = graph_storage_->current_subgraph_state_->global_to_local_index_map_.index_select(0, batch->root_node_indices_);
+        auto root_node_accessor = batch->root_node_indices_.accessor<int64_t, 1>();
+        auto buffer_offsets_accessor = graph_storage_->current_subgraph_state_->buffer_offsets_.accessor<int64_t, 1>();
+        int64_t partition_size = graph_storage_->current_subgraph_state_->partition_size_;
+
+        #pragma omp parallel for
+        for (int i = 0; i < batch->root_node_indices_.size(0); i++) {
+            int64_t global_id = root_node_accessor[i];
+            int64_t partition = global_id / partition_size;
+
+            root_node_accessor[i] = buffer_offsets_accessor[partition] + global_id - (partition * partition_size);
+        }
+
     }
 
     if (neighbor_sampler_ != nullptr) {
@@ -616,18 +633,30 @@ void DataLoader::loadGPUParameters(shared_ptr<Batch> batch) {
 }
 
 void DataLoader::updateEmbeddings(shared_ptr<Batch> batch, bool gpu) {
-    if (gpu) {
-        if (graph_storage_->storage_ptrs_.node_embeddings->device_ == torch::kCUDA) {
-            graph_storage_->updateAddNodeEmbeddings(batch->unique_node_indices_, batch->node_gradients_);
-            graph_storage_->updateAddNodeEmbeddingState(batch->unique_node_indices_, batch->node_state_update_);
+    if (batch->sub_batches_.size() > 0) {
+        #pragma omp parallel for // TODO: maybe not parallel for better perf?
+        for (int i = 0; i < batch->sub_batches_.size(); i++) {
+            if (batch->sub_batches_[i]->node_gradients_.defined()) {
+                updateEmbeddings(batch->sub_batches_[i], gpu);
+            }
         }
-    } else {
-//        batch->host_transfer_.synchronize();
-        if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
-            graph_storage_->updateAddNodeEmbeddings(batch->unique_node_indices_, batch->node_gradients_);
-            graph_storage_->updateAddNodeEmbeddingState(batch->unique_node_indices_, batch->node_state_update_);
+        return;
+    }
+
+    if (batch->node_gradients_.defined()) {
+        if (gpu) {
+            if (graph_storage_->storage_ptrs_.node_embeddings->device_ == torch::kCUDA) {
+                graph_storage_->updateAddNodeEmbeddings(batch->unique_node_indices_, batch->node_gradients_);
+                graph_storage_->updateAddNodeEmbeddingState(batch->unique_node_indices_, batch->node_state_update_);
+            }
+        } else {
+//            batch->host_transfer_.synchronize();
+            if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
+                graph_storage_->updateAddNodeEmbeddings(batch->unique_node_indices_, batch->node_gradients_);
+                graph_storage_->updateAddNodeEmbeddingState(batch->unique_node_indices_, batch->node_state_update_);
+            }
+//            batch->clear();
         }
-        batch->clear();
     }
 }
 
@@ -652,9 +681,9 @@ void DataLoader::loadStorage() {
     }
 
     if (!buffer_states_.empty()) {
-        graph_storage_->initializeInMemorySubGraph(buffer_states_[0], num_hash_maps);
+        graph_storage_->initializeInMemorySubGraph(buffer_states_[0], num_hash_maps, neighbor_sampler_ != nullptr);
     } else {
-        graph_storage_->initializeInMemorySubGraph(torch::empty({}), num_hash_maps);
+        graph_storage_->initializeInMemorySubGraph(torch::empty({}), num_hash_maps, neighbor_sampler_ != nullptr);
     }
 
     if (negative_sampler_ != nullptr) {

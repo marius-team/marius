@@ -13,6 +13,10 @@
 
 MariusGraph::MariusGraph(){};
 
+MariusGraph::MariusGraph(int64_t num_nodes_in_memory) {
+    num_nodes_in_memory_ = num_nodes_in_memory;
+}
+
 MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps) {
     num_nodes_in_memory_ = num_nodes_in_memory;
 

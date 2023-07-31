@@ -392,7 +392,9 @@ void PartitionBuffer::load() {
             num_nodes += partition->partition_size_;
         }
 
-        in_buffer_ids_ = torch::empty({num_nodes}, torch::kInt64);
+        in_buffer_ids_ = num_nodes * torch::ones({1}, torch::kInt64);
+//        in_buffer_ids_ = torch::empty({num_nodes}, torch::kInt64);
+
         //        int64_t offset = 0;
         //        for (int i = 0; i < buffer_state_.size(0); i++) {
         //            partition_id = buffer_state_[i].item<int>();
@@ -452,7 +454,10 @@ torch::Tensor PartitionBuffer::indexRead(torch::Tensor indices) {
     return out;
 }
 
-Indices PartitionBuffer::getRandomIds(int64_t size) { return torch::randint(in_buffer_ids_.size(0), size, torch::kInt64); }
+Indices PartitionBuffer::getRandomIds(int64_t size) {
+//    return torch::randint(in_buffer_ids_.size(0), size, torch::kInt64);
+    return torch::randint(in_buffer_ids_[0].item<int64_t>(), size, torch::kInt64);
+}
 
 // indices must contain unique values, else there is a possibility of a race condition
 void PartitionBuffer::indexAdd(torch::Tensor indices, torch::Tensor values) {
@@ -525,7 +530,8 @@ void PartitionBuffer::performNextSwap() {
         num_nodes += partition_table_[partition_id]->partition_size_;
     }
 
-    in_buffer_ids_ = torch::empty({num_nodes}, torch::kInt64);
+    in_buffer_ids_ = num_nodes * torch::ones({1}, torch::kInt64);
+//    in_buffer_ids_ = torch::empty({num_nodes}, torch::kInt64);
 
     //    int64_t offset = 0;
     //    for (int i = 0; i < buffer_state_.size(0); i++) {
@@ -577,21 +583,23 @@ std::vector<int> PartitionBuffer::getNextEvict() {
 }
 
 torch::Tensor PartitionBuffer::getGlobalToLocalMap(bool get_current) {
-    torch::Tensor buffer_index_map = -torch::ones({total_embeddings_}, torch::kInt64);
+//    torch::Tensor buffer_index_map = -torch::ones({total_embeddings_}, torch::kInt64);
+    torch::Tensor buffer_offsets = -torch::ones({num_partitions_}, torch::kInt64);
 
     torch::Tensor buffer_state;
 
     if (get_current) {
         buffer_state = buffer_state_;
 
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < buffer_state.size(0); i++) {
             int partition_id = buffer_state[i].item<int>();
             Partition *partition = partition_table_[partition_id];
             int64_t partition_offset = partition->idx_offset_;
             int64_t buffer_offset = partition->buffer_idx_ * partition_size_;
-            buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) =
-                torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
+//            buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) =
+//                torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
+            buffer_offsets.slice(0, partition_id, partition_id+1) = torch::arange(buffer_offset, buffer_offset + 1);
         }
 
     } else {
@@ -603,7 +611,7 @@ torch::Tensor PartitionBuffer::getGlobalToLocalMap(bool get_current) {
         std::vector<int> admit_ids = getNextAdmit();
 
         // get mapping for the partitions that will still be in the buffer
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < buffer_state.size(0); i++) {
             int partition_id = buffer_state[i].item<int>();
             Partition *partition = partition_table_[partition_id];
@@ -611,23 +619,26 @@ torch::Tensor PartitionBuffer::getGlobalToLocalMap(bool get_current) {
 
             if (partition->buffer_idx_ != -1) {
                 int64_t buffer_offset = partition->buffer_idx_ * partition_size_;
-                buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) =
-                    torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
+//                buffer_index_map.slice(0, partition_offset, partition_offset + partition->partition_size_) =
+//                    torch::arange(buffer_offset, buffer_offset + partition->partition_size_);
+                buffer_offsets.slice(0, partition_id, partition_id+1) = torch::arange(buffer_offset, buffer_offset + 1);
             }
         }
 
-// get mapping for the partitions that will be admitted
-#pragma omp parallel for
+        // get mapping for the partitions that will be admitted
+        #pragma omp parallel for
         for (int i = 0; i < evict_ids.size(); i++) {
             Partition *admit_partition = partition_table_[admit_ids[i]];
             Partition *evict_partition = partition_table_[evict_ids[i]];
             int64_t partition_offset = admit_partition->idx_offset_;
             int64_t buffer_offset = evict_partition->buffer_idx_ * partition_size_;
-            buffer_index_map.slice(0, partition_offset, partition_offset + admit_partition->partition_size_) =
-                torch::arange(buffer_offset, buffer_offset + admit_partition->partition_size_);
+//            buffer_index_map.slice(0, partition_offset, partition_offset + admit_partition->partition_size_) =
+//                torch::arange(buffer_offset, buffer_offset + admit_partition->partition_size_);
+            buffer_offsets.slice(0, admit_ids[i], admit_ids[i]+1) = torch::arange(buffer_offset, buffer_offset + 1);
         }
     }
-    return buffer_index_map;
+//    return buffer_index_map;
+    return buffer_offsets;
 }
 
 void PartitionBuffer::evict(std::vector<Partition *> evict_partitions) {

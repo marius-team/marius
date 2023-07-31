@@ -20,6 +20,7 @@ torch::Tensor pad_and_reshape(torch::Tensor input, int num_chunks) {
 }
 
 torch::Tensor L2Compare::operator()(torch::Tensor src, torch::Tensor dst) {
+    // TODO: negate distance here for TransE?
     if (!src.defined() || !dst.defined()) {
         throw UndefinedTensorException();
     }

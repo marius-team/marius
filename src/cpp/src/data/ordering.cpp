@@ -242,8 +242,10 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
     int buffer_size = buffer_states[0].size();
     int num_buckets = all_buckets.size(0);
 
-    torch::Tensor choices = torch::zeros({num_buckets, num_buffers}, torch::kInt32);
-    int32_t *choices_mem = choices.data_ptr<int32_t>();
+//    torch::Tensor choices = torch::zeros({num_buckets, num_buffers}, torch::kInt32);
+//    int32_t *choices_mem = choices.data_ptr<int32_t>();
+    torch::Tensor choices = torch::zeros({num_buckets, num_buffers}, torch::kInt8);
+    int8_t *choices_mem = choices.data_ptr<int8_t>();
 
     #pragma omp parallel for
     for (int i = 0; i < num_buffers; i++) {
@@ -258,10 +260,16 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
     }
 
     torch::Tensor pick = torch::zeros({num_buckets}, torch::kInt32);
-    torch::Tensor pick_one_hot = torch::zeros({num_buckets, num_buffers}, torch::kInt32);
     int32_t *pick_mem = pick.data_ptr<int32_t>();
-    int32_t *pick_one_hot_mem = pick_one_hot.data_ptr<int32_t>();
     auto pick_accessor = pick.accessor<int32_t, 1>();
+//    torch::Tensor pick_one_hot = torch::zeros({num_buckets, num_buffers}, torch::kInt32);
+//    int32_t *pick_one_hot_mem = pick_one_hot.data_ptr<int32_t>();
+
+    vector<int> num_edge_buckets_per_buffer(num_buffers);
+    std::vector<std::mutex *> buffer_locks(num_buffers);
+    for (int i = 0; i < buffer_locks.size(); i++) {
+        buffer_locks[i] = new std::mutex();
+    }
 
     // setup seeds
     unsigned int num_threads = 1;
@@ -300,17 +308,26 @@ vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<ve
             int32_t dst_part = all_buckets_accessor[i][1];
             *(pick_mem + (src_part * num_partitions + dst_part)) = buffer_choice;
             if (buffer_choice != -1) {
-                *(pick_one_hot_mem + (src_part * num_partitions + dst_part) * num_buffers + buffer_choice) = 1;
+//                *(pick_one_hot_mem + (src_part * num_partitions + dst_part) * num_buffers + buffer_choice) = 1;
+                buffer_locks[buffer_choice]->lock();
+                ++num_edge_buckets_per_buffer[buffer_choice];
+                buffer_locks[buffer_choice]->unlock();
             }
         }
     }
 
-    torch::Tensor num_edge_buckets_per_buffer = torch::sum(pick_one_hot, 0);
+    choices = torch::Tensor();
 
+//    torch::Tensor num_edge_buckets_per_buffer = torch::sum(pick_one_hot, 0);
+
+    int num_edge_buckets_check = 0;
     vector<vector<std::pair<int, int>>> edge_buckets_per_buffer(num_buffers);
     for (int i = 0; i < num_buffers; i++) {
-        edge_buckets_per_buffer[i] = vector<std::pair<int, int>>(num_edge_buckets_per_buffer[i].item<int>());
+//        edge_buckets_per_buffer[i] = vector<std::pair<int, int>>(num_edge_buckets_per_buffer[i].item<int>());
+        edge_buckets_per_buffer[i] = vector<std::pair<int, int>>(num_edge_buckets_per_buffer[i]);
+        num_edge_buckets_check += num_edge_buckets_per_buffer[i];
     }
+    SPDLOG_INFO("Assigned {} edge buckets for training", num_edge_buckets_check);
 
     vector<int> indices(num_buffers, 0);
     for (int i = 0; i < num_buckets; i++) {

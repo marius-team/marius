@@ -13,6 +13,7 @@ Batch::Batch(bool train) : device_transfer_(0), host_transfer_(0), timer_(false)
     status_ = BatchStatus::Waiting;
     train_ = train;
     device_id_ = -1;
+    loss_ = 0;
     clear();
 }
 
@@ -110,6 +111,14 @@ void Batch::accumulateGradients(float learning_rate) {
 }
 
 void Batch::embeddingsToHost() {
+    if (sub_batches_.size() > 0) {
+        #pragma omp parallel for
+        for (int i = 0; i < sub_batches_.size(); i++) {
+            sub_batches_[i]->embeddingsToHost();
+        }
+        return;
+    }
+
     if (node_gradients_.defined() && node_gradients_.device().is_cuda()) {
         auto grad_opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU).pinned_memory(true);
         Gradients temp_grads = torch::empty(node_gradients_.sizes(), grad_opts);
@@ -174,4 +183,22 @@ void Batch::clear() {
             sub_batches_[i]->clear();
         }
     }
+}
+
+double Batch::getLoss(LossReduction reduction_type) {
+    double loss = 0.0;
+    if (sub_batches_.size() > 0) {
+        for (int i = 0; i < sub_batches_.size(); i++) {
+            loss += sub_batches_[i]->loss_;
+        }
+
+        if (reduction_type == LossReduction::MEAN) {
+            loss = loss / sub_batches_.size();
+        }
+
+    } else {
+        loss = loss_;
+    }
+
+    return loss;
 }

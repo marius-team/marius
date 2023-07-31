@@ -128,6 +128,8 @@ class ProgressReporter : public Reporter {
     int total_reports_;
     int64_t next_report_;
     int64_t items_per_report_;
+    double current_loss_;
+    int64_t current_batch_count_;
 
    public:
     ProgressReporter(std::string item_name, int64_t total_items, int total_reports);
@@ -136,7 +138,7 @@ class ProgressReporter : public Reporter {
 
     void clear();
 
-    void addResult(int64_t items_processed);
+    void addResult(int64_t items_processed, double loss = 0.0);
 
     void report() override;
 };
