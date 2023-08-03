@@ -69,14 +69,15 @@ class DataLoader {
     bool only_root_features_;
 
     LearningTask learning_task_;
+    bool use_partition_embeddings_;
 
     std::vector<CudaStream *> compute_streams_;
     shared_ptr<c10d::ProcessGroupGloo> pg_gloo_;
     shared_ptr<DistributedConfig> dist_config_;
     bool dist_;
 
-    DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, shared_ptr<TrainingConfig> training_config,
-               shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config);
+    DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, bool use_partition_embeddings,
+               shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config);
 
     DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler = nullptr,
                shared_ptr<NeighborSampler> neighbor_sampler = nullptr, bool train = false);
@@ -105,6 +106,8 @@ class DataLoader {
      * Notify that the batch has been completed. Used for concurrency control.
      */
     void finishedBatch();
+
+    void getBatchHelper(shared_ptr<Batch> batch, int worker_id);
 
     /**
      * Gets the next batch to be processed by the pipeline.

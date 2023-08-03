@@ -6,6 +6,7 @@
 
 #include "nn/activation.h"
 #include "nn/layers/embedding/embedding.h"
+#include "nn/layers/embedding/partition_embedding.h"
 #include "nn/layers/feature/feature.h"
 #include "nn/layers/gnn/gat_layer.h"
 #include "nn/layers/gnn/gcn_layer.h"
@@ -15,13 +16,15 @@
 #include "nn/layers/reduction/linear.h"
 #include "nn/layers/reduction/reduction_layer.h"
 
-GeneralEncoder::GeneralEncoder(shared_ptr<EncoderConfig> encoder_config, torch::Device device, int num_relations) : device_(torch::kCPU) {
+GeneralEncoder::GeneralEncoder(shared_ptr<EncoderConfig> encoder_config, torch::Device device, int num_relations, int num_partitions) : device_(torch::kCPU) {
     encoder_config_ = encoder_config;
     num_relations_ = num_relations;
+    num_partitions_ = num_partitions;
     device_ = device;
 
     has_features_ = false;
     has_embeddings_ = false;
+    has_partition_embeddings_ = false;
 
     reset();
 }
@@ -46,6 +49,9 @@ GeneralEncoder::GeneralEncoder(std::vector<std::vector<shared_ptr<Layer>>> layer
             } else if (instance_of<Layer, FeatureLayer>(layer)) {
                 name = "feature:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
                 register_module<FeatureLayer>(name, std::dynamic_pointer_cast<FeatureLayer>(layer));
+            } else if (instance_of<Layer, PartitionEmbeddingLayer>(layer)) {
+                name = "partition_embedding:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+                register_module<PartitionEmbeddingLayer>(name, std::dynamic_pointer_cast<PartitionEmbeddingLayer>(layer));
             } else if (instance_of<Layer, ReductionLayer>(layer)) {
                 if (instance_of<Layer, LinearReduction>(layer)) {
                     name = "linear_reduction:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
@@ -95,6 +101,14 @@ shared_ptr<Layer> GeneralEncoder::initFeatureLayer(shared_ptr<LayerConfig> layer
     shared_ptr<Layer> layer = std::make_shared<FeatureLayer>(layer_config, device_);
     register_module<FeatureLayer>(name, std::dynamic_pointer_cast<FeatureLayer>(layer));
     has_features_ = true;
+    return layer;
+}
+
+shared_ptr<Layer> GeneralEncoder::initPartitionEmbeddingLayer(shared_ptr<LayerConfig> layer_config, int stage_id, int layer_id) {
+    string name = "partition_embedding:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
+    shared_ptr<Layer> layer = std::make_shared<PartitionEmbeddingLayer>(layer_config, device_, num_partitions_);
+    register_module<PartitionEmbeddingLayer>(name, std::dynamic_pointer_cast<PartitionEmbeddingLayer>(layer));
+    has_partition_embeddings_ = true;
     return layer;
 }
 
@@ -167,6 +181,8 @@ void GeneralEncoder::reset() {
                     layer = initEmbeddingLayer(layer_config, stage_id, layer_id);
                 } else if (layer_config->type == LayerType::FEATURE) {
                     layer = initFeatureLayer(layer_config, stage_id, layer_id);
+                } else if (layer_config->type == LayerType::PARTITION_EMBEDDING) {
+                    layer = initPartitionEmbeddingLayer(layer_config, stage_id, layer_id);
                 } else if (layer_config->type == LayerType::REDUCTION) {
                     layer = initReductionLayer(layer_config, stage_id, layer_id);
                 } else if (layer_config->type == LayerType::GNN) {
@@ -201,7 +217,7 @@ torch::Tensor GeneralEncoder::forward(at::optional<torch::Tensor> embeddings, at
         bool use_sample = false;
         bool added_output = false;
 
-        int64_t output_size;
+        int64_t output_size; // TODO: shouldn't we take last output_size of embeddings/features
         if (embeddings.has_value() && embeddings.value().defined()) {
             output_size = embeddings.value().size(0);
         } else if (features.has_value() && features.value().defined()) {
@@ -226,6 +242,9 @@ torch::Tensor GeneralEncoder::forward(at::optional<torch::Tensor> embeddings, at
                 max_outputs[j] = std::dynamic_pointer_cast<FeatureLayer>(layers_[i][j])->forward(features.value().narrow(0, 0, output_size));
                 max_outputs[j] = layers_[i][j]->post_hook(max_outputs[j]);
                 added_output = true;
+            } else if (instance_of<Layer, PartitionEmbeddingLayer>(layers_[i][j])) {
+                outputs[j] = std::dynamic_pointer_cast<PartitionEmbeddingLayer>(layers_[i][j])->forward(outputs[j], dense_graph);
+                outputs[j] = layers_[i][j]->post_hook(outputs[j]);
             } else if (instance_of<Layer, ReductionLayer>(layers_[i][j])) {
                 std::vector<torch::Tensor> new_outputs(1);
                 new_outputs[0] = std::dynamic_pointer_cast<ReductionLayer>(layers_[i][j])->forward(outputs);

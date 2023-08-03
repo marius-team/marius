@@ -218,6 +218,21 @@ shared_ptr<LayerConfig> initLayerConfig(pyobj python_config) {
         ret_config->bias = cast_helper<bool>(python_config.attr("bias"));
         ret_config->bias_init = initInitConfig(python_config.attr("bias_init"));
         ret_config->activation = getActivationFunction(cast_helper<string>(python_config.attr("activation")));
+    } else if (ret_config->type == LayerType::PARTITION_EMBEDDING) {
+        pyobj py_options = python_config.attr("options");
+        auto options = std::make_shared<PartitionEmbeddingLayerOptions>();
+        if (!check_missing(py_options))
+            options->add_to_gnn_input = cast_helper<bool>(py_options.attr("add_to_gnn_input"));
+        else options->add_to_gnn_input = false;
+        ret_config->options = options;
+
+        ret_config->input_dim = cast_helper<int>(python_config.attr("input_dim"));
+        ret_config->output_dim = cast_helper<int>(python_config.attr("output_dim"));
+        ret_config->init = initInitConfig(python_config.attr("init"));
+        ret_config->optimizer = initOptimizerConfig(python_config.attr("optimizer"));
+        ret_config->bias = cast_helper<bool>(python_config.attr("bias"));
+        ret_config->bias_init = initInitConfig(python_config.attr("bias_init"));
+        ret_config->activation = getActivationFunction(cast_helper<string>(python_config.attr("activation")));
     } else if (ret_config->type == LayerType::GNN) {
         pyobj py_options = python_config.attr("options");
         auto options = std::make_shared<GNNLayerOptions>();

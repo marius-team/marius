@@ -151,6 +151,8 @@ LayerType getLayerType(std::string string_val) {
         return LayerType::EMBEDDING;
     } else if (string_val == "FEATURE") {
         return LayerType::FEATURE;
+    } else if (string_val == "PARTITION_EMBEDDING") {
+        return LayerType::PARTITION_EMBEDDING;
     } else if (string_val == "GNN") {
         return LayerType::GNN;
     } else if (string_val == "DENSE") {

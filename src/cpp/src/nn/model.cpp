@@ -251,6 +251,8 @@ int64_t Model::get_base_embedding_dim() {
 
 bool Model::has_embeddings() { return encoder_->has_embeddings_; }
 
+bool Model::has_partition_embeddings() { return encoder_->has_partition_embeddings_; }
+
 torch::Tensor Model::forward_nc(at::optional<torch::Tensor> node_embeddings, at::optional<torch::Tensor> node_features, DENSEGraph dense_graph, bool train) {
     torch::Tensor encoded_nodes = encoder_->forward(node_embeddings, node_features, dense_graph, train);
     torch::Tensor y_pred = std::dynamic_pointer_cast<NodeDecoder>(decoder_)->forward(encoded_nodes);
@@ -463,7 +465,7 @@ void Model::broadcast(std::vector<torch::Device> devices) {
     }
 }
 
-shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std::vector<torch::Device> devices, int num_relations, bool train) {
+shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std::vector<torch::Device> devices, int num_relations, int num_partitions, bool train) {
     shared_ptr<GeneralEncoder> encoder = nullptr;
     shared_ptr<Decoder> decoder = nullptr;
     shared_ptr<LossFunction> loss = nullptr;
@@ -483,7 +485,7 @@ shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std:
 
     auto tensor_options = torch::TensorOptions().device(devices[0]).dtype(torch::kFloat32);
 
-    encoder = std::make_shared<GeneralEncoder>(model_config->encoder, devices[0], num_relations);
+    encoder = std::make_shared<GeneralEncoder>(model_config->encoder, devices[0], num_relations, num_partitions);
 
     if (model_config->learning_task == LearningTask::LINK_PREDICTION) {
         shared_ptr<EdgeDecoderOptions> decoder_options = std::dynamic_pointer_cast<EdgeDecoderOptions>(model_config->decoder->options);

@@ -268,6 +268,8 @@ void DENSEGraph::clear() {
     out_neighbors_vec_ = {};
 
     node_properties_ = torch::Tensor();
+
+    buffer_state_ = torch::Tensor();
 }
 
 void DENSEGraph::to(torch::Device device, CudaStream *compute_stream, CudaStream *transfer_stream) {
@@ -287,6 +289,8 @@ void DENSEGraph::to(torch::Device device, CudaStream *compute_stream, CudaStream
     }
 
     node_properties_ = transfer_tensor(node_properties_, device, compute_stream, transfer_stream);
+
+    buffer_state_ = transfer_tensor(buffer_state_, device, compute_stream, transfer_stream);
 }
 
 int64_t DENSEGraph::getLayerOffset() { return hop_offsets_[1].item<int64_t>(); }
@@ -365,6 +369,10 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> DENSEGraph::getCombinedN
 
 void DENSEGraph::performMap() {
     if (!node_ids_.defined()) {
+        return;
+    }
+
+    if (!out_offsets_.defined() and !in_offsets_.defined()) {
         return;
     }
 

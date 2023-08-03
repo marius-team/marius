@@ -386,6 +386,7 @@ void GraphModelStorage::decoderOnlyInMemorySubgraph(shared_ptr<InMemorySubgraphS
         buffer_offsets = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->getGlobalToLocalMap(!prefetch);
         partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->partition_size_;
     }
+    subgraph->buffer_offsets_ = buffer_offsets;
 
     subgraph->all_in_memory_mapped_edges_ = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
     int dst_index = storage_ptrs_.edges->dim1_size_ - 1;
@@ -508,7 +509,6 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
             partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->partition_size_;
         }
         current_subgraph_state_->buffer_offsets_ = buffer_offsets;
-        current_subgraph_state_->partition_size_ = partition_size;
 
 //        torch::Tensor mapped_edges;
 //        torch::Tensor mapped_edges_dst_sort;
@@ -832,7 +832,6 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
         partition_size = std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->partition_size_;
     }
     subgraph->buffer_offsets_ = buffer_offsets;
-    subgraph->partition_size_ = partition_size;
 
 //    torch::Tensor mapped_edges;
 //    torch::Tensor mapped_edges_dst_sort;

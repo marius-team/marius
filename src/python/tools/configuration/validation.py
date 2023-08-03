@@ -235,6 +235,9 @@ def check_encoder_layer_dimensions(output_config):
                 )
                 continue
 
+            if layer.type == "PARTITION_EMBEDDING":
+                continue
+
             if layer.type == "GNN":
                 # should have one input and one output
                 assert stage_idx > 0, "GNN Layer found in Stage 0"
@@ -253,7 +256,7 @@ def check_encoder_layer_dimensions(output_config):
                 # no constraints on input and output dim
                 continue
 
-            raise ValueError("Unsupported layer type\nShould be one of EMBEDDING, FEATURE, REDUCTION, GNN, DENSE")
+            raise ValueError("Unsupported layer type\nShould be one of EMBEDDING, FEATURE, PARTITION_EMBEDDING, REDUCTION, GNN, DENSE")
 
     # ensure that output dimension of a stage is equal to the input dimension of the next one
     for i in range(1, len(layers)):

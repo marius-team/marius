@@ -114,6 +114,10 @@ class EmbeddingLayerOptions(LayerOptions):
 class FeatureLayerOptions(LayerOptions):
     pass
 
+@dataclass
+class PartitionEmbeddingLayerOptions(LayerOptions):
+    add_to_gnn_input: bool = False
+
 
 @dataclass
 class DenseLayerOptions(LayerOptions):

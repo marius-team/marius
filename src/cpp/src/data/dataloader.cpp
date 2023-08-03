@@ -7,8 +7,8 @@
 #include "common/util.h"
 #include "data/ordering.h"
 
-DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, shared_ptr<TrainingConfig> training_config,
-                       shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config) {
+DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, bool use_partition_embeddings,
+                       shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config) {
     current_edge_ = 0;
     train_ = true;
     epochs_processed_ = 0;
@@ -25,6 +25,8 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
     training_config_ = training_config;
     evaluation_config_ = evaluation_config;
     only_root_features_ = false;
+
+    use_partition_embeddings_ = use_partition_embeddings;
 
     edge_sampler_ = std::make_shared<RandomEdgeSampler>(graph_storage_);
 
@@ -116,7 +118,7 @@ void DataLoader::nextEpoch() {
     epochs_processed_++;
 
     if (graph_storage_->useInMemorySubGraph()) {
-        unloadStorage();
+        unloadStorage(true);
     }
 }
 
@@ -366,6 +368,27 @@ void DataLoader::finishedBatch() {
     batch_cv_->notify_all();
 }
 
+void DataLoader::getBatchHelper(shared_ptr<Batch> batch, int worker_id) {
+    if (batch->task_ == LearningTask::LINK_PREDICTION) {
+        edgeSample(batch, worker_id);
+    } else if (batch->task_ == LearningTask::NODE_CLASSIFICATION || batch->task_ == LearningTask::ENCODE) {
+        nodeSample(batch, worker_id);
+    }
+
+    if (use_partition_embeddings_) { // TODO: maybe check that we are actually using the buffer during training here
+        if (!batch->dense_graph_.node_ids_.defined()) {
+            //need to set
+            batch->dense_graph_.node_ids_ = batch->unique_node_indices_;
+        }
+        if (graph_storage_->useInMemorySubGraph()) {
+            batch->dense_graph_.buffer_state_ = graph_storage_->getBufferState();
+        }
+        batch->dense_graph_.partition_size_ = graph_storage_->getPartitionSize();
+    }
+
+    loadCPUParameters(batch);
+}
+
 shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool perform_map, int worker_id) {
     shared_ptr<Batch> batch = getNextBatch();
     if (batch == nullptr) {
@@ -390,6 +413,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
                     edges_per_batch = num_edges - offset;
                 }
 
+                sub_batch->task_ = batch->task_;
                 sub_batch->batch_id_ = batch->batch_id_;
                 sub_batch->start_idx_ = batch->start_idx_ + offset;
                 sub_batch->batch_size_ = edges_per_batch;
@@ -397,8 +421,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 //                sub_batch->root_node_indices_ = node_ids.narrow(0, offset, nodes_per_batch);
                 offset += edges_per_batch;
 
-                edgeSample(sub_batch, worker_id);
-                loadCPUParameters(sub_batch);
+                getBatchHelper(sub_batch, worker_id);
                 sub_batches.emplace_back(sub_batch);
             }
 
@@ -417,6 +440,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
                     nodes_per_batch = num_nodes - offset;
                 }
 
+                sub_batch->task_ = batch->task_;
                 sub_batch->batch_id_ = batch->batch_id_;
                 sub_batch->start_idx_ = batch->start_idx_ + offset;
                 sub_batch->batch_size_ = nodes_per_batch;
@@ -424,8 +448,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 //                sub_batch->root_node_indices_ = node_ids.narrow(0, offset, nodes_per_batch);
                 offset += nodes_per_batch;
 
-                nodeSample(sub_batch, worker_id);
-                loadCPUParameters(sub_batch);
+                getBatchHelper(sub_batch, worker_id);
                 sub_batches.emplace_back(sub_batch);
             }
         }
@@ -436,13 +459,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
     }
 
     // single GPU
-    if (batch->task_ == LearningTask::LINK_PREDICTION) {
-        edgeSample(batch, worker_id);
-    } else if (batch->task_ == LearningTask::NODE_CLASSIFICATION || batch->task_ == LearningTask::ENCODE) {
-        nodeSample(batch, worker_id);
-    }
-
-    loadCPUParameters(batch);
+    getBatchHelper(batch, worker_id);
 
     if (device.has_value()) {
         if (device.value().is_cuda()) {
@@ -559,7 +576,7 @@ void DataLoader::nodeSample(shared_ptr<Batch> batch, int worker_id) {
 //        batch->root_node_indices_ = graph_storage_->current_subgraph_state_->global_to_local_index_map_.index_select(0, batch->root_node_indices_);
         auto root_node_accessor = batch->root_node_indices_.accessor<int64_t, 1>();
         auto buffer_offsets_accessor = graph_storage_->current_subgraph_state_->buffer_offsets_.accessor<int64_t, 1>();
-        int64_t partition_size = graph_storage_->current_subgraph_state_->partition_size_;
+        int64_t partition_size = graph_storage_->getPartitionSize();
 
         #pragma omp parallel for
         for (int i = 0; i < batch->root_node_indices_.size(0); i++) {

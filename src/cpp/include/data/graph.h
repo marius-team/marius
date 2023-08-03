@@ -121,6 +121,9 @@ class DENSEGraph : public MariusGraph {
 
     int num_nodes_in_memory_;
 
+    torch::Tensor buffer_state_;
+    int partition_size_;
+
     DENSEGraph();
 
     DENSEGraph(Indices hop_offsets, Indices node_ids, Indices in_offsets, std::vector<torch::Tensor> in_neighbors_vec, Indices in_neighbors_mapping,

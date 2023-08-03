@@ -144,8 +144,6 @@ class PartitionBuffer {
     std::vector<torch::Tensor> buffer_states_;
     std::vector<torch::Tensor>::iterator buffer_state_iterator_;
 
-    torch::Tensor getBufferState();
-
     void admit(std::vector<Partition *> admit_partitions, std::vector<int64_t> buffer_idxs);
 
     void evict(std::vector<Partition *> evict_partitions);
@@ -159,6 +157,8 @@ class PartitionBuffer {
                     torch::Dtype dtype, string filename, bool prefetching);
 
     ~PartitionBuffer();
+
+    torch::Tensor getBufferState();
 
     void load();
 

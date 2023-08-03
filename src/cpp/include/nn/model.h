@@ -61,8 +61,10 @@ class Model : public torch::nn::Module {
     int64_t get_base_embedding_dim();
 
     bool has_embeddings();
+
+    bool has_partition_embeddings();
 };
 
-shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std::vector<torch::Device> devices, int num_relations, bool train);
+shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std::vector<torch::Device> devices, int num_relations, int num_partitions, bool train);
 
 #endif  // MARIUS_INCLUDE_MODEL_H_

@@ -30,6 +30,7 @@ from marius.tools.configuration.datatypes import (
     NormalInitOptions,
     OptimizerOptions,
     PartitionBufferOptions,
+    PartitionEmbeddingLayerOptions,
     RankingLossOptions,
     ReductionLayerOptions,
     StorageOptions,
@@ -286,6 +287,9 @@ class LayerConfig:
 
             if self.type == "REDUCTION":
                 new_options = ReductionLayerOptions()
+
+            if self.type == "PARTITION_EMBEDDING":
+                new_options = PartitionEmbeddingLayerOptions()
 
             for key in new_options.__dict__.keys():
                 if key in input_config.options.keys():

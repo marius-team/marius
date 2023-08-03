@@ -58,7 +58,7 @@ std::tuple<std::shared_ptr<Model>, shared_ptr<GraphModelStorage>, CheckpointMeta
     CheckpointMeta checkpoint_meta = loadMetadata(checkpoint_dir);
 
     std::vector<torch::Device> devices = devices_from_config(marius_config->storage);
-    std::shared_ptr<Model> model = initModelFromConfig(marius_config->model, devices, marius_config->storage->dataset->num_relations, train);
+    std::shared_ptr<Model> model = initModelFromConfig(marius_config->model, devices, marius_config->storage->dataset->num_relations, 1, train); //TODO: num_partitions
     model->load(checkpoint_dir, train);
 
     if (checkpoint_meta.link_prediction) {

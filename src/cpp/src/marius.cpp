@@ -114,11 +114,21 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     shared_ptr<GraphModelStorage> graph_model_storage;
 
     int epochs_processed = 0;
+    int num_partitions = 1; // TODO: move this to part of storage->dataset, can be set automatically during preprocessing
+    if (marius_config->storage->embeddings != nullptr) {
+        if (marius_config->storage->embeddings->type == StorageBackend::PARTITION_BUFFER) {
+            num_partitions = std::dynamic_pointer_cast<PartitionBufferOptions>(marius_config->storage->embeddings->options)->num_partitions;
+        }
+    } else if (marius_config->storage->features != nullptr) {
+        if (marius_config->storage->features->type == StorageBackend::PARTITION_BUFFER) {
+            num_partitions = std::dynamic_pointer_cast<PartitionBufferOptions>(marius_config->storage->features->options)->num_partitions;
+        }
+    }
 
     if (train) {
         // initialize new model
         if (!marius_config->training->resume_training && marius_config->training->resume_from_checkpoint.empty()) {
-            model = initModelFromConfig(marius_config->model, devices, marius_config->storage->dataset->num_relations, true);
+            model = initModelFromConfig(marius_config->model, devices, marius_config->storage->dataset->num_relations, num_partitions, true);
             graph_model_storage = initializeStorage(model, marius_config->storage, !marius_config->training->resume_training, true);
         } else {
             auto checkpoint_loader = std::make_shared<Checkpointer>();
@@ -150,8 +160,8 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
         epochs_processed = checkpoint_meta.num_epochs;
     }
 
-    shared_ptr<DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage, model->learning_task_, marius_config->training,
-                                                                     marius_config->evaluation, marius_config->model->encoder);
+    shared_ptr<DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage, model->learning_task_, model->has_partition_embeddings(),
+                                                                     marius_config->training, marius_config->evaluation, marius_config->model->encoder);
 
     dataloader->epochs_processed_ = epochs_processed;
 

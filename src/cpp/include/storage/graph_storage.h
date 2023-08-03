@@ -38,7 +38,6 @@ struct InMemorySubgraphState {
     torch::Tensor in_memory_edge_bucket_starts_;
     torch::Tensor global_to_local_index_map_;
     torch::Tensor buffer_offsets_;
-    int64_t partition_size_;
     shared_ptr<MariusGraph> in_memory_subgraph_;
 };
 
@@ -225,6 +224,28 @@ class GraphModelStorage {
         if (storage_ptrs_.node_features != nullptr && instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_features)) {
             std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->setBufferOrdering(buffer_states);
         }
+    }
+
+    torch::Tensor getBufferState() {
+        if (storage_ptrs_.node_embeddings != nullptr && instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
+            return std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->buffer_->getBufferState();
+        }
+        if (storage_ptrs_.node_features != nullptr && instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_features)) {
+            return std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->buffer_->getBufferState();
+        }
+
+        return torch::Tensor();
+    }
+
+    int getPartitionSize() {
+        if (storage_ptrs_.node_embeddings != nullptr && instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
+            return std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->partition_size_;
+        }
+        if (storage_ptrs_.node_features != nullptr && instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_features)) {
+            return std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_features)->partition_size_;
+        }
+
+        return -1;
     }
 
     void setActiveEdges(torch::Tensor active_edges) { active_edges_ = active_edges; }

@@ -41,7 +41,7 @@ enum class ReductionLayerType { NONE, CONCAT, LINEAR };
 
 ReductionLayerType getReductionLayerType(std::string string_val);
 
-enum class LayerType { NONE, EMBEDDING, FEATURE, GNN, DENSE, REDUCTION };
+enum class LayerType { NONE, EMBEDDING, FEATURE, PARTITION_EMBEDDING, GNN, DENSE, REDUCTION };
 
 LayerType getLayerType(std::string string_val);
 
@@ -160,6 +160,11 @@ struct LayerOptions {
 struct EmbeddingLayerOptions : LayerOptions {};
 
 struct FeatureLayerOptions : LayerOptions {};
+
+struct PartitionEmbeddingLayerOptions : LayerOptions {
+    bool add_to_gnn_input;
+    virtual ~PartitionEmbeddingLayerOptions() = default;
+};
 
 struct DenseLayerOptions : LayerOptions {
     DenseLayerType type;
