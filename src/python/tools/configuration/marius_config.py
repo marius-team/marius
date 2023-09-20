@@ -99,6 +99,7 @@ class WorkerConfig:
 
 @dataclass
 class DistributedConfig:
+    model_sync: str = "SYNC_MODEL"
     workers: List[WorkerConfig] = field(default_factory=list)
 
     def merge(self, input_config: DictConfig):
@@ -107,6 +108,10 @@ class DistributedConfig:
         :param input_config: The input configuration dictionary
         :return: Structured output config
         """
+
+        self.model_sync = input_config.model_sync.upper()
+
+        assert self.model_sync in ["SYNC_MODEL", "SYNC_GRADS", "ASYNC_MODEL", "ASYNC_GRADS", "NONE"], "Invalid distributed model_sync."
 
         new_workers = []
         if "workers" in input_config.keys():

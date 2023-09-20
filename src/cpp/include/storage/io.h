@@ -33,12 +33,12 @@ shared_ptr<Storage> initializeNodeFeatures(std::shared_ptr<Model> model, shared_
 shared_ptr<Storage> initializeNodeLabels(std::shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config);
 
 shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(std::shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize,
-                                                              bool train, std::shared_ptr<InitConfig> init_config);
+                                                              bool train, std::shared_ptr<InitConfig> init_config, bool batch_worker);
 
 shared_ptr<GraphModelStorage> initializeStorageNodeClassification(std::shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize,
-                                                                  bool train, std::shared_ptr<InitConfig> init_config);
+                                                                  bool train, std::shared_ptr<InitConfig> init_config, bool batch_worker);
 
 shared_ptr<GraphModelStorage> initializeStorage(std::shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
-                                                std::shared_ptr<InitConfig> init_config = nullptr);
+                                                std::shared_ptr<InitConfig> init_config = nullptr, bool batch_worker = true);
 
 #endif  // MARIUS_IO_H

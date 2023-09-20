@@ -9,52 +9,12 @@
 using std::get;
 using std::tie;
 
-PipelineTrainer::PipelineTrainer(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config, int logs_per_epoch) {
+PipelineTrainer::PipelineTrainer(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config, int logs_per_epoch,
+                                 bool batch_worker, bool compute_worker, bool batch_worker_needs_remote, bool compute_worker_needs_remote) {
     dataloader_ = dataloader;
-    learning_task_ = dataloader_->learning_task_;
 
-    std::string item_name;
-    int64_t num_items = 0;
-    if (learning_task_ == LearningTask::LINK_PREDICTION) {
-        item_name = "Edges";
-        num_items = dataloader_->graph_storage_->storage_ptrs_.train_edges->getDim0();
-    } else if (learning_task_ == LearningTask::NODE_CLASSIFICATION) {
-        item_name = "Nodes";
-        num_items = dataloader_->graph_storage_->storage_ptrs_.train_nodes->getDim0();
-    }
-
-    progress_reporter_ = std::make_shared<ProgressReporter>(item_name, num_items, logs_per_epoch);
-
-    if (model->device_.is_cuda()) {
-        pipeline_ = std::make_shared<PipelineGPU>(dataloader, model, true, progress_reporter_, pipeline_config);
-    } else {
-        pipeline_ = std::make_shared<PipelineCPU>(dataloader, model, true, progress_reporter_, pipeline_config);
-    }
-}
-
-void PipelineTrainer::train(int num_epochs) {
-    if (!dataloader_->single_dataset_) {
-        dataloader_->setTrainSet();
-    }
-
-    dataloader_->initializeBatches(false);
-
-    Timer timer = Timer(false);
-    for (int epoch = 0; epoch < num_epochs; epoch++) {
-        timer.start();
-        SPDLOG_INFO("################ Starting training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
-        pipeline_->start();
-        pipeline_->waitComplete();
-        pipeline_->pauseAndFlush();
-        SPDLOG_INFO("################ Finished training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
-
-        if (pipeline_->model_->device_models_.size() > 1) {
-            pipeline_->model_->all_reduce();
-        }
-
-        dataloader_->nextEpoch();
-        progress_reporter_->clear();
-        timer.stop();
+    if (dataloader_->batch_worker_) {
+        learning_task_ = dataloader_->learning_task_;
 
         std::string item_name;
         int64_t num_items = 0;
@@ -66,10 +26,65 @@ void PipelineTrainer::train(int num_epochs) {
             num_items = dataloader_->graph_storage_->storage_ptrs_.train_nodes->getDim0();
         }
 
-        int64_t epoch_time = timer.getDuration();
-        float items_per_second = (float)num_items / ((float)epoch_time / 1000);
-        SPDLOG_INFO("Epoch Runtime: {}ms", epoch_time);
-        SPDLOG_INFO("{} per Second: {}", item_name, items_per_second);
+        progress_reporter_ = std::make_shared<ProgressReporter>(item_name, num_items, logs_per_epoch);
+    }
+
+    if (model->device_.is_cuda()) {
+        pipeline_ = std::make_shared<PipelineGPU>(dataloader, model, true, progress_reporter_, pipeline_config, false,
+                                                  batch_worker, compute_worker, batch_worker_needs_remote, compute_worker_needs_remote);
+    } else {
+        pipeline_ = std::make_shared<PipelineCPU>(dataloader, model, true, progress_reporter_, pipeline_config);
+    }
+}
+
+void PipelineTrainer::train(int num_epochs) {
+    if (!dataloader_->single_dataset_ and dataloader_->batch_worker_) {
+        dataloader_->setTrainSet();
+    } else {
+        dataloader_->train_ = true;
+    }
+
+    if (dataloader_->batch_worker_) {
+        dataloader_->initializeBatches(false);
+    }
+
+    pipeline_->model_->distPrepareForTraining();
+
+    Timer timer = Timer(false);
+    for (int epoch = 0; epoch < num_epochs; epoch++) {
+        timer.start();
+        SPDLOG_INFO("################ Starting training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
+        pipeline_->start();
+        pipeline_->waitComplete();
+        pipeline_->pauseAndFlush();
+        SPDLOG_INFO("################ Finished training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
+        timer.stop();
+
+//        if (pipeline_->model_->device_models_.size() > 1) {
+//            pipeline_->model_->all_reduce();
+//        }
+
+        pipeline_->model_->distNotifyCompleteAndWait();
+
+        if (dataloader_->batch_worker_) {
+            dataloader_->nextEpoch();
+            progress_reporter_->clear();
+
+            std::string item_name;
+            int64_t num_items = 0;
+            if (learning_task_ == LearningTask::LINK_PREDICTION) {
+                item_name = "Edges";
+                num_items = dataloader_->graph_storage_->storage_ptrs_.train_edges->getDim0();
+            } else if (learning_task_ == LearningTask::NODE_CLASSIFICATION) {
+                item_name = "Nodes";
+                num_items = dataloader_->graph_storage_->storage_ptrs_.train_nodes->getDim0();
+            }
+
+            int64_t epoch_time = timer.getDuration();
+            float items_per_second = (float) num_items / ((float) epoch_time / 1000);
+            SPDLOG_INFO("Epoch Runtime: {}ms", epoch_time);
+            SPDLOG_INFO("{} per Second: {}", item_name, items_per_second);
+        }
     }
 }
 
@@ -97,6 +112,8 @@ void SynchronousTrainer::train(int num_epochs) {
     }
 
     dataloader_->initializeBatches(false);
+
+    model_->distPrepareForTraining();
 
     Timer timer = Timer(false);
 
@@ -137,6 +154,8 @@ void SynchronousTrainer::train(int num_epochs) {
             progress_reporter_->addResult(batch->batch_size_, batch->getLoss(model_->model_config_->loss->options->loss_reduction));
         }
         SPDLOG_INFO("################ Finished training epoch {} ################", dataloader_->getEpochsProcessed() + 1);
+
+        model_->distNotifyCompleteAndWait();
 
         // notify that the epoch has been completed
         dataloader_->nextEpoch();

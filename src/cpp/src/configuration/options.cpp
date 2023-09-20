@@ -16,6 +16,24 @@ WorkerType getWorkerType(std::string string_val) {
     }
 }
 
+DistributedModelSync getDistributedModelSync(std::string string_val) {
+    for (auto& c : string_val) c = toupper(c);
+
+    if (string_val == "SYNC_MODEL") {
+        return DistributedModelSync::SYNC_MODEL;
+    } else if (string_val == "SYNC_GRADS") {
+        return DistributedModelSync::SYNC_GRADS;
+    } else if (string_val == "ASYNC_MODEL") {
+        return DistributedModelSync::ASYNC_MODEL;
+    } else if (string_val == "ASYNC_GRADS") {
+        return DistributedModelSync::ASYNC_GRADS;
+    } else if (string_val == "NONE") {
+        return DistributedModelSync::NONE;
+    } else {
+        throw std::runtime_error("Unrecognized worker type string");
+    }
+}
+
 LearningTask getLearningTask(std::string string_val) {
     for (auto& c : string_val) c = toupper(c);
 

@@ -13,6 +13,7 @@ Batch::Batch(bool train) : device_transfer_(0), host_transfer_(0), timer_(false)
     status_ = BatchStatus::Waiting;
     train_ = train;
     device_id_ = -1;
+    creator_id_ = -1;
     loss_ = 0;
     clear();
 }
@@ -68,6 +69,141 @@ void Batch::to(torch::Device device, CudaStream *compute_stream) {
     }
 
     status_ = BatchStatus::TransferredToDevice;
+}
+
+void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag, bool send_meta) {
+
+    if (send_meta) {
+        torch::Tensor metadata = torch::tensor({batch_id_, batch_size_, creator_id_}, {torch::kInt32});
+
+        std::vector<torch::Tensor> transfer_vec;
+        transfer_vec.push_back(metadata);
+        auto work = pg->send(transfer_vec, worker_id, tag);
+        if (!work->wait()) {
+            throw work->exception();
+        }
+    }
+
+    if (sub_batches_.size() > 0) {
+//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        for (int i = 0; i < sub_batches_.size(); i++) {
+            sub_batches_[i]->remoteTo(pg, worker_id, tag, false);
+        }
+        return;
+    }
+
+    send_tensor(edges_, pg, worker_id, tag);
+
+    send_tensor(neg_edges_, pg, worker_id, tag);
+
+    send_tensor(root_node_indices_, pg, worker_id, tag);
+
+    send_tensor(unique_node_indices_, pg, worker_id, tag);
+
+    send_tensor(node_labels_, pg, worker_id, tag);
+
+    send_tensor(src_neg_indices_mapping_, pg, worker_id, tag);
+
+    send_tensor(dst_neg_indices_mapping_, pg, worker_id, tag);
+
+    send_tensor(src_neg_filter_, pg, worker_id, tag);
+
+    send_tensor(dst_neg_filter_, pg, worker_id, tag);
+
+    send_tensor(node_embeddings_, pg, worker_id, tag);
+
+    send_tensor(node_embeddings_state_, pg, worker_id, tag);
+
+    send_tensor(node_features_, pg, worker_id, tag);
+
+    send_tensor(encoded_uniques_, pg, worker_id, tag);
+
+    dense_graph_.send(pg, worker_id, tag);
+
+    send_tensor(node_gradients_, pg, worker_id, tag);
+
+    send_tensor(node_state_update_, pg, worker_id, tag);
+
+    send_tensor(pos_scores_, pg, worker_id, tag);
+
+    send_tensor(neg_scores_, pg, worker_id, tag);
+
+    send_tensor(inv_pos_scores_, pg, worker_id, tag);
+
+    send_tensor(inv_neg_scores_, pg, worker_id, tag);
+
+    send_tensor(y_pred_, pg, worker_id, tag);
+
+    // can clear batch, it's sent to another machine at this point
+    clear();
+}
+
+void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag, bool receive_meta) {
+
+    if (receive_meta) {
+        torch::Tensor metadata = torch::tensor({-1, -1, -1}, {torch::kInt32});
+
+        std::vector <torch::Tensor> transfer_vec;
+        transfer_vec.push_back(metadata);
+        auto work = pg->recv(transfer_vec, worker_id, tag);
+        if (!work->wait()) {
+            throw work->exception();
+        }
+
+        batch_id_ = metadata[0].item<int>();
+        batch_size_ = metadata[1].item<int>();
+        creator_id_ = metadata[2].item<int>();
+    }
+
+    if (sub_batches_.size() > 0) {
+//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        for (int i = 0; i < sub_batches_.size(); i++) {
+            sub_batches_[i]->remoteReceive(pg, worker_id, tag, false);
+        }
+        return;
+    }
+
+    edges_ = receive_tensor(pg, worker_id, tag);
+
+    neg_edges_ = receive_tensor(pg, worker_id, tag);
+
+    root_node_indices_ = receive_tensor(pg, worker_id, tag);
+
+    unique_node_indices_ = receive_tensor(pg, worker_id, tag);
+
+    node_labels_ = receive_tensor(pg, worker_id, tag);
+
+    src_neg_indices_mapping_ = receive_tensor(pg, worker_id, tag);
+
+    dst_neg_indices_mapping_ = receive_tensor(pg, worker_id, tag);
+
+    src_neg_filter_ = receive_tensor(pg, worker_id, tag);
+
+    dst_neg_filter_ = receive_tensor(pg, worker_id, tag);
+
+    node_embeddings_ = receive_tensor(pg, worker_id, tag);
+
+    node_embeddings_state_ = receive_tensor(pg, worker_id, tag);
+
+    node_features_ = receive_tensor(pg, worker_id, tag);
+
+    encoded_uniques_ = receive_tensor(pg, worker_id, tag);
+
+    dense_graph_.receive(pg, worker_id, tag);
+
+    node_gradients_ = receive_tensor(pg, worker_id, tag);
+
+    node_state_update_ = receive_tensor(pg, worker_id, tag);
+
+    pos_scores_ = receive_tensor(pg, worker_id, tag);
+
+    neg_scores_ = receive_tensor(pg, worker_id, tag);
+
+    inv_pos_scores_ = receive_tensor(pg, worker_id, tag);
+
+    inv_neg_scores_ = receive_tensor(pg, worker_id, tag);
+
+    y_pred_ = receive_tensor(pg, worker_id, tag);
 }
 
 void Batch::accumulateGradients(float learning_rate) {
@@ -152,7 +288,37 @@ void Batch::embeddingsToHost() {
     status_ = BatchStatus::TransferredToHost;
 }
 
-void Batch::clear() {
+void Batch::evalToHost() {
+    if (sub_batches_.size() > 0) {
+        throw MariusRuntimeException("Multi-GPU evaluation currently not supported.");
+    }
+
+    if (pos_scores_.defined()) {
+        pos_scores_ = pos_scores_.to(torch::kCPU);
+    }
+
+    if (neg_scores_.defined()) {
+        neg_scores_ = neg_scores_.to(torch::kCPU);
+    }
+
+    if (inv_pos_scores_.defined()) {
+        inv_pos_scores_ = inv_pos_scores_.to(torch::kCPU);
+    }
+
+    if (inv_neg_scores_.defined()) {
+        inv_neg_scores_ = inv_neg_scores_.to(torch::kCPU);
+    }
+
+    if (y_pred_.defined()) {
+        y_pred_ = y_pred_.to(torch::kCPU);
+    }
+
+    if (node_labels_.defined()) {
+        node_labels_ = node_labels_.to(torch::kCPU);
+    }
+}
+
+void Batch::clear(bool clear_eval) {
     root_node_indices_ = torch::Tensor();
     unique_node_indices_ = torch::Tensor();
     node_embeddings_ = torch::Tensor();
@@ -161,7 +327,7 @@ void Batch::clear() {
     node_embeddings_state_ = torch::Tensor();
 
     node_features_ = torch::Tensor();
-    node_labels_ = torch::Tensor();
+//    node_labels_ = torch::Tensor();
 
     src_neg_indices_mapping_ = torch::Tensor();
     dst_neg_indices_mapping_ = torch::Tensor();
@@ -182,6 +348,17 @@ void Batch::clear() {
         for (int i = 0; i < sub_batches_.size(); i++) {
             sub_batches_[i]->clear();
         }
+    }
+
+    sub_batches_ = {};
+
+    if (clear_eval) {
+        pos_scores_ = torch::Tensor();
+        neg_scores_ = torch::Tensor();
+        inv_pos_scores_ = torch::Tensor();
+        inv_neg_scores_ = torch::Tensor();
+        y_pred_ = torch::Tensor();
+        node_labels_ = torch::Tensor();
     }
 }
 

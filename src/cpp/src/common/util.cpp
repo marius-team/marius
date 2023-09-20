@@ -143,6 +143,128 @@ torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device, CudaStr
     return input;
 }
 
+void send_tensor(torch::Tensor input, shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag) {
+    int max_dim = 3;
+
+    if (input.dim() > max_dim) {
+        throw MariusRuntimeException("Trying to send a tensor with too many dimensions");
+    }
+
+    torch::Tensor metadata;
+    if (!input.defined()) {
+        metadata = torch::zeros({max_dim+1}, {torch::kInt64}) - 1;
+    } else {
+        metadata = torch::cat({torch::tensor(input.sizes(), {torch::kInt64}), torch::zeros({max_dim + 1 - input.dim()}, torch::kInt64) - 1});
+        metadata[-1] = get_dtype_label(input.dtype().toScalarType());
+    }
+
+    std::vector<torch::Tensor> transfer_vec;
+    transfer_vec.push_back(metadata);
+    auto work = pg->send(transfer_vec, worker_id, tag);
+    if (!work->wait()) {
+        throw work->exception();
+    }
+
+    if (input.defined()) {
+        transfer_vec = {};
+        transfer_vec.push_back(input.contiguous());
+        work = pg->send(transfer_vec, worker_id, tag);
+        if (!work->wait()) {
+            throw work->exception();
+        }
+    }
+}
+
+torch::Tensor receive_tensor(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag) {
+    torch::Tensor received = torch::Tensor();
+
+    int max_dim = 3;
+    torch::Tensor metadata = torch::zeros({max_dim+1}, {torch::kInt64}) - 1;
+
+    std::vector<torch::Tensor> transfer_vec;
+    transfer_vec.push_back(metadata);
+    auto work = pg->recv(transfer_vec, worker_id, tag);
+    if (!work->wait()) {
+        throw work->exception();
+    }
+
+    if (metadata.sum().item<int>() == -1*(max_dim+1)) {
+        // this tensor is undefined
+        return received;
+    }
+
+    int dtype_label = metadata[-1].item<int>();
+
+    int dim = 0;
+    for (int i = 0; i < max_dim; i++) {
+        if (metadata[i].item<int>() != -1) {
+            dim++;
+        }
+    }
+
+    torch::Tensor sizes = metadata.narrow(0, 0, dim);
+    int64_t *data_ptr = (int64_t *)sizes.data_ptr();
+    int64_t *end = (int64_t *)data_ptr + sizes.size(0);
+    std::vector<int64_t> sizes_vec = std::vector<int64_t>(data_ptr, end);
+
+    auto options = torch::TensorOptions().dtype(get_dtype_from_label(dtype_label));
+    #ifdef MARIUS_CUDA
+    options = options.pinned_memory(true);
+    #endif
+    received = torch::empty(sizes_vec, options);
+
+    transfer_vec = {};
+    transfer_vec.push_back(received);
+    work = pg->recv(transfer_vec, worker_id, tag);
+    if (!work->wait()) {
+        throw work->exception();
+    }
+
+    return received;
+}
+
+int get_dtype_label(torch::Dtype dtype) {
+    if (dtype == torch::kFloat64) {
+        return 0;
+    }
+    if (dtype == torch::kFloat32) {
+        return 1;
+    }
+    if (dtype == torch::kFloat16) {
+        return 2;
+    }
+    if (dtype == torch::kInt64) {
+        return 3;
+    }
+    if (dtype == torch::kInt32) {
+        return 4;
+    }
+
+    SPDLOG_ERROR("Unable to determine dtype label for given dtype_ {}", dtype);
+    throw std::runtime_error("");
+}
+
+torch::Dtype get_dtype_from_label(int label) {
+    if (label == 0) {
+        return torch::kFloat64;
+    }
+    if (label == 1) {
+        return torch::kFloat32;
+    }
+    if (label == 2) {
+        return torch::kFloat16;
+    }
+    if (label == 3) {
+        return torch::kInt64;
+    }
+    if (label == 4) {
+        return torch::kInt32;
+    }
+
+    SPDLOG_ERROR("Unable to determine dtype for given label {}", label);
+    throw std::runtime_error("");
+}
+
 int64_t get_dtype_size_wrapper(torch::Dtype dtype_) {
     if (dtype_ == torch::kFloat64) {
         return 8;

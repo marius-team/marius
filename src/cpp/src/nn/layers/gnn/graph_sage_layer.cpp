@@ -81,9 +81,13 @@ torch::Tensor GraphSageLayer::forward(torch::Tensor inputs, DENSEGraph dense_gra
         a_i = a_i / (total_num_neighbors + 1).unsqueeze(-1);
         outputs = torch::matmul(w1_, a_i.transpose(0, -1)).transpose(0, -1);
     } else if (options_->aggregator == GraphSageAggregator::MEAN) {
-        torch::Tensor denominator = torch::where(torch::not_equal(total_num_neighbors, 0), total_num_neighbors, 1).to(a_i.dtype()).unsqueeze(-1);
-        a_i = a_i / denominator;
-        outputs = (torch::matmul(w1_, self_embs.transpose(0, -1)) + torch::matmul(w2_, a_i.transpose(0, -1))).transpose(0, -1);
+        if (total_num_neighbors.defined()) {
+            torch::Tensor denominator = torch::where(torch::not_equal(total_num_neighbors, 0), total_num_neighbors, 1).to(a_i.dtype()).unsqueeze(-1);
+            a_i = a_i / denominator;
+            outputs = (torch::matmul(w1_, self_embs.transpose(0, -1)) + torch::matmul(w2_, a_i.transpose(0, -1))).transpose(0, -1);
+        } else {
+            outputs = torch::matmul(w1_, self_embs.transpose(0, -1)).transpose(0, -1);
+        }
     } else {
         throw std::runtime_error("Unrecognized aggregator");
     }

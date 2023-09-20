@@ -165,6 +165,10 @@ class DENSEGraph : public MariusGraph {
     void clear();
 
     void to(torch::Device device, CudaStream *compute_stream = nullptr, CudaStream *transfer_stream = nullptr);
+
+    void send(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag);
+
+    void receive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag);
 };
 
 #endif  // MARIUS_SRC_CPP_INCLUDE_GRAPH_H_

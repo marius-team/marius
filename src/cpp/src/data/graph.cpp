@@ -293,6 +293,76 @@ void DENSEGraph::to(torch::Device device, CudaStream *compute_stream, CudaStream
     buffer_state_ = transfer_tensor(buffer_state_, device, compute_stream, transfer_stream);
 }
 
+void DENSEGraph::send(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag) {
+    send_tensor(node_ids_, pg, worker_id, tag);
+    send_tensor(hop_offsets_, pg, worker_id, tag);
+
+    send_tensor(out_offsets_, pg, worker_id, tag);
+
+    send_tensor(in_offsets_, pg, worker_id, tag);
+
+    int in_size = in_neighbors_vec_.size();
+    int out_size = out_neighbors_vec_.size();
+
+    torch::Tensor metadata = torch::tensor({in_size, out_size, num_nodes_in_memory_, partition_size_}, {torch::kInt64});
+    std::vector<torch::Tensor> transfer_vec;
+    transfer_vec.push_back(metadata);
+    auto work = pg->send(transfer_vec, worker_id, tag);
+    if (!work->wait()) {
+        throw work->exception();
+    }
+
+    for (int i = 0; i < in_neighbors_vec_.size(); i++) {
+        send_tensor(in_neighbors_vec_[i], pg, worker_id, tag);
+    }
+
+    for (int i = 0; i < out_neighbors_vec_.size(); i++) {
+        send_tensor(out_neighbors_vec_[i], pg, worker_id, tag);
+    }
+
+    send_tensor(node_properties_, pg, worker_id, tag);
+
+    send_tensor(buffer_state_, pg, worker_id, tag);
+}
+
+void DENSEGraph::receive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag) {
+    node_ids_ = receive_tensor(pg, worker_id, tag);
+    hop_offsets_ = receive_tensor(pg, worker_id, tag);
+
+    out_offsets_ = receive_tensor(pg, worker_id, tag);
+
+    in_offsets_ = receive_tensor(pg, worker_id, tag);
+
+    torch::Tensor metadata = torch::tensor({-1, -1, -1, -1}, {torch::kInt64});
+    std::vector<torch::Tensor> transfer_vec;
+    transfer_vec.push_back(metadata);
+    auto work = pg->recv(transfer_vec, worker_id, tag);
+    if (!work->wait()) {
+        throw work->exception();
+    }
+
+    int in_size = metadata[0].item<int>();
+    int out_size = metadata[1].item<int>();
+
+    in_neighbors_vec_ = std::vector<torch::Tensor>(in_size);
+    out_neighbors_vec_ = std::vector<torch::Tensor>(out_size);
+
+    for (int i = 0; i < in_neighbors_vec_.size(); i++) {
+        in_neighbors_vec_[i] = receive_tensor(pg, worker_id, tag);
+    }
+
+    for (int i = 0; i < out_neighbors_vec_.size(); i++) {
+        out_neighbors_vec_[i] = receive_tensor(pg, worker_id, tag);
+    }
+
+    node_properties_ = receive_tensor(pg, worker_id,  tag);
+
+    buffer_state_ = receive_tensor(pg, worker_id, tag);
+
+    num_nodes_in_memory_ = metadata[2].item<int64_t>();
+    partition_size_ = metadata[3].item<int64_t>();
+}
+
 int64_t DENSEGraph::getLayerOffset() { return hop_offsets_[1].item<int64_t>(); }
 
 void DENSEGraph::prepareForNextLayer() {

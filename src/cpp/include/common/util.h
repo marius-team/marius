@@ -77,6 +77,14 @@ int64_t pwrite_wrapper(int fd, const void *buf, int64_t count, int64_t offset);
 
 torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device, CudaStream *compute_stream = nullptr, CudaStream *transfer_stream = nullptr);
 
+void send_tensor(torch::Tensor input, shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag);
+
+torch::Tensor receive_tensor(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag);
+
+int get_dtype_label(torch::Dtype dtype_);
+
+torch::Dtype get_dtype_from_label(int label);
+
 int64_t get_dtype_size_wrapper(torch::Dtype dtype_);
 
 std::string get_directory(std::string path);

@@ -10,7 +10,7 @@
 #include "data/ordering.h"
 #include "reporting/logger.h"
 
-GraphModelStorage::GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_ptr<StorageConfig> storage_config) {
+GraphModelStorage::GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_ptr<StorageConfig> storage_config, bool batch_worker) {
     storage_ptrs_ = storage_ptrs;
     train_ = true;
     full_graph_evaluation_ = storage_config->full_graph_evaluation;
@@ -30,7 +30,7 @@ GraphModelStorage::GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_
 
     num_gpus_ = storage_config->device_ids.size();
 
-    if (full_graph_evaluation_) {
+    if (full_graph_evaluation_ and batch_worker) {
         if (storage_ptrs_.node_embeddings != nullptr) {
             if (instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
                 string node_embedding_filename = storage_config->model_dir + PathConstants::embeddings_file + PathConstants::file_ext;

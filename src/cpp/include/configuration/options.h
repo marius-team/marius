@@ -13,6 +13,10 @@ enum class WorkerType { BATCH, COMPUTE };
 
 WorkerType getWorkerType(std::string string_val);
 
+enum class DistributedModelSync { SYNC_MODEL, SYNC_GRADS, ASYNC_MODEL, ASYNC_GRADS, NONE };
+
+DistributedModelSync getDistributedModelSync(std::string string_val);
+
 enum class LearningTask { NODE_CLASSIFICATION, LINK_PREDICTION, ENCODE };
 
 LearningTask getLearningTask(std::string string_val);

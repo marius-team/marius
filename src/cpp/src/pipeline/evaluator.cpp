@@ -7,20 +7,22 @@
 #include "configuration/constants.h"
 #include "reporting/logger.h"
 
-PipelineEvaluator::PipelineEvaluator(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config) {
+PipelineEvaluator::PipelineEvaluator(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config,
+                                     bool batch_worker, bool compute_worker, bool batch_worker_needs_remote, bool compute_worker_needs_remote) {
     dataloader_ = dataloader;
 
     if (model->device_.is_cuda()) {
-        pipeline_ = std::make_shared<PipelineGPU>(dataloader, model, false, nullptr, pipeline_config);
+        pipeline_ = std::make_shared<PipelineGPU>(dataloader, model, false, nullptr, pipeline_config, false,
+                                                  batch_worker, compute_worker, batch_worker_needs_remote, compute_worker_needs_remote);
     } else {
         pipeline_ = std::make_shared<PipelineCPU>(dataloader, model, false, nullptr, pipeline_config);
     }
 
-    pipeline_->initialize();
+//    pipeline_->initialize();
 }
 
 void PipelineEvaluator::evaluate(bool validation) {
-    if (!dataloader_->single_dataset_) {
+    if (!dataloader_->single_dataset_ and dataloader_->batch_worker_) {
         if (validation) {
             SPDLOG_INFO("Evaluating validation set");
             dataloader_->setValidationSet();
@@ -28,23 +30,33 @@ void PipelineEvaluator::evaluate(bool validation) {
             SPDLOG_INFO("Evaluating test set");
             dataloader_->setTestSet();
         }
+    } else {
+        dataloader_->train_ = false;
     }
 
-    dataloader_->initializeBatches(false);
+    if (dataloader_->batch_worker_) {
+        dataloader_->initializeBatches(false);
+    }
 
-    if (dataloader_->evaluation_negative_sampler_ != nullptr) {
+    if (dataloader_->evaluation_negative_sampler_ != nullptr and dataloader_->batch_worker_) {
         if (dataloader_->evaluation_config_->negative_sampling->filtered) {
             dataloader_->graph_storage_->sortAllEdges();
         }
     }
+
+    pipeline_->model_->distPrepareForTraining(true);
 
     Timer timer = Timer(false);
     timer.start();
     pipeline_->start();
     pipeline_->waitComplete();
     pipeline_->pauseAndFlush();
-    pipeline_->model_->reporter_->report();
     timer.stop();
+
+    pipeline_->model_->distNotifyCompleteAndWait(true);
+
+    if (dataloader_->batch_worker_)
+        pipeline_->model_->reporter_->report();
 
     int64_t epoch_time = timer.getDuration();
     SPDLOG_INFO("Evaluation complete: {}ms", epoch_time);
@@ -56,6 +68,10 @@ SynchronousEvaluator::SynchronousEvaluator(shared_ptr<DataLoader> dataloader, sh
 }
 
 void SynchronousEvaluator::evaluate(bool validation) {
+    //TODO: evaluate on batch construction worker 0 only?
+    // treat similar to train, if a batch construction worker isn't doing eval, then it can just signal to it's
+    // gpus that it's done and then wait for eval to finish
+
     if (!dataloader_->single_dataset_) {
         if (validation) {
             SPDLOG_INFO("Evaluating validation set");

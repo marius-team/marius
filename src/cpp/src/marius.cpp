@@ -96,7 +96,8 @@ shared_ptr<c10d::ProcessGroupGloo> distributed_init(string coord_address, int wo
 
 }
 
-std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoader>> marius_init(shared_ptr<MariusConfig> marius_config, bool train) {
+std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoader>> marius_init(shared_ptr<MariusConfig> marius_config, bool train,
+                                                                                                 bool batch_worker, bool compute_worker) {
     Timer initialization_timer = Timer(false);
     initialization_timer.start();
     SPDLOG_INFO("Start initialization");
@@ -114,7 +115,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     shared_ptr<GraphModelStorage> graph_model_storage;
 
     int epochs_processed = 0;
-    int num_partitions = 1; // TODO: move this to part of storage->dataset, can be set automatically during preprocessing
+    int num_partitions = 1;
     if (marius_config->storage->embeddings != nullptr) {
         if (marius_config->storage->embeddings->type == StorageBackend::PARTITION_BUFFER) {
             num_partitions = std::dynamic_pointer_cast<PartitionBufferOptions>(marius_config->storage->embeddings->options)->num_partitions;
@@ -124,12 +125,13 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
             num_partitions = std::dynamic_pointer_cast<PartitionBufferOptions>(marius_config->storage->features->options)->num_partitions;
         }
     }
+    // TODO: move the num partitions to storage->dataset, where it can be set automatically during preprocessing
 
     if (train) {
         // initialize new model
         if (!marius_config->training->resume_training && marius_config->training->resume_from_checkpoint.empty()) {
-            model = initModelFromConfig(marius_config->model, devices, marius_config->storage->dataset->num_relations, num_partitions, true);
-            graph_model_storage = initializeStorage(model, marius_config->storage, !marius_config->training->resume_training, true);
+            model = initModelFromConfig(marius_config->model, devices, marius_config->storage->dataset->num_relations, num_partitions, true, compute_worker);
+            graph_model_storage = initializeStorage(model, marius_config->storage, !marius_config->training->resume_training, true, nullptr, batch_worker);
         } else {
             auto checkpoint_loader = std::make_shared<Checkpointer>();
 
@@ -160,9 +162,10 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
         epochs_processed = checkpoint_meta.num_epochs;
     }
 
-    shared_ptr<DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage, model->learning_task_, model->has_partition_embeddings(),
-                                                                     marius_config->training, marius_config->evaluation, marius_config->model->encoder);
-
+    shared_ptr <DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage, model->learning_task_,
+                                                                      model->has_partition_embeddings(),
+                                                                      marius_config->training, marius_config->evaluation,
+                                                                      marius_config->model->encoder, batch_worker);
     dataloader->epochs_processed_ = epochs_processed;
 
     initialization_timer.stop();
@@ -173,14 +176,61 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     return std::forward_as_tuple(model, graph_model_storage, dataloader);
 }
 
-void marius_train(shared_ptr<MariusConfig> marius_config, shared_ptr<c10d::ProcessGroupGloo> pg_gloo) {
-    auto tup = marius_init(marius_config, true);
+void marius_train(shared_ptr<MariusConfig> marius_config, shared_ptr<ProcessGroupState> pg_gloo) {
+    int ii = 0;
+    bool batch_worker = false;
+    bool compute_worker = false;
+    bool compute_worker_needs_remote = false;
+    bool batch_worker_needs_remote = false;
+
+    if (pg_gloo != nullptr) {
+        for (auto worker_config: marius_config->distributed->workers) {
+
+            if (ii == pg_gloo->pg->getRank()) {
+                if (worker_config->type == WorkerType::BATCH) {
+                    batch_worker = true;
+                    if (std::dynamic_pointer_cast<BatchWorkerOptions>(worker_config->options)->also_compute == true) {
+                        compute_worker = true;
+                    }
+                }
+                if (worker_config->type == WorkerType::COMPUTE) {
+                    compute_worker = true;
+                }
+
+                if (batch_worker) SPDLOG_INFO("Operating as a batch construction worker");
+                if (compute_worker) SPDLOG_INFO("Operating as a compute worker");
+            }
+
+            if (worker_config->type == WorkerType::BATCH) {
+                vector<int> children = std::dynamic_pointer_cast<BatchWorkerOptions>(worker_config->options)->children;
+                for (auto c: children) {
+                    if (ii == pg_gloo->pg->getRank() and c != ii) {
+                        batch_worker_needs_remote = true;
+                        SPDLOG_INFO("Batch worker has remote child");
+                    }
+                    if (c == pg_gloo->pg->getRank() and c != ii) {
+                        compute_worker_needs_remote = true;
+                        SPDLOG_INFO("Compute worker has remote parent");
+                    }
+                }
+            }
+
+            ii++;
+        }
+    } else {
+        batch_worker = true;
+        compute_worker = true;
+    }
+
+    auto tup = marius_init(marius_config, true, batch_worker, compute_worker);
     auto model = std::get<0>(tup);
     auto graph_model_storage = std::get<1>(tup);
     auto dataloader = std::get<2>(tup);
 
     if (pg_gloo != nullptr) {
-        dataloader->setDistPG(pg_gloo, marius_config->distributed);
+        model->setDistPG(pg_gloo, marius_config->distributed);
+        if (dataloader != nullptr)
+            dataloader->setDistPG(pg_gloo, marius_config->distributed);
     }
 
     shared_ptr<Trainer> trainer;
@@ -197,15 +247,23 @@ void marius_train(shared_ptr<MariusConfig> marius_config, shared_ptr<c10d::Proce
     }
 
     if (marius_config->training->pipeline->sync) {
+        if ((compute_worker and compute_worker_needs_remote) or (batch_worker and batch_worker_needs_remote))
+            throw MariusRuntimeException("Synchronous training not supported for when using distributed batch construction workers.");
+
         trainer = std::make_shared<SynchronousTrainer>(dataloader, model, marius_config->training->logs_per_epoch);
     } else {
-        trainer = std::make_shared<PipelineTrainer>(dataloader, model, marius_config->training->pipeline, marius_config->training->logs_per_epoch);
+        trainer = std::make_shared<PipelineTrainer>(dataloader, model, marius_config->training->pipeline, marius_config->training->logs_per_epoch,
+                                                    batch_worker, compute_worker, batch_worker_needs_remote, compute_worker_needs_remote);
     }
 
     if (marius_config->evaluation->pipeline->sync) {
+        if ((compute_worker and compute_worker_needs_remote) or (batch_worker and batch_worker_needs_remote))
+            throw MariusRuntimeException("Synchronous evaluator not supported for when using distributed batch construction workers.");
+
         evaluator = std::make_shared<SynchronousEvaluator>(dataloader, model);
     } else {
-        evaluator = std::make_shared<PipelineEvaluator>(dataloader, model, marius_config->evaluation->pipeline);
+        evaluator = std::make_shared<PipelineEvaluator>(dataloader, model, marius_config->evaluation->pipeline,
+                                                        batch_worker, compute_worker, batch_worker_needs_remote, compute_worker_needs_remote);
     }
 
     int checkpoint_interval = marius_config->training->checkpoint->interval;
@@ -235,6 +293,8 @@ void marius_train(shared_ptr<MariusConfig> marius_config, shared_ptr<c10d::Proce
             encode_and_export(dataloader, model, marius_config);
         }
     }
+
+    exit(0);
 }
 
 void marius_eval(shared_ptr<MariusConfig> marius_config) {
@@ -270,7 +330,7 @@ void marius(int argc, char *argv[]) {
         train = false;
     }
 
-    shared_ptr<c10d::ProcessGroupGloo> pg_gloo = nullptr;
+    shared_ptr<ProcessGroupState> pg_gloo = nullptr;
     if (argc > 2) {
         SPDLOG_INFO("Distributed training detected.");
 
@@ -279,7 +339,10 @@ void marius(int argc, char *argv[]) {
         int rank = std::atoi(argv[4]);
         string address = string(argv[5]);
 
-        pg_gloo = distributed_init(coord_address, world_size, rank, address);
+        auto pg = distributed_init(coord_address, world_size, rank, address);
+        pg_gloo = std::make_shared<ProcessGroupState>();
+        pg_gloo->pg = pg;
+        pg_gloo->address = address;
     }
 
     shared_ptr<MariusConfig> marius_config = loadConfig(config_path, true);

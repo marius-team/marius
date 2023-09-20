@@ -42,6 +42,34 @@ class BatchToHostWorker : public Worker {
     void run() override;
 };
 
+class RemoteLoadWorker : public Worker {
+public:
+    RemoteLoadWorker(Pipeline *pipeline) : Worker{pipeline} {};
+
+    void run() override;
+};
+
+class RemoteToDeviceWorker : public Worker {
+public:
+    RemoteToDeviceWorker(Pipeline *pipeline) : Worker{pipeline} {};
+
+    void run() override;
+};
+
+class RemoteToHostWorker : public Worker {
+public:
+    RemoteToHostWorker(Pipeline *pipeline) : Worker{pipeline} {};
+
+    void run() override;
+};
+
+class RemoteListenForUpdatesWorker : public Worker {
+public:
+    RemoteListenForUpdatesWorker(Pipeline *pipeline) : Worker{pipeline} {};
+
+    void run() override;
+};
+
 class PipelineGPU : public Pipeline {
    public:
     vector<shared_ptr<Worker>> pool_[GPU_NUM_WORKER_TYPES];
@@ -56,7 +84,8 @@ class PipelineGPU : public Pipeline {
     int gpu_sync_interval_;
 
     PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, bool train, shared_ptr<ProgressReporter> reporter,
-                shared_ptr<PipelineConfig> pipeline_config, bool encode_only = false);
+                shared_ptr<PipelineConfig> pipeline_config, bool encode_only = false,
+                bool batch_worker = true, bool compute_worker = true, bool batch_worker_needs_remote = false, bool compute_worker_needs_remote = false);
 
     ~PipelineGPU();
 

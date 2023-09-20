@@ -8,7 +8,8 @@
 #include "data/ordering.h"
 
 DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, bool use_partition_embeddings,
-                       shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config) {
+                       shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config,
+                       bool batch_worker) {
     current_edge_ = 0;
     train_ = true;
     epochs_processed_ = 0;
@@ -27,49 +28,54 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
     only_root_features_ = false;
 
     use_partition_embeddings_ = use_partition_embeddings;
+    batch_worker_ = batch_worker;
 
-    edge_sampler_ = std::make_shared<RandomEdgeSampler>(graph_storage_);
+    if (!batch_worker) {
 
-    if (learning_task_ == LearningTask::LINK_PREDICTION) {
-        training_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(
-            training_config_->negative_sampling->num_chunks, training_config_->negative_sampling->negatives_per_positive,
-            training_config_->negative_sampling->degree_fraction, training_config_->negative_sampling->filtered,
-            training_config_->negative_sampling->local_filter_mode);
-
-        evaluation_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(
-            evaluation_config_->negative_sampling->num_chunks, evaluation_config_->negative_sampling->negatives_per_positive,
-            evaluation_config_->negative_sampling->degree_fraction, evaluation_config_->negative_sampling->filtered,
-            evaluation_config_->negative_sampling->local_filter_mode);
     } else {
-        training_negative_sampler_ = nullptr;
-        evaluation_negative_sampler_ = nullptr;
-    }
+        edge_sampler_ = std::make_shared<RandomEdgeSampler>(graph_storage_);
 
-    if (encoder_config != nullptr) {
-        if (!encoder_config->train_neighbor_sampling.empty()) {
-            training_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->train_neighbor_sampling,
-                                                                                  encoder_config->use_incoming_nbrs, encoder_config->use_outgoing_nbrs);
+        if (learning_task_ == LearningTask::LINK_PREDICTION) {
+            training_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(
+                training_config_->negative_sampling->num_chunks, training_config_->negative_sampling->negatives_per_positive,
+                training_config_->negative_sampling->degree_fraction, training_config_->negative_sampling->filtered,
+                training_config_->negative_sampling->local_filter_mode);
 
-            if (!encoder_config->eval_neighbor_sampling.empty()) {
-                evaluation_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->eval_neighbor_sampling,
-                                                                                        encoder_config->use_incoming_nbrs, encoder_config->use_incoming_nbrs);
+            evaluation_negative_sampler_ = std::make_shared<CorruptNodeNegativeSampler>(
+                evaluation_config_->negative_sampling->num_chunks, evaluation_config_->negative_sampling->negatives_per_positive,
+                evaluation_config_->negative_sampling->degree_fraction, evaluation_config_->negative_sampling->filtered,
+                evaluation_config_->negative_sampling->local_filter_mode);
+        } else {
+            training_negative_sampler_ = nullptr;
+            evaluation_negative_sampler_ = nullptr;
+        }
+
+        if (encoder_config != nullptr) {
+            if (!encoder_config->train_neighbor_sampling.empty()) {
+                training_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->train_neighbor_sampling,
+                                                                                      encoder_config->use_incoming_nbrs, encoder_config->use_outgoing_nbrs);
+
+                if (!encoder_config->eval_neighbor_sampling.empty()) {
+                    evaluation_neighbor_sampler_ = std::make_shared<LayeredNeighborSampler>(graph_storage_, encoder_config->eval_neighbor_sampling,
+                                                                                            encoder_config->use_incoming_nbrs, encoder_config->use_incoming_nbrs);
+                } else {
+                    evaluation_neighbor_sampler_ = training_neighbor_sampler_;
+                }
+
             } else {
-                evaluation_neighbor_sampler_ = training_neighbor_sampler_;
+                training_neighbor_sampler_ = nullptr;
+                evaluation_neighbor_sampler_ = nullptr;
             }
-
         } else {
             training_neighbor_sampler_ = nullptr;
             evaluation_neighbor_sampler_ = nullptr;
         }
-    } else {
-        training_neighbor_sampler_ = nullptr;
-        evaluation_neighbor_sampler_ = nullptr;
     }
 
     compute_streams_ = {nullptr, nullptr}; //TODO: general multi-gpu
     pg_gloo_ = nullptr;
     dist_config_ = nullptr;
-    dist_ = false;
+//    dist_ = false;
 }
 
 DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler,
@@ -276,6 +282,9 @@ void DataLoader::setBufferOrdering() {
             edge_buckets_per_buffer_iterator_ = edge_buckets_per_buffer_.begin();
 
             graph_storage_->setBufferOrdering(buffer_states_, edge_buckets_per_buffer_iterator_);
+
+            // TODO: calculate num examples here (and likewise for below),
+            //  progress reporter would need to be updated each epoch based on this in the trainer
         }
     } else {
         if (graph_storage_->useInMemorySubGraph()) {

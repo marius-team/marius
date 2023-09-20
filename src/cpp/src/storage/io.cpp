@@ -297,7 +297,7 @@ shared_ptr<Storage> initializeRelationFeatures(shared_ptr<Model> model, shared_p
     int64_t num_relations = storage_config->dataset->num_relations;
     int64_t rel_feature_dim = storage_config->dataset->rel_feature_dim;
 
-    if (rel_feature_dim == -1 || num_relations == -1 || model->decoder_ == nullptr) {
+    if (rel_feature_dim == -1 || num_relations == -1 || model->decoder_ == nullptr) { // TODO: decoder_ will always be null for bc worker
         return nullptr;
     }
 
@@ -376,12 +376,18 @@ shared_ptr<Storage> initializeNodeLabels(shared_ptr<Model> model, shared_ptr<Sto
 }
 
 shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
-                                                              shared_ptr<InitConfig> init_config) {
+                                                              shared_ptr<InitConfig> init_config, bool batch_worker) {
+
+    GraphModelStoragePtrs storage_ptrs = {};
+
+    if (!batch_worker) {
+        shared_ptr<GraphModelStorage> graph_model_storage = std::make_shared<GraphModelStorage>(storage_ptrs, storage_config, batch_worker);
+        return graph_model_storage;
+    }
+
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages =
         initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
-
-    GraphModelStoragePtrs storage_ptrs = {};
 
     storage_ptrs.train_edges = std::get<0>(edge_storages);
     storage_ptrs.train_edges_dst_sort = std::get<1>(edge_storages);
@@ -394,20 +400,25 @@ shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> 
 
     storage_ptrs.relation_features = initializeRelationFeatures(model, storage_config);
 
-    shared_ptr<GraphModelStorage> graph_model_storage = std::make_shared<GraphModelStorage>(storage_ptrs, storage_config);
+    shared_ptr<GraphModelStorage> graph_model_storage = std::make_shared<GraphModelStorage>(storage_ptrs, storage_config, batch_worker);
 
     return graph_model_storage;
 }
 
 shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize,
-                                                                  bool train, shared_ptr<InitConfig> init_config) {
+                                                                  bool train, shared_ptr<InitConfig> init_config, bool batch_worker) {
+    GraphModelStoragePtrs storage_ptrs = {};
+
+    if (!batch_worker) {
+        shared_ptr<GraphModelStorage> graph_model_storage = std::make_shared<GraphModelStorage>(storage_ptrs, storage_config, batch_worker);
+        return graph_model_storage;
+    }
+
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> edge_storages =
         initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> node_id_storages = initializeNodeIds(storage_config);
     shared_ptr<Storage> node_features = initializeNodeFeatures(model, storage_config);
     shared_ptr<Storage> node_labels = initializeNodeLabels(model, storage_config);
-
-    GraphModelStoragePtrs storage_ptrs = {};
 
     storage_ptrs.train_edges = std::get<0>(edge_storages);
     storage_ptrs.train_edges_dst_sort = std::get<1>(edge_storages);
@@ -425,22 +436,22 @@ shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Mod
     storage_ptrs.node_embeddings = std::get<0>(node_embeddings);
     storage_ptrs.node_optimizer_state = std::get<1>(node_embeddings);
 
-    shared_ptr<GraphModelStorage> graph_model_storage = std::make_shared<GraphModelStorage>(storage_ptrs, storage_config);
+    shared_ptr<GraphModelStorage> graph_model_storage = std::make_shared<GraphModelStorage>(storage_ptrs, storage_config, batch_worker);
 
     return graph_model_storage;
 }
 
 shared_ptr<GraphModelStorage> initializeStorage(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
-                                                shared_ptr<InitConfig> init_config) {
+                                                shared_ptr<InitConfig> init_config, bool batch_worker) {
     if (init_config == nullptr) {
         init_config = std::make_shared<InitConfig>();
         init_config->type = InitDistribution::GLOROT_UNIFORM;
     }
 
     if (model->learning_task_ == LearningTask::LINK_PREDICTION) {
-        return initializeStorageLinkPrediction(model, storage_config, reinitialize, train, init_config);
+        return initializeStorageLinkPrediction(model, storage_config, reinitialize, train, init_config, batch_worker);
     } else if (model->learning_task_ == LearningTask::NODE_CLASSIFICATION) {
-        return initializeStorageNodeClassification(model, storage_config, reinitialize, train, init_config);
+        return initializeStorageNodeClassification(model, storage_config, reinitialize, train, init_config, batch_worker);
     } else {
         SPDLOG_ERROR("Unsupported Learning Task");
         throw std::runtime_error("");

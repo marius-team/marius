@@ -76,7 +76,7 @@ class GraphModelStorage {
 
     int num_gpus_;
 
-    GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_ptr<StorageConfig> storage_config);
+    GraphModelStorage(GraphModelStoragePtrs storage_ptrs, shared_ptr<StorageConfig> storage_config, bool batch_worker = true);
 
     GraphModelStorage(GraphModelStoragePtrs storage_ptrs, bool prefetch = false);
 

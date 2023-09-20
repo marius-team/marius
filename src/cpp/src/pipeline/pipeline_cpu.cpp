@@ -103,7 +103,13 @@ PipelineCPU::~PipelineCPU() {
     }
 }
 
-bool Pipeline::isDone() { return (batches_in_flight_ <= 0) && dataloader_->epochComplete(); }
+bool Pipeline::isDone() {
+    if (compute_worker_ and compute_worker_needs_remote_) {
+        return model_->epoch_complete_;
+    } else {
+        return (batches_in_flight_ <= 0) && dataloader_->epochComplete();
+    }
+}
 
 bool Pipeline::isTrain() { return train_; }
 

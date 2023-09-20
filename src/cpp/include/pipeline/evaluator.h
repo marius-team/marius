@@ -31,7 +31,8 @@ class PipelineEvaluator : public Evaluator {
     shared_ptr<Pipeline> pipeline_;
 
    public:
-    PipelineEvaluator(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config);
+    PipelineEvaluator(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config,
+                      bool batch_worker = true, bool compute_worker = true, bool batch_worker_needs_remote = false, bool compute_worker_needs_remote = false);
 
     void evaluate(bool validation) override;
 };

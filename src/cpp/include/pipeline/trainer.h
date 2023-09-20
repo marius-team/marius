@@ -29,7 +29,8 @@ class PipelineTrainer : public Trainer {
     shared_ptr<Pipeline> pipeline_;
 
    public:
-    PipelineTrainer(shared_ptr<DataLoader> dataloader, std::shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config, int logs_per_epoch = 10);
+    PipelineTrainer(shared_ptr<DataLoader> dataloader, std::shared_ptr<Model> model, shared_ptr<PipelineConfig> pipeline_config, int logs_per_epoch = 10,
+                    bool batch_worker = true, bool compute_worker = true, bool batch_worker_needs_remote = false, bool compute_worker_needs_remote = false);
 
     void train(int num_epochs = 1) override;
 };

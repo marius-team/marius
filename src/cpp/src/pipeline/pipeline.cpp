@@ -150,6 +150,16 @@ shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id, int w
         worker = std::make_shared<WriteNodesWorker>(this);
     }
 
+    else if (worker_type == REMOTE_LOADER_ID) {
+        worker = std::make_shared<RemoteLoadWorker>(this);
+    } else if (worker_type == REMOTE_TO_DEVICE_ID) {
+        worker = std::make_shared<RemoteToDeviceWorker>(this);
+    } else if (worker_type == REMOTE_TO_HOST_ID) {
+        worker = std::make_shared<RemoteToHostWorker>(this);
+    } else if (worker_type == REMOTE_LISTEN_FOR_UPDATES_ID) {
+        worker = std::make_shared<RemoteListenForUpdatesWorker>(this);
+    }
+
     worker->spawn();
     return worker;
 }

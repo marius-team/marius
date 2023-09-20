@@ -96,6 +96,22 @@ class Pipeline {
 
     int64_t curr_pos_;
 
+    bool batch_worker_;
+    bool compute_worker_;
+    bool batch_worker_needs_remote_;
+    bool compute_worker_needs_remote_;
+
+    int64_t fwd_round_robin_child_;
+    int64_t fwd_round_robin_parent_;
+    int64_t bwd_round_robin_child_;
+//    int64_t bwd_round_robin_parent_;
+    vector<int> fwd_children_tags_;
+    vector<int> fwd_parent_tags_;
+    vector<int> bwd_children_tags_;
+    vector<int> bwd_parent_tags_;
+    std::mutex *fwd_tag_lock_;
+    std::mutex *bwd_tag_lock_;
+
     ~Pipeline();
 
     shared_ptr<Worker> initWorkerOfType(int worker_type, int gpu_id = 0, int worker_id = 0);

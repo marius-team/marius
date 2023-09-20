@@ -19,6 +19,7 @@ struct WorkerConfig {
 };
 
 struct DistributedConfig {
+    DistributedModelSync model_sync;
     std::vector<shared_ptr<WorkerConfig>> workers;
 };
 

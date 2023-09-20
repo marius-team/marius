@@ -2,10 +2,116 @@
 // Created by Jason Mohoney on 1/21/22.
 //
 
+#include "pipeline/pipeline_cpu.h"
 #include "pipeline/pipeline_gpu.h"
 
 #include "pipeline/queue.h"
 #include "reporting/logger.h"
+
+void batchToDevice(Pipeline* pipeline_, shared_ptr<Batch> batch) {
+    if (batch->sub_batches_.size() > 0) {
+        #pragma omp parallel for
+        for (int i = 0; i < batch->sub_batches_.size(); i++) {
+            batch->sub_batches_[i]->to(pipeline_->model_->device_models_[i]->device_, pipeline_->dataloader_->compute_streams_[i]);
+        }
+    } else {
+        batch->to(pipeline_->model_->device_models_[0]->device_, pipeline_->dataloader_->compute_streams_[0]);
+    }
+
+    ((PipelineGPU *)pipeline_)->device_loaded_batches_[0]->blocking_push(batch);
+
+//  std::cout<<"to: "<<pipeline_->model_->device_models_[i]->device_<<"\n";
+//  ((PipelineGPU *)pipeline_)->device_loaded_batches_[i]->blocking_push(batch->sub_batches_[i]);
+}
+
+void updateEvalForBatch(Pipeline* pipeline_, shared_ptr<Batch> batch) {
+    if (batch->neg_scores_.defined()) {
+        std::dynamic_pointer_cast<LinkPredictionReporter>(pipeline_->model_->reporter_)->addResult(batch->pos_scores_, batch->neg_scores_);
+    }
+    if (batch->inv_neg_scores_.defined()) {
+        std::dynamic_pointer_cast<LinkPredictionReporter>(pipeline_->model_->reporter_)->addResult(batch->inv_pos_scores_, batch->inv_neg_scores_);
+    }
+    if (batch->y_pred_.defined()) {
+        std::dynamic_pointer_cast<NodeClassificationReporter>(pipeline_->model_->reporter_)->addResult(batch->node_labels_, batch->y_pred_);
+    }
+
+    pipeline_->batches_in_flight_--;
+    pipeline_->max_batches_cv_->notify_one();
+    pipeline_->dataloader_->finishedBatch();
+    batch->clear();
+}
+
+void RemoteLoadWorker::run() {
+    while (!done_) {
+        while (!paused_) {
+            // NOTE: this "train" is probably not set correctly all the time
+            shared_ptr<Batch> batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
+
+            std::unique_lock lock(*pipeline_->fwd_tag_lock_);
+            int parent_id = pipeline_->fwd_round_robin_parent_ % pipeline_->model_->parents_.size();
+            int parent = pipeline_->model_->parents_[parent_id];
+            int tag = pipeline_->fwd_parent_tags_[parent_id];
+            pipeline_->fwd_parent_tags_[parent_id]++;
+            pipeline_->fwd_round_robin_parent_++;
+            lock.unlock();
+
+            if (parent == pipeline_->model_->pg_gloo_->pg->getRank()) { // parent is self
+                // if the parent is self, then we don't need to receive batches. The batch loader workers will already
+                // be putting batches on the loaded_batches_ queue
+                continue;
+            }
+
+            if (pipeline_->model_->device_models_.size() > 1 and pipeline_->isTrain()) {
+                std::vector <shared_ptr<Batch>> sub_batches;
+                for (int i = 0; i < pipeline_->model_->device_models_.size(); i++) {
+                    shared_ptr<Batch> sub_batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
+                    sub_batches.emplace_back(sub_batch);
+                }
+                batch->sub_batches_ = sub_batches;
+            }
+
+            batch->remoteReceive(pipeline_->model_->pg_gloo_->pg, parent, tag);
+
+            if (pipeline_->model_->device_.is_cuda()) {
+                ((PipelineGPU *)pipeline_)->loaded_batches_->blocking_push(batch);
+            } else {
+                ((PipelineCPU *)pipeline_)->loaded_batches_->blocking_push(batch);
+            }
+        }
+        nanosleep(&sleep_time_, NULL);
+    }
+}
+
+void RemoteToDeviceWorker::run() {
+    while (!done_) {
+        while (!paused_) {
+            auto tup = ((PipelineGPU *)pipeline_)->loaded_batches_->blocking_pop();
+            bool popped = std::get<0>(tup);
+            shared_ptr<Batch> batch = std::get<1>(tup);
+            if (!popped) {
+                break;
+            }
+
+            std::unique_lock lock(*pipeline_->fwd_tag_lock_);
+            int child_id = pipeline_->fwd_round_robin_child_ % pipeline_->model_->children_.size();
+            int child = pipeline_->model_->children_[child_id];
+            int tag = pipeline_->fwd_children_tags_[child_id];
+            pipeline_->fwd_children_tags_[child_id]++;
+            pipeline_->fwd_round_robin_child_++;
+            lock.unlock();
+
+            if (child == pipeline_->model_->pg_gloo_->pg->getRank()) { // child is self
+                // need to call regular to device here
+                batchToDevice(pipeline_, batch);
+                continue;
+            }
+
+            batch->creator_id_ = pipeline_->model_->pg_gloo_->pg->getRank();
+            batch->remoteTo(pipeline_->model_->pg_gloo_->pg, child, tag);
+        }
+        nanosleep(&sleep_time_, NULL);
+    }
+}
 
 void BatchToDeviceWorker::run() {
     unsigned int rand_seed = rand();
@@ -21,55 +127,15 @@ void BatchToDeviceWorker::run() {
                 break;
             }
 
-            if (batch->sub_batches_.size() > 0) {
-                #pragma omp parallel for
-                for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                    batch->sub_batches_[i]->to(pipeline_->model_->device_models_[i]->device_, pipeline_->dataloader_->compute_streams_[i]);
-//                    std::cout<<"to: "<<pipeline_->model_->device_models_[i]->device_<<"\n";
-//                    ((PipelineGPU *)pipeline_)->device_loaded_batches_[i]->blocking_push(batch->sub_batches_[i]);
-                }
-            } else {
-                batch->to(pipeline_->model_->device_models_[0]->device_, pipeline_->dataloader_->compute_streams_[0]);
-            }
-
-            ((PipelineGPU *)pipeline_)->device_loaded_batches_[0]->blocking_push(batch);
-
+            batchToDevice(pipeline_, batch);
         }
         nanosleep(&sleep_time_, NULL);
     }
 }
 
 void ComputeWorkerGPU::run() {
-//    at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
-//    if (pipeline_->dataloader_->learning_task_ == LearningTask::NODE_CLASSIFICATION) {
-//        pipeline_->dataloader_->compute_streams_[0] = &compute_stream;
-//    }
-//    //TODO: streams for LP need a bit more work
-
-
-
-//    std::cout<<"start: "<<gpu_id_<<"\n";
     CudaStream compute_stream = getStreamFromPool(true, gpu_id_);
     pipeline_->dataloader_->compute_streams_[gpu_id_] = &compute_stream;
-
-
-
-//    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
-//    std::cout<<compute_stream<<"\n";
-//    at::cuda::setCurrentCUDAStream(compute_stream);
-
-//    {
-//        at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, 0);
-//        pipeline_->dataloader_->compute_streams_[0] = &compute_stream;
-//    }
-//
-//    for (int i = 0; i < 2; i++) {
-//        at::cuda::CUDAStream compute_stream = at::cuda::getStreamFromPool(true, i);
-//        pipeline_->dataloader_->compute_streams_[i] = &compute_stream;
-//    }
-
-
-
 
     while (!done_) {
         while (!paused_) {
@@ -80,56 +146,13 @@ void ComputeWorkerGPU::run() {
                 break;
             }
 
-//            t.start();
-            pipeline_->dataloader_->loadGPUParameters(batch); // TODO for sub_batches
-//            t.stop();
-//            std::cout<<"load: "<<t.getDuration()<<"\n";
-//            std::cout<<"load\n";
+            pipeline_->dataloader_->loadGPUParameters(batch); // TODO: this needs to be updated for multi-gpu (sub_batches)
 
             if (pipeline_->isTrain()) {
-                bool will_sync = false;
-//                if (pipeline_->model_->device_models_.size() > 1) {
-//                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->lock();
-//                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_++;
-//
-//                    if (((PipelineGPU *)pipeline_)->batches_since_last_sync_ == ((PipelineGPU *)pipeline_)->gpu_sync_interval_) {
-//                        will_sync = true;
-//                    }
-//
-//                    // only release the lock if we don't need to synchronize the GPUs
-//                    if (!will_sync) {
-//                        ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
-//                    }
-//                }
-
-//                if (pipeline_->dataloader_->compute_streams_[0] != nullptr) {
-//                    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
-//                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *) pipeline_)->pipeline_options_->gpu_model_average);
-//                } else {
-//                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, ((PipelineGPU *) pipeline_)->pipeline_options_->gpu_model_average);
-//                }
-
-
-
-
+                // train batch
                 if (batch->sub_batches_.size() > 0) {
                     int i = gpu_id_;
-//                    std::cout<<gpu_id_<<"\n";
-//                    std::cout<<"on: "<<batch->node_features_.device()<<"\n";
-//                    at::cuda::CUDAStreamGuard stream_guard(compute_stream);
-//                    at::cuda::CUDAStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[gpu_id_]));
-//                    pipeline_->model_->device_models_[1].get()->train_batch(batch->sub_batches_[1], true);
 
-
-//                    t.start();
-//                    at::cuda::CUDAMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
-//                                                                *(pipeline_->dataloader_->compute_streams_[1])});
-//                    std::cout<<"guard\n";
-//                    t.stop();
-//                    std::cout<<"stream guard: "<<t.getDuration()<<"\n";
-//                    pipeline_->model_->clear_grad_all();
-
-//                    t.start();
                     #pragma omp parallel
                     {
                         #pragma omp for
@@ -137,87 +160,71 @@ void ComputeWorkerGPU::run() {
                             CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
                             pipeline_->model_->device_models_[i]->clear_grad();
                             pipeline_->model_->device_models_[i]->train_batch(batch->sub_batches_[i], false);
-
-//                            pipeline_->model_->device_models_[i]->step();
-//                            pipeline_->model_->device_models_[i]->train_batch(batch, true);
-//                            std::cout<<"train_batch: "<<i<<"\n";
                         }
-
 
                         #pragma omp single
                         {
-//                            at::cuda::setCurrentCUDAStream(*(pipeline_->dataloader_->compute_streams_[0]);
-//                            at::cuda::setCurrentCUDAStream(*(pipeline_->dataloader_->compute_streams_[1]));
                             CudaMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
                                                               *(pipeline_->dataloader_->compute_streams_[1])}); // TODO: general multi-gpu
-//                            std::vector<at::cuda::CUDAStream *> streams = {pipeline_->dataloader_->compute_streams_[0],
-//                                                                           pipeline_->dataloader_->compute_streams_[1]};
-//                            pipeline_->model_->all_reduce(streams);
-
                             pipeline_->model_->all_reduce();
-////                            std::cout<<"all reduce\n";
+                            // TODO: distributed grad sync here
                         }
 
                         #pragma omp for
                         for (int i = 0; i < batch->sub_batches_.size(); i++) {
                             CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
                             pipeline_->model_->device_models_[i]->step();
-//                            std::cout<<"step: "<<i<<"\n";
+                        }
+
+                        #pragma omp single
+                        {
+                            // TODO: should this be on this stream?
+                            CudaMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
+                                                              *(pipeline_->dataloader_->compute_streams_[1])}); // TODO: general multi-gpu
+                            pipeline_->model_->distModelSync();
                         }
                     }
 
-//                    t.stop();
-//                    std::cout<<"train_batch: "<<t.getDuration()<<"\n";
-
-//                    t.start();
-//                    pipeline_->model_->all_reduce();
-//                    t.stop();
-//                    std::cout<<"all_reduce: "<<t.getDuration()<<"\n";
-
-//                    t.start();
-//                    pipeline_->model_->step_all();
-//                    t.stop();
-//                    std::cout<<"step: "<<t.getDuration()<<"\n";
-
-
                 } else {
                     CudaStreamGuard stream_guard(compute_stream);
-                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch, true);
+                    pipeline_->model_->device_models_[gpu_id_].get()->train_batch(batch);
                 }
 
-
-
-
-
-
-
-//                if (will_sync) {
-//                    // we already have the lock acquired, it is safe to sync?
-//                    pipeline_->model_->all_reduce();
-//
-//                    ((PipelineGPU *)pipeline_)->batches_since_last_sync_ = 0;
-//                    ((PipelineGPU *)pipeline_)->gpu_sync_lock_->unlock();
-//                }
-
-//                t.start();
                 if (!pipeline_->has_embeddings()) {
+                    // training: node classification
                     batch->clear();
-                    pipeline_->reporter_->addResult(batch->batch_size_, batch->getLoss(pipeline_->model_->model_config_->loss->options->loss_reduction));
-                    pipeline_->batches_in_flight_--;
-                    pipeline_->dataloader_->finishedBatch();
-                    pipeline_->max_batches_cv_->notify_one();
-                    pipeline_->edges_processed_ += batch->batch_size_;
+
+                    if (pipeline_->compute_worker_needs_remote_) {
+                        ((PipelineGPU *)pipeline_)->update_batches_->blocking_push(batch);
+                    } else {
+                        pipeline_->reporter_->addResult(batch->batch_size_, batch->getLoss(pipeline_->model_->model_config_->loss->options->loss_reduction));
+                        pipeline_->batches_in_flight_--;
+                        pipeline_->dataloader_->finishedBatch();
+                        pipeline_->max_batches_cv_->notify_one();
+                        pipeline_->edges_processed_ += batch->batch_size_;
+                    }
                 } else {
-                    pipeline_->dataloader_->updateEmbeddings(batch, true); // TODO: multi gpu with embeddings on device probably doesn't work
+                    // training: link prediction
+                    if (pipeline_->dataloader_->batch_worker_) {
+                        pipeline_->dataloader_->updateEmbeddings(batch, true); // TODO: this needs to be updated for multi-gpu (sub_batches)
+                    }
                     ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
                 }
             } else {
-                pipeline_->model_->device_models_[gpu_id_]->evaluate_batch(batch);
+                // evaluation
+                if (pipeline_->compute_worker_needs_remote_) {
+                    pipeline_->model_->device_models_[gpu_id_].get()->evaluate_batch(batch, true);
+                    batch->clear(false);
 
-                pipeline_->batches_in_flight_--;
-                pipeline_->max_batches_cv_->notify_one();
-                pipeline_->dataloader_->finishedBatch();
-                batch->clear();
+                    ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_push(batch);
+                } else {
+                    pipeline_->model_->device_models_[gpu_id_].get()->evaluate_batch(batch);
+
+                    pipeline_->batches_in_flight_--;
+                    pipeline_->max_batches_cv_->notify_one();
+                    pipeline_->dataloader_->finishedBatch();
+                    batch->clear();
+                }
             }
         }
         nanosleep(&sleep_time_, NULL);
@@ -257,18 +264,21 @@ void BatchToHostWorker::run() {
                 break;
             }
 
-            if (batch->sub_batches_.size() > 0) {
-                #pragma omp parallel for
-                for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                    CudaStream transfer_stream = getStreamFromPool(false, i);
+            if (pipeline_->isTrain()) {
+                if (batch->sub_batches_.size() > 0) {
+                    #pragma omp parallel for
+                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                        CudaStream transfer_stream = getStreamFromPool(false, i);
+                        CudaStreamGuard stream_guard(transfer_stream);
+                        batch->sub_batches_[i]->embeddingsToHost();
+                    }
+                } else {
+                    CudaStream transfer_stream = getStreamFromPool(false, gpu_id_);
                     CudaStreamGuard stream_guard(transfer_stream);
-                    batch->sub_batches_[i]->embeddingsToHost();
+                    batch->embeddingsToHost();
                 }
-            }
-            else {
-                CudaStream transfer_stream = getStreamFromPool(false, gpu_id_);
-                CudaStreamGuard stream_guard(transfer_stream);
-                batch->embeddingsToHost();
+            } else {
+                batch->evalToHost();
             }
 
             ((PipelineGPU *)pipeline_)->update_batches_->blocking_push(batch);
@@ -277,8 +287,94 @@ void BatchToHostWorker::run() {
     }
 }
 
+void RemoteToHostWorker::run() {
+    while (!done_) {
+        while (!paused_) {
+            auto tup = ((PipelineGPU *)pipeline_)->update_batches_->blocking_pop();
+            bool popped = std::get<0>(tup);
+            shared_ptr<Batch> batch = std::get<1>(tup);
+            if (!popped) {
+                break;
+            }
+
+            if (batch->creator_id_ == -1 or batch->creator_id_ == pipeline_->model_->pg_gloo_->pg->getRank()) { // parent is self
+                if (pipeline_->isTrain()) {
+                    // regular update batch for link prediction or notify to data loader that node classification batch finished
+                    pipeline_->dataloader_->updateEmbeddings(batch, false);
+                    batch->clear();
+
+                    pipeline_->reporter_->addResult(batch->batch_size_, batch->getLoss(pipeline_->model_->model_config_->loss->options->loss_reduction));
+                    pipeline_->batches_in_flight_--;
+                    pipeline_->dataloader_->finishedBatch();
+                    pipeline_->max_batches_cv_->notify_one();
+                    pipeline_->edges_processed_ += batch->batch_size_;
+                } else {
+                    // eval
+                    updateEvalForBatch(pipeline_, batch);
+                }
+                continue;
+            }
+
+            std::unique_lock lock(*pipeline_->bwd_tag_lock_);
+            int parent_id = -1;
+            for (int i = 0; i < pipeline_->model_->parents_.size(); i++) {
+                if (pipeline_->model_->parents_[i] == batch->creator_id_)
+                    parent_id = i;
+            }
+            int parent = batch->creator_id_;
+            int tag = pipeline_->bwd_parent_tags_[parent_id];
+            pipeline_->bwd_parent_tags_[parent_id]++;
+            lock.unlock();
+
+            batch->remoteTo(pipeline_->model_->pg_gloo_->pg, parent, tag);
+
+        }
+        nanosleep(&sleep_time_, NULL);
+    }
+}
+
+void RemoteListenForUpdatesWorker::run() {
+    while (!done_) {
+        while (!paused_) {
+            // NOTE: this "train" is probably not set correctly all the time
+            shared_ptr<Batch> batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
+
+            std::unique_lock lock(*pipeline_->bwd_tag_lock_);
+            int child_id = pipeline_->bwd_round_robin_child_ % pipeline_->model_->children_.size();
+            int child = pipeline_->model_->children_[child_id];
+            int tag = pipeline_->bwd_children_tags_[child_id];
+            pipeline_->bwd_children_tags_[child_id]++;
+            pipeline_->bwd_round_robin_child_++;
+            lock.unlock();
+
+            if (child == pipeline_->model_->pg_gloo_->pg->getRank()) { // child is self
+                // if the child is self, then we don't need to receive batch updates. The compute/device to host workers
+                // will already be putting batches on the update_batches_ queue
+                continue;
+            }
+
+            // NC batch finished notifications won't send batch sub_batches_ even if there were some,
+            // they are cleared as they don't contain useful information. Eval also doesn't contain sub batches
+            if (pipeline_->model_->device_models_.size() > 1 and pipeline_->has_embeddings() and pipeline_->isTrain()) {
+                std::vector <shared_ptr<Batch>> sub_batches;
+                for (int i = 0; i < pipeline_->model_->device_models_.size(); i++) {
+                    shared_ptr<Batch> sub_batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
+                    sub_batches.emplace_back(sub_batch);
+                }
+                batch->sub_batches_ = sub_batches;
+            }
+
+            batch->remoteReceive(pipeline_->model_->pg_gloo_->pg, child, tag);
+
+            ((PipelineGPU *)pipeline_)->update_batches_->blocking_push(batch);
+        }
+        nanosleep(&sleep_time_, NULL);
+    }
+}
+
 PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, bool train, shared_ptr<ProgressReporter> reporter,
-                         shared_ptr<PipelineConfig> pipeline_config, bool encode_only) {
+                         shared_ptr<PipelineConfig> pipeline_config, bool encode_only,
+                         bool batch_worker, bool compute_worker, bool batch_worker_needs_remote, bool compute_worker_needs_remote) {
     dataloader_ = dataloader;
     model_ = model;
     reporter_ = reporter;
@@ -291,6 +387,12 @@ PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mo
     assign_id_ = 0;
     encode_only_ = encode_only;
 
+    batch_worker_ = batch_worker;
+    compute_worker_ = compute_worker;
+    batch_worker_needs_remote_ = batch_worker_needs_remote;
+    compute_worker_needs_remote_ = compute_worker_needs_remote;
+
+    // Note that sometimes we don't actually need e.g., device_loaded_batches (for a batch worker but not compute worker)
     if (train_) {
         loaded_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
         for (int i = 0; i < model_->device_models_.size(); i++) {
@@ -299,12 +401,22 @@ PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mo
                 device_update_batches_.emplace_back(std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->gradients_device_queue_size));
             }
         }
-        if (model_->has_embeddings()) {
+
+        if (model_->has_embeddings() or (batch_worker_ and batch_worker_needs_remote_) or (compute_worker_ and compute_worker_needs_remote_)) {
             update_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->gradients_host_queue_size);
         }
     } else {
         loaded_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
-        device_loaded_batches_.emplace_back(std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_device_queue_size));
+        for (int i = 0; i < model_->device_models_.size(); i++) {
+            device_loaded_batches_.emplace_back(std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_device_queue_size));
+            if (compute_worker_needs_remote_) {
+                device_update_batches_.emplace_back(std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->gradients_device_queue_size));
+            }
+        }
+
+        if (compute_worker_needs_remote_ or batch_worker_needs_remote_) {
+            update_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->gradients_host_queue_size);
+        }
     }
 
     pipeline_lock_ = new std::mutex();
@@ -315,6 +427,22 @@ PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mo
     batches_in_flight_ = 0;
     admitted_batches_ = 0;
     curr_pos_ = 0;
+
+
+    fwd_round_robin_child_ = 0;
+    fwd_round_robin_parent_ = 0;
+    bwd_round_robin_child_ = 0;
+//    bwd_round_robing_parent_ = 0;
+    if (batch_worker_) {
+        fwd_children_tags_ = vector<int>(model_->children_.size(), 100);
+        bwd_children_tags_ = vector<int>(model_->children_.size(), 100);
+    }
+    if (compute_worker_) {
+        fwd_parent_tags_ = vector<int>(model_->parents_.size(), 100);
+        bwd_parent_tags_ = vector<int>(model_->parents_.size(), 100);
+    }
+    fwd_tag_lock_ = new std::mutex();
+    bwd_tag_lock_ = new std::mutex();
 
     PipelineGPU::initialize();
 }
@@ -363,17 +491,55 @@ void PipelineGPU::initialize() {
         }
     } else {
         if (train_) {
-            addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
-            addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
-            addWorkersToPool(2, GPU_COMPUTE_ID, 1, model_->device_models_.size());  // Only one std::thread manages GPU
-            if (model_->has_embeddings()) {
-                addWorkersToPool(3, D2H_TRANSFER_ID, pipeline_options_->gradient_transfer_threads, model_->device_models_.size());
+            // TODO: fix number of threads assigned to each
+            if (batch_worker_)
+                addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
+
+            if (batch_worker_ and batch_worker_needs_remote_)
+                addWorkersToPool(5, REMOTE_TO_DEVICE_ID, pipeline_options_->batch_transfer_threads);
+            else if (compute_worker_)
+                addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
+
+            if (compute_worker_ and compute_worker_needs_remote_)
+                addWorkersToPool(6, REMOTE_LOADER_ID, pipeline_options_->batch_loader_threads);
+
+            if (compute_worker_)
+                addWorkersToPool(2, GPU_COMPUTE_ID, 1, model_->device_models_.size());  // Only one std::thread manages GPU
+
+            if (model_->has_embeddings() and compute_worker_)
+                addWorkersToPool(3, D2H_TRANSFER_ID, pipeline_options_->gradient_transfer_threads);
+
+            if ((compute_worker_ and compute_worker_needs_remote_) or (batch_worker_ and batch_worker_needs_remote_))
+                addWorkersToPool(8, REMOTE_TO_HOST_ID, pipeline_options_->gradient_transfer_threads);
+            else if (model_->has_embeddings() and batch_worker_)
                 addWorkersToPool(4, UPDATE_BATCH_ID, pipeline_options_->gradient_update_threads);
-            }
+
+            if (batch_worker_ and batch_worker_needs_remote_)
+                addWorkersToPool(7, REMOTE_LISTEN_FOR_UPDATES_ID, pipeline_options_->gradient_update_threads);
+
         } else {
-            addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
-            addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
-            addWorkersToPool(2, GPU_COMPUTE_ID, 1, model_->device_models_.size());
+            if (batch_worker_)
+                addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
+
+            if (batch_worker_ and batch_worker_needs_remote_)
+                addWorkersToPool(5, REMOTE_TO_DEVICE_ID, pipeline_options_->batch_transfer_threads);
+            else if (compute_worker_)
+                addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
+
+            if (compute_worker_ and compute_worker_needs_remote_)
+                addWorkersToPool(6, REMOTE_LOADER_ID, pipeline_options_->batch_loader_threads);
+
+            if (compute_worker_)
+                addWorkersToPool(2, GPU_COMPUTE_ID, 1, model_->device_models_.size());  // Only one std::thread manages GPU
+
+            if (compute_worker_ and compute_worker_needs_remote_)
+                addWorkersToPool(3, D2H_TRANSFER_ID, pipeline_options_->gradient_transfer_threads);
+
+            if ((compute_worker_ and compute_worker_needs_remote_) or (batch_worker_ and batch_worker_needs_remote_))
+                addWorkersToPool(8, REMOTE_TO_HOST_ID, pipeline_options_->gradient_transfer_threads);
+
+            if (batch_worker_ and batch_worker_needs_remote_)
+                addWorkersToPool(7, REMOTE_LISTEN_FOR_UPDATES_ID, pipeline_options_->gradient_update_threads);
         }
     }
 }

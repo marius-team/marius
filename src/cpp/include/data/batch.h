@@ -81,18 +81,32 @@ class Batch {
     double transfer_;
     double compute_;
 
+    int creator_id_;
+
+    torch::Tensor pos_scores_;
+    torch::Tensor neg_scores_;
+    torch::Tensor inv_pos_scores_;
+    torch::Tensor inv_neg_scores_;
+    torch::Tensor y_pred_;
+
     Batch(bool train); /**< Constructor */
 
     ~Batch(); /**< Destructor */
 
     void to(torch::Device device, CudaStream *compute_stream = nullptr); /**< Transfers embeddings, optimizer state, and indices to specified device */
 
+    void remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag, bool send_meta = true);
+
+    void remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag, bool receive_meta = true);
+
     void accumulateGradients(float learning_rate); /**< Accumulates gradients into the unique_node_gradients, and applies optimizer update rule to create the
                                                       unique_node_gradients2 tensor */
 
     void embeddingsToHost(); /**< Transfers gradients and embedding updates to host */
 
-    void clear(); /**< Clears all tensor data in the batch */
+    void evalToHost();
+
+    void clear(bool clear_eval = true); /**< Clears all tensor data in the batch */
 
     double getLoss(LossReduction reduction_type = LossReduction::SUM);
 };

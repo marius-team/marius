@@ -68,6 +68,8 @@ shared_ptr<DistributedConfig> initDistributedConfig(pyobj python_config) {
 
     shared_ptr<DistributedConfig> ret_config = std::make_shared<DistributedConfig>();
 
+    ret_config->model_sync = getDistributedModelSync(cast_helper<string>(python_config.attr("model_sync")));
+
     pybind11::list workers_python_obj = cast_helper<pybind11::list>(python_config.attr("workers"));
     auto workers_vec = std::vector<shared_ptr<WorkerConfig>>();
 
