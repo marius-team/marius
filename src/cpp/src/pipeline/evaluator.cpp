@@ -84,6 +84,8 @@ void SynchronousEvaluator::evaluate(bool validation) {
 
     dataloader_->initializeBatches(false);
 
+    model_->distPrepareForTraining();
+
     if (dataloader_->evaluation_negative_sampler_ != nullptr) {
         if (dataloader_->evaluation_config_->negative_sampling->filtered) {
             dataloader_->graph_storage_->sortAllEdges();
@@ -108,6 +110,8 @@ void SynchronousEvaluator::evaluate(bool validation) {
         num_batches++;
     }
     timer.stop();
+
+    model_->distNotifyCompleteAndWait(true);
 
     model_->reporter_->report();
 }

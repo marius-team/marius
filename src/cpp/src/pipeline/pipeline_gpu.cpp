@@ -167,7 +167,7 @@ void ComputeWorkerGPU::run() {
                             CudaMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
                                                               *(pipeline_->dataloader_->compute_streams_[1])}); // TODO: general multi-gpu
                             pipeline_->model_->all_reduce();
-                            // TODO: distributed grad sync here
+                            pipeline_->model_->distGradSync();
                         }
 
                         #pragma omp for
