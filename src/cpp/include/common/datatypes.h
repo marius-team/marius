@@ -59,6 +59,10 @@ class DummyCudaStreamGuard {
 class DummyCudaMultiStreamGuard {
    public:
     DummyCudaMultiStreamGuard(DummyCudaStream []) {}
+
+    DummyCudaMultiStreamGuard(std::initializer_list<DummyCudaStream>) {}
+
+    DummyCudaMultiStreamGuard(std::vector<DummyCudaStream *>) {}
 };
 
 #ifdef MARIUS_CUDA
@@ -75,7 +79,8 @@ typedef at::cuda::CUDAStreamGuard CudaStreamGuard;
 typedef at::cuda::CUDAMultiStreamGuard CudaMultiStreamGuard;
 
 using at::cuda::getStreamFromPool;
-using at::cuda::getCurrentCUDAStream;
+//using at::cuda::getCurrentCUDAStream;
+inline CudaStream getCurrentCudaStream(int device_index = 0) { return at::cuda::getCurrentCUDAStream(device_index); }
 
 #else
 typedef DummyCudaEvent CudaEvent;
@@ -84,7 +89,7 @@ typedef DummyCudaStreamGuard CudaStreamGuard;
 typedef DummyCudaMultiStreamGuard CudaMultiStreamGuard;
 
 inline CudaStream getStreamFromPool(bool = false, int = 0) { return CudaStream(); }
-inline CudaStream getCurrentCUDAStream(int = 0) { return CudaStream(); }
+inline CudaStream getCurrentCudaStream(int = 0) { return CudaStream(); }
 #endif
 
 #ifndef IO_FLAGS
