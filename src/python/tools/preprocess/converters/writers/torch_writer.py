@@ -2,8 +2,8 @@ from pathlib import Path
 
 from omegaconf import OmegaConf
 
-from marius.tools.configuration.constants import PathConstants
-from marius.tools.configuration.marius_config import DatasetConfig
+from configuration.constants import PathConstants
+from configuration.marius_config import DatasetConfig
 
 
 class TorchWriter(object):
@@ -24,7 +24,9 @@ class TorchWriter(object):
         train_edges_offsets=None,
         valid_edges_offsets=None,
         test_edges_offsets=None,
+        save_order = None,
     ):
+
         dataset_stats = DatasetConfig()
         dataset_stats.dataset_dir = Path(self.output_dir).absolute().__str__() + "/"
 
@@ -38,6 +40,7 @@ class TorchWriter(object):
 
         dataset_stats.num_nodes = num_nodes
         dataset_stats.num_relations = num_rels
+        dataset_stats.save_order = save_order
 
         with open(self.output_dir / Path("dataset.yaml"), "w") as f:
             print("Dataset statistics written to: {}".format((self.output_dir / Path("dataset.yaml")).__str__()))

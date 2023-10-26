@@ -16,8 +16,9 @@ from marius.tools.preprocess.datasets import (
     ogbn_arxiv,
     ogbn_papers100m,
     ogbn_products,
-    twitter,
+    twitter
 )
+from preprocess.datasets import ogbl_collab
 
 
 def set_args():
@@ -127,6 +128,7 @@ def main():
         "OGBN_PAPERS100M": ogbn_papers100m.OGBNPapers100M,
         "OGB_WIKIKG90MV2": ogb_wikikg90mv2.OGBWikiKG90Mv2,
         "OGB_MAG240M": ogb_mag240m.OGBMag240M,
+        "OGBL_COLLAB" : ogbl_collab.OGBLCollab,
     }
 
     dataset = dataset_dict.get(args.dataset.upper())
@@ -140,6 +142,7 @@ def main():
             sequential_train_nodes=args.sequential_train_nodes,
             partitioned_eval=args.partitioned_eval,
         )
+        
     else:
         print("Preprocess custom dataset")
 
