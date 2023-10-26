@@ -448,7 +448,7 @@ class TorchEdgeListConverter(object):
         # Determine the edge type column id and the weight type column id
         self.edge_type_column = -1
         self.edge_weight_column = edge_weight_column
-        if len(self.columns) > 3:
+        if len(self.columns) > 2:
             possible_edge_type_column = self.columns[1]
             if possible_edge_type_column > 0 and possible_edge_type_column != self.edge_weight_column:
                 self.edge_type_column = possible_edge_type_column
@@ -633,6 +633,7 @@ class TorchEdgeListConverter(object):
                     test_edges_tens = dataframe_to_tensor(test_edges_df)               
 
         else:
+            print("Using in memory data")
             train_edges_tens = self.train_edges_tens
             valid_edges_tens = self.valid_edges_tens
             test_edges_tens = self.test_edges_tens

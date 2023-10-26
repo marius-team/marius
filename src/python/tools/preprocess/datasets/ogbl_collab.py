@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 
 import numpy as np
+import os
 import pandas as pd
 from preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
@@ -22,12 +23,14 @@ class OGBLCollab(LinkPredictionDataset):
     than one year.
     """
 
-    def __init__(self, output_directory: Path, spark=False):
+    def __init__(self, output_directory: Path, spark=False, include_edge_type = False, include_edge_weight = False):
         super().__init__(output_directory, spark)
 
         self.dataset_name = "ogbl_citation2"
         self.dataset_url = "http://snap.stanford.edu/ogb/data/linkproppred/collab.zip"
         self.node_ids = None
+        self.include_edge_type = include_edge_type
+        self.include_edge_weight = include_edge_weight
 
     def download(self, overwrite=False):
         self.input_train_edges_file = self.output_directory / Path("train.pt")
@@ -58,36 +61,74 @@ class OGBLCollab(LinkPredictionDataset):
 
     def preprocess(self, num_partitions=1, remap_ids=True, splits=None, 
         sequential_train_nodes=False, partitioned_eval=False):  
-        # Read in the training data
-        train_idx = torch.load(self.input_train_edges_file)
-        train_list = train_idx.get("edge")
-        train_weights = train_idx.get("weight").reshape(-1, 1)
-        train_edges = np.hstack([train_list, train_weights])
+        
+        for edge_type in [False, True]:
+            for edge_weight in [False, True]:
+                self.include_edge_type = edge_type
+                self.include_edge_weight = edge_weight
+                save_dir = os.path.join(self.output_directory, "type_" + str(self.include_edge_type) + "_weight_" + str(self.include_edge_weight))
+                os.makedirs(save_dir, exist_ok = True)
 
-        # Read in the valid data
-        valid_idx = torch.load(self.input_valid_edges_file)
-        valid_list = valid_idx.get("edge")
-        valid_weights = valid_idx.get("weight").reshape(-1, 1)
-        valid_edges = np.hstack([valid_list, valid_weights])
+                # Read in the training data
+                train_idx = torch.load(self.input_train_edges_file)
+                train_edges = train_idx.get("edge")
 
-        # Read in the test data
-        test_idx = torch.load(self.input_test_edges_file)
-        test_list = test_idx.get("edge")
-        test_weights = test_idx.get("weight").reshape(-1, 1)
-        test_edges = np.hstack([test_list, test_weights])
+                # Read in the valid data
+                valid_idx = torch.load(self.input_valid_edges_file)
+                valid_edges = valid_idx.get("edge")
 
-        converter = TorchEdgeListConverter(
-            output_dir=self.output_directory,
-            train_edges=train_edges,
-            valid_edges=valid_edges,
-            test_edges=test_edges,
-            num_partitions=num_partitions,
-            remap_ids=remap_ids,
-            known_node_ids=[ torch.arange(self.num_nodes) ], 
-            format="numpy",
-            edge_weight_column=2,
-            columns = [0, 2, 1],
-            partitioned_evaluation=partitioned_eval,
-        )
+                # Read in the test data
+                test_idx = torch.load(self.input_test_edges_file)
+                test_edges = test_idx.get("edge")
 
-        return converter.convert()
+                weights_col_id = -1
+                col_ids = [0, 1]
+                if self.include_edge_weight:
+                    # Add in the weights
+                    train_weights = train_idx.get("weight").reshape(-1, 1)
+                    train_edges = np.hstack([train_edges, train_weights])
+
+                    valid_weights = valid_idx.get("weight").reshape(-1, 1)
+                    valid_edges = np.hstack([valid_edges, valid_weights])
+
+                    test_weights = test_idx.get("weight").reshape(-1, 1)
+                    test_edges = np.hstack([test_edges, test_weights])
+                    
+                    weights_col_id = 2
+                    col_ids.insert(1, weights_col_id)
+
+                if self.include_edge_type:
+                    # Added in the year information
+                    train_edges = np.hstack([train_edges, train_idx.get("year").reshape(-1, 1)])
+                    valid_edges = np.hstack([valid_edges, valid_idx.get("year").reshape(-1, 1)])
+                    test_edges = np.hstack([test_edges, test_idx.get("year").reshape(-1, 1)])
+
+                    # Normalize the edge types
+                    min_year = min([np.min(train_edges[ : , -1]), np.min(valid_edges[ : , -1]), np.min(test_edges[ : , -1])])
+                    train_edges[ : , -1] = train_edges[ : , -1] - min_year
+                    valid_edges[ : , -1] = valid_edges[ : , -1] - min_year
+                    test_edges[ : , -1] = test_edges[ : , -1] - min_year
+
+                    # Added in edge type column id
+                    last_col_id = train_edges.shape[1] - 1
+                    if len(col_ids) == 3:
+                        col_ids[1] = last_col_id
+                    else:
+                        col_ids.insert(1, last_col_id)        
+                
+                # Add in the edge type information
+                converter = TorchEdgeListConverter(
+                    output_dir = save_dir,
+                    train_edges = train_edges,
+                    valid_edges = valid_edges,
+                    test_edges = test_edges,
+                    num_partitions = num_partitions,
+                    remap_ids = remap_ids,
+                    known_node_ids = [ torch.arange(self.num_nodes) ], 
+                    format = "numpy",
+                    edge_weight_column = weights_col_id,
+                    columns = col_ids,
+                    partitioned_evaluation=partitioned_eval,
+                )
+
+                converter.convert()
