@@ -40,15 +40,6 @@ class PandasDelimitedFileReader(Reader):
 
         self.delim = delim
 
-        if len(self.columns) == 2:
-            self.has_rels = False
-        elif len(self.columns) == 3:
-            self.has_rels = True
-        else:
-            raise RuntimeError(
-                "Incorrect number of columns specified, expected length 2 or 3, received {}".format(len(self.columns))
-            )
-
     def read(self):
         train_edges_df: pd.DataFrame = None
         valid_edges_df: pd.DataFrame = None
@@ -56,15 +47,16 @@ class PandasDelimitedFileReader(Reader):
 
         assert self.train_edges is not None
         train_edges_df = pd.read_csv(self.train_edges, delimiter=self.delim, skiprows=self.header_length, header=None)
-        train_edges_df = train_edges_df[train_edges_df.columns[self.columns]]
+        train_edges_df = train_edges_df[train_edges_df.columns[self.columns]].astype(str)
 
         if self.valid_edges is not None:
             valid_edges_df = pd.read_csv(
                 self.valid_edges, delimiter=self.delim, skiprows=self.header_length, header=None
             )
-            valid_edges_df = valid_edges_df[valid_edges_df.columns[self.columns]]
+            valid_edges_df = valid_edges_df[valid_edges_df.columns[self.columns]].astype(str)
+
         if self.test_edges is not None:
             test_edges_df = pd.read_csv(self.test_edges, delimiter=self.delim, skiprows=self.header_length, header=None)
-            test_edges_df = test_edges_df[test_edges_df.columns[self.columns]]
+            test_edges_df = test_edges_df[test_edges_df.columns[self.columns]].astype(str)
 
         return train_edges_df, valid_edges_df, test_edges_df

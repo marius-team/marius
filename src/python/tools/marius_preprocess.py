@@ -2,7 +2,6 @@ import argparse
 import shutil
 from pathlib import Path
 
-from marius.tools.preprocess import custom
 from marius.tools.preprocess.datasets import (
     fb15k,
     fb15k_237,
@@ -19,6 +18,7 @@ from marius.tools.preprocess.datasets import (
     twitter
 )
 from preprocess.datasets import ogbl_collab
+from preprocess import custom
 
 
 def set_args():
@@ -101,6 +101,15 @@ def set_args():
         help="List of column ids of input delimited files which denote the src node, edge-type, and dst node of edges.",
     )
 
+    parser.add_argument(
+        "--edge_weight_column",
+        metavar="edge_weight_column",
+        required=False,
+        type=int,
+        default=-1,
+        help="The column id which denotes the edge weight column",
+    )
+
     return parser
 
 
@@ -133,6 +142,7 @@ def main():
 
     dataset = dataset_dict.get(args.dataset.upper())
     if dataset is not None:
+        print("Using existing dataset of", args.dataset.upper())
         dataset = dataset(args.output_directory, spark=args.spark)
         dataset.download(args.overwrite)
         dataset.preprocess(
@@ -161,6 +171,7 @@ def main():
             partitioned_eval=args.partitioned_eval,
             sequential_train_nodes=args.sequential_train_nodes,
             columns=args.columns,
+            edge_weight_column = args.edge_weight_column,
         )
 
 

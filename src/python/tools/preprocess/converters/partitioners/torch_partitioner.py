@@ -4,11 +4,8 @@ from marius.tools.preprocess.converters.partitioners.partitioner import Partitio
 
 import torch  # isort:skip
 
-
-def dataframe_to_tensor(input_dataframe):
-    np_array = input_dataframe.to_dask_array().compute()
-    return torch.from_numpy(np_array)
-
+def dataframe_to_tensor(df):
+    return torch.tensor(df.to_numpy())
 
 def partition_edges(edges, num_nodes, num_partitions):
     partition_size = int(np.ceil(num_nodes / num_partitions))

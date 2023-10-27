@@ -76,14 +76,16 @@ def apply_mapping1d(input_ids, mapping_df):
         raise RuntimeError("Unsupported datatype for input. Must be a pandas.Series or a 1D torch.Tensor")
 
 
-def map_edge_list_dfs(edge_lists: list, known_node_ids=None, sequential_train_nodes=False, sequential_deg_nodes=0):
+def map_edge_list_dfs(edge_lists: list, known_node_ids=None, sequential_train_nodes=False, sequential_deg_nodes=0,
+columns = None, edge_type_column = -1, edge_weight_column = -1):
     if sequential_train_nodes or sequential_deg_nodes > 0:
         raise RuntimeError("sequential_train_nodes not yet supported for map_edge_list_dfs")
 
+    src_col, dst_col = columns[0], columns[-1]
     all_edges_df = pd.concat(edge_lists)
 
-    unique_src = all_edges_df.iloc[:, 0].unique()
-    unique_dst = all_edges_df.iloc[:, -1].unique()
+    unique_src = all_edges_df.iloc[:, src_col].unique()
+    unique_dst = all_edges_df.iloc[:, dst_col].unique()
 
     if known_node_ids is None:
         unique_nodes = np.unique(np.concatenate([unique_src.astype(str), unique_dst.astype(str)]))
@@ -98,15 +100,13 @@ def map_edge_list_dfs(edge_lists: list, known_node_ids=None, sequential_train_no
     mapped_node_ids = np.random.permutation(num_nodes)
     nodes_dict = dict(zip(list(unique_nodes), list(mapped_node_ids)))
 
-    has_rels = False
+    has_rels = edge_type_column >= 0
     unique_rels = torch.empty([0])
     mapped_rel_ids = torch.empty([0])
     rels_dict = None
-    if len(all_edges_df.columns) == 3:
-        has_rels = True
 
     if has_rels:
-        unique_rels = all_edges_df.iloc[:, 1].unique()
+        unique_rels = all_edges_df.iloc[:, edge_type_column].unique()
         num_rels = unique_rels.shape[0]
         mapped_rel_ids = np.random.permutation(num_rels)
         rels_dict = dict(zip(list(unique_rels), list(mapped_rel_ids)))
@@ -114,25 +114,40 @@ def map_edge_list_dfs(edge_lists: list, known_node_ids=None, sequential_train_no
     all_edges_df = None  # can safely free this df
 
     output_edge_lists = []
-    for edge_list in edge_lists:
-        node_columns = edge_list.columns[[0, -1]]
+    save_order = ["src_col", "dst_col"]
+    for idx, edge_list in enumerate(edge_lists):
+        node_columns = edge_list.columns[[src_col, dst_col]]
         edge_list[node_columns] = edge_list[node_columns].applymap(nodes_dict.get)
 
         if has_rels:
-            rel_columns = edge_list.columns[1]
+            rel_columns = edge_list.columns[edge_type_column]
             edge_list[rel_columns] = edge_list[rel_columns].map(rels_dict.get)
 
+        cols_ids_to_keep = [src_col, dst_col]
+        if edge_type_column >= 0:
+            cols_ids_to_keep.insert(len(cols_ids_to_keep) - 1, edge_type_column)
+            if idx == 0:
+                save_order.insert(len(save_order) - 1, "edge_type")
+        
+        if edge_weight_column >= 0:
+            edge_list[edge_weight_column] = edge_list[edge_weight_column].astype(float)
+            cols_ids_to_keep.insert(len(cols_ids_to_keep) - 1, edge_weight_column)
+            if idx == 0:
+                save_order.insert(len(save_order) - 1, "edge_weight")
+
+        edge_list = edge_list[edge_list.columns[cols_ids_to_keep]]
         output_edge_lists.append(dataframe_to_tensor(edge_list))
 
     node_mapping = np.stack([unique_nodes, mapped_node_ids], axis=1)
     rel_mapping = None
     if has_rels:
         rel_mapping = np.stack([unique_rels, mapped_rel_ids], axis=1)
-    return output_edge_lists, node_mapping, rel_mapping
+    
+    return output_edge_lists, node_mapping, rel_mapping, save_order
 
 
 def map_edge_lists(edge_lists: list, perform_unique=True, known_node_ids=None, sequential_train_nodes=False, 
-sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
+sequential_deg_nodes=0, columns = None, edge_type_column = -1, edge_weight_column = -1):
     print("Remapping Edges")
 
     defined_edges = []
@@ -145,7 +160,8 @@ sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
     if isinstance(edge_lists[0], pd.DataFrame):
         if isinstance(edge_lists[0].iloc[0][0], str):
             # need to take uniques using pandas for string datatypes, since torch doesn't support strings
-            return map_edge_list_dfs(edge_lists, known_node_ids, sequential_train_nodes, sequential_deg_nodes)
+            return map_edge_list_dfs(edge_lists, known_node_ids, sequential_train_nodes, sequential_deg_nodes,
+            columns = columns, edge_type_column = edge_type_column, edge_weight_column = edge_weight_column)
 
         new_edge_lists = []
         for edge_list in edge_lists:
@@ -154,6 +170,7 @@ sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
         edge_lists = new_edge_lists
 
     all_edges = torch.cat(edge_lists)
+    src_col, dst_col = columns[0], columns[-1]
     has_rels, has_weights = edge_type_column >= 0, edge_weight_column >= 0
     num_rels = 1
     unique_rels = torch.empty([0])
@@ -161,8 +178,8 @@ sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
     output_dtype = torch.int32
 
     if perform_unique:
-        unique_src = torch.unique(all_edges[:, 0])
-        unique_dst = torch.unique(all_edges[:, -1])
+        unique_src = torch.unique(all_edges[:, src_col])
+        unique_dst = torch.unique(all_edges[:, dst_col])
         if known_node_ids is None:
             unique_nodes = torch.unique(torch.cat([unique_src, unique_dst]), sorted=True)
         else:
@@ -177,11 +194,11 @@ sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
         print("Number of relationships", num_rels)
             
     else:
-        num_nodes = torch.max(all_edges[:, 0])[0]
+        num_nodes = torch.max(all_edges[:, src_col])[0]
         unique_nodes = torch.arange(num_nodes).to(output_dtype)
 
         if has_rels:
-            num_rels = torch.max(all_edges[:, 1])[0]
+            num_rels = torch.max(all_edges[:, edge_type_column])[0]
             unique_rels = torch.arange(num_rels).to(output_dtype)
 
     if sequential_train_nodes or sequential_deg_nodes > 0:
@@ -273,8 +290,8 @@ sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
     output_edge_lists = []
     save_order = ["src_node", "dest_node"]
     for idx, edge_list in enumerate(edge_lists):
-        new_src = extended_map[edge_list[:, 0].to(torch.int64)]
-        new_dst = extended_map[edge_list[:, -1].to(torch.int64)]
+        new_src = extended_map[edge_list[:, src_col].to(torch.int64)]
+        new_dst = extended_map[edge_list[:, dst_col].to(torch.int64)]
 
         if has_rels:
             new_rel = mapped_rel_ids[edge_list[:, edge_type_column].to(torch.int64)]
@@ -285,7 +302,7 @@ sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
                 save_order.insert(1, "edge_type")
 
             if has_weights:
-                curr_row.insert(2, edge_list[ : , edge_weight_column])
+                curr_row.insert(2, edge_list[ : , edge_weight_column].to(torch.float32))
                 if idx == 0:
                     save_order.insert(2, "edge_weight")
 
@@ -293,7 +310,7 @@ sequential_deg_nodes=0, edge_type_column = -1, edge_weight_column = -1):
         else:
             curr_row = [new_src, new_dst]
             if has_weights:
-                curr_row.insert(1, edge_list[ : , edge_weight_column])
+                curr_row.insert(1, edge_list[ : , edge_weight_column].to(torch.float32))
                 if idx == 0:
                     save_order.insert(1, "edge_weight")
 
@@ -411,14 +428,12 @@ class TorchEdgeListConverter(object):
                                                 E.g. columns=[0, 2, 1] means that the source nodes are found in the first column, the edge-types are found in
                                                 in the third column, and the destination nodes are found in the second column. 
                                                 For datasets with both edge-types and edge-weights, the edge-weights column should be specified by edge_weight_column
-                                                field while the edge-types is read from this parameter. 
-                                                For datasets with only edge-weights, the edge-weight column should be replaced with the edge-type column in this parameter
-                                                as well as passed into the edge_weight_column parameter. Thus if edge weights are in column 3, edge src in column 0, edge
-                                                dst in column 1, then columns should be set to [0, 3, 1] and edge_weight_column should be set to 3. 
-                                                For datasets without edge-types or weight, only two column ids should be specified. E.g. columns=[0, 2]
-        :param edge_weight_column:              The column id storing the edge weight. If the file has edge weights and not edge types then the edge weight column id must
-                                                also be passed into the columns parameter. See the columns parameter for more details on how to do so. If the data is in 
-                                                memory then this parameter specifies the idx in each row that contains the edge weight. 
+                                                field while the edge-types is read from the middle field of this parameter. 
+                                                For datasets with only edge-weights, the edge-weight column should be set and the src and dest node columns should be
+                                                specified by this field. Thus if edge weights are in column 3, edge src in column 0, edge
+                                                dst in column 1, then columns should be set to [0, 1] and edge_weight_column should be set to 3. 
+                                                For datasets without edge-types or weight, only the src and dest node columns need to be passed in through this parameter
+        :param edge_weight_column:              The column id storing the edge weight. 
         :param header_length:                   Length of the header for input delimited files
         :param delim:                           Delimiter of the input delimited files
         :param dtype:                           Datatype of the node ids in the output preprocessed datasets. Unless you have over 2 billion nodes, this should
@@ -449,14 +464,15 @@ class TorchEdgeListConverter(object):
         self.edge_type_column = -1
         self.edge_weight_column = edge_weight_column
         if len(self.columns) > 2:
-            possible_edge_type_column = self.columns[1]
-            if possible_edge_type_column > 0 and possible_edge_type_column != self.edge_weight_column:
-                self.edge_type_column = possible_edge_type_column
+            self.edge_type_column = self.columns[1]
+        print("Edge type column", self.edge_type_column, "with edge weight column", self.edge_weight_column)
 
         if format.upper() in SUPPORTED_DELIM_FORMATS:
             assert isinstance(train_edges, str) or isinstance(train_edges, Path)
 
-            self.reader = PandasDelimitedFileReader(train_edges, valid_edges, test_edges, columns, header_length, delim)
+            max_col_num = max(max(self.columns), self.edge_weight_column)
+            all_cols_to_read = [i for i in range(0, max_col_num + 1)]
+            self.reader = PandasDelimitedFileReader(train_edges, valid_edges, test_edges, all_cols_to_read, header_length, delim)
 
         elif format.upper() in SUPPORTED_IN_MEMORY_FORMATS:
             self.reader = None
@@ -499,7 +515,7 @@ class TorchEdgeListConverter(object):
 
         # Determine if this has edge types
         self.has_rels = False
-        if len(columns) == 3 and columns[1] != self.edge_weight_column:
+        if self.edge_type_column >= 0:
             self.has_rels = True
 
         if dtype.upper() == "INT32" or dtype.upper() == "INT":
@@ -552,13 +568,8 @@ class TorchEdgeListConverter(object):
             save_order.insert(1, "edge_weight")
         elif self.edge_type_column >= 0 and self.edge_weight_column >= 0:
             # Have both edge type and edge weight
-            first_val, second_val = "edge_type", "edge_weight"
-            if self.edge_type_column > self.edge_weight_column:
-                # Edge type column comes later
-                first_val = "edge_weight"
-                second_val = "edge_type"
-            save_order.insert(1, first_val)
-            save_order.insert(2, second_val)
+            save_order.insert(1, "edge_type")
+            save_order.insert(2, "edge_weight")
         
         return save_order
 
@@ -583,6 +594,7 @@ class TorchEdgeListConverter(object):
                     sequential_deg_nodes=self.sequential_deg_nodes,
                     edge_type_column = self.edge_type_column,
                     edge_weight_column = self.edge_weight_column,
+                    columns = self.columns,
                 )
 
                 self.num_nodes = node_mapping.shape[0]
@@ -624,13 +636,23 @@ class TorchEdgeListConverter(object):
                         delimiter=",",
                     )
             else:
+                cols_to_keep = [self.columns[0], self.columns[-1]]
+                if self.edge_type_column >= 0:
+                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_type_column)
+
+                if self.edge_weight_column >= 0:
+                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_weight_column)
+
+                train_edges_df = train_edges_df[train_edges_df.columns[cols_to_keep]].astype(int)
                 train_edges_tens = dataframe_to_tensor(train_edges_df)
 
                 if valid_edges_df is not None:
+                    valid_edges_df = valid_edges_df[valid_edges_df.columns[cols_to_keep]].astype(int)
                     valid_edges_tens = dataframe_to_tensor(valid_edges_df)
 
                 if test_edges_df is not None:
-                    test_edges_tens = dataframe_to_tensor(test_edges_df)               
+                    test_edges_df = valid_edges_df[test_edges_df.columns[cols_to_keep]].astype(int)
+                    test_edges_tens = dataframe_to_tensor(test_edges_df)           
 
         else:
             print("Using in memory data")
@@ -646,6 +668,7 @@ class TorchEdgeListConverter(object):
                     sequential_deg_nodes=self.sequential_deg_nodes,
                     edge_type_column = self.edge_type_column,
                     edge_weight_column = self.edge_weight_column,
+                    columns = self.columns,
                 )
 
                 self.num_nodes = node_mapping.shape[0]
@@ -685,19 +708,60 @@ class TorchEdgeListConverter(object):
                         fmt="%s",
                         delimiter=",",
                     )
+            
+            else:
+                cols_to_keep = [self.columns[0], self.columns[-1]]
+                if self.edge_type_column >= 0:
+                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_type_column)
+
+                if self.edge_weight_column >= 0:
+                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_weight_column)
+                
+                train_edges_tens = train_edges_tens[ : , [cols_to_keep]]
+                if valid_edges_tens is not None:
+                    valid_edges_tens = valid_edges_tens[ : , [cols_to_keep]]
+                if test_edges_tens is not None:
+                    test_edges_tens = test_edges_tens[ : , [cols_to_keep]]
+
+        # Split the edges
+        if self.splits is not None:
+            train_edges_tens, valid_edges_tens, test_edges_tens = split_edges(train_edges_tens, self.splits)
+
+        if save_order is None:
+            save_order = self.save_order()
+        print("Determine tensor save order of", save_order)
+
+        # Extract the weights if they exist
+        train_edges_weights, valid_edges_weights, test_edges_weights = None, None, None
+        if "edge_weight" in save_order:
+            edge_idx = save_order.index("edge_weight")
+            cols_to_keep = [i for i in range(len(save_order))]
+            cols_to_keep.pop(edge_idx)
+            save_order.pop(edge_idx)
+
+            train_edges_weights = train_edges_tens[ : , [edge_idx]].to(torch.float32)
+            train_edges_tens = train_edges_tens[ : , cols_to_keep]
+
+            if valid_edges_tens is not None:
+                valid_edges_weights = valid_edges_tens[ : , [edge_idx]].to(torch.float32)
+                valid_edges_tens = valid_edges_tens[ : , cols_to_keep]
+
+            if test_edges_tens is not None:
+                test_edges_weights = test_edges_tens[ : , [edge_idx]].to(torch.float32)
+                test_edges_tens = test_edges_tens[ : , cols_to_keep]
 
         train_edges_tens = train_edges_tens.to(self.dtype)
         if valid_edges_tens is not None:
             valid_edges_tens = valid_edges_tens.to(self.dtype)
         if test_edges_tens is not None:
             test_edges_tens = test_edges_tens.to(self.dtype)
+        
+        # Add this point the data must be in the save order. This means that the src node will always be in col 0
+        # and the dst node in col -1. 
+        
+        print("First row of train_edges_tens is", train_edges_tens[0], "with edges", train_edges_weights[0])
 
-        if self.splits is not None:
-            train_edges_tens, valid_edges_tens, test_edges_tens = split_edges(train_edges_tens, self.splits)
-
-        if save_order is None:
-            save_order = self.save_order()
-
+        '''
         if self.partitioner is not None:
             print("Partition nodes into {} partitions".format(self.num_partitions))
             (
@@ -721,9 +785,9 @@ class TorchEdgeListConverter(object):
                 train_edges_offsets,
                 valid_edges_offsets,
                 test_edges_offsets,
-                save_order = save_order
             )
         else:
             return self.writer.write_to_binary(
                 train_edges_tens, valid_edges_tens, test_edges_tens, self.num_nodes, 
-                self.num_rels, self.num_partitions, save_order = save_order)
+                self.num_rels, self.num_partitions)
+        '''
