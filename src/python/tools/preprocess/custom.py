@@ -1,8 +1,8 @@
 import importlib
 from pathlib import Path
 
-from preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
+from preprocess.converters.torch_converter import TorchEdgeListConverter
 
 pyspark_loader = importlib.find_loader("pyspark")
 pyspark_found = pyspark_loader is not None
@@ -44,13 +44,13 @@ class CustomLinkPredictionDataset(LinkPredictionDataset):
         partitioned_eval=False,
         sequential_train_nodes=False,
         columns=[0, 1, 2],
-        edge_weight_column = -1,
+        edge_weight_column=-1,
     ):
         if self.spark and pyspark_found:
             converter_class = SparkEdgeListConverter
         else:
             converter_class = TorchEdgeListConverter
-        
+
         converter = converter_class(
             output_dir=self.output_directory,
             train_edges=self.train_edges_file,
@@ -62,7 +62,7 @@ class CustomLinkPredictionDataset(LinkPredictionDataset):
             splits=splits,
             remap_ids=remap_ids,
             partitioned_evaluation=partitioned_eval,
-            edge_weight_column = edge_weight_column,
+            edge_weight_column=edge_weight_column,
         )
 
         return converter.convert()

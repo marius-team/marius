@@ -1,13 +1,14 @@
 import numpy as np
-
 from marius.tools.preprocess.converters.partitioners.partitioner import Partitioner
 
 import torch  # isort:skip
 
+
 def dataframe_to_tensor(df):
     return torch.tensor(df.to_numpy())
 
-def partition_edges(edges, num_nodes, num_partitions, edge_weights = None):
+
+def partition_edges(edges, num_nodes, num_partitions, edge_weights=None):
     partition_size = int(np.ceil(num_nodes / num_partitions))
 
     src_partitions = torch.div(edges[:, 0], partition_size, rounding_mode="trunc")
@@ -16,7 +17,7 @@ def partition_edges(edges, num_nodes, num_partitions, edge_weights = None):
     _, dst_args = torch.sort(dst_partitions, stable=True)
     _, src_args = torch.sort(src_partitions[dst_args], stable=True)
     mask = dst_args[src_args]
-    
+
     edges = edges[mask]
     if edge_weights is not None:
         edge_weights = edge_weights[mask]
@@ -50,22 +51,42 @@ class TorchPartitioner(Partitioner):
 
         self.partitioned_evaluation = partitioned_evaluation
 
-    def partition_edges(self, train_edges_tens, valid_edges_tens, test_edges_tens, num_nodes, num_partitions, edge_weights = None):
+    def partition_edges(
+        self, train_edges_tens, valid_edges_tens, test_edges_tens, num_nodes, num_partitions, edge_weights=None
+    ):
         # Extract the edge weights
         train_edge_weights, valid_edge_weights, test_edge_weights = None, None, None
         if edge_weights is not None:
-            train_edge_weights, valid_edge_weights, test_edge_weights = edge_weights[0], edge_weights[1], edge_weights[2]
+            train_edge_weights, valid_edge_weights, test_edge_weights = (
+                edge_weights[0],
+                edge_weights[1],
+                edge_weights[2],
+            )
 
-        train_edges_tens, train_offsets, train_edge_weights = partition_edges(train_edges_tens, num_nodes, num_partitions, edge_weights = train_edge_weights)
+        train_edges_tens, train_offsets, train_edge_weights = partition_edges(
+            train_edges_tens, num_nodes, num_partitions, edge_weights=train_edge_weights
+        )
 
         valid_offsets = None
         test_offsets = None
 
         if self.partitioned_evaluation:
             if valid_edges_tens is not None:
-                valid_edges_tens, valid_offsets, valid_edge_weights = partition_edges(valid_edges_tens, num_nodes, num_partitions, edge_weights = valid_edge_weights)
+                valid_edges_tens, valid_offsets, valid_edge_weights = partition_edges(
+                    valid_edges_tens, num_nodes, num_partitions, edge_weights=valid_edge_weights
+                )
 
             if test_edges_tens is not None:
-                test_edges_tens, test_offsets, test_edge_weights = partition_edges(test_edges_tens, num_nodes, num_partitions, edge_weights = test_edge_weights)
+                test_edges_tens, test_offsets, test_edge_weights = partition_edges(
+                    test_edges_tens, num_nodes, num_partitions, edge_weights=test_edge_weights
+                )
 
-        return train_edges_tens, train_offsets, valid_edges_tens, valid_offsets, test_edges_tens, test_offsets, [train_edge_weights, valid_edge_weights, test_edge_weights]
+        return (
+            train_edges_tens,
+            train_offsets,
+            valid_edges_tens,
+            valid_offsets,
+            test_edges_tens,
+            test_offsets,
+            [train_edge_weights, valid_edge_weights, test_edge_weights],
+        )

@@ -2,6 +2,7 @@ import argparse
 import shutil
 from pathlib import Path
 
+from marius.tools.preprocess import custom
 from marius.tools.preprocess.datasets import (
     fb15k,
     fb15k_237,
@@ -10,15 +11,14 @@ from marius.tools.preprocess.datasets import (
     ogb_mag240m,
     ogb_wikikg90mv2,
     ogbl_citation2,
+    ogbl_collab,
     ogbl_ppa,
     ogbl_wikikg2,
     ogbn_arxiv,
     ogbn_papers100m,
     ogbn_products,
-    twitter
+    twitter,
 )
-from preprocess.datasets import ogbl_collab
-from preprocess import custom
 
 
 def set_args():
@@ -137,7 +137,7 @@ def main():
         "OGBN_PAPERS100M": ogbn_papers100m.OGBNPapers100M,
         "OGB_WIKIKG90MV2": ogb_wikikg90mv2.OGBWikiKG90Mv2,
         "OGB_MAG240M": ogb_mag240m.OGBMag240M,
-        "OGBL_COLLAB" : ogbl_collab.OGBLCollab,
+        "OGBL_COLLAB": ogbl_collab.OGBLCollab,
     }
 
     dataset = dataset_dict.get(args.dataset.upper())
@@ -152,7 +152,7 @@ def main():
             sequential_train_nodes=args.sequential_train_nodes,
             partitioned_eval=args.partitioned_eval,
         )
-        
+
     else:
         print("Preprocess custom dataset")
 
@@ -171,7 +171,7 @@ def main():
             partitioned_eval=args.partitioned_eval,
             sequential_train_nodes=args.sequential_train_nodes,
             columns=args.columns,
-            edge_weight_column = args.edge_weight_column,
+            edge_weight_column=args.edge_weight_column,
         )
 
 

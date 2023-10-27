@@ -1,9 +1,8 @@
 from pathlib import Path
 
+from marius.tools.configuration.constants import PathConstants
+from marius.tools.configuration.marius_config import DatasetConfig
 from omegaconf import OmegaConf
-
-from configuration.constants import PathConstants
-from configuration.marius_config import DatasetConfig
 
 
 class TorchWriter(object):
@@ -24,9 +23,8 @@ class TorchWriter(object):
         train_edges_offsets=None,
         valid_edges_offsets=None,
         test_edges_offsets=None,
-        edge_weights = None
+        edge_weights=None,
     ):
-
         dataset_stats = DatasetConfig()
         dataset_stats.dataset_dir = Path(self.output_dir).absolute().__str__() + "/"
 
@@ -45,16 +43,20 @@ class TorchWriter(object):
             print("Dataset statistics written to: {}".format((self.output_dir / Path("dataset.yaml")).__str__()))
             yaml_file = OmegaConf.to_yaml(dataset_stats)
             f.writelines(yaml_file)
-        
+
         # Read the edge weights
         train_edges_weights, valid_edges_weights, test_edges_weights = None, None, None
         if edge_weights is not None:
-            train_edges_weights, valid_edges_weights, test_edges_weights = edge_weights[0], edge_weights[1], edge_weights[2]
+            train_edges_weights, valid_edges_weights, test_edges_weights = (
+                edge_weights[0],
+                edge_weights[1],
+                edge_weights[2],
+            )
 
         with open(self.output_dir / Path(PathConstants.train_edges_path), "wb") as f:
             print("Train edges written to:", PathConstants.train_edges_path)
             f.write(bytes(train_edges_tens.numpy()))
-        
+
         if train_edges_weights is not None:
             print("Train edges weights written to:", PathConstants.train_edges_weights_path)
             with open(self.output_dir / Path(PathConstants.train_edges_weights_path), "wb") as f:
@@ -64,7 +66,7 @@ class TorchWriter(object):
             print("Valid edges written to:", PathConstants.valid_edges_path)
             with open(self.output_dir / Path(PathConstants.valid_edges_path), "wb") as f:
                 f.write(bytes(valid_edges_tens.numpy()))
-            
+
             if valid_edges_weights is not None:
                 print("Valid edges weights written to:", PathConstants.valid_edges_weights_path)
                 with open(self.output_dir / Path(PathConstants.valid_edges_weights_path), "wb") as f:
@@ -74,7 +76,7 @@ class TorchWriter(object):
             print("Test edges written to:", PathConstants.test_edges_path)
             with open(self.output_dir / Path(PathConstants.test_edges_path), "wb") as f:
                 f.write(bytes(test_edges_tens.numpy()))
-            
+
             if test_edges_weights is not None:
                 print("Test edge weights written to:", PathConstants.test_edges_weights_path)
                 with open(self.output_dir / Path(PathConstants.test_edges_weights_path), "wb") as f:
