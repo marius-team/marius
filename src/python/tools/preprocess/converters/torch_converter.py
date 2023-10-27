@@ -596,6 +596,7 @@ class TorchEdgeListConverter(object):
 
         return save_order
 
+    # flake8: noqa: C901
     def convert(self):
         train_edges_tens = None
         valid_edges_tens = None
@@ -781,7 +782,7 @@ class TorchEdgeListConverter(object):
         """
         At this point the data must be in the save order. This means that the src node will always be in col 0
         and the dst node in col -1. Additionally if edge weights columns is specified then the edge weights variables
-        contains the edge weights. 
+        contains the edge weights.
         """
 
         if self.partitioner is not None:
