@@ -729,7 +729,6 @@ class TorchEdgeListConverter(object):
 
         if save_order is None:
             save_order = self.save_order()
-        print("Determine tensor save order of", save_order)
 
         # Extract the weights if they exist
         train_edges_weights, valid_edges_weights, test_edges_weights = None, None, None
@@ -756,12 +755,12 @@ class TorchEdgeListConverter(object):
         if test_edges_tens is not None:
             test_edges_tens = test_edges_tens.to(self.dtype)
         
-        # Add this point the data must be in the save order. This means that the src node will always be in col 0
-        # and the dst node in col -1. 
-        
-        print("First row of train_edges_tens is", train_edges_tens[0], "with edges", train_edges_weights[0])
-
         '''
+        At this point the data must be in the save order. This means that the src node will always be in col 0
+        and the dst node in col -1. Additionally if edge weights columns is specified then the edge weights variables
+        contains the edge weights. 
+        '''
+        
         if self.partitioner is not None:
             print("Partition nodes into {} partitions".format(self.num_partitions))
             (
@@ -771,8 +770,10 @@ class TorchEdgeListConverter(object):
                 valid_edges_offsets,
                 test_edges_tens,
                 test_edges_offsets,
+                all_edge_weights
             ) = self.partitioner.partition_edges(
-                train_edges_tens, valid_edges_tens, test_edges_tens, self.num_nodes, self.num_partitions
+                train_edges_tens, valid_edges_tens, test_edges_tens, self.num_nodes, self.num_partitions,
+                edge_weights = [train_edges_weights, valid_edges_weights, test_edges_weights]
             )
 
             return self.writer.write_to_binary(
@@ -785,9 +786,11 @@ class TorchEdgeListConverter(object):
                 train_edges_offsets,
                 valid_edges_offsets,
                 test_edges_offsets,
+                edge_weights = all_edge_weights,
             )
         else:
+            print("Writing edge weights to file")
+            all_edge_weights = [train_edges_weights, valid_edges_weights, test_edges_weights]
             return self.writer.write_to_binary(
                 train_edges_tens, valid_edges_tens, test_edges_tens, self.num_nodes, 
-                self.num_rels, self.num_partitions)
-        '''
+                self.num_rels, self.num_partitions, edge_weights = all_edge_weights)

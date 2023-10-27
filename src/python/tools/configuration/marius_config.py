@@ -433,7 +433,6 @@ class DatasetConfig:
     rel_feature_dim: int = -1
     num_classes: int = -1
     initialized: bool = False
-    save_order : list = field(default_factory=list)
 
     def __post_init__(self):
         if not self.initialized:

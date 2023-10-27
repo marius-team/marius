@@ -14,6 +14,7 @@ class PathConstants:
     node_mapping_file: str = "node_mapping.txt"
     relation_mapping_file: str = "relation_mapping.txt"
     edge_file_name: str = "edges"
+    edge_weight_file_name : str = "edges_weights"
     node_file_name: str = "nodes"
     features_file_name: str = "features"
     labels_file_name: str = "labels"
@@ -23,8 +24,14 @@ class PathConstants:
     file_ext: str = ".bin"
 
     train_edges_path: str = edges_directory + training_file_prefix + edge_file_name + file_ext
+    train_edges_weights_path : str = edges_directory + training_file_prefix + edge_weight_file_name + file_ext
+
     valid_edges_path: str = edges_directory + validation_file_prefix + edge_file_name + file_ext
+    valid_edges_weights_path: str = edges_directory + validation_file_prefix + edge_weight_file_name + file_ext
+
     test_edges_path: str = edges_directory + test_file_prefix + edge_file_name + file_ext
+    test_edges_weights_path: str = edges_directory + test_file_prefix + edge_weight_file_name + file_ext
+
     train_edge_buckets_path: str = edges_directory + training_file_prefix + partition_offsets_file
     valid_edge_buckets_path: str = edges_directory + validation_file_prefix + partition_offsets_file
     test_edge_buckets_path: str = edges_directory + test_file_prefix + partition_offsets_file

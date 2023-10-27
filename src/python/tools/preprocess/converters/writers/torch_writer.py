@@ -24,7 +24,7 @@ class TorchWriter(object):
         train_edges_offsets=None,
         valid_edges_offsets=None,
         test_edges_offsets=None,
-        save_order = None,
+        edge_weights = None
     ):
 
         dataset_stats = DatasetConfig()
@@ -40,33 +40,58 @@ class TorchWriter(object):
 
         dataset_stats.num_nodes = num_nodes
         dataset_stats.num_relations = num_rels
-        dataset_stats.save_order = save_order
 
         with open(self.output_dir / Path("dataset.yaml"), "w") as f:
             print("Dataset statistics written to: {}".format((self.output_dir / Path("dataset.yaml")).__str__()))
             yaml_file = OmegaConf.to_yaml(dataset_stats)
             f.writelines(yaml_file)
+        
+        # Read the edge weights
+        train_edges_weights, valid_edges_weights, test_edges_weights = None, None, None
+        if edge_weights is not None:
+            train_edges_weights, valid_edges_weights, test_edges_weights = edge_weights[0], edge_weights[1], edge_weights[2]
 
         with open(self.output_dir / Path(PathConstants.train_edges_path), "wb") as f:
+            print("Train edges written to:", PathConstants.train_edges_path)
             f.write(bytes(train_edges_tens.numpy()))
+        
+        if train_edges_weights is not None:
+            print("Train edges weights written to:", PathConstants.train_edges_weights_path)
+            with open(self.output_dir / Path(PathConstants.train_edges_weights_path), "wb") as f:
+                f.write(bytes(train_edges_weights.numpy()))
 
         if valid_edges_tens is not None:
+            print("Valid edges written to:", PathConstants.valid_edges_path)
             with open(self.output_dir / Path(PathConstants.valid_edges_path), "wb") as f:
                 f.write(bytes(valid_edges_tens.numpy()))
+            
+            if valid_edges_weights is not None:
+                print("Valid edges weights written to:", PathConstants.valid_edges_weights_path)
+                with open(self.output_dir / Path(PathConstants.valid_edges_weights_path), "wb") as f:
+                    f.write(bytes(valid_edges_weights.numpy()))
 
         if test_edges_tens is not None:
+            print("Test edges written to:", PathConstants.test_edges_path)
             with open(self.output_dir / Path(PathConstants.test_edges_path), "wb") as f:
                 f.write(bytes(test_edges_tens.numpy()))
+            
+            if test_edges_weights is not None:
+                print("Test edge weights written to:", PathConstants.test_edges_weights_path)
+                with open(self.output_dir / Path(PathConstants.test_edges_weights_path), "wb") as f:
+                    f.write(bytes(test_edges_weights.numpy()))
 
         if num_partitions > 1:
             with open(self.output_dir / Path(PathConstants.train_edge_buckets_path), "w") as f:
+                print("Train partition offsets written to:", PathConstants.train_edge_buckets_path)
                 f.writelines([str(o) + "\n" for o in train_edges_offsets])
 
             if valid_edges_offsets is not None:
+                print("Valid partition offsets written to:", PathConstants.train_edge_buckets_path)
                 with open(self.output_dir / Path(PathConstants.valid_edge_buckets_path), "w") as f:
                     f.writelines([str(o) + "\n" for o in valid_edges_offsets])
 
             if test_edges_offsets is not None:
+                print("Test partition offsets written to:", PathConstants.train_edge_buckets_path)
                 with open(self.output_dir / Path(PathConstants.test_edge_buckets_path), "w") as f:
                     f.writelines([str(o) + "\n" for o in test_edges_offsets])
 
