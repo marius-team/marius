@@ -496,7 +496,7 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
         }
 
         if (outgoing_offsets.defined()) {
-            if (delta_outgoing_edges.size(0) > 0) {
+            if (delta_outgoing_offsets.size(0) > 0) {
                 outgoing_offsets = outgoing_offsets + delta_outgoing_edges.size(0);
                 outgoing_offsets = torch::cat({delta_outgoing_offsets, outgoing_offsets}, 0);
             }
@@ -632,7 +632,7 @@ torch::Tensor LayeredNeighborSampler::computeDeltaIdsHelperMethod1(torch::Tensor
 
     auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids.device());
     std::vector<torch::Tensor> sub_deltas = std::vector<torch::Tensor>(num_threads);
-    int64_t upper_bound = (int64_t)(delta_incoming_edges.size(0) + delta_outgoing_edges.size(0)) / num_threads;
+    int64_t upper_bound = (int64_t)(delta_incoming_edges.size(0) + delta_outgoing_edges.size(0)) / num_threads + 1;
 
     std::vector<int> sub_counts = std::vector<int>(num_threads, 0);
     std::vector<int> sub_offsets = std::vector<int>(num_threads, 0);
