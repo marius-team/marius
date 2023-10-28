@@ -496,7 +496,7 @@ DENSEGraph LayeredNeighborSampler::getNeighbors(torch::Tensor node_ids, shared_p
         }
 
         if (outgoing_offsets.defined()) {
-            if (delta_outgoing_edges.size(0) > 0) {
+            if (delta_outgoing_offsets.size(0) > 0) {
                 outgoing_offsets = outgoing_offsets + delta_outgoing_edges.size(0);
                 outgoing_offsets = torch::cat({delta_outgoing_offsets, outgoing_offsets}, 0);
             }
