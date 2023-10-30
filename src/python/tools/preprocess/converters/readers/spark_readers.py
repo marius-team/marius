@@ -1,8 +1,9 @@
 from pathlib import Path
 
-from marius.tools.preprocess.converters.readers.reader import Reader
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
+
+from marius.tools.preprocess.converters.readers.reader import Reader
 
 
 class SparkDelimitedFileReader(Reader):

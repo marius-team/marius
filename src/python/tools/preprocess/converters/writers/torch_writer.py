@@ -1,8 +1,9 @@
 from pathlib import Path
 
+from omegaconf import OmegaConf
+
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
-from omegaconf import OmegaConf
 
 
 class TorchWriter(object):

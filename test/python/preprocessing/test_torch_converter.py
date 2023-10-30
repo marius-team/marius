@@ -6,10 +6,11 @@ from test.python.constants import TESTING_DATA_DIR, TMP_TEST_DIR
 
 import numpy as np
 import pandas as pd
+from omegaconf import MISSING, OmegaConf
+
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
-from omegaconf import MISSING, OmegaConf
 
 import torch  # isort:skip
 
@@ -374,6 +375,9 @@ class TestTorchConverter(unittest.TestCase):
         validate_partitioned_output_dir(
             output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, num_partitions=100
         )
+
+    def test_always_fail(self):
+        assert 1 == 0
 
     def test_no_remap(self):
         output_dir = Path(TMP_TEST_DIR) / Path("test_dtype")
