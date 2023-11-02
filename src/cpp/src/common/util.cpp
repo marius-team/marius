@@ -6,6 +6,7 @@
 
 #include <unistd.h>
 
+#include <fstream>
 #include <iostream>
 
 #include "reporting/logger.h"

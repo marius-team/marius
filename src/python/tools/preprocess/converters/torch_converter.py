@@ -404,8 +404,8 @@ class TorchEdgeListConverter(object):
         remap_ids: bool = True,
         sequential_train_nodes: bool = False,
         sequential_deg_nodes: int = 0,
-        num_nodes: int = None,
-        num_rels: int = None,
+        num_nodes: int = 1,
+        num_rels: int = 1,
         known_node_ids: list = None,
     ):
         """
@@ -592,8 +592,8 @@ class TorchEdgeListConverter(object):
             save_order.insert(1, "edge_weight")
         elif self.edge_type_column >= 0 and self.edge_weight_column >= 0:
             # Have both edge type and edge weight
-            save_order.insert(1, "edge_type")
-            save_order.insert(2, "edge_weight")
+            save_order.insert(len(save_order) - 1, "edge_type")
+            save_order.insert(len(save_order) - 1, "edge_weight")
 
         return save_order
 
@@ -661,13 +661,15 @@ class TorchEdgeListConverter(object):
                         delimiter=",",
                     )
             else:
+                # Determine which columns to keep
                 cols_to_keep = [self.columns[0], self.columns[-1]]
                 if self.edge_type_column >= 0:
-                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_type_column)
+                    cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_type_column)
 
                 if self.edge_weight_column >= 0:
-                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_weight_column)
+                    cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_weight_column)
 
+                print("Cols to keep of", cols_to_keep, "with df columns of", train_edges_df.columns)
                 train_edges_df = train_edges_df[train_edges_df.columns[cols_to_keep]].astype(int)
                 train_edges_tens = dataframe_to_tensor(train_edges_df)
 
@@ -737,23 +739,27 @@ class TorchEdgeListConverter(object):
             else:
                 cols_to_keep = [self.columns[0], self.columns[-1]]
                 if self.edge_type_column >= 0:
-                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_type_column)
+                    cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_type_column)
 
                 if self.edge_weight_column >= 0:
-                    cols_to_keep = cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_weight_column)
+                    cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_weight_column)
+                print("Determined columns to keep", cols_to_keep)
 
-                train_edges_tens = train_edges_tens[:, [cols_to_keep]]
+                train_edges_tens = train_edges_tens[:, cols_to_keep]
                 if valid_edges_tens is not None:
-                    valid_edges_tens = valid_edges_tens[:, [cols_to_keep]]
+                    valid_edges_tens = valid_edges_tens[:, cols_to_keep]
                 if test_edges_tens is not None:
-                    test_edges_tens = test_edges_tens[:, [cols_to_keep]]
+                    test_edges_tens = test_edges_tens[:, cols_to_keep]
+                
+                print("Train edges tensor of shape", train_edges_tens.size(), "with values", train_edges_tens[0])
 
         # Split the edges
         if self.splits is not None:
             train_edges_tens, valid_edges_tens, test_edges_tens = split_edges(train_edges_tens, self.splits)
 
         if save_order is None:
-            save_order = self.save_order()
+            save_order = self.extract_edge_mapping()
+        print("Determined save order of", save_order)
 
         # Extract the weights if they exist
         train_edges_weights, valid_edges_weights, test_edges_weights = None, None, None
@@ -761,10 +767,11 @@ class TorchEdgeListConverter(object):
             edge_idx = save_order.index("edge_weight")
             cols_to_keep = [i for i in range(len(save_order))]
             cols_to_keep.pop(edge_idx)
-            save_order.pop(edge_idx)
+            print("Cols to keep of", cols_to_keep, "with edge idx of", edge_idx)
 
             train_edges_weights = train_edges_tens[:, [edge_idx]].to(torch.float32)
             train_edges_tens = train_edges_tens[:, cols_to_keep]
+            print("First values", train_edges_tens[0], "with weights of", train_edges_weights[0])
 
             if valid_edges_tens is not None:
                 valid_edges_weights = valid_edges_tens[:, [edge_idx]].to(torch.float32)

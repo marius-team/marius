@@ -59,9 +59,10 @@ class TorchWriter(object):
             f.write(bytes(train_edges_tens.numpy()))
 
         if train_edges_weights is not None:
-            print("Train edges weights written to:", PathConstants.train_edges_weights_path)
-            with open(self.output_dir / Path(PathConstants.train_edges_weights_path), "wb") as f:
-                f.write(bytes(train_edges_weights.numpy()))
+            save_path = self.output_dir / Path(PathConstants.train_edges_weights_path)
+            print("Train edges weights written to:", save_path)
+            weights_arr = train_edges_weights.numpy().flatten()
+            weights_arr.tofile(save_path)
 
         if valid_edges_tens is not None:
             print("Valid edges written to:", PathConstants.valid_edges_path)
@@ -69,9 +70,10 @@ class TorchWriter(object):
                 f.write(bytes(valid_edges_tens.numpy()))
 
             if valid_edges_weights is not None:
-                print("Valid edges weights written to:", PathConstants.valid_edges_weights_path)
-                with open(self.output_dir / Path(PathConstants.valid_edges_weights_path), "wb") as f:
-                    f.write(bytes(valid_edges_weights.numpy()))
+                save_path = self.output_dir / Path(PathConstants.valid_edges_weights_path)
+                print("Valid edges weights written to:", save_path)
+                weights_arr = valid_edges_weights.numpy().flatten()
+                weights_arr.tofile(save_path)
 
         if test_edges_tens is not None:
             print("Test edges written to:", PathConstants.test_edges_path)
@@ -79,9 +81,10 @@ class TorchWriter(object):
                 f.write(bytes(test_edges_tens.numpy()))
 
             if test_edges_weights is not None:
-                print("Test edge weights written to:", PathConstants.test_edges_weights_path)
-                with open(self.output_dir / Path(PathConstants.test_edges_weights_path), "wb") as f:
-                    f.write(bytes(test_edges_weights.numpy()))
+                save_path = self.output_dir / Path(PathConstants.test_edges_weights_path)
+                print("Test edge weights written to:", save_path)
+                weights_arr = test_edges_weights.numpy().flatten()
+                weights_arr.tofile(save_path)
 
         if num_partitions > 1:
             with open(self.output_dir / Path(PathConstants.train_edge_buckets_path), "w") as f:
