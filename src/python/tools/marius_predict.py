@@ -3,10 +3,9 @@ import os
 import pathlib
 from argparse import RawDescriptionHelpFormatter
 
+import marius as m
 import numpy as np
 import pandas as pd
-
-import marius as m
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.prediction.link_prediction import infer_lp
 from marius.tools.prediction.node_classification import infer_nc

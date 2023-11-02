@@ -6,11 +6,10 @@ from test.python.constants import TESTING_DATA_DIR, TMP_TEST_DIR
 
 import numpy as np
 import pandas as pd
-from omegaconf import MISSING, OmegaConf
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
+from omegaconf import MISSING, OmegaConf
 
 import torch  # isort:skip
 
@@ -18,7 +17,12 @@ test_files = ["train_edges.txt", "train_edges_weights.txt", "valid_edges.txt", "
 
 
 def validate_partitioned_output_dir(
-    output_dir: Path, expected_stats: DatasetConfig, num_partitions, dtype=np.int32, partitioned_eval=False, has_weights = False,
+    output_dir: Path,
+    expected_stats: DatasetConfig,
+    num_partitions,
+    dtype=np.int32,
+    partitioned_eval=False,
+    has_weights=False,
 ):
     validate_output_dir(output_dir, expected_stats, dtype, remap_ids=True)
 
@@ -56,17 +60,19 @@ def validate_partitioned_output_dir(
                 offset += bucket_size
 
     assert offset == expected_stats.num_train
-    
+
     if has_weights:
         weights_file_path = output_dir / Path(PathConstants.train_edges_weights_path)
         assert weights_file_path.exists()
-        values = np.memmap(weights_file_path, dtype=np.float32, mode='r')
+        values = np.memmap(weights_file_path, dtype=np.float32, mode="r")
         values = np.sort(values)
         for i in range(len(values)):
             assert values[i] == float(i)
 
 
-def validate_output_dir(output_dir: Path, expected_stats: DatasetConfig, dtype=np.int32, remap_ids=True, has_weights = False):
+def validate_output_dir(
+    output_dir: Path, expected_stats: DatasetConfig, dtype=np.int32, remap_ids=True, has_weights=False
+):
     assert output_dir.exists()
     assert (output_dir / Path("edges")).exists()
     assert (output_dir / Path("nodes")).exists()
@@ -127,13 +133,14 @@ def validate_output_dir(output_dir: Path, expected_stats: DatasetConfig, dtype=n
     else:
         assert not node_mapping_path.exists()
         assert not relation_mapping_path.exists()
-    
+
     if has_weights:
         weights_file_path = output_dir / Path(PathConstants.train_edges_weights_path)
         assert weights_file_path.exists()
-        values = np.memmap(weights_file_path, dtype=np.float32, mode='r')
+        values = np.memmap(weights_file_path, dtype=np.float32, mode="r")
         for i in range(len(values)):
             assert values[i] == float(i)
+
 
 class TestTorchConverter(unittest.TestCase):
     """
@@ -413,409 +420,433 @@ class TestTorchConverter(unittest.TestCase):
         expected_stats.num_train = 1000
 
         validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=False)
-    
+
     def test_torch_no_relation_no_remap(self):
         remap_val = False
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_df = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         train_edges = torch.tensor(train_edges_df.to_numpy())
-        
+
         num_rows = train_edges.size(0)
         train_edges = torch.column_stack((train_edges, torch.arange(num_rows)))
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=train_edges,
-            remap_ids = remap_val,
-            columns = [0, 2],
-            num_nodes = 100,
-            format="pytorch"
+            remap_ids=remap_val,
+            columns=[0, 2],
+            num_nodes=100,
+            format="pytorch",
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val)
-    
+
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val)
+
     def test_pandas_no_relation_no_remap(self):
         remap_val = False
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_file = Path(TMP_TEST_DIR) / Path("train_edges_weights.txt")
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
-            train_edges = train_edges_file,
+            train_edges=train_edges_file,
             delim=" ",
-            remap_ids = remap_val,
-            columns = [0, 2],
-            num_nodes = 100,
+            remap_ids=remap_val,
+            columns=[0, 2],
+            num_nodes=100,
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val)
-    
+
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val)
+
     def test_torch_no_relation_remap(self):
         remap_val = True
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_df = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         train_edges = torch.tensor(train_edges_df.to_numpy())
-        
+
         num_rows = train_edges.size(0)
         train_edges = torch.column_stack((train_edges, torch.arange(num_rows)))
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=train_edges,
-            remap_ids = remap_val,
-            columns = [0, 2],
-            num_nodes = 100,
-            format="pytorch"
+            remap_ids=remap_val,
+            columns=[0, 2],
+            num_nodes=100,
+            format="pytorch",
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val)
-    
+
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val)
+
     def test_pandas_no_relation_remap(self):
         remap_val = True
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_file = Path(TMP_TEST_DIR) / Path("train_edges_weights.txt")
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
-            train_edges = train_edges_file,
+            train_edges=train_edges_file,
             delim=" ",
-            remap_ids = remap_val,
-            columns = [0, 2],
-            num_nodes = 100,
+            remap_ids=remap_val,
+            columns=[0, 2],
+            num_nodes=100,
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val)
-    
+
+        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val)
+
     def test_torch_only_weights_no_remap(self):
         remap_val = False
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_df = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         train_edges = torch.tensor(train_edges_df.to_numpy())
-        
+
         num_rows = train_edges.size(0)
         train_edges = torch.column_stack((train_edges, torch.arange(num_rows)))
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=train_edges,
-            remap_ids = remap_val,
-            columns = [0, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
-            format="pytorch"
+            remap_ids=remap_val,
+            columns=[0, 2],
+            edge_weight_column=3,
+            num_nodes=100,
+            format="pytorch",
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_pandas_only_weights_no_remap(self):
         remap_val = False
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_file = Path(TMP_TEST_DIR) / Path("train_edges_weights.txt")
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
-            train_edges = train_edges_file,
+            train_edges=train_edges_file,
             delim=" ",
-            remap_ids = remap_val,
-            columns = [0, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
+            remap_ids=remap_val,
+            columns=[0, 2],
+            edge_weight_column=3,
+            num_nodes=100,
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_torch_only_weights_remap(self):
         remap_val = True
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_df = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         train_edges = torch.tensor(train_edges_df.to_numpy())
-        
+
         num_rows = train_edges.size(0)
         train_edges = torch.column_stack((train_edges, torch.arange(num_rows)))
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=train_edges,
-            remap_ids = remap_val,
-            columns = [0, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
-            format="pytorch"
+            remap_ids=remap_val,
+            columns=[0, 2],
+            edge_weight_column=3,
+            num_nodes=100,
+            format="pytorch",
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_pandas_only_weights_remap(self):
         remap_val = True
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_file = Path(TMP_TEST_DIR) / Path("train_edges_weights.txt")
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
-            train_edges = train_edges_file,
+            train_edges=train_edges_file,
             delim=" ",
-            remap_ids = remap_val,
-            columns = [0, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
+            remap_ids=remap_val,
+            columns=[0, 2],
+            edge_weight_column=3,
+            num_nodes=100,
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 1
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_torch_relationship_weights_no_remap(self):
         remap_val = False
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_df = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         train_edges = torch.tensor(train_edges_df.to_numpy())
-        
+
         num_rows = train_edges.size(0)
         train_edges = torch.column_stack((train_edges, torch.arange(num_rows)))
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=train_edges,
-            remap_ids = remap_val,
-            columns = [0, 1, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
+            remap_ids=remap_val,
+            columns=[0, 1, 2],
+            edge_weight_column=3,
+            num_nodes=100,
             num_rels=10,
-            format="pytorch"
+            format="pytorch",
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_pandas_relationship_weights_no_remap(self):
         remap_val = False
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_file = Path(TMP_TEST_DIR) / Path("train_edges_weights.txt")
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
-            train_edges = train_edges_file,
+            train_edges=train_edges_file,
             delim=" ",
-            remap_ids = remap_val,
-            columns = [0, 1, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
-            num_rels = 10,
+            remap_ids=remap_val,
+            columns=[0, 1, 2],
+            edge_weight_column=3,
+            num_nodes=100,
+            num_rels=10,
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_torch_relationship_weights_remap(self):
         remap_val = True
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_df = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         train_edges = torch.tensor(train_edges_df.to_numpy())
-        
+
         num_rows = train_edges.size(0)
         train_edges = torch.column_stack((train_edges, torch.arange(num_rows)))
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=train_edges,
-            remap_ids = remap_val,
-            columns = [0, 1, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
-            format="pytorch"
+            remap_ids=remap_val,
+            columns=[0, 1, 2],
+            edge_weight_column=3,
+            num_nodes=100,
+            format="pytorch",
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_pandas_relationship_weights_remap(self):
         remap_val = True
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_file = Path(TMP_TEST_DIR) / Path("train_edges_weights.txt")
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
-            train_edges = train_edges_file,
+            train_edges=train_edges_file,
             delim=" ",
-            remap_ids = remap_val,
-            columns = [0, 1, 2],
-            edge_weight_column = 3,
-            num_nodes = 100,
-            num_rels = 10,
+            remap_ids=remap_val,
+            columns=[0, 1, 2],
+            edge_weight_column=3,
+            num_nodes=100,
+            num_rels=10,
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
-        
-        validate_output_dir(output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids = remap_val, has_weights = True)
-    
+
+        validate_output_dir(
+            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, remap_ids=remap_val, has_weights=True
+        )
+
     def test_torch_relationship_weights_remap_partioned(self):
         num_paritions = 10
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_df = pd.read_csv(Path(TMP_TEST_DIR) / Path("train_edges.txt"), header=None, sep=" ")
         train_edges = torch.tensor(train_edges_df.to_numpy())
-        
+
         num_rows = train_edges.size(0)
         train_edges = torch.column_stack((train_edges, torch.arange(num_rows)))
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
             train_edges=train_edges,
-            columns = [0, 1, 2],
-            edge_weight_column = 3,
-            num_partitions = num_paritions,
-            format="pytorch"
+            columns=[0, 1, 2],
+            edge_weight_column=3,
+            num_partitions=num_paritions,
+            format="pytorch",
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
-        
+
         validate_partitioned_output_dir(
-            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, num_partitions = num_paritions, has_weights = True,
+            output_dir=output_dir,
+            expected_stats=expected_stats,
+            dtype=np.int32,
+            num_partitions=num_paritions,
+            has_weights=True,
         )
-    
+
     def test_pandas_relationship_weights_remap_partioned(self):
         num_paritions = 10
         output_dir = Path(TMP_TEST_DIR) / Path("test_torch_defaults")
         output_dir.mkdir()
-        
+
         train_edges_file = Path(TMP_TEST_DIR) / Path("train_edges_weights.txt")
-        
+
         converter = TorchEdgeListConverter(
             output_dir=output_dir,
-            train_edges = train_edges_file,
+            train_edges=train_edges_file,
             delim=" ",
-            columns = [0, 1, 2],
-            edge_weight_column = 3,
-            num_partitions = num_paritions,
+            columns=[0, 1, 2],
+            edge_weight_column=3,
+            num_partitions=num_paritions,
         )
         converter.convert()
-        
+
         expected_stats = DatasetConfig()
         expected_stats.dataset_dir = output_dir.__str__()
         expected_stats.num_edges = 1000
         expected_stats.num_nodes = 100
         expected_stats.num_relations = 10
         expected_stats.num_train = 1000
-        
+
         validate_partitioned_output_dir(
-            output_dir=output_dir, expected_stats=expected_stats, dtype=np.int32, num_partitions = num_paritions, has_weights = True,
+            output_dir=output_dir,
+            expected_stats=expected_stats,
+            dtype=np.int32,
+            num_partitions=num_paritions,
+            has_weights=True,
         )

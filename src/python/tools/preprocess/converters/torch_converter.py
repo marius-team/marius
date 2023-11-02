@@ -3,7 +3,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.preprocess.converters.partitioners.torch_partitioner import TorchPartitioner
 from marius.tools.preprocess.converters.readers.pandas_readers import PandasDelimitedFileReader
@@ -750,7 +749,7 @@ class TorchEdgeListConverter(object):
                     valid_edges_tens = valid_edges_tens[:, cols_to_keep]
                 if test_edges_tens is not None:
                     test_edges_tens = test_edges_tens[:, cols_to_keep]
-                
+
                 print("Train edges tensor of shape", train_edges_tens.size(), "with values", train_edges_tens[0])
 
         # Split the edges

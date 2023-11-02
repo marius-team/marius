@@ -1,9 +1,8 @@
 import importlib
 from pathlib import Path
 
-from preprocess.converters.torch_converter import TorchEdgeListConverter
-
 from marius.tools.preprocess.dataset import LinkPredictionDataset
+from preprocess.converters.torch_converter import TorchEdgeListConverter
 
 pyspark_loader = importlib.find_loader("pyspark")
 pyspark_found = pyspark_loader is not None

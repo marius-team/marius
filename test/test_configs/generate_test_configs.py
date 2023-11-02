@@ -3,9 +3,8 @@ import os
 from pathlib import Path
 from test.python.constants import TESTING_CONFIG_DIR
 
-from omegaconf import OmegaConf
-
 from marius.tools.configuration.marius_config import MariusConfig
+from omegaconf import OmegaConf
 
 
 def get_config(model_config_path, storage_config_path, train_config_path, eval_config_path):
