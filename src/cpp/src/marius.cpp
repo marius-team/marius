@@ -120,7 +120,8 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
         if (marius_config->storage->embeddings->type == StorageBackend::PARTITION_BUFFER) {
             num_partitions = std::dynamic_pointer_cast<PartitionBufferOptions>(marius_config->storage->embeddings->options)->num_partitions;
         }
-    } else if (marius_config->storage->features != nullptr) {
+    }
+    if (marius_config->storage->features != nullptr) {
         if (marius_config->storage->features->type == StorageBackend::PARTITION_BUFFER) {
             num_partitions = std::dynamic_pointer_cast<PartitionBufferOptions>(marius_config->storage->features->options)->num_partitions;
         }

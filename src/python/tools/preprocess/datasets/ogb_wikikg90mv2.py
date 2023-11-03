@@ -83,8 +83,8 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
             random_node_map_argsort = np.argsort(random_node_map)
 
             with open(self.node_features_file, "wb") as f:
-                chunk_size = 1e7
-                num_chunks = np.ceil(node_mapping.shape[0] / chunk_size)
+                chunk_size = int(1e7)
+                num_chunks = int(np.ceil(node_mapping.shape[0] / chunk_size))
 
                 offset = 0
 

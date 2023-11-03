@@ -275,6 +275,7 @@ class LayerConfig:
         self.type = input_config.type.upper()
 
         if "init" in input_config.keys():
+            self.init = InitConfig()
             self.init.merge(input_config.init)
 
         if "options" in input_config.keys():
@@ -310,11 +311,11 @@ class LayerConfig:
             self.bias = input_config.bias
 
         if "bias_init" in input_config.keys():
+            self.bias_init = InitConfig()
             self.bias_init.merge(input_config.bias_init)
 
         if "optimizer" in input_config.keys():
-            if self.optimizer is MISSING:
-                self.optimizer = OptimizerConfig()
+            self.optimizer = OptimizerConfig()
             self.optimizer.merge(input_config.optimizer)
 
         if "input_dim" in input_config.keys():
@@ -408,6 +409,7 @@ class DecoderConfig:
         self.options = new_options
 
         if "optimizer" in input_config.keys():
+            self.optimizer = OptimizerConfig()
             self.optimizer.merge(input_config.optimizer)
 
 
@@ -439,24 +441,23 @@ class ModelConfig:
             self.learning_task = input_config.learning_task.upper()
 
         if "encoder" in input_config.keys():
-            if self.encoder is MISSING:
-                self.encoder = EncoderConfig()
+            self.encoder = EncoderConfig()
             self.encoder.merge(input_config.encoder)
 
         if "decoder" in input_config.keys():
-            if self.decoder is MISSING:
-                self.decoder = DecoderConfig()
+            self.decoder = DecoderConfig()
             self.decoder.merge(input_config.decoder)
 
         if "loss" in input_config.keys():
-            if self.loss is MISSING:
-                self.loss = LossConfig()
+            self.loss = LossConfig()
             self.loss.merge(input_config.loss)
 
         if "dense_optimizer" in input_config.keys():
+            self.dense_optimizer = OptimizerConfig()
             self.dense_optimizer.merge(input_config.dense_optimizer)
 
         if "sparse_optimizer" in input_config.keys():
+            self.sparse_optimizer = OptimizerConfig()
             self.sparse_optimizer.merge(input_config.sparse_optimizer)
 
         self.__post_init__()
@@ -591,7 +592,7 @@ class StorageConfig:
     dataset: DatasetConfig = DatasetConfig()
     edges: StorageBackendConfig = StorageBackendConfig(options=StorageOptions(dtype="int"))
     nodes: StorageBackendConfig = StorageBackendConfig(options=StorageOptions(dtype="int"))
-    embeddings: StorageBackendConfig = StorageBackendConfig(options=StorageOptions(dtype="float"))
+    embeddings: StorageBackendConfig = StorageBackendConfig(options=StorageOptions(dtype="float")) # TODO: these can probably default to MISSING
     features: StorageBackendConfig = StorageBackendConfig(options=StorageOptions(dtype="float"))
     prefetch: bool = True
     shuffle_input: bool = True
@@ -631,6 +632,7 @@ class StorageConfig:
             self.device_ids = input_config.device_ids
 
         if "dataset" in input_config.keys():
+            self.dataset = DatasetConfig()
             self.dataset.merge(input_config.dataset)
 
         if "model_dir" in input_config.keys():
@@ -639,21 +641,19 @@ class StorageConfig:
             self.model_dir = get_model_dir_path(self.dataset.dataset_dir)
 
         if "edges" in input_config.keys():
+            self.edges = StorageBackendConfig(options=StorageOptions(dtype="int"))
             self.edges.merge(input_config.edges)
 
         if "nodes" in input_config.keys():
-            if self.nodes is MISSING:
-                self.nodes = StorageBackendConfig(options=StorageOptions(dtype="int"))
+            self.nodes = StorageBackendConfig(options=StorageOptions(dtype="int"))
             self.nodes.merge(input_config.nodes)
 
         if "embeddings" in input_config.keys():
-            if self.embeddings is MISSING:
-                self.embeddings = StorageBackendConfig(options=StorageOptions(dtype="float"))
+            self.embeddings = StorageBackendConfig(options=StorageOptions(dtype="float"))
             self.embeddings.merge(input_config.embeddings)
 
         if "features" in input_config.keys():
-            if self.features is MISSING:
-                self.features = StorageBackendConfig(options=StorageOptions(dtype="float"))
+            self.features = StorageBackendConfig(options=StorageOptions(dtype="float"))
             self.features.merge(input_config.features)
 
         if "prefetch" in input_config.keys():
@@ -831,14 +831,13 @@ class TrainingConfig:
                     if key == "negative_sampling":
                         val = input_config.get("negative_sampling", MISSING)
                         if val is not MISSING:
-                            if self.negative_sampling is MISSING:
-                                self.negative_sampling = NegativeSamplingConfig()
+                            self.negative_sampling = NegativeSamplingConfig()
                             self.negative_sampling.merge(val)
                     elif key == "pipeline":
-                        if self.pipeline is MISSING:
-                            self.pipeline = PipelineConfig()
+                        self.pipeline = PipelineConfig()
                         self.pipeline.merge(input_config.pipeline)
                     elif key == "checkpoint":
+                        self.checkpoint = CheckpointConfig()
                         self.checkpoint.merge(input_config.checkpoint)
                     else:
                         val = input_config.__getattr__(key)
@@ -871,10 +870,10 @@ class EvaluationConfig:
                 if key == "negative_sampling":
                     val = input_config.get("negative_sampling", MISSING)
                     if val is not MISSING:
-                        if self.negative_sampling is MISSING:
-                            self.negative_sampling = NegativeSamplingConfig()
+                        self.negative_sampling = NegativeSamplingConfig()
                         self.negative_sampling.merge(val)
                 elif key == "pipeline":
+                    self.pipeline = PipelineConfig()
                     self.pipeline.merge(input_config.pipeline)
                 else:
                     val = input_config.__getattr__(key)
@@ -921,15 +920,19 @@ def type_safe_merge(base_config: MariusConfig, input_config: DictConfig):
         base_config.distributed.merge(input_config.distributed)
 
     if "model" in input_config.keys():
+        base_config.model = ModelConfig()
         base_config.model.merge(input_config.model)
 
     if "storage" in input_config.keys():
+        base_config.storage = StorageConfig()
         base_config.storage.merge(input_config.storage)
 
     if "training" in input_config.keys():
+        base_config.training = TrainingConfig()
         base_config.training.merge(input_config.training)
 
     if "evaluation" in input_config.keys():
+        base_config.evaluation = EvaluationConfig()
         base_config.evaluation.merge(input_config.evaluation)
 
     base_config.__post_init__()
