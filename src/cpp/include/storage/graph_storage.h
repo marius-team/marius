@@ -217,7 +217,7 @@ class GraphModelStorage {
 
         if (storage_ptrs_.node_embeddings != nullptr && instance_of<Storage, PartitionBufferStorage>(storage_ptrs_.node_embeddings)) {
             std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->setBufferOrdering(buffer_states);
-            if (storage_ptrs_.node_optimizer_state != nullptr && !train_) {
+            if (storage_ptrs_.node_optimizer_state != nullptr && train_) {
                 std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_optimizer_state)->setBufferOrdering(buffer_states);
             }
         }

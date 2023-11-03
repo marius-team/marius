@@ -204,6 +204,9 @@ class DataLoader {
             graph_storage_->setTrainSet();
             negative_sampler_ = training_negative_sampler_;
             neighbor_sampler_ = training_neighbor_sampler_;
+            if (graph_storage_->useInMemorySubGraph()) {
+                unloadStorage(false); // unload storage loaded during eval before new epoch
+            }
             loadStorage();
         }
     }
