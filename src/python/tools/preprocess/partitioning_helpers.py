@@ -161,12 +161,13 @@ def balance_parts(parts, part_size, edges):
                 while counts[jj] >= part_size and jj < ii:
                     jj += 1
 
-                while counts[ii] > part_size > counts[jj]: # this doesn't need to be a loop, can do all at once
-                    # move a random node from ii to jj
-                    choice = np.random.choice(np.flatnonzero(parts == uniques_sorted_on_size[ii]))
-                    parts[choice] = uniques_sorted_on_size[jj]
-                    counts[ii] -= 1
-                    counts[jj] += 1
+                # move random nodes from ii to jj
+                num_to_move = min(counts[ii]-part_size, part_size-counts[jj])
+                if num_to_move > 0:
+                    choices = np.random.choice(np.flatnonzero(parts == uniques_sorted_on_size[ii]), size=(num_to_move, ), replace=False)
+                    parts[choices] = uniques_sorted_on_size[jj]
+                    counts[ii] -= num_to_move
+                    counts[jj] += num_to_move
             else:
                 ii -= 1
 
@@ -176,12 +177,12 @@ def balance_parts(parts, part_size, edges):
 
         # make only one partition smaller than part_size (this would be the last partition)
         for ii in range(1, counts.shape[0]):
-            while counts[ii] < part_size:
-                # move a random node from 0 to ii
-                choice = np.random.choice(np.flatnonzero(parts == uniques_sorted_on_size[0]))
-                parts[choice] = uniques_sorted_on_size[ii]
-                counts[0] -= 1
-                counts[ii] += 1
+            num_to_move = part_size - counts[ii]
+            if num_to_move > 0:
+                choices = np.random.choice(np.flatnonzero(parts == uniques_sorted_on_size[0]), size=(num_to_move, ), replace=False)
+                parts[choices] = uniques_sorted_on_size[ii]
+                counts[0] -= num_to_move
+                counts[ii] += num_to_move
 
         argsort = counts.argsort()[::-1]
         uniques_sorted_on_size = uniques_sorted_on_size[argsort]
