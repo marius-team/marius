@@ -170,8 +170,6 @@ def main():
             splits=args.dataset_split,
             partitioned_eval=args.partitioned_eval,
             sequential_train_nodes=args.sequential_train_nodes,
-            columns=args.columns,
-            edge_weight_column=args.edge_weight_column,
         )
 
 

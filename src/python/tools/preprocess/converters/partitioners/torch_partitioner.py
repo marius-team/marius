@@ -17,11 +17,11 @@ def partition_edges(edges, num_nodes, num_partitions, edge_weights=None):
 
     _, dst_args = torch.sort(dst_partitions, stable=True)
     _, src_args = torch.sort(src_partitions[dst_args], stable=True)
-    mask = dst_args[src_args]
+    sort_order = dst_args[src_args]
 
-    edges = edges[mask]
+    edges = edges[sort_order]
     if edge_weights is not None:
-        edge_weights = edge_weights[mask]
+        edge_weights = edge_weights[sort_order]
 
     edge_bucket_ids = torch.div(edges, partition_size, rounding_mode="trunc")
     offsets = np.zeros([num_partitions, num_partitions], dtype=int)

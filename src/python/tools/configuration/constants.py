@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 @dataclass
 class PathConstants:
     model_file: str = "model.pt"
