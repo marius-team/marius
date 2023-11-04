@@ -65,7 +65,7 @@ def validate_partitioned_output_dir(
     if has_weights:
         weights_file_path = output_dir / Path(PathConstants.train_edges_weights_path)
         assert weights_file_path.exists()
-        values = np.memmap(weights_file_path, dtype=np.float32, mode="r")
+        values = np.fromfile(weights_file_path, dtype=np.float32)
         values = np.sort(values)
         for i in range(len(values)):
             assert values[i] == float(i)

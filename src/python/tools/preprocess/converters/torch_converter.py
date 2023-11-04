@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from marius.tools.configuration.constants import PathConstants
-from marius.tools.preprocess.constants import TorchConverterColumnKeys as ColNames
+from marius.tools.preprocess.converters.torch_constants import TorchConverterColumnKeys as ColNames
 from marius.tools.preprocess.converters.partitioners.torch_partitioner import TorchPartitioner
 from marius.tools.preprocess.converters.readers.pandas_readers import PandasDelimitedFileReader
 from marius.tools.preprocess.converters.writers.torch_writer import TorchWriter
@@ -170,7 +170,22 @@ def map_edge_list_dfs(
 
     return output_edge_lists, node_mapping, rel_mapping, output_edge_weights
 
+def extract_tensor_from_tens(edges_tensor, column_mappings):
+    if edges_tensor is None:
+        return None, None
+    
+    edge_weights_column = column_mappings[ColNames.EDGE_WEIGHT_COL]
+    cols_to_keep = [column_mappings[ColNames.SRC_COL], column_mappings[ColNames.DST_COL]]
+    if column_mappings[ColNames.EDGE_TYPE_COL] is not None:
+        cols_to_keep.insert(len(cols_to_keep) - 1, column_mappings[ColNames.EDGE_TYPE_COL])
 
+    converted_tensor = edges_tensor[ : , cols_to_keep]
+    converted_weights = None
+    if edge_weights_column is not None:
+        converted_weights = edges_tensor[ : , edge_weights_column]
+    
+    return converted_tensor, converted_weights
+    
 def map_edge_lists(
     edge_lists: list,
     perform_unique=True,
@@ -206,21 +221,15 @@ def map_edge_lists(
                 all_edges.append(edge_tensors)
     else:
         # Determine the order of tensors to keep
-        cols_to_keep = [column_mappings[ColNames.SRC_COL], column_mappings[ColNames.DST_COL]]
-        if column_mappings[ColNames.EDGE_TYPE_COL] is None:
-            cols_to_keep.insert(len(cols_to_keep) - 1, column_mappings[ColNames.EDGE_TYPE_COL])
-            has_rels = True
-        edge_weights_column = column_mappings[ColNames.EDGE_WEIGHT_COL]
-        
         for idx in range(len(edge_lists)):
             curr_edges = edge_lists[idx]
             if curr_edges is None:
                 continue
             
-            edge_lists[idx] = curr_edges[cols_to_keep]
-            all_edges.append(edge_lists[idx])            
-            if edge_weights_column is not None:
-                edge_weights_list[idx] = curr_edges[edge_weights_column]
+            converted_edges, converted_weights = extract_tensor_from_tens(curr_edges, column_mappings)
+            edge_lists[idx] = converted_edges
+            all_edges.append(converted_edges)
+            edge_weights_list[idx] = converted_weights 
     
     all_edges = torch.cat(all_edges)
     num_rels = 1
@@ -343,15 +352,14 @@ def map_edge_lists(
         if edge_list is None:
             output_edge_lists.append(None)
             continue
-            
+        
         new_src = extended_map[edge_list[:, 0].to(torch.int64)]
         new_dst = extended_map[edge_list[:, -1].to(torch.int64)]
         curr_row = [new_src, new_dst]
 
         if has_rels:
             new_rel = mapped_rel_ids[edge_list[:, 1].to(torch.int64) - min_rel_val]
-            curr_row.insert(len(new_rel) - 1, new_rel)
-            
+            curr_row.insert(len(curr_row) - 1, new_rel)            
         output_edge_lists.append(torch.stack(curr_row, dim=1))
 
     node_mapping = np.stack([unique_nodes.numpy(), mapped_node_ids.numpy()], axis=1)
@@ -419,8 +427,8 @@ class TorchEdgeListConverter(object):
         remap_ids: bool = True,
         sequential_train_nodes: bool = False,
         sequential_deg_nodes: int = 0,
-        num_nodes: int = 1,
-        num_rels: int = 1,
+        num_nodes: int = None,
+        num_rels: int = None,
         known_node_ids: list = None,
     ):
         """
@@ -513,7 +521,7 @@ class TorchEdgeListConverter(object):
             
         elif format.upper() in SUPPORTED_IN_MEMORY_FORMATS:
             self.reader = None
-            if format.upper() == "NUMPY":
+            if format.upper() == "NUMPY" or format.upper() == "NP":
                 assert isinstance(train_edges, np.ndarray)
                 self.train_edges_tens = torch.from_numpy(train_edges)
                 self.valid_edges_tens = None
@@ -527,7 +535,7 @@ class TorchEdgeListConverter(object):
                     assert isinstance(test_edges, np.ndarray)
                     self.test_edges_tens = torch.from_numpy(test_edges)
 
-            elif format.upper() == "PYTORCH":
+            elif format.upper() == "PYTORCH" or format.upper() == "TORCH":
                 assert isinstance(train_edges, torch.Tensor)
                 self.train_edges_tens = train_edges
                 self.valid_edges_tens = valid_edges
@@ -607,7 +615,7 @@ class TorchEdgeListConverter(object):
             train_edges_df, valid_edges_df, test_edges_df = self.reader.read()
 
             if self.remap_ids:
-                                
+                
                 all_edge_lists, node_mapping, rel_mapping, all_edge_weights = map_edge_lists(
                     [train_edges_df, valid_edges_df, test_edges_df],
                     known_node_ids=self.known_node_ids,
@@ -674,14 +682,12 @@ class TorchEdgeListConverter(object):
             test_edges_tens = self.test_edges_tens
 
             if self.remap_ids:
-                all_edges_list, node_mapping, rel_mapping, save_order = map_edge_lists(
+                all_edges_list, node_mapping, rel_mapping, all_edge_weights = map_edge_lists(
                     [train_edges_tens, valid_edges_tens, test_edges_tens],
                     known_node_ids=self.known_node_ids,
                     sequential_train_nodes=self.sequential_train_nodes,
                     sequential_deg_nodes=self.sequential_deg_nodes,
-                    edge_type_column=self.edge_type_column,
-                    edge_weight_column=self.edge_weight_column,
-                    columns=self.columns,
+                    column_mappings = self.column_mappings
                 )
 
                 self.num_nodes = node_mapping.shape[0]
@@ -696,6 +702,10 @@ class TorchEdgeListConverter(object):
                 elif len(all_edges_list) == 3:
                     valid_edges_tens = all_edges_list[1]
                     test_edges_tens = all_edges_list[2]
+                
+                train_edge_weights = all_edge_weights[0]
+                valid_edge_weights = all_edge_weights[1]
+                test_edge_weights = all_edge_weights[2]
 
                 print(
                     "Node mapping written to: {}".format(
@@ -723,21 +733,9 @@ class TorchEdgeListConverter(object):
                     )
 
             else:
-                cols_to_keep = [self.columns[0], self.columns[-1]]
-                if self.edge_type_column >= 0:
-                    cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_type_column)
-
-                if self.edge_weight_column >= 0:
-                    cols_to_keep.insert(len(cols_to_keep) - 1, self.edge_weight_column)
-                print("Determined columns to keep", cols_to_keep)
-
-                train_edges_tens = train_edges_tens[:, cols_to_keep]
-                if valid_edges_tens is not None:
-                    valid_edges_tens = valid_edges_tens[:, cols_to_keep]
-                if test_edges_tens is not None:
-                    test_edges_tens = test_edges_tens[:, cols_to_keep]
-
-                print("Train edges tensor of shape", train_edges_tens.size(), "with values", train_edges_tens[0])
+                train_edges_tens, train_edge_weights = extract_tensor_from_tens(train_edges_tens, self.column_mappings)
+                test_edges_tens, train_edge_weights = extract_tensor_from_tens(test_edges_tens, self.column_mappings)
+                valid_edges_tens, valid_edge_weights = extract_tensor_from_tens(valid_edges_tens, self.column_mappings)
 
         # Split the edges
         if self.splits is not None:

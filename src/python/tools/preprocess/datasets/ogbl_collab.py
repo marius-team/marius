@@ -23,7 +23,7 @@ class OGBLCollab(LinkPredictionDataset):
     than one year.
     """
 
-    def __init__(self, output_directory: Path, spark=False, include_edge_type=False, include_edge_weight=True):
+    def __init__(self, output_directory: Path, spark=False, include_edge_type=True, include_edge_weight=True):
         super().__init__(output_directory, spark)
 
         self.dataset_name = "ogbl_citation2"
@@ -66,51 +66,42 @@ class OGBLCollab(LinkPredictionDataset):
         splits=None,
         sequential_train_nodes=False,
         partitioned_eval=False,
-        df_save_dir=None,
     ):
         # Read in the training data
         train_idx = torch.load(self.input_train_edges_file)
-        train_edges = train_idx.get("edge")
+        train_edges = torch.from_numpy(train_idx.get("edge"))
 
         # Read in the valid data
         valid_idx = torch.load(self.input_valid_edges_file)
-        valid_edges = valid_idx.get("edge")
+        valid_edges = torch.from_numpy(valid_idx.get("edge"))
 
         # Read in the test data
         test_idx = torch.load(self.input_test_edges_file)
-        test_edges = test_idx.get("edge")
-
-        weights_col_id = -1
-        col_ids = [0, 1]
+        test_edges = torch.from_numpy(test_idx.get("edge"))
 
         if self.include_edge_type:
             # Added in the year information
-            train_edges = np.hstack([train_edges, train_idx.get("year").reshape(-1, 1)])
-            valid_edges = np.hstack([valid_edges, valid_idx.get("year").reshape(-1, 1)])
-            test_edges = np.hstack([test_edges, test_idx.get("year").reshape(-1, 1)])
-
-            # Normalize the edge types
-            min_year = min([np.min(train_edges[:, -1]), np.min(valid_edges[:, -1]), np.min(test_edges[:, -1])])
-            train_edges[:, -1] = train_edges[:, -1] - min_year
-            valid_edges[:, -1] = valid_edges[:, -1] - min_year
-            test_edges[:, -1] = test_edges[:, -1] - min_year
-
-            # Added in edge type column id
-            col_ids.insert(1, train_edges.shape[1] - 1)
+            train_year = torch.from_numpy(train_idx.get("year").reshape(-1, 1))
+            train_edges = torch.cat((train_edges, train_year), dim = 1)
+            
+            valid_year = torch.from_numpy(valid_idx.get("year").reshape(-1, 1))
+            valid_edges = torch.cat((valid_edges, valid_year), dim = 1)
+            
+            test_year = torch.from_numpy(test_idx.get("year").reshape(-1, 1))
+            test_edges = torch.cat((test_edges, test_year), dim = 1)
 
         if self.include_edge_weight:
             # Add in the weights
-            train_weights = train_idx.get("weight").reshape(-1, 1)
-            train_edges = np.hstack([train_edges, train_weights])
+            train_weight = torch.from_numpy(train_idx.get("weight").reshape(-1, 1))
+            train_edges = torch.cat((train_edges, train_weight), dim = 1)
+            
+            valid_weight = torch.from_numpy(valid_idx.get("weight").reshape(-1, 1))
+            valid_edges = torch.cat((valid_edges, valid_weight), dim = 1)
+            
+            test_weight = torch.from_numpy(test_idx.get("weight").reshape(-1, 1))
+            test_edges = torch.cat((test_edges, test_weight), dim = 1)
 
-            valid_weights = valid_idx.get("weight").reshape(-1, 1)
-            valid_edges = np.hstack([valid_edges, valid_weights])
-
-            test_weights = test_idx.get("weight").reshape(-1, 1)
-            test_edges = np.hstack([test_edges, test_weights])
-
-            weights_col_id = train_edges.shape[1] - 1
-
+        
         # Add in the edge type information
         converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
@@ -120,10 +111,14 @@ class OGBLCollab(LinkPredictionDataset):
             num_partitions=num_partitions,
             remap_ids=remap_ids,
             known_node_ids=[torch.arange(self.num_nodes)],
-            format="numpy",
-            edge_weight_column=weights_col_id,
-            columns=col_ids,
-            partitioned_evaluation=partitioned_eval,
+            format="pytorch",
+            splits=splits,
+            sequential_train_nodes=sequential_train_nodes,
+            src_column = 0,
+            dst_column = 1,
+            edge_type_column = 2,
+            edge_weight_column = 3,
+            partitioned_evaluation = partitioned_eval,
         )
 
         converter.convert()
