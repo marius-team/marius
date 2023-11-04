@@ -2,6 +2,10 @@ import glob
 import os
 from pathlib import Path
 
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, monotonically_increasing_id, rand, row_number
+from pyspark.sql.window import Window
+
 from marius.tools.preprocess.converters.partitioners.spark_partitioner import SparkPartitioner
 from marius.tools.preprocess.converters.readers.spark_readers import SparkDelimitedFileReader
 from marius.tools.preprocess.converters.spark_constants import (
@@ -17,9 +21,6 @@ from marius.tools.preprocess.converters.spark_constants import (
     TMP_DATA_DIRECTORY,
 )
 from marius.tools.preprocess.converters.writers.spark_writer import SparkWriter
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, monotonically_increasing_id, rand, row_number
-from pyspark.sql.window import Window
 
 SUPPORTED_DELIM_FORMATS = ["CSV", "TSV", "TXT", "DELIM", "DELIMITED"]
 SUPPORTED_NON_DELIM_FILE_FORMATS = ["PARQUET"]

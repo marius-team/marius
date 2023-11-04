@@ -1,4 +1,5 @@
 import numpy as np
+
 from marius.tools.preprocess.converters.partitioners.partitioner import Partitioner
 
 import torch  # isort:skip
