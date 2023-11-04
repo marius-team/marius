@@ -648,7 +648,7 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
 
         buffer_states_int = convertToVectorOfInts(buffer_states);
 
-        printBuffers(buffer_states_int, false);
+//        printBuffers(buffer_states_int, false);
     } else {
         // coarse buffers (using local partition ids)
         int coarse_num_partitions = local_num_partitions / fine_to_coarse_ratio;
@@ -665,8 +665,8 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
         buffer_states_int = convertToFinePartitions(coarse_buffer_states_int, local_num_partitions,
                                                     buffer_capacity, fine_to_coarse_ratio, num_cache_partitions);
 
-        printBuffers(coarse_buffer_states_int, true);
-        printBuffers(buffer_states_int, false);
+//        printBuffers(coarse_buffer_states_int, true);
+//        printBuffers(buffer_states_int, false);
 
 
         if (pg_gloo != nullptr) {
@@ -684,7 +684,7 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
 
             buffer_states_int = global_buffer_states;
 
-            printBuffers(buffer_states_int, false);
+//            printBuffers(buffer_states_int, false);
         }
     }
 
@@ -697,7 +697,7 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
             edge_buckets_per_buffer = greedyAssignEdgeBucketsToBuffers(buffer_states_int, num_partitions);
         }
 
-        printEdgeBuckets(edge_buckets_per_buffer);
+//        printEdgeBuckets(edge_buckets_per_buffer);
 
         return convertEdgeBucketOrderToTensors(buffer_states_int, edge_buckets_per_buffer);
     } else {
@@ -712,7 +712,7 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
 
         auto train_nodes_per_buffer = randomlyAssignTrainNodesToBuffers(buffer_states, train_nodes, total_num_nodes, num_partitions, buffer_capacity);
 
-        printTrainNodes(train_nodes_per_buffer);
+//        printTrainNodes(train_nodes_per_buffer);
 
         return std::forward_as_tuple(buffer_states, train_nodes_per_buffer);
     }

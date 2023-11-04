@@ -26,7 +26,7 @@ torch::Tensor L2Compare::operator()(torch::Tensor src, torch::Tensor dst) {
     }
 
     if (src.sizes() == dst.sizes()) {
-        return torch::pairwise_distance(src, dst);
+        return -1*torch::pairwise_distance(src, dst);
     } else {
         src = pad_and_reshape(src, dst.size(0));
 
@@ -37,7 +37,7 @@ torch::Tensor L2Compare::operator()(torch::Tensor src, torch::Tensor dst) {
         double tol = 1e-8;
 
         // (x - y)^2 = x^2 + y^2 - 2*x*y
-        return torch::sqrt(torch::clamp_min(x2 + y2 - 2 * xy, tol)).flatten(0, 1).clone();
+        return -1*torch::sqrt(torch::clamp_min(x2 + y2 - 2 * xy, tol)).flatten(0, 1).clone();
     }
 }
 

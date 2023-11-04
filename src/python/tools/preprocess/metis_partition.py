@@ -102,6 +102,18 @@ class MariusDataset(object):
         else:
             self.train_edges = torch.stack((train_edges_src, train_edges_dest), dim=1)
 
+        # sort the edges into the edge_buckets
+        indices = torch.argsort(self.train_edges[:, 0])
+        self.train_edges = self.train_edges[indices]
+
+        src_splits = torch.searchsorted(self.train_edges[:, 0].contiguous(),
+                                        np.ceil(self.num_nodes/self.num_partitions) * torch.arange(self.num_partitions))
+        for ii in range(self.num_partitions): # src partition index
+            end_index = self.train_edges.shape[0] if ii == self.num_partitions - 1 else src_splits[ii+1]
+
+            indices = torch.argsort(self.train_edges[src_splits[ii]:end_index, -1])
+            self.train_edges[src_splits[ii]:end_index] = self.train_edges[src_splits[ii]:end_index][indices]
+
         if self.learning_task == "link_prediction":
             valid_edges_src = node_mapping[self.valid_edges[:, 0]]
             valid_edges_dest = node_mapping[self.valid_edges[:, -1]]
