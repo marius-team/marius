@@ -55,6 +55,9 @@ class FB15K237(LinkPredictionDataset):
             num_partitions=num_partitions,
             remap_ids=remap_ids,
             partitioned_evaluation=partitioned_eval,
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
         )
 
         return converter.convert()

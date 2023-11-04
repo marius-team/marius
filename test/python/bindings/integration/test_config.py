@@ -5,10 +5,9 @@ from pathlib import Path
 from test.python.constants import TMP_TEST_DIR
 from test.test_configs.generate_test_configs import generate_configs_for_dataset
 
-from omegaconf import OmegaConf
-
 import marius.tools.configuration.marius_config
 from marius.config import loadConfig
+from omegaconf import OmegaConf
 
 
 class TestConfig(unittest.TestCase):

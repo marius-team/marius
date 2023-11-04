@@ -1,12 +1,11 @@
 from pathlib import Path
 
 import numpy as np
-from omegaconf import OmegaConf
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
+from omegaconf import OmegaConf
 
 
 class OGBWikiKG90Mv2(LinkPredictionDataset):
@@ -65,7 +64,9 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
             valid_edges=valid_edges,
             test_edges=valid_edges,
             num_partitions=num_partitions,
-            columns=[0, 1, 2],
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
             remap_ids=remap_ids,
             sequential_train_nodes=sequential_train_nodes,
             format="numpy",

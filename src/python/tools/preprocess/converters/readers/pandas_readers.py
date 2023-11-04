@@ -1,9 +1,9 @@
 from pathlib import Path
 
 import pandas as pd
-
 from marius.tools.preprocess.converters.readers.reader import Reader
 from marius.tools.preprocess.converters.torch_constants import TorchConverterColumnKeys as ColNames
+
 
 class PandasDelimitedFileReader(Reader):
     def __init__(
@@ -22,9 +22,10 @@ class PandasDelimitedFileReader(Reader):
         :param valid_edges:                 The path to the raw validation edge list
         :param test_edges:                  The path to the raw test edge list
                                             it is the train/valid/test split. The sum of this list must be 1.
-        :param columns:                     A dict containing the columns we want to extract and the names we want to assing them.
-                                            The key should be the name we want to assign the column and the value is the column id.
-                                            Any columns with a None id are ignored. 
+        :param columns:                     A dict containing the columns we want to extract and the names we want
+                                            to assing them. The key should be the name we want to assign the column
+                                            and the value is the column id.
+                                            Any columns with a None id are ignored.
         :param header_length:               The length of the header of the input edge lists
         :param delim:                       The delimiter used between columns of the input edge lists
         """
@@ -38,11 +39,11 @@ class PandasDelimitedFileReader(Reader):
         self.header_length = header_length
         self.columns = columns
         self.delim = delim
-    
+
     def read_single_file(self, file_path):
         if file_path is None:
             return None
-        
+
         # Determine the columns to read
         cols_to_keeps = []
         id_to_name_mapping = {}
@@ -50,28 +51,31 @@ class PandasDelimitedFileReader(Reader):
             if col_id is not None:
                 cols_to_keeps.append(col_id)
                 id_to_name_mapping[col_id] = col_name.value
-        
+
         # Read the file and extracted the columns we need
         file_data = pd.read_csv(file_path, delimiter=self.delim, skiprows=self.header_length, header=None)
         file_data = file_data[cols_to_keeps]
         file_data = file_data.rename(columns=id_to_name_mapping)
-        
+
         # Make sure we got the src and dst columns
         columns_read = list(file_data.columns)
         assert "src_column" in columns_read
         assert "dst_column" in columns_read
-        
+
         # Ensure that data is in the proper order
         cols_order = [ColNames.SRC_COL.value, ColNames.DST_COL.value]
         if "edge_type_column" in columns_read:
             cols_order.insert(len(cols_order) - 1, ColNames.EDGE_TYPE_COL.value)
-        
+
         if "edge_weight_column" in columns_read:
             cols_order.insert(len(cols_order), ColNames.EDGE_WEIGHT_COL.value)
-        
+
         file_data = file_data[cols_order]
-        file_data[ColNames.EDGE_TYPE_COL.value] = file_data[ColNames.EDGE_TYPE_COL.value].astype(str)
         return file_data
 
     def read(self):
-        return self.read_single_file(self.train_edges), self.read_single_file(self.valid_edges), self.read_single_file(self.test_edges)
+        return (
+            self.read_single_file(self.train_edges),
+            self.read_single_file(self.valid_edges),
+            self.read_single_file(self.test_edges),
+        )

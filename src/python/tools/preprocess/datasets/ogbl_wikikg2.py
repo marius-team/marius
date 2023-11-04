@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import numpy as np
-
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
@@ -66,6 +65,9 @@ class OGBLWikiKG2(LinkPredictionDataset):
             format="numpy",
             remap_ids=remap_ids,
             partitioned_evaluation=partitioned_eval,
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
         )
 
         return converter.convert()

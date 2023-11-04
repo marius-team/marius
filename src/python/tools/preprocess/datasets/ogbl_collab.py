@@ -1,8 +1,6 @@
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
@@ -79,29 +77,33 @@ class OGBLCollab(LinkPredictionDataset):
         test_idx = torch.load(self.input_test_edges_file)
         test_edges = torch.from_numpy(test_idx.get("edge"))
 
+        edge_type_column, edge_weight_column = None, None
         if self.include_edge_type:
             # Added in the year information
             train_year = torch.from_numpy(train_idx.get("year").reshape(-1, 1))
-            train_edges = torch.cat((train_edges, train_year), dim = 1)
-            
+            train_edges = torch.cat((train_edges, train_year), dim=1)
+
             valid_year = torch.from_numpy(valid_idx.get("year").reshape(-1, 1))
-            valid_edges = torch.cat((valid_edges, valid_year), dim = 1)
-            
+            valid_edges = torch.cat((valid_edges, valid_year), dim=1)
+
             test_year = torch.from_numpy(test_idx.get("year").reshape(-1, 1))
-            test_edges = torch.cat((test_edges, test_year), dim = 1)
+            test_edges = torch.cat((test_edges, test_year), dim=1)
+
+            edge_type_column = 2
 
         if self.include_edge_weight:
             # Add in the weights
             train_weight = torch.from_numpy(train_idx.get("weight").reshape(-1, 1))
-            train_edges = torch.cat((train_edges, train_weight), dim = 1)
-            
-            valid_weight = torch.from_numpy(valid_idx.get("weight").reshape(-1, 1))
-            valid_edges = torch.cat((valid_edges, valid_weight), dim = 1)
-            
-            test_weight = torch.from_numpy(test_idx.get("weight").reshape(-1, 1))
-            test_edges = torch.cat((test_edges, test_weight), dim = 1)
+            train_edges = torch.cat((train_edges, train_weight), dim=1)
 
-        
+            valid_weight = torch.from_numpy(valid_idx.get("weight").reshape(-1, 1))
+            valid_edges = torch.cat((valid_edges, valid_weight), dim=1)
+
+            test_weight = torch.from_numpy(test_idx.get("weight").reshape(-1, 1))
+            test_edges = torch.cat((test_edges, test_weight), dim=1)
+
+            edge_weight_column = 3
+
         # Add in the edge type information
         converter = TorchEdgeListConverter(
             output_dir=self.output_directory,
@@ -114,11 +116,11 @@ class OGBLCollab(LinkPredictionDataset):
             format="pytorch",
             splits=splits,
             sequential_train_nodes=sequential_train_nodes,
-            src_column = 0,
-            dst_column = 1,
-            edge_type_column = 2,
-            edge_weight_column = 3,
-            partitioned_evaluation = partitioned_eval,
+            src_column=0,
+            dst_column=1,
+            edge_type_column=edge_type_column,
+            edge_weight_column=edge_weight_column,
+            partitioned_evaluation=partitioned_eval,
         )
 
         converter.convert()

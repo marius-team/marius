@@ -92,13 +92,30 @@ def set_args():
     )
 
     parser.add_argument(
-        "--columns",
-        metavar="columns",
-        nargs="*",
+        "--src_column",
+        metavar="src_column",
         required=False,
         type=int,
-        default=[0, 1, 2],
-        help="List of column ids of input delimited files which denote the src node, edge-type, and dst node of edges.",
+        default=None,
+        help="The column id of the src column",
+    )
+
+    parser.add_argument(
+        "--dst_column",
+        metavar="dst_column",
+        required=False,
+        type=int,
+        default=None,
+        help="The column id of the dst column",
+    )
+
+    parser.add_argument(
+        "--edge_type_column",
+        metavar="edge_type_column",
+        required=False,
+        type=int,
+        default=None,
+        help="The column id which denotes the edge weight column",
     )
 
     parser.add_argument(
@@ -106,7 +123,7 @@ def set_args():
         metavar="edge_weight_column",
         required=False,
         type=int,
-        default=-1,
+        default=None,
         help="The column id which denotes the edge weight column",
     )
 
@@ -116,6 +133,8 @@ def set_args():
 def main():
     parser = set_args()
     args = parser.parse_args()
+    if args.dataset == "custom" and (args.src_column is None or args.dst_column is None):
+        parser.error("When using a custom dataset, src column and dst column must be specified")
 
     if args.output_directory == "":
         args.output_directory = args.dataset
@@ -170,6 +189,10 @@ def main():
             splits=args.dataset_split,
             partitioned_eval=args.partitioned_eval,
             sequential_train_nodes=args.sequential_train_nodes,
+            src_column=args.src_column,
+            dst_column=args.dst_column,
+            edge_type_column=args.edge_type_column,
+            edge_weight_column=args.edge_weight_column,
         )
 
 

@@ -60,6 +60,9 @@ class OGBLPpa(LinkPredictionDataset):
             remap_ids=remap_ids,
             format="numpy",
             partitioned_evaluation=partitioned_eval,
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
         )
 
         return converter.convert()

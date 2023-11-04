@@ -49,7 +49,9 @@ class Freebase86m(LinkPredictionDataset):
             valid_edges=self.input_valid_edges_file,
             test_edges=self.input_test_edges_file,
             num_partitions=num_partitions,
-            columns=[0, 2, 1],
+            src_column=0,
+            dst_column=1,
+            edge_type_column=2,
             remap_ids=remap_ids,
             partitioned_evaluation=partitioned_eval,
         )

@@ -1,13 +1,12 @@
 from pathlib import Path
 
 import numpy as np
-from omegaconf import OmegaConf
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import NodeClassificationDataset
 from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
 from marius.tools.preprocess.utils import download_url, extract_file
+from omegaconf import OmegaConf
 
 import torch  # isort:skip
 
@@ -82,6 +81,9 @@ class OGBNPapers100M(NodeClassificationDataset):
             format="pytorch",
             known_node_ids=[train_nodes, valid_nodes, test_nodes],
             partitioned_evaluation=partitioned_eval,
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
         )
 
         dataset_stats = converter.convert()

@@ -7,8 +7,6 @@ from random import randint
 
 import numpy as np
 import pandas as pd
-from omegaconf import OmegaConf
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
 from marius.tools.preprocess.converters.spark_constants import (
@@ -20,6 +18,7 @@ from marius.tools.preprocess.converters.spark_constants import (
     TMP_DATA_DIRECTORY,
 )
 from marius.tools.preprocess.utils import get_df_count
+from omegaconf import OmegaConf
 
 
 # TODO can this be made faster? Pandas is pretty slow and not parallel

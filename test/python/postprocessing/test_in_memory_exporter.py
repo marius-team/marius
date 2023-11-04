@@ -7,9 +7,8 @@ from test.python.constants import TMP_TEST_DIR
 from test.test_configs.generate_test_configs import generate_configs_for_dataset
 from test.test_data.generate import generate_random_dataset
 
-import pandas as pd
-
 import marius as m
+import pandas as pd
 from marius.tools.postprocess.in_memory_exporter import InMemoryExporter
 
 
