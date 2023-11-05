@@ -86,10 +86,11 @@ def generate_random_dataset_nc(
     edges = get_random_graph(num_nodes, num_edges, num_rels)
     edges_df = pd.DataFrame(data=edges)
 
+    src_col, dst_col, edge_type_col = None, None, None
     if edges.shape[1] == 3:
-        columns = [0, 1, 2]
+        src_col, dst_col, edge_type_col = 0, 2, 1
     else:
-        columns = [0, 1]
+        src_col, dst_col = 0, 1
 
     raw_edges_filename = output_dir / Path("raw_edges.csv")
     edges_df.to_csv(raw_edges_filename, ",", header=False, index=False)
@@ -100,7 +101,9 @@ def generate_random_dataset_nc(
     valid_nodes = None
     test_nodes = None
     if splits is not None:
-        train_nodes, valid_nodes, test_nodes = split_edges(all_nodes, splits)
+        train_nodes, train_weights, valid_nodes, valid_weights, test_nodes, test_weights = split_edges(
+            all_nodes, None, splits
+        )
 
     converter = TorchEdgeListConverter(
         output_dir,
@@ -108,11 +111,13 @@ def generate_random_dataset_nc(
         delim=",",
         remap_ids=remap_ids,
         num_partitions=num_partitions,
-        columns=columns,
         partitioned_evaluation=partitioned_eval,
         sequential_train_nodes=sequential_train_nodes,
         known_node_ids=[train_nodes, valid_nodes, test_nodes],
         format="CSV",
+        src_column=src_col,
+        dst_column=dst_col,
+        edge_type_column=edge_type_col,
     )
 
     dataset_stats = converter.convert()
@@ -193,10 +198,11 @@ def generate_random_dataset_lp(
     edges = get_random_graph(num_nodes, num_edges, num_rels)
     edges_df = pd.DataFrame(data=edges)
 
+    src_col, dst_col, edge_type_col = None, None, None
     if edges.shape[1] == 3:
-        columns = [0, 1, 2]
+        src_col, dst_col, edge_type_col = 0, 2, 1
     else:
-        columns = [0, 1]
+        src_col, dst_col = 0, 1
 
     raw_edges_filename = output_dir / Path("raw_edges.csv")
 
@@ -209,10 +215,12 @@ def generate_random_dataset_lp(
         splits=splits,
         num_partitions=num_partitions,
         remap_ids=remap_ids,
-        columns=columns,
         partitioned_evaluation=partitioned_eval,
         sequential_train_nodes=sequential_train_nodes,
         format="CSV",
+        src_column=src_col,
+        dst_column=dst_col,
+        edge_type_column=edge_type_col,
     )
 
     dataset_stats = converter.convert()

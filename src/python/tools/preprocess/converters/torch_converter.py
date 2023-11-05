@@ -118,16 +118,15 @@ def map_edge_list_dfs(
 
     # Get the unique nodes
     all_edges_df = pd.concat(combined_dfs)
-    unique_src = all_edges_df[ColNames.SRC_COL.value].unique()
-    unique_dst = all_edges_df[ColNames.DST_COL.value].unique()
-    if known_node_ids is None:
-        unique_nodes = np.unique(np.concatenate([unique_src, unique_dst]))
-    else:
-        node_ids = [unique_src, unique_dst]
-        for n in known_node_ids:
-            node_ids.append(n.numpy())
-        unique_nodes = np.unique(np.concatenate(node_ids))
+    unique_src = all_edges_df[ColNames.SRC_COL.value].unique().astype(str)
+    unique_dst = all_edges_df[ColNames.DST_COL.value].unique().astype(str)
 
+    unique_list = [unique_src, unique_dst]
+    if known_node_ids is not None:
+        for n in known_node_ids:
+            unique_list.append(n.numpy().astype(str))
+
+    unique_nodes = np.unique(np.concatenate(unique_list, axis=None))
     num_nodes = unique_nodes.shape[0]
     mapped_node_ids = np.random.permutation(num_nodes)
     nodes_dict = dict(zip(list(unique_nodes), list(mapped_node_ids)))
@@ -393,6 +392,7 @@ def split_edges(edges, edges_weights, splits):
         train_edges_tens = edges[rand_perm[:num_train]]
         valid_edges_tens = edges[rand_perm[num_train : num_train + num_valid]]
         test_edges_tens = edges[rand_perm[num_train + num_valid : total_split_edges]]
+
         if edges_weights is not None:
             train_edges_weights = edges_weights[rand_perm[:num_train]]
             valid_edges_weights = edges_weights[rand_perm[num_train : num_train + num_valid]]
@@ -407,6 +407,7 @@ def split_edges(edges, edges_weights, splits):
 
         train_edges_tens = edges[rand_perm[:num_train]]
         test_edges_tens = edges[rand_perm[num_train:total_split_edges]]
+
         if edges_weights is not None:
             train_edges_weights = edges_weights[rand_perm[:num_train]]
             test_edges_weights = edges_weights[rand_perm[num_train:total_split_edges]]
@@ -530,7 +531,6 @@ class TorchEdgeListConverter(object):
             ColNames.EDGE_TYPE_COL: edge_type_column,
             ColNames.EDGE_WEIGHT_COL: edge_weight_column,
         }
-        print("Got column mappings of", self.column_mappings)
 
         if format.upper() in SUPPORTED_DELIM_FORMATS:
             assert isinstance(train_edges, str) or isinstance(train_edges, Path)
