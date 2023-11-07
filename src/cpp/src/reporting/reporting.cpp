@@ -11,31 +11,65 @@ HitskMetric::HitskMetric(int k) {
     k_ = k;
     name_ = "Hits@" + std::to_string(k_);
     unit_ = "";
+    best_val_ = 0;
+    best_test_ = 0;
 }
 
-torch::Tensor HitskMetric::computeMetric(torch::Tensor ranks) { return torch::tensor((double)ranks.le(k_).nonzero().size(0) / ranks.size(0), torch::kFloat64); }
+torch::Tensor HitskMetric::computeMetric(torch::Tensor ranks, bool val) {
+    return torch::tensor((double)ranks.le(k_).nonzero().size(0) / ranks.size(0), torch::kFloat64);
+}
 
 MeanRankMetric::MeanRankMetric() {
     name_ = "Mean Rank";
     unit_ = "";
+    best_val_ = 0;
+    best_test_ = 0;
 }
 
-torch::Tensor MeanRankMetric::computeMetric(torch::Tensor ranks) { return ranks.to(torch::kFloat64).mean(); }
+torch::Tensor MeanRankMetric::computeMetric(torch::Tensor ranks, bool val) {
+    return ranks.to(torch::kFloat64).mean();
+}
 
 MeanReciprocalRankMetric::MeanReciprocalRankMetric() {
     name_ = "MRR";
     unit_ = "";
+    best_val_ = 0;
+    best_test_ = 0;
 }
 
-torch::Tensor MeanReciprocalRankMetric::computeMetric(torch::Tensor ranks) { return ranks.to(torch::kFloat32).reciprocal().mean(); }
+torch::Tensor MeanReciprocalRankMetric::computeMetric(torch::Tensor ranks, bool val) {
+    torch::Tensor result = ranks.to(torch::kFloat32).reciprocal().mean();
+    if (val) {
+        if (result.item<double>() > best_val_) {
+            best_val_ = result.item<double>();
+        }
+    } else {
+        if (result.item<double>() > best_test_) {
+            best_test_ = result.item<double>();
+        }
+    }
+    return result;
+}
 
 CategoricalAccuracyMetric::CategoricalAccuracyMetric() {
     name_ = "Accuracy";
     unit_ = "%";
+    best_val_ = 0;
+    best_test_ = 0;
 }
 
-torch::Tensor CategoricalAccuracyMetric::computeMetric(torch::Tensor y_true, torch::Tensor y_pred) {
-    return 100 * torch::tensor({(double)(y_true == y_pred).nonzero().size(0) / y_true.size(0)}, torch::kFloat64);
+torch::Tensor CategoricalAccuracyMetric::computeMetric(torch::Tensor y_true, torch::Tensor y_pred, bool val) {
+    torch::Tensor result = 100 * torch::tensor({(double)(y_true == y_pred).nonzero().size(0) / y_true.size(0)}, torch::kFloat64);
+    if (val) {
+        if (result.item<double>() > best_val_) {
+            best_val_ = result.item<double>();
+        }
+    } else {
+        if (result.item<double>() > best_test_) {
+            best_test_ = result.item<double>();
+        }
+    }
+    return result;
 }
 
 Reporter::~Reporter() { delete lock_; }
@@ -69,7 +103,7 @@ void LinkPredictionReporter::addResult(torch::Tensor pos_scores, torch::Tensor n
     unlock();
 }
 
-void LinkPredictionReporter::report() {
+void LinkPredictionReporter::report(bool val) {
     all_ranks_ = torch::cat(per_batch_ranks_).to(torch::kCPU);
     if (per_batch_scores_.size() > 0) {
         all_scores_ = torch::cat(per_batch_scores_);
@@ -83,8 +117,10 @@ void LinkPredictionReporter::report() {
 
     std::string tmp;
     for (auto m : metrics_) {
-        torch::Tensor result = std::dynamic_pointer_cast<RankingMetric>(m)->computeMetric(all_ranks_);
-        tmp = m->name_ + ": " + std::to_string(result.item<double>()) + m->unit_ + "\n";
+        torch::Tensor result = std::dynamic_pointer_cast<RankingMetric>(m)->computeMetric(all_ranks_, val);
+        if (val)
+            tmp = m->name_ + ": " + std::to_string(result.item<double>()) + m->unit_ + "; Best: " + std::to_string(m->best_val_) + "\n";
+        else tmp = m->name_ + ": " + std::to_string(result.item<double>()) + m->unit_ + "; Best: " + std::to_string(m->best_test_) + "\n";
         report_string = report_string + tmp;
     }
     std::string footer = "=================================";
@@ -201,7 +237,7 @@ void NodeClassificationReporter::addResult(torch::Tensor y_true, torch::Tensor y
     unlock();
 }
 
-void NodeClassificationReporter::report() {
+void NodeClassificationReporter::report(bool val) {
     all_y_true_ = torch::cat(per_batch_y_true_);
     all_y_pred_ = torch::cat(per_batch_y_pred_);
     per_batch_y_true_ = {};
@@ -213,8 +249,10 @@ void NodeClassificationReporter::report() {
 
     std::string tmp;
     for (auto m : metrics_) {
-        torch::Tensor result = std::dynamic_pointer_cast<ClassificationMetric>(m)->computeMetric(all_y_true_, all_y_pred_);
-        tmp = m->name_ + ": " + std::to_string(result.item<double>()) + m->unit_ + "\n";
+        torch::Tensor result = std::dynamic_pointer_cast<ClassificationMetric>(m)->computeMetric(all_y_true_, all_y_pred_, val);
+        if (val)
+            tmp = m->name_ + ": " + std::to_string(result.item<double>()) + m->unit_ + "; Best: " + std::to_string(m->best_val_) + "\n";
+        else tmp = m->name_ + ": " + std::to_string(result.item<double>()) + m->unit_ + "; Best: " + std::to_string(m->best_test_) + "\n";
         report_string = report_string + tmp;
     }
     std::string footer = "=================================";
@@ -321,7 +359,7 @@ void ProgressReporter::addResult(int64_t items_processed, double loss) {
     unlock();
 }
 
-void ProgressReporter::report() {
+void ProgressReporter::report(bool val) {
 //    std::string report_string = item_name_ + " processed: [" + std::to_string(current_item_) + "/" + std::to_string(total_items_) + "], " +
 //                                fmt::format("{:.2f}", 100 * (double)current_item_ / total_items_) + "%";
     std::string report_string = item_name_ + " processed: [" + std::to_string(current_item_) + "/" + std::to_string(total_items_) + "], " +

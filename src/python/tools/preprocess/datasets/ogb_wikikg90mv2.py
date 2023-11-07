@@ -74,41 +74,41 @@ class OGBWikiKG90Mv2(LinkPredictionDataset):
 
         dataset_stats = converter.convert()
 
-        node_features = np.load(self.input_node_feature_file).astype(np.float32)
-        rel_features = np.load(self.input_rel_feature_file).astype(np.float32)
-
-        if remap_ids:
-            node_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.node_mapping_path), delimiter=",")
-            random_node_map = node_mapping[:, 1].astype(np.int32)
-            random_node_map_argsort = np.argsort(random_node_map)
-
-            with open(self.node_features_file, "wb") as f:
-                chunk_size = int(1e7)
-                num_chunks = int(np.ceil(node_mapping.shape[0] / chunk_size))
-
-                offset = 0
-
-                for chunk_id in range(num_chunks):
-                    if offset + chunk_size >= node_mapping.shape[0]:
-                        chunk_size = node_mapping.shape[0] - offset
-                    f.write(bytes(node_features[random_node_map_argsort[offset : offset + chunk_size]]))
-
-            rel_mapping = np.genfromtxt(
-                self.output_directory / Path(PathConstants.relation_mapping_path), delimiter=","
-            )
-            random_rel_map = rel_mapping[:, 1].astype(np.int32)
-            random_rel_map_argsort = np.argsort(random_rel_map)
-            rel_features = rel_features[random_rel_map_argsort]
-        else:
-            with open(self.node_features_file, "wb") as f:
-                f.write(bytes(node_features))
-
-        with open(self.relation_features_file, "wb") as f:
-            f.write(bytes(rel_features))
+        # node_features = np.load(self.input_node_feature_file).astype(np.float32)
+        # rel_features = np.load(self.input_rel_feature_file).astype(np.float32)
+        #
+        # if remap_ids:
+        #     node_mapping = np.genfromtxt(self.output_directory / Path(PathConstants.node_mapping_path), delimiter=",")
+        #     random_node_map = node_mapping[:, 1].astype(np.int32)
+        #     random_node_map_argsort = np.argsort(random_node_map)
+        #
+        #     with open(self.node_features_file, "wb") as f:
+        #         chunk_size = int(1e7)
+        #         num_chunks = int(np.ceil(node_mapping.shape[0] / chunk_size))
+        #
+        #         offset = 0
+        #
+        #         for chunk_id in range(num_chunks):
+        #             if offset + chunk_size >= node_mapping.shape[0]:
+        #                 chunk_size = node_mapping.shape[0] - offset
+        #             f.write(bytes(node_features[random_node_map_argsort[offset : offset + chunk_size]]))
+        #
+        #     rel_mapping = np.genfromtxt(
+        #         self.output_directory / Path(PathConstants.relation_mapping_path), delimiter=","
+        #     )
+        #     random_rel_map = rel_mapping[:, 1].astype(np.int32)
+        #     random_rel_map_argsort = np.argsort(random_rel_map)
+        #     rel_features = rel_features[random_rel_map_argsort]
+        # else:
+        #     with open(self.node_features_file, "wb") as f:
+        #         f.write(bytes(node_features))
+        #
+        # with open(self.relation_features_file, "wb") as f:
+        #     f.write(bytes(rel_features))
 
         # update dataset yaml
-        dataset_stats.node_feature_dim = node_features.shape[1]
-        dataset_stats.rel_feature_dim = rel_features.shape[1]
+        # dataset_stats.node_feature_dim = node_features.shape[1]
+        # dataset_stats.rel_feature_dim = rel_features.shape[1]
 
         with open(self.output_directory / Path("dataset.yaml"), "w") as f:
             yaml_file = OmegaConf.to_yaml(dataset_stats)

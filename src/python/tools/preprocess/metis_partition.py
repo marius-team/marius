@@ -69,7 +69,7 @@ class MariusDataset(object):
             raise Exception()
 
     def metis_partition(self):
-        from partitioning_helpers import relabel_edges, pymetis_partitioning, add_missing_nodes, balance_parts, create_edge_buckets
+        from partitioning_helpers import relabel_edges, pymetis_partitioning, add_missing_nodes, balance_parts, create_edge_buckets#, tree_partitioning
 
         # partition based on the train_edges
         edges = self.train_edges.numpy()
@@ -79,7 +79,12 @@ class MariusDataset(object):
         edges, unique_nodes, node_mapping = relabel_edges(edges, self.num_nodes, return_map=True)
         num_unique = unique_nodes.shape[0]
 
-        parts = pymetis_partitioning(self.num_partitions, num_unique, edges, 0)
+        parts = pymetis_partitioning(self.num_partitions, num_unique, edges)#, True, False)
+        # import time
+        # t1 = time.time()
+        # parts = tree_partitioning(self.num_partitions, num_unique, edges)
+        # print("time: ", time.time() - t1)
+
         parts = add_missing_nodes(parts, self.num_nodes)
         parts = balance_parts(parts, np.ceil(self.num_nodes/self.num_partitions), None)
         edge_bucket_sizes, _, _ = create_edge_buckets(edges, parts, 0, plot=False)
@@ -107,7 +112,7 @@ class MariusDataset(object):
         self.train_edges = self.train_edges[indices]
 
         src_splits = torch.searchsorted(self.train_edges[:, 0].contiguous(),
-                                        np.ceil(self.num_nodes/self.num_partitions) * torch.arange(self.num_partitions))
+                                        int(np.ceil(self.num_nodes/self.num_partitions)) * torch.arange(self.num_partitions, dtype=torch.int32))
         for ii in range(self.num_partitions): # src partition index
             end_index = self.train_edges.shape[0] if ii == self.num_partitions - 1 else src_splits[ii+1]
 

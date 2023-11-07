@@ -56,7 +56,7 @@ void PipelineEvaluator::evaluate(bool validation) {
     pipeline_->model_->distNotifyCompleteAndWait(true);
 
     if (dataloader_->batch_worker_)
-        pipeline_->model_->reporter_->report();
+        pipeline_->model_->reporter_->report(validation);
 
     int64_t epoch_time = timer.getDuration();
     SPDLOG_INFO("Evaluation complete: {}ms", epoch_time);
@@ -113,5 +113,5 @@ void SynchronousEvaluator::evaluate(bool validation) {
 
     model_->distNotifyCompleteAndWait(true);
 
-    model_->reporter_->report();
+    model_->reporter_->report(validation);
 }

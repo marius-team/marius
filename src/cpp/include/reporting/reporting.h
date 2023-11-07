@@ -11,13 +11,15 @@ class Metric {
    public:
     std::string name_;
     std::string unit_;
+    double best_val_;
+    double best_test_;
 
     virtual ~Metric(){};
 };
 
 class RankingMetric : public Metric {
    public:
-    virtual torch::Tensor computeMetric(torch::Tensor ranks) = 0;
+    virtual torch::Tensor computeMetric(torch::Tensor ranks, bool val = false) = 0;
 };
 
 class HitskMetric : public RankingMetric {
@@ -26,33 +28,33 @@ class HitskMetric : public RankingMetric {
    public:
     HitskMetric(int k);
 
-    torch::Tensor computeMetric(torch::Tensor ranks);
+    torch::Tensor computeMetric(torch::Tensor ranks, bool val = false);
 };
 
 class MeanRankMetric : public RankingMetric {
    public:
     MeanRankMetric();
 
-    torch::Tensor computeMetric(torch::Tensor ranks);
+    torch::Tensor computeMetric(torch::Tensor ranks, bool val = false);
 };
 
 class MeanReciprocalRankMetric : public RankingMetric {
    public:
     MeanReciprocalRankMetric();
 
-    torch::Tensor computeMetric(torch::Tensor ranks);
+    torch::Tensor computeMetric(torch::Tensor ranks, bool val = false);
 };
 
 class ClassificationMetric : public Metric {
    public:
-    virtual torch::Tensor computeMetric(torch::Tensor y_true, torch::Tensor y_pred) = 0;
+    virtual torch::Tensor computeMetric(torch::Tensor y_true, torch::Tensor y_pred, bool val = false) = 0;
 };
 
 class CategoricalAccuracyMetric : public ClassificationMetric {
    public:
     CategoricalAccuracyMetric();
 
-    torch::Tensor computeMetric(torch::Tensor y_true, torch::Tensor y_pred) override;
+    torch::Tensor computeMetric(torch::Tensor y_true, torch::Tensor y_pred, bool val = false) override;
 };
 
 class Reporter {
@@ -72,7 +74,7 @@ class Reporter {
 
     void addMetric(shared_ptr<Metric> metric) { metrics_.emplace_back(metric); }
 
-    virtual void report() = 0;
+    virtual void report(bool val = false) = 0;
 };
 
 class LinkPredictionReporter : public Reporter {
@@ -94,7 +96,7 @@ class LinkPredictionReporter : public Reporter {
 
     void addResult(torch::Tensor pos_scores, torch::Tensor neg_scores, torch::Tensor edges = torch::Tensor());
 
-    void report() override;
+    void report(bool val = false) override;
 
     void save(string directory, bool scores, bool ranks);
 };
@@ -116,7 +118,7 @@ class NodeClassificationReporter : public Reporter {
 
     void addResult(torch::Tensor y_true, torch::Tensor y_pred, torch::Tensor node_ids = torch::Tensor());
 
-    void report() override;
+    void report(bool val = false) override;
 
     void save(string directory, bool labels);
 };
@@ -140,7 +142,7 @@ class ProgressReporter : public Reporter {
 
     void addResult(int64_t items_processed, double loss = 0.0);
 
-    void report() override;
+    void report(bool val = false) override;
 };
 
 #endif  // MARIUS_SRC_CPP_INCLUDE_REPORTING_H_
