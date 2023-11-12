@@ -82,6 +82,9 @@ class OGBNPapers100M(NodeClassificationDataset):
             format="pytorch",
             known_node_ids=[train_nodes, valid_nodes, test_nodes],
             partitioned_evaluation=partitioned_eval,
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
         )
 
         dataset_stats = converter.convert()

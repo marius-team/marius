@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from marius.tools.preprocess.converters.readers.reader import Reader
+from marius.tools.preprocess.converters.torch_constants import TorchConverterColumnKeys as ColNames
 
 
 class PandasDelimitedFileReader(Reader):
@@ -11,7 +12,7 @@ class PandasDelimitedFileReader(Reader):
         train_edges: Path,
         valid_edges: Path = None,
         test_edges: Path = None,
-        columns: list = [0, 1, 2],
+        columns: dict = {},
         header_length: int = 0,
         delim: str = "\t",
     ):
@@ -22,49 +23,60 @@ class PandasDelimitedFileReader(Reader):
         :param valid_edges:                 The path to the raw validation edge list
         :param test_edges:                  The path to the raw test edge list
                                             it is the train/valid/test split. The sum of this list must be 1.
-        :param columns:                     Denotes the columns to extract for the edges. The default is [0, 1, 2],
-                                            where the first index is the column id of the src nodes, the second the
-                                            relations (edge-types), and the third the dst nodes. For graphs without
-                                            edge types, only two ids should be provided.
+        :param columns:                     A dict containing the columns we want to extract and the names we want
+                                            to assing them. The key should be the name we want to assign the column
+                                            and the value is the column id.
+                                            Any columns with a None id are ignored.
         :param header_length:               The length of the header of the input edge lists
         :param delim:                       The delimiter used between columns of the input edge lists
         """
 
         super().__init__()
 
+        assert train_edges is not None
         self.train_edges = train_edges
         self.valid_edges = valid_edges
         self.test_edges = test_edges
-        self.columns = columns
         self.header_length = header_length
-
+        self.columns = columns
         self.delim = delim
 
-        if len(self.columns) == 2:
-            self.has_rels = False
-        elif len(self.columns) == 3:
-            self.has_rels = True
-        else:
-            raise RuntimeError(
-                "Incorrect number of columns specified, expected length 2 or 3, received {}".format(len(self.columns))
-            )
+    def read_single_file(self, file_path):
+        if file_path is None:
+            return None
+
+        # Determine the columns to read
+        cols_to_keeps = []
+        id_to_name_mapping = {}
+        for col_name, col_id in self.columns.items():
+            if col_id is not None:
+                cols_to_keeps.append(col_id)
+                id_to_name_mapping[col_id] = col_name.value
+
+        # Read the file and extracted the columns we need
+        file_data = pd.read_csv(file_path, delimiter=self.delim, skiprows=self.header_length, header=None)
+        file_data = file_data[cols_to_keeps]
+        file_data = file_data.rename(columns=id_to_name_mapping)
+
+        # Make sure we got the src and dst columns
+        columns_read = list(file_data.columns)
+        assert "src_column" in columns_read
+        assert "dst_column" in columns_read
+
+        # Ensure that data is in the proper order
+        cols_order = [ColNames.SRC_COL.value, ColNames.DST_COL.value]
+        if "edge_type_column" in columns_read:
+            cols_order.insert(len(cols_order) - 1, ColNames.EDGE_TYPE_COL.value)
+
+        if "edge_weight_column" in columns_read:
+            cols_order.insert(len(cols_order), ColNames.EDGE_WEIGHT_COL.value)
+
+        file_data = file_data[cols_order]
+        return file_data
 
     def read(self):
-        train_edges_df: pd.DataFrame = None
-        valid_edges_df: pd.DataFrame = None
-        test_edges_df: pd.DataFrame = None
-
-        assert self.train_edges is not None
-        train_edges_df = pd.read_csv(self.train_edges, delimiter=self.delim, skiprows=self.header_length, header=None)
-        train_edges_df = train_edges_df[train_edges_df.columns[self.columns]]
-
-        if self.valid_edges is not None:
-            valid_edges_df = pd.read_csv(
-                self.valid_edges, delimiter=self.delim, skiprows=self.header_length, header=None
-            )
-            valid_edges_df = valid_edges_df[valid_edges_df.columns[self.columns]]
-        if self.test_edges is not None:
-            test_edges_df = pd.read_csv(self.test_edges, delimiter=self.delim, skiprows=self.header_length, header=None)
-            test_edges_df = test_edges_df[test_edges_df.columns[self.columns]]
-
-        return train_edges_df, valid_edges_df, test_edges_df
+        return (
+            self.read_single_file(self.train_edges),
+            self.read_single_file(self.valid_edges),
+            self.read_single_file(self.test_edges),
+        )

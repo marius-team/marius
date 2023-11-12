@@ -8,8 +8,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <fstream>
 #include <functional>
 #include <future>
+#include <iostream>
 #include <shared_mutex>
 
 #include "configuration/constants.h"

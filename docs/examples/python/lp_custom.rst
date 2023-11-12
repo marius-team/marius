@@ -66,7 +66,8 @@ Making a new dataset class requires writing two methods:
         converter = converter(
             output_dir=self.output_directory,
             train_edges=self.input_train_edges_file,
-            columns = [0,1], # col 0 is src and col 1 dst node in input csv
+            src_column = 0, # col 0 is src and col 1 dst node in input csv
+            dst_column = 1,
             delim=",", # CSV delimitor is ","
             splits = splits, # Splitting the data in train, valid and test
             remap_ids=remap_ids # Remapping the raw entity ids into random integers

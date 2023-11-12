@@ -52,6 +52,9 @@ class FB15K(LinkPredictionDataset):
             test_edges=self.input_test_edges_file,
             num_partitions=num_partitions,
             remap_ids=remap_ids,
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
             partitioned_evaluation=partitioned_eval,
         )
 

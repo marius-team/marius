@@ -1,8 +1,9 @@
 //
 // Created by Jason Mohoney on 8/24/21.
 //
-
 #include "reporting/reporting.h"
+
+#include <fstream>
 
 #include "configuration/constants.h"
 #include "reporting/logger.h"

@@ -82,6 +82,9 @@ class OGBMag240M(NodeClassificationDataset):
             remap_ids=remap_ids,
             sequential_train_nodes=sequential_train_nodes,
             format="numpy",
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
             known_node_ids=[
                 train_nodes,
                 valid_nodes,

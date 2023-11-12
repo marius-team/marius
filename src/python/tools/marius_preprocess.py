@@ -11,6 +11,7 @@ from marius.tools.preprocess.datasets import (
     ogb_mag240m,
     ogb_wikikg90mv2,
     ogbl_citation2,
+    ogbl_collab,
     ogbl_ppa,
     ogbl_wikikg2,
     ogbn_arxiv,
@@ -91,13 +92,39 @@ def set_args():
     )
 
     parser.add_argument(
-        "--columns",
-        metavar="columns",
-        nargs="*",
+        "--src_column",
+        metavar="src_column",
         required=False,
         type=int,
-        default=[0, 1, 2],
-        help="List of column ids of input delimited files which denote the src node, edge-type, and dst node of edges.",
+        default=None,
+        help="The column id of the src column",
+    )
+
+    parser.add_argument(
+        "--dst_column",
+        metavar="dst_column",
+        required=False,
+        type=int,
+        default=None,
+        help="The column id of the dst column",
+    )
+
+    parser.add_argument(
+        "--edge_type_column",
+        metavar="edge_type_column",
+        required=False,
+        type=int,
+        default=None,
+        help="The column id which denotes the edge weight column",
+    )
+
+    parser.add_argument(
+        "--edge_weight_column",
+        metavar="edge_weight_column",
+        required=False,
+        type=int,
+        default=None,
+        help="The column id which denotes the edge weight column",
     )
 
     return parser
@@ -106,6 +133,8 @@ def set_args():
 def main():
     parser = set_args()
     args = parser.parse_args()
+    if args.dataset == "custom" and (args.src_column is None or args.dst_column is None):
+        parser.error("When using a custom dataset, src column and dst column must be specified")
 
     if args.output_directory == "":
         args.output_directory = args.dataset
@@ -127,10 +156,12 @@ def main():
         "OGBN_PAPERS100M": ogbn_papers100m.OGBNPapers100M,
         "OGB_WIKIKG90MV2": ogb_wikikg90mv2.OGBWikiKG90Mv2,
         "OGB_MAG240M": ogb_mag240m.OGBMag240M,
+        "OGBL_COLLAB": ogbl_collab.OGBLCollab,
     }
 
     dataset = dataset_dict.get(args.dataset.upper())
     if dataset is not None:
+        print("Using existing dataset of", args.dataset.upper())
         dataset = dataset(args.output_directory, spark=args.spark)
         dataset.download(args.overwrite)
         dataset.preprocess(
@@ -140,6 +171,7 @@ def main():
             sequential_train_nodes=args.sequential_train_nodes,
             partitioned_eval=args.partitioned_eval,
         )
+
     else:
         print("Preprocess custom dataset")
 
@@ -157,7 +189,10 @@ def main():
             splits=args.dataset_split,
             partitioned_eval=args.partitioned_eval,
             sequential_train_nodes=args.sequential_train_nodes,
-            columns=args.columns,
+            src_column=args.src_column,
+            dst_column=args.dst_column,
+            edge_type_column=args.edge_type_column,
+            edge_weight_column=args.edge_weight_column,
         )
 
 

@@ -63,6 +63,9 @@ class OGBLCitation2(LinkPredictionDataset):
             valid_edges=valid_list,
             test_edges=test_list,
             num_partitions=num_partitions,
+            src_column=0,
+            dst_column=2,
+            edge_type_column=1,
             remap_ids=remap_ids,
             known_node_ids=[
                 torch.arange(2927963)

@@ -12,4 +12,5 @@ __all__ = [
     "fb15k_237",
     "ogb_wikikg90mv2",
     "ogb_mag240m",
+    "ogbl_collab",
 ]
