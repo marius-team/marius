@@ -21,11 +21,11 @@ void GraphSageLayer::reset() {
     auto tensor_options = torch::TensorOptions().dtype(torch::kFloat32).device(device_);
 
     // Note: need to multiply the fans by 1/2 to match DGL's initialization
-    torch::Tensor edge_mat = initialize_tensor(config_->init, {output_dim_, input_dim_}, tensor_options).set_requires_grad(true);
+    torch::Tensor edge_mat = initialize_tensor(config_->init, {input_dim_, output_dim_}, tensor_options).set_requires_grad(true);
     w1_ = register_parameter("w1", edge_mat);
 
     if (options_->aggregator == GraphSageAggregator::MEAN) {
-        edge_mat = initialize_tensor(config_->init, {output_dim_, input_dim_}, tensor_options).set_requires_grad(true);
+        edge_mat = initialize_tensor(config_->init, {input_dim_, output_dim_}, tensor_options).set_requires_grad(true);
         w2_ = register_parameter("w2", edge_mat);
     }
 
@@ -79,14 +79,14 @@ torch::Tensor GraphSageLayer::forward(torch::Tensor inputs, DENSEGraph dense_gra
     if (options_->aggregator == GraphSageAggregator::GCN) {
         a_i = a_i + self_embs;
         a_i = a_i / (total_num_neighbors + 1).unsqueeze(-1);
-        outputs = torch::matmul(w1_, a_i.transpose(0, -1)).transpose(0, -1);
+        outputs = torch::matmul(a_i, w1_);
     } else if (options_->aggregator == GraphSageAggregator::MEAN) {
         if (total_num_neighbors.defined()) {
             torch::Tensor denominator = torch::where(torch::not_equal(total_num_neighbors, 0), total_num_neighbors, 1).to(a_i.dtype()).unsqueeze(-1);
             a_i = a_i / denominator;
-            outputs = (torch::matmul(w1_, self_embs.transpose(0, -1)) + torch::matmul(w2_, a_i.transpose(0, -1))).transpose(0, -1);
+            outputs = torch::matmul(self_embs, w1_) + torch::matmul(a_i, w2_);
         } else {
-            outputs = torch::matmul(w1_, self_embs.transpose(0, -1)).transpose(0, -1);
+            outputs = torch::matmul(self_embs, w1_);
         }
     } else {
         throw std::runtime_error("Unrecognized aggregator");
