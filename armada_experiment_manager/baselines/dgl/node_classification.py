@@ -81,7 +81,7 @@ def train_one_epoch(encoder, loss_fxn, model_optimizer, data_loader, epoch_num, 
 
     encoder.train()
 
-    print_frequency = num_batches // 20
+    print_frequency = max(num_batches // 20, 20)
     batch_num = 0
     for input_nodes, output_nodes, blocks in data_loader:
 
@@ -234,10 +234,10 @@ def run(proc_id, devices, num_gpus, data, all_args):
         # if num_gpus > 1:
         #     train_dl.set_epoch(epoch - 1)
 
-        num_batches = (train_node_ids.shape[0] // args.train_batch_size + 1)
-        if num_gpus > 1:
-            num_batches = num_batches // num_gpus
-        num_batches = num_batches + 1
+        num_batches = (train_node_ids.shape[0] // (args.train_batch_size * args.num_gpus) + 1)
+        # if num_gpus > 1:
+        #     num_batches = num_batches // num_gpus
+        #     num_batches = num_batches + 1
 
         if all_args[2].print_timing:
             train_trace_one_epoch(encoder, loss_fxn, model_optimizer, train_dl, epoch, num_batches,

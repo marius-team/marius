@@ -185,7 +185,7 @@ def train_one_epoch(embedding_layer, encoder, decoder, loss_fxn, model_optimizer
     encoder.train()
     decoder.train()
 
-    print_frequency = num_batches//20
+    print_frequency = max(num_batches // 20, 20)
     batch_num = 0
     for input_nodes, positive_graph, negative_graph, blocks in data_loader:
         if batch_num % print_frequency == 0 and proc_id == 0:
@@ -364,10 +364,10 @@ def run(proc_id, devices, num_gpus, data, all_args):
         # if num_gpus > 1:
         #     train_dl.set_epoch(epoch - 1)
 
-        num_batches = (train_eids.shape[0] // args.train_batch_size + 1)
-        if num_gpus > 1:
-            num_batches = num_batches // num_gpus
-            num_batches = num_batches + 1
+        num_batches = (train_eids.shape[0] // (args.train_batch_size * args.num_gpus) + 1)
+        # if num_gpus > 1:
+        #     num_batches = num_batches // num_gpus
+        #     num_batches = num_batches + 1
 
         train_one_epoch(embedding_layer, encoder, decoder, loss_fxn, model_optimizer, emb_optimizer, train_dl,
                         args.encode, args.num_train_chunks, args.num_train_uniform_negs, args.num_train_deg_negs,
