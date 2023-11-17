@@ -153,6 +153,11 @@ void ComputeWorkerGPU::run() {
                 if (batch->sub_batches_.size() > 0) {
                     int i = gpu_id_;
 
+                    std::vector<CudaStream> streams_for_multi_guard;
+                    for (int i = 0; i < pipeline_->dataloader_->graph_storage_->num_gpus_; i++) {
+                        streams_for_multi_guard.emplace_back(*(pipeline_->dataloader_->compute_streams_[i]));
+                    }
+
                     #pragma omp parallel
                     {
                         #pragma omp for
@@ -164,8 +169,7 @@ void ComputeWorkerGPU::run() {
 
                         #pragma omp single
                         {
-                            CudaMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
-                                                              *(pipeline_->dataloader_->compute_streams_[1])}); // TODO: general multi-gpu
+                            CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
                             pipeline_->model_->all_reduce();
                             pipeline_->model_->distGradSync();
                         }
@@ -179,8 +183,7 @@ void ComputeWorkerGPU::run() {
                         #pragma omp single
                         {
                             // TODO: should this be on this stream?
-                            CudaMultiStreamGuard multi_guard({*(pipeline_->dataloader_->compute_streams_[0]),
-                                                              *(pipeline_->dataloader_->compute_streams_[1])}); // TODO: general multi-gpu
+                            CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
                             pipeline_->model_->distModelSync();
                         }
                     }

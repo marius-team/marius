@@ -23,7 +23,13 @@ Batch::~Batch() { clear(); }
 void Batch::to(torch::Device device, CudaStream *compute_stream) {
 
     if (sub_batches_.size() > 0) {
-        std::vector<torch::Device> tmp = {torch::Device(torch::kCUDA, 0), torch::Device(torch::kCUDA, 1)}; // TODO: general multi-gpu
+//        std::vector<torch::Device> tmp = {torch::Device(torch::kCUDA, 0), torch::Device(torch::kCUDA, 1)};
+
+        std::vector<torch::Device> tmp;
+        for (int i = 0; i < sub_batches_.size(); i++) {
+            tmp.emplace_back(torch::Device(torch::kCUDA, i));
+        }
+
         #pragma omp parallel for
         for (int i = 0; i < sub_batches_.size(); i++) {
             sub_batches_[i]->to(tmp[i]);

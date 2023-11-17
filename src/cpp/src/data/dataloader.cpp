@@ -72,7 +72,19 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
         }
     }
 
-    compute_streams_ = {nullptr, nullptr}; //TODO: general multi-gpu
+//    compute_streams_ = {nullptr, nullptr};
+
+//    compute_streams_(graph_storage_->num_gpus_); //= {nullptr, nullptr};
+//    for (int i = 0; i < graph_storage_->num_gpus_; i++) {
+//        compute_streams_[i] = nullptr;
+//    }
+
+    CudaStream* temp[graph_storage_->num_gpus_];
+    for (int i = 0; i < graph_storage_->num_gpus_; i++) {
+        temp[i] = nullptr;
+    }
+    compute_streams_ = &temp[0];
+
     pg_gloo_ = nullptr;
     dist_config_ = nullptr;
 //    dist_ = false;
@@ -404,10 +416,10 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
         return batch;
     }
 
-    // TODO: general multi-gpu
+
     if (train_ and graph_storage_->num_gpus_ > 1) {
         std::vector <shared_ptr<Batch>> sub_batches;
-        int num_devices = 2; //graph_storage_->storage_config_->device_ids.size();
+        int num_devices = graph_storage_->num_gpus_;        //graph_storage_->storage_config_->device_ids.size();
 
         if (batch->task_ == LearningTask::LINK_PREDICTION) {
             torch::Tensor edges = edge_sampler_->getEdges(batch);
