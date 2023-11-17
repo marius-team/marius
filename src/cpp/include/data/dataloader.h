@@ -71,8 +71,8 @@ class DataLoader {
     LearningTask learning_task_;
     bool use_partition_embeddings_;
 
-//    std::vector<CudaStream *> compute_streams_;
-    CudaStream** compute_streams_;
+    std::vector<CudaStream *> compute_streams_;
+//    CudaStream** compute_streams_;
     shared_ptr<c10d::ProcessGroupGloo> pg_gloo_;
     shared_ptr<DistributedConfig> dist_config_;
 //    bool dist_;

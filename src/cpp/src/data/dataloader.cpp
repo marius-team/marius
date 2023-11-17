@@ -72,18 +72,21 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
         }
     }
 
-//    compute_streams_ = {nullptr, nullptr};
+    compute_streams_ = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}; // TODO: fix this
+//    for (int i = 0; i < graph_storage_->num_gpus_; i++) {
+//        compute_streams_.emplace_back(nullptr);
+//    }
 
 //    compute_streams_(graph_storage_->num_gpus_); //= {nullptr, nullptr};
 //    for (int i = 0; i < graph_storage_->num_gpus_; i++) {
 //        compute_streams_[i] = nullptr;
 //    }
 
-    CudaStream* temp[graph_storage_->num_gpus_];
-    for (int i = 0; i < graph_storage_->num_gpus_; i++) {
-        temp[i] = nullptr;
-    }
-    compute_streams_ = &temp[0];
+//    CudaStream* temp[graph_storage_->num_gpus_];
+//    for (int i = 0; i < graph_storage_->num_gpus_; i++) {
+//        temp[i] = nullptr;
+//    }
+//    compute_streams_ = &temp[0];
 
     pg_gloo_ = nullptr;
     dist_config_ = nullptr;
