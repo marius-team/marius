@@ -357,7 +357,7 @@ def run(proc_id, devices, num_gpus, data, all_args):
     # if emb_storage_backend == 'dgl_sparse':
     #     emb_optimizer = dgl.optim.pytorch.SparseAdagrad([embedding_layer.node_embs], lr=args.learning_rate)
     # elif emb_storage_backend == 'torch_emb':
-    #     emb_optimizer = torch.optim.SparseAdam(list(embedding_layer.parameters()), lr=args.learning_rate)
+    #     emb_optimizer = torch.optim.Adagrad(list(embedding_layer.parameters()), lr=args.learning_rate)
     # else:
     #     emb_optimizer = torch.optim.Adagrad(embedding_layer.parameters(), lr=args.learning_rate)
 
@@ -482,7 +482,7 @@ def run_lp(args):
     if args.emb_storage_backend == 'dgl_sparse':
         emb_optimizer = dgl.optim.SparseAdagrad([embedding_layer.node_embs], lr=args.learning_rate)
     elif args.emb_storage_backend == 'torch_emb':
-        emb_optimizer = torch.optim.SparseAdam(list(embedding_layer.parameters()), lr=args.learning_rate)
+        emb_optimizer = torch.optim.Adagrad(list(embedding_layer.parameters()), lr=args.learning_rate)
     else:
         emb_optimizer = torch.optim.Adagrad(embedding_layer.parameters(), lr=args.learning_rate)
     # embedding_layer = args.emb_dim
