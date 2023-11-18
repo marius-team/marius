@@ -72,6 +72,31 @@ torch::Tensor GraphSageLayer::forward(torch::Tensor inputs, DENSEGraph dense_gra
         }
     }
 
+//    Indices neighbors;
+//    Indices neighbor_offsets;
+////    Indices total_num_neighbors;
+//
+//    if (dense_graph.out_neighbors_mapping_.defined() && dense_graph.in_neighbors_mapping_.defined()) {
+//        auto tup = dense_graph.getCombinedNeighborIDs();
+//        neighbors = std::get<2>(tup);
+//        neighbor_offsets = std::get<0>(tup);
+//        total_num_neighbors = std::get<1>(tup);
+//    } else if (dense_graph.in_neighbors_mapping_.defined()) {
+//        neighbors = dense_graph.getNeighborIDs(true, false);
+//        neighbor_offsets = dense_graph.getNeighborOffsets(true);
+//        total_num_neighbors = dense_graph.getNumNeighbors(true);
+//    } else if (dense_graph.out_neighbors_mapping_.defined()) {
+//        neighbors = dense_graph.getNeighborIDs(false, false);
+//        neighbor_offsets = dense_graph.getNeighborOffsets(false);
+//        total_num_neighbors = dense_graph.getNumNeighbors(false);
+//    } else {
+//        throw MariusRuntimeException("No neighbors defined.");
+//    }
+//
+//    torch::Tensor nbr_embeddings = inputs.index_select(0, neighbors);
+//    a_i = segmented_sum_with_offsets(nbr_embeddings, neighbor_offsets);
+
+
     int64_t layer_offset = dense_graph.getLayerOffset();
     torch::Tensor self_embs = inputs.narrow(0, layer_offset, inputs.size(0) - layer_offset);
 

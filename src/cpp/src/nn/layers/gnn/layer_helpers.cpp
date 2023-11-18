@@ -5,7 +5,7 @@
 #include "nn/layers/gnn/layer_helpers.h"
 
 #ifdef MARIUS_CUDA
-    #include "pytorch_scatter/segment_max.h"
+    #include "pytorch_scatter/segment_csr.h"
 #endif
 
 torch::Tensor segment_ids_from_offsets(torch::Tensor segment_offsets, int64_t input_size) {
@@ -25,8 +25,16 @@ torch::Tensor segmented_sum(torch::Tensor tensor, torch::Tensor segment_ids, int
 }
 
 torch::Tensor segmented_sum_with_offsets(torch::Tensor tensor, torch::Tensor segment_offsets) {
+#ifdef MARIUS_CUDA
+    auto shape = tensor.sizes().vec();
+    shape[0] = segment_offsets.size(0);
+    torch::Tensor out = torch::zeros(shape, tensor.options());
+
+    return segment_sum_csr(tensor, torch::cat({segment_offsets, torch::tensor({tensor.size(0)}, segment_offsets.options())}), out);
+#else
     torch::Tensor segment_ids = segment_ids_from_offsets(segment_offsets, tensor.size(0));
     return segmented_sum(tensor, segment_ids, segment_offsets.size(0));
+#endif
 }
 
 torch::Tensor segmented_max_with_offsets(torch::Tensor tensor, torch::Tensor segment_offsets) {

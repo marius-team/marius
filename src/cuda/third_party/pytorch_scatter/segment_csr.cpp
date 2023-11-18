@@ -50,3 +50,33 @@ segment_max_csr(torch::Tensor src, torch::Tensor indptr,
     auto result = SegmentMaxCSR::apply(src, indptr, optional_out);
     return std::make_tuple(result[0], result[1]);
 }
+
+class SegmentSumCSR : public torch::autograd::Function<SegmentSumCSR> {
+public:
+    static variable_list forward(AutogradContext *ctx, Variable src,
+                                 Variable indptr,
+                                 torch::optional<Variable> optional_out) {
+        ctx->saved_data["src_shape"] = src.sizes();
+        auto out = std::get<0>(segment_csr_cuda(src, indptr, optional_out, "sum"));
+        ctx->save_for_backward({indptr});
+        if (optional_out.has_value())
+            ctx->mark_dirty({optional_out.value()});
+        return {out};
+    }
+
+    static variable_list backward(AutogradContext *ctx, variable_list grad_outs) {
+        auto grad_out = grad_outs[0];
+        auto saved = ctx->get_saved_variables();
+        auto indptr = saved[0];
+        auto src_shape = list2vec(ctx->saved_data["src_shape"].toIntList());
+        auto grad_in = torch::empty(src_shape, grad_out.options());
+        gather_csr_cuda(grad_out, indptr, grad_in);
+        return {grad_in, Variable(), Variable()};
+    }
+};
+
+torch::Tensor
+segment_sum_csr(torch::Tensor src, torch::Tensor indptr,
+        torch::optional<torch::Tensor> optional_out) {
+return SegmentSumCSR::apply(src, indptr, optional_out)[0];
+}
