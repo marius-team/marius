@@ -40,8 +40,12 @@ class GraphEmbeddingLayer(nn.Module):
 
             self.node_embs = NodeEmbedding(num_nodes, embed_size, 'node_embs', init_func=initializer, device=storage_device)
 
-        # elif backend == 'torch_emb':
-        #
+        elif backend == 'torch_emb':
+            self.node_embs = torch.nn.Embedding(num_nodes, embed_size, sparse=True, device=storage_device, dtype=torch.float32)
+
+            scale_factor = 0.001
+            torch.nn.init.normal_(self.node_embs.weight)
+            self.node_embs.weight = nn.Parameter(self.node_embs.weight * scale_factor)
 
         else:
             node_embs = torch.Tensor(num_nodes, embed_size).to(torch.float32)
@@ -57,8 +61,9 @@ class GraphEmbeddingLayer(nn.Module):
             node_ids = node_ids.to(self.node_embs.weight.device)
             return self.node_embs(node_ids, out_device)
 
-        # elif backend == 'torch_emb':
-        #
+        elif self.backend == 'torch_emb':
+            node_ids = node_ids.to(self.node_embs.weight.device)
+            return self.node_embs(node_ids).to(out_device)
 
         else:
             node_ids = node_ids.to(self.node_embs.device)

@@ -273,6 +273,9 @@ def run(proc_id, devices, num_gpus, data, all_args):
 
     full_graph, train_g, valid_g, test_g, train_eids, valid_eids, test_eids, embedding_layer, emb_optimizer = data
 
+    # full_graph, train_g, valid_g, test_g, train_eids, valid_eids, test_eids, emb_dim, emb_storage_backend = data
+    # emb_storage_backend = emb_optimizer
+
     emb_storage_device, num_nodes, num_rels, args = all_args
 
     # train data loaders (old comment)
@@ -352,9 +355,11 @@ def run(proc_id, devices, num_gpus, data, all_args):
     all_params = itertools.chain(encoder.parameters(), decoder.parameters())
     model_optimizer = torch.optim.Adagrad(all_params, lr=args.learning_rate)
     # if emb_storage_backend == 'dgl_sparse':
-    #     emb_optimizer = dgl.optim.pytorch.SparseAdagrad([embedding_layer.node_embs], lr=learning_rate)
+    #     emb_optimizer = dgl.optim.pytorch.SparseAdagrad([embedding_layer.node_embs], lr=args.learning_rate)
+    # elif emb_storage_backend == 'torch_emb':
+    #     emb_optimizer = torch.optim.SparseAdam(list(embedding_layer.parameters()), lr=args.learning_rate)
     # else:
-    #     emb_optimizer = torch.optim.Adagrad(embedding_layer.parameters(), lr=learning_rate)
+    #     emb_optimizer = torch.optim.Adagrad(embedding_layer.parameters(), lr=args.learning_rate)
 
     # training
     for epoch in range(1, args.num_epochs + 1):
@@ -476,8 +481,12 @@ def run_lp(args):
                                           backend=args.emb_storage_backend)
     if args.emb_storage_backend == 'dgl_sparse':
         emb_optimizer = dgl.optim.SparseAdagrad([embedding_layer.node_embs], lr=args.learning_rate)
+    elif args.emb_storage_backend == 'torch_emb':
+        emb_optimizer = torch.optim.SparseAdam(list(embedding_layer.parameters()), lr=args.learning_rate)
     else:
         emb_optimizer = torch.optim.Adagrad(embedding_layer.parameters(), lr=args.learning_rate)
+    # embedding_layer = args.emb_dim
+    # emb_optimizer = args.emb_storage_backend
 
     # data
     data = full_graph, train_g, valid_g, test_g, train_eids, valid_eids, test_eids, embedding_layer, emb_optimizer
