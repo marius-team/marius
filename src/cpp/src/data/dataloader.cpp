@@ -445,7 +445,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 //                sub_batch->root_node_indices_ = node_ids.narrow(0, offset, nodes_per_batch);
                 offset += edges_per_batch;
 
-                getBatchHelper(sub_batch, worker_id);
+                getBatchHelper(sub_batch, worker_id); // TODO: could put this in an omp for loop
                 sub_batches.emplace_back(sub_batch);
             }
 

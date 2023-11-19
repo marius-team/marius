@@ -63,6 +63,8 @@ class DummyCudaMultiStreamGuard {
     DummyCudaMultiStreamGuard(std::initializer_list<DummyCudaStream>) {}
 
     DummyCudaMultiStreamGuard(std::vector<DummyCudaStream *>) {}
+
+    DummyCudaMultiStreamGuard(std::vector<DummyCudaStream>&) {}
 };
 
 #ifdef MARIUS_CUDA
