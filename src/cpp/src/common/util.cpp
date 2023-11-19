@@ -203,6 +203,8 @@ torch::Tensor receive_tensor(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_i
     }
 
     torch::Tensor sizes = metadata.narrow(0, 0, dim);
+    std::cout<<sizes()<<"\n";
+    std::cout<<dtype_label<<"\n\n";
     int64_t *data_ptr = (int64_t *)sizes.data_ptr();
     int64_t *end = (int64_t *)data_ptr + sizes.size(0);
     std::vector<int64_t> sizes_vec = std::vector<int64_t>(data_ptr, end);
