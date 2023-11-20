@@ -153,7 +153,7 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
 
     if (num_columns == 3) {
 #pragma omp parallel default(none) shared(tid_seeds, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, num_neighbors_accessor, \
-                                          num_neighbors, max_neighbors, sorted_list_ptr, edges, ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
+                                              num_neighbors, max_neighbors, sorted_list_ptr, edges, ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
         {
 #ifdef MARIUS_OMP
             unsigned int seed = tid_seeds[omp_get_thread_num()];
@@ -193,7 +193,7 @@ std::tuple<torch::Tensor, torch::Tensor> sample_uniform_cpu(torch::Tensor edges,
         }
     } else {
 #pragma omp parallel default(none) shared(tid_seeds, local_offsets_accessor, local_offsets, global_offsets_accessor, global_offsets, num_neighbors_accessor, \
-                                          num_neighbors, max_neighbors, sorted_list_ptr, edges, ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
+                                              num_neighbors, max_neighbors, sorted_list_ptr, edges, ret_neighbor_id_edges_mem, ret_neighbor_id_edges)
         {
 #ifdef MARIUS_OMP
             unsigned int seed = tid_seeds[omp_get_thread_num()];
