@@ -166,7 +166,7 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     shared_ptr <DataLoader> dataloader = std::make_shared<DataLoader>(graph_model_storage, model->learning_task_,
                                                                       model->has_partition_embeddings(),
                                                                       marius_config->training, marius_config->evaluation,
-                                                                      marius_config->model->encoder, batch_worker);
+                                                                      marius_config->model->encoder, batch_worker, compute_worker);
     dataloader->epochs_processed_ = epochs_processed;
 
     initialization_timer.stop();

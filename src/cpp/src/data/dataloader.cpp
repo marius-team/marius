@@ -9,7 +9,7 @@
 
 DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, bool use_partition_embeddings,
                        shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config,
-                       bool batch_worker) {
+                       bool batch_worker, bool compute_worker) {
     current_edge_ = 0;
     train_ = true;
     epochs_processed_ = 0;
@@ -29,6 +29,7 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
 
     use_partition_embeddings_ = use_partition_embeddings;
     batch_worker_ = batch_worker;
+    compute_worker_ = compute_worker;
 
     if (!batch_worker) {
 
@@ -638,7 +639,8 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
         }
     }
 
-    if (graph_storage_->storage_ptrs_.node_features != nullptr) {
+//    if (graph_storage_->storage_ptrs_.node_features != nullptr) {
+    if (graph_storage_->storage_ptrs_.node_features != nullptr and compute_worker_) {
         if (graph_storage_->storage_ptrs_.node_features->device_ != torch::kCUDA) {
             if (only_root_features_) {
                 batch->node_features_ = graph_storage_->getNodeFeatures(batch->root_node_indices_);

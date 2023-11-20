@@ -77,9 +77,10 @@ class DataLoader {
     shared_ptr<DistributedConfig> dist_config_;
 //    bool dist_;
     bool batch_worker_;
+    bool compute_worker_;
 
     DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, bool use_partition_embeddings,
-               shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config, bool batch_worker = true);
+               shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config, bool batch_worker = true, bool compute_worker = true);
 
     DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler = nullptr,
                shared_ptr<NeighborSampler> neighbor_sampler = nullptr, bool train = false);
