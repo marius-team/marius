@@ -1,9 +1,10 @@
 from pathlib import Path
 
 import numpy as np
+from omegaconf import OmegaConf
+
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
-from omegaconf import OmegaConf
 
 
 class TorchWriter(object):

@@ -3,8 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from marius.tools.configuration.constants import PathConstants
 from omegaconf import OmegaConf
+
+from marius.tools.configuration.constants import PathConstants
 
 import torch  # isort:skip
 
