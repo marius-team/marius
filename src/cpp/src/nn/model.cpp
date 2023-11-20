@@ -873,6 +873,8 @@ void Model::distPrepareForTraining(bool eval) {
         return;
     }
 
+    already_notified_ = false;
+
     std::cout<<"distPrepareForTraining\n";
 
     // set batch_worker_, compute_worker_, children, parents, num_batch_, num_compute_ here based on config,
@@ -948,9 +950,9 @@ void Model::distPrepareForTraining(bool eval) {
 
     feeders_ = feeders;
 
-    if (compute_worker_ and !eval) {
-        createComputePG(feeders, global_to_compute_worker, compute_worker_to_global);
-    }
+//    if (compute_worker_ and !eval) {
+//        createComputePG(feeders, global_to_compute_worker, compute_worker_to_global);
+//    }
 
     std::thread(&Model::distListenForComplete, this, eval).detach();
 
@@ -970,11 +972,23 @@ void Model::distPrepareForTraining(bool eval) {
 
 
     // TODO: batch construction (i.e., everybody) waits for sync (with some sort of barrier)?
+
+
+    auto work = pg_gloo_->pg->barrier(); // TBD on if this actually works when we have batch construction workers or not
+////    while (!work->isCompleted()) { std::cout<<"barrier waiting\n"; }
+    if (!work->wait()) {
+        throw work->exception();
+    }
+
+    std::cout<<"distPrepareForTraining barrier complete\n";
+
+
 //    exit(0);
 }
 
 void Model::updateFeeders(int x, bool eval) {
     std::cout<<"update feeders: "<<x<<"\n";
+    update_feeders_lock_->lock();
 
     if (compute_workers_[0] == pg_gloo_->pg->getRank()) {
         for (int i = 0; i < pg_gloo_->pg->getSize(); i++) {
@@ -984,15 +998,24 @@ void Model::updateFeeders(int x, bool eval) {
 
             std::cout<<pg_gloo_->pg->getRank()<<" sending "<<x<<" to "<<i<<"\n";
 
+//            bool success = false;
+
+//            while (!success) {
+//                try {
             std::vector<torch::Tensor> vec;
             torch::Tensor x_tens = torch::zeros({1}, torch::kInt32) + x;
             vec.push_back(x_tens);
             auto work = pg_gloo_->pg->send(vec, i, 2 + eval);
-            if (!work->wait()) {
+            if (!work->wait()) {                        //std::chrono::milliseconds(1000)
                 throw work->exception();
             }
+//                    success = true;
+//                } catch (...) {
+//                    std::cout<<"Caught ERROR with update feeders\n\n";
+//                }
+//            }
 
-            std::cout<<"done sending\n";
+            std::cout<<"done sending "<<x<<" to "<<i<<"\n";
         }
     }
 
@@ -1020,9 +1043,11 @@ void Model::updateFeeders(int x, bool eval) {
         epoch_complete_ = true;
     }
 
-    if (compute_worker_ and !eval and !epoch_complete_)
-        createComputePG(feeders_, all_workers_, compute_workers_);
-    std::cout<<"done update feeders\n";
+//    if (compute_worker_ and !eval and !epoch_complete_)
+//        createComputePG(feeders_, all_workers_, compute_workers_);
+
+    update_feeders_lock_->unlock();
+    std::cout<<"done update feeders:"<<x<<"\n";
 }
 
 void Model::distListenForComplete(bool eval) {
@@ -1039,7 +1064,9 @@ void Model::distListenForComplete(bool eval) {
 //        std::cout<<"x: "<<x<<"\n";
 
         auto work = pg_gloo_->pg->recvAnysource(vec, 2 + eval);
-//        auto work = pg_gloo_->pg->recv(vec, compute_workers_[0], 2);
+//        std::cout<<"compute_worker[0]: "<< compute_workers_[0]<<"\n";
+//        auto work = pg_gloo_->pg->recv(vec, compute_workers_[0], 2 + eval);
+//        std::cout<<"distListenForComplete waiting\n";
         if (!work->wait()) {
             throw work->exception();
         }
@@ -1128,7 +1155,7 @@ void Model::distListenForComplete(bool eval) {
 
 //}
 
-void Model::distNotifyCompleteAndWait(bool eval) {
+void Model::distNotifyCompleteAndWait(bool eval, bool wait) {
     if (pg_gloo_ == nullptr) {
         return;
     }
@@ -1137,41 +1164,49 @@ void Model::distNotifyCompleteAndWait(bool eval) {
 
     // called on everything
 
-    // if batch construction worker, notify all of completion
-    if (batch_worker_) {
-        torch::Tensor x = torch::zeros({1}, torch::kInt32) + pg_gloo_->pg->getRank();
-        std::vector<torch::Tensor> transfer_vec;
-        transfer_vec.push_back(x);
+    if (!already_notified_) {
+        already_notified_ = true;
 
-        auto compute_worker_id = compute_workers_[0];
-//        for (auto compute_worker_id : compute_workers_) {
-//            std::cout<<compute_worker_id<<"\n";
-        if (compute_worker_id == pg_gloo_->pg->getRank()) {
-//            std::cout<<"direct update feeders\n";
-            updateFeeders(compute_worker_id, eval); //TODO: this can actually cause update feeders to be called in parallel with the thread, we should have a lock
-//            continue;
-        } else {
-            std::cout<<pg_gloo_->pg->getRank()<<" direct sending "<<x.item<int>()<<" to "<<compute_worker_id<<"\n";
+        // if batch construction worker, notify all of completion
+        if (batch_worker_) {
+            torch::Tensor x = torch::zeros({1}, torch::kInt32) + pg_gloo_->pg->getRank();
+            std::vector<torch::Tensor> transfer_vec;
+            transfer_vec.push_back(x);
 
-            auto work = pg_gloo_->pg->send(transfer_vec, compute_worker_id, 2 + eval);
-            if (!work->wait()) {
-                throw work->exception();
+            auto compute_worker_id = compute_workers_[0];
+    //        for (auto compute_worker_id : compute_workers_) {
+    //            std::cout<<compute_worker_id<<"\n";
+            if (compute_worker_id == pg_gloo_->pg->getRank()) {
+    //            std::cout<<"direct update feeders\n";
+                updateFeeders(compute_worker_id, eval); //TODO: this can actually cause update feeders to be called in parallel with the thread, we should have a lock
+    //            continue;
+            } else {
+                std::cout<<pg_gloo_->pg->getRank()<<" direct sending "<<x.item<int>()<<" to "<<compute_worker_id<<"\n";
+
+                auto work = pg_gloo_->pg->send(transfer_vec, compute_worker_id, 2 + eval);
+                if (!work->wait()) {
+                    throw work->exception();
+                }
+                std::cout<<"done direct sending\n";
             }
-            std::cout<<"done direct sending\n";
+
+    //        }
+
+    //        if (!compute_worker_) {
+    //            std::cout<<"distNotifyCompleteAndWait barrier\n";
+    //            auto work = pg_gloo_->pg->barrier();
+    //            if (!work->wait()) {
+    //                throw work->exception();
+    //            }
+    //            epoch_complete_ = true;
+    //        }
+        } else {
+
         }
+    }
 
-//        }
-
-//        if (!compute_worker_) {
-//            std::cout<<"distNotifyCompleteAndWait barrier\n";
-//            auto work = pg_gloo_->pg->barrier();
-//            if (!work->wait()) {
-//                throw work->exception();
-//            }
-//            epoch_complete_ = true;
-//        }
-    } else {
-
+    if (!wait) {
+        return;
     }
 
 
@@ -1334,7 +1369,9 @@ shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std:
     model->compute_worker_ = compute_worker;
     model->first_epoch_ = true;
     model->pg_lock_ = new std::mutex();
+    model->update_feeders_lock_ = new std::mutex();
     model->last_compute_worker_ = -1;
+    model->already_notified_ = false;
 
     std::cout<<"init model"<<"\n"; // init some model listening queues here if desired for distributed training
 

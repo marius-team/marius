@@ -215,10 +215,10 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
 
     y_pred_ = receive_tensor(pg, worker_id, tag);
     t.stop();
-    std::cout<<"batch recv: "<<t.getDuration()<<"\n";
+//    std::cout<<"batch recv: "<<t.getDuration()<<"\n";
 
     t_full.stop();
-    std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";
+//    std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";
 }
 
 void Batch::accumulateGradients(float learning_rate) {

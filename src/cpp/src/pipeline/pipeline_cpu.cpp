@@ -104,10 +104,26 @@ PipelineCPU::~PipelineCPU() {
 }
 
 bool Pipeline::isDone() {
-    if (compute_worker_ and compute_worker_needs_remote_) {
-        return model_->epoch_complete_;
+//    if (compute_worker_ and compute_worker_needs_remote_) {
+//        return model_->epoch_complete_;
+//    } else {
+//        return (batches_in_flight_ <= 0) && dataloader_->epochComplete();
+//    }
+
+    if (batch_worker_) {
+        bool done_locally = (batches_in_flight_ <= 0) && dataloader_->epochComplete();
+        if (done_locally and compute_worker_ and compute_worker_needs_remote_) {
+//            model_->distNotifyCompleteAndWait(train_, false);
+            if (!model_->already_notified_) {
+                model_->updateFeeders(model_->pg_gloo_->pg->getRank(), !train_); // TODO; not general, need something like distNotifyComplete
+                model_->already_notified_ = true;
+            }
+            return model_->epoch_complete_;
+        } else {
+            return done_locally;
+        }
     } else {
-        return (batches_in_flight_ <= 0) && dataloader_->epochComplete();
+        return model_->epoch_complete_;
     }
 }
 

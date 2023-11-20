@@ -58,7 +58,9 @@ class Model : public torch::nn::Module {
     bool first_epoch_;
     std::atomic<bool> epoch_complete_;
     std::mutex *pg_lock_;
+    std::mutex *update_feeders_lock_;
     int last_compute_worker_;
+    std::atomic<bool> already_notified_;
 
     Model(shared_ptr<GeneralEncoder> encoder, shared_ptr<Decoder> decoder, shared_ptr<LossFunction> loss,
           shared_ptr<Reporter> reporter = nullptr, LearningTask learning_task = LearningTask::LINK_PREDICTION,
@@ -137,7 +139,7 @@ class Model : public torch::nn::Module {
 
     void distModelAverage();
 
-    void distNotifyCompleteAndWait(bool eval = false);
+    void distNotifyCompleteAndWait(bool eval = false, bool wait = true);
 };
 
 shared_ptr<Model> initModelFromConfig(shared_ptr<ModelConfig> model_config, std::vector<torch::Device> devices, int num_relations, int num_partitions, bool train,
