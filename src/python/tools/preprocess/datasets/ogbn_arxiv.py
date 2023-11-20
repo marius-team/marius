@@ -1,13 +1,12 @@
 from pathlib import Path
 
 import numpy as np
-from omegaconf import OmegaConf
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import NodeClassificationDataset
 from marius.tools.preprocess.datasets.dataset_helpers import remap_nodes
 from marius.tools.preprocess.utils import download_url, extract_file
+from omegaconf import OmegaConf
 
 
 class OGBNArxiv(NodeClassificationDataset):
@@ -81,7 +80,6 @@ class OGBNArxiv(NodeClassificationDataset):
             output_dir=self.output_directory,
             train_edges=self.input_edge_list_file,
             num_partitions=num_partitions,
-            columns=[0, 1],
             src_column=0,
             dst_column=1,
             remap_ids=remap_ids,

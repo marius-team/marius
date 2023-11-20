@@ -1,11 +1,10 @@
 from pathlib import Path
 
-from omegaconf import OmegaConf
-
 import marius as m
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter
 from marius.tools.preprocess.dataset import LinkPredictionDataset
 from marius.tools.preprocess.utils import download_url, extract_file
+from omegaconf import OmegaConf
 
 import torch  # isort:skip
 

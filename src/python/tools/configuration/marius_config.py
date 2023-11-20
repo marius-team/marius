@@ -8,8 +8,6 @@ from distutils import dir_util
 from pathlib import Path
 from typing import List
 
-from omegaconf import MISSING, DictConfig, OmegaConf
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.datatypes import (
     AdagradOptions,
@@ -42,6 +40,7 @@ from marius.tools.configuration.validation import (
     validate_dataset_config,
     validate_storage_config,
 )
+from omegaconf import MISSING, DictConfig, OmegaConf
 
 
 def get_model_dir_path(dataset_dir):

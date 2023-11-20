@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from omegaconf import OmegaConf
-
 import marius as m
 from marius.tools.preprocess.datasets.ogbn_arxiv import OGBNArxiv
+from omegaconf import OmegaConf
 
 import torch  # isort:skip
 

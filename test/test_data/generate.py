@@ -3,10 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from omegaconf import OmegaConf
-
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.preprocess.converters.torch_converter import TorchEdgeListConverter, split_edges
+from omegaconf import OmegaConf
 
 
 def get_random_graph(num_nodes, num_edges, num_rels=1):
