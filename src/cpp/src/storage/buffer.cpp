@@ -444,7 +444,7 @@ torch::Tensor PartitionBuffer::indexRead(torch::Tensor indices) {
         throw std::runtime_error("");
     }
 
-    auto out_options = torch::TensorOptions().dtype(torch::kFloat32);
+    auto out_options = torch::TensorOptions().dtype(dtype_);
 #ifdef MARIUS_CUDA
     out_options = out_options.pinned_memory(true);
 #endif
@@ -468,7 +468,7 @@ void PartitionBuffer::indexAdd(torch::Tensor indices, torch::Tensor values) {
     // buffer_tensor_view_.index_add_(0, indices, values);
 
     // assumes this operation is only used on float valued data, and this op takes place on the CPU
-    auto data_accessor = buffer_tensor_view_.accessor<float, 2>();
+    auto data_accessor = buffer_tensor_view_.accessor<float, 2>(); // TODO: float16?
     auto ids_accessor = indices.accessor<int64_t, 1>();
     auto values_accessor = values.accessor<float, 2>();
 

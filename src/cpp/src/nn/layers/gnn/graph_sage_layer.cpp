@@ -35,6 +35,8 @@ void GraphSageLayer::reset() {
 }
 
 torch::Tensor GraphSageLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bool train) {
+    inputs = inputs.to(torch::kFloat32);
+
     torch::Tensor total_num_neighbors;
     torch::Tensor a_i;
     //

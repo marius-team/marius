@@ -339,6 +339,8 @@ torch::Dtype getDtype(std::string string_val) {
         return torch::kInt64;
     } else if (string_val == "FLOAT" || string_val == "FLOAT32") {
         return torch::kFloat32;
+    } else if (string_val == "FLOAT16") {
+        return torch::kFloat16;
     } else if (string_val == "DOUBLE" || string_val == "FLOAT64") {
         return torch::kFloat64;
     } else {

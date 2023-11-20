@@ -271,7 +271,7 @@ void Batch::embeddingsToHost() {
     }
 
     if (node_gradients_.defined() && node_gradients_.device().is_cuda()) {
-        auto grad_opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU).pinned_memory(true);
+        auto grad_opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU).pinned_memory(true); // TODO: float16?
         Gradients temp_grads = torch::empty(node_gradients_.sizes(), grad_opts);
         temp_grads.copy_(node_gradients_, false);
 

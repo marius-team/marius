@@ -162,7 +162,7 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeEmbeddings(sh
 
     int64_t num_nodes = storage_config->dataset->num_nodes;
     int embedding_dim = model->get_base_embedding_dim();
-    torch::Dtype dtype = storage_config->embeddings->options->dtype;
+    torch::Dtype dtype = storage_config->embeddings->options->dtype; //TODO use this in initialization
 
     if (reinitialize) {
         shared_ptr<FlatFile> init_node_embeddings = std::make_shared<FlatFile>(node_embedding_filename, dtype);

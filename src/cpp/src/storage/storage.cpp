@@ -622,6 +622,13 @@ torch::Tensor InMemory::indexRead(Indices indices) {
 #endif
                 out = torch::empty({indices.size(0), dim1_size_}, out_options);
                 torch::index_select_out(out, data_, 0, indices);
+            } else if (dtype_ == torch::kFloat16) {
+                auto out_options = torch::TensorOptions().dtype(torch::kFloat16);
+#ifdef MARIUS_CUDA
+                out_options = out_options.pinned_memory(true);
+#endif
+                out = torch::empty({indices.size(0), dim1_size_}, out_options);
+                torch::index_select_out(out, data_, 0, indices);
             } else if (dtype_ == torch::kInt64) {
                 auto out_options = torch::TensorOptions().dtype(torch::kInt64);
 #ifdef MARIUS_CUDA
