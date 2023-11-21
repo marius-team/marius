@@ -151,6 +151,7 @@ void BatchToDeviceWorker::run() {
             }
 
             if (batch->sub_batches_.size() > 0) {
+                #pragma omp parallel for
                 for (int i = 0; i < batch->sub_batches_.size(); i++) {
                     if (!batch->sub_batches_[i]->node_features_.defined())
                         batch->sub_batches_[i]->node_features_ = pipeline_->dataloader_->graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
