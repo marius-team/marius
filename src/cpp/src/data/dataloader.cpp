@@ -411,7 +411,7 @@ void DataLoader::getBatchHelper(shared_ptr<Batch> batch, int worker_id) {
         batch->dense_graph_.partition_size_ = graph_storage_->getPartitionSize();
     }
 
-    loadCPUParameters(batch);
+//    loadCPUParameters(batch);
 }
 
 shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool perform_map, int worker_id) {
@@ -479,6 +479,8 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
         }
 
         batch->sub_batches_ = sub_batches;
+
+//        loadCPUParameters(batch);
 
         return batch;
     }
@@ -645,7 +647,61 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
             if (only_root_features_) {
                 batch->node_features_ = graph_storage_->getNodeFeatures(batch->root_node_indices_);
             } else {
-                batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+//                batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+
+
+
+                if (batch->sub_batches_.size() > 0) {
+//                    std::cout << "start\n";
+                    std::vector<torch::Tensor> all_unique_nodes_vec(batch->sub_batches_.size());
+//                    int total_unique_nodes = 0;
+
+//                    #pragma omp parallel for # TODO
+                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                        all_unique_nodes_vec[i] = batch->sub_batches_[i]->unique_node_indices_;
+//                        total_unique_nodes += batch->sub_batches_[i]->unique_node_indices_.size(0);
+
+//                        std::cout << batch->sub_batches_[i]->unique_node_indices_.sizes() << " "
+//                                  << batch->sub_batches_[i]->unique_node_indices_.device() << "\n";
+                    }
+
+//                    std::cout << "cat\n";
+                    torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
+//                    std::cout << all_unique_nodes.sizes() << "\n";
+                    auto unique_nodes = torch::_unique2(all_unique_nodes, true, true, false);
+                    torch::Tensor unique_indices = std::get<0>(unique_nodes);
+                    torch::Tensor inverse = std::get<1>(unique_nodes);
+                    torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
+//                    std::cout << unique_indices.sizes() << "\n";
+//                    std::cout << inverse.sizes() << " " << inverse.device() << "\n";
+//                    std::cout << unique_features.sizes() << " " << unique_features.device() << "\n";
+                    std::cout<<unique_indices.size(0)<<" vs " <<all_unique_nodes.size(0)<<"\n";
+
+//                    std::cout << "end cat\n";
+                    int count = 0;
+                    int count1 = 0;
+                    int split_size = (int) ceil((float) unique_features.size(0) / batch->sub_batches_.size());
+                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                        if (!batch->sub_batches_[i]->node_features_.defined()) {
+                            batch->sub_batches_[i]->unique_node_indices_ = inverse.narrow(0, count, batch->sub_batches_[i]->unique_node_indices_.size(0));
+                            count += batch->sub_batches_[i]->unique_node_indices_.size(0);
+//                            std::cout << batch->sub_batches_[i]->unique_node_indices_.sizes() << "\n";
+
+                            int size = split_size;
+                            if (count1 + split_size > unique_features.size(0)) size = unique_features.size(0) - count1;
+                            batch->sub_batches_[i]->node_features_ = unique_features.narrow(0, count1, size);
+                            count1 += size;
+//                            std::cout << batch->sub_batches_[i]->node_features_.sizes() << "\n";
+                        }
+                    }
+//                    std::cout << "end\n";
+                } else {
+                    batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+                }
+
+
+
+
             }
         }
     }
