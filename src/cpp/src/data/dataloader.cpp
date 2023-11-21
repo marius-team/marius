@@ -694,6 +694,9 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
 //                        torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
 
                         int split_size = (int) ceil((float) unique_indices.size(0) / batch->sub_batches_.size());
+                        int padded_size = split_size*batch->sub_batches_.size();
+                        int actual_size = unique_indices.size(0);
+                        unique_indices = torch::cat({unique_indices, torch::zeros({padded_size-actual_size}, unique_indices.options())}, 0);
 
                         #pragma omp parallel for
                         for (int i = 0; i < batch->sub_batches_.size(); i++) {
