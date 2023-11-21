@@ -599,17 +599,17 @@ void DataLoader::nodeSample(shared_ptr<Batch> batch, int worker_id) {
 
     if (graph_storage_->useInMemorySubGraph()) {
 //        batch->root_node_indices_ = graph_storage_->current_subgraph_state_->global_to_local_index_map_.index_select(0, batch->root_node_indices_);
-        auto root_node_accessor = batch->root_node_indices_.accessor<int64_t, 1>();
-        auto buffer_offsets_accessor = graph_storage_->current_subgraph_state_->buffer_offsets_.accessor<int64_t, 1>();
-        int64_t partition_size = graph_storage_->getPartitionSize();
-
-        #pragma omp parallel for
-        for (int i = 0; i < batch->root_node_indices_.size(0); i++) {
-            int64_t global_id = root_node_accessor[i];
-            int64_t partition = global_id / partition_size;
-
-            root_node_accessor[i] = buffer_offsets_accessor[partition] + global_id - (partition * partition_size);
-        }
+//        auto root_node_accessor = batch->root_node_indices_.accessor<int64_t, 1>();
+//        auto buffer_offsets_accessor = graph_storage_->current_subgraph_state_->buffer_offsets_.accessor<int64_t, 1>();
+//        int64_t partition_size = graph_storage_->getPartitionSize();
+//
+//        #pragma omp parallel for
+//        for (int i = 0; i < batch->root_node_indices_.size(0); i++) {
+//            int64_t global_id = root_node_accessor[i];
+//            int64_t partition = global_id / partition_size;
+//
+//            root_node_accessor[i] = buffer_offsets_accessor[partition] + global_id - (partition * partition_size);
+//        }
 
     }
 
