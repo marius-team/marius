@@ -44,8 +44,8 @@ void updateEvalForBatch(Pipeline* pipeline_, shared_ptr<Batch> batch) {
 void RemoteLoadWorker::run() {
     while (!done_) {
         while (!paused_) {
-            Timer t = new Timer(false);
-            t.start();
+//            Timer t = new Timer(false);
+//            t.start();
             // NOTE: this "train" is probably not set correctly all the time
             shared_ptr<Batch> batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
 
@@ -86,8 +86,8 @@ void RemoteLoadWorker::run() {
             } else {
                 ((PipelineCPU *)pipeline_)->loaded_batches_->blocking_push(batch);
             }
-            t.stop();
-            std::cout<<"remote load: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"remote load: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -96,12 +96,12 @@ void RemoteLoadWorker::run() {
 void RemoteToDeviceWorker::run() {
     while (!done_) {
         while (!paused_) {
-            Timer t = new Timer(false);
-            t.start();
+//            Timer t = new Timer(false);
+//            t.start();
             auto tup = ((PipelineGPU *)pipeline_)->loaded_batches_->blocking_pop();
-            t.stop();
-            std::cout<<"remote to block: "<<t.getDuration()<<"\n";
-            t.start();
+//            t.stop();
+//            std::cout<<"remote to block: "<<t.getDuration()<<"\n";
+//            t.start();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -124,8 +124,8 @@ void RemoteToDeviceWorker::run() {
 
             batch->creator_id_ = pipeline_->model_->pg_gloo_->pg->getRank();
             batch->remoteTo(pipeline_->model_->pg_gloo_->pg, child, tag);
-            t.stop();
-            std::cout<<"remote to: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"remote to: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -139,10 +139,10 @@ void BatchToDeviceWorker::run() {
     while (!done_) {
         while (!paused_) {
             Timer t = new Timer(false);
-            t.start();
+//            t.start();
             auto tup = ((PipelineGPU *)pipeline_)->loaded_batches_->blocking_pop();
-            t.stop();
-            std::cout<<"batch to block: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"batch to block: "<<t.getDuration()<<"\n";
             t.start();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
@@ -181,12 +181,12 @@ void ComputeWorkerGPU::run() {
 
     while (!done_) {
         while (!paused_) {
-            Timer t = new Timer(false);
-            t.start();
+//            Timer t = new Timer(false);
+//            t.start();
             auto tup = ((PipelineGPU *)pipeline_)->device_loaded_batches_[gpu_id_]->blocking_pop();
-            t.stop();
-            std::cout<<"compute block: "<<t.getDuration()<<"\n";
-            t.start();
+//            t.stop();
+//            std::cout<<"compute block: "<<t.getDuration()<<"\n";
+//            t.start();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -276,8 +276,8 @@ void ComputeWorkerGPU::run() {
                     batch->clear();
                 }
             }
-            t.stop();
-            std::cout<<"compute: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"compute: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -309,12 +309,12 @@ void EncodeNodesWorkerGPU::run() {
 void BatchToHostWorker::run() {
     while (!done_) {
         while (!paused_) {
-            Timer t = new Timer(false);
-            t.start();
+//            Timer t = new Timer(false);
+//            t.start();
             auto tup = ((PipelineGPU *)pipeline_)->device_update_batches_[gpu_id_]->blocking_pop();
-            t.stop();
-            std::cout<<"batch to host block: "<<t.getDuration()<<"\n";
-            t.start();
+//            t.stop();
+//            std::cout<<"batch to host block: "<<t.getDuration()<<"\n";
+//            t.start();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -339,8 +339,8 @@ void BatchToHostWorker::run() {
             }
 
             ((PipelineGPU *)pipeline_)->update_batches_->blocking_push(batch);
-            t.stop();
-            std::cout<<"batch to host: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"batch to host: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -349,12 +349,12 @@ void BatchToHostWorker::run() {
 void RemoteToHostWorker::run() {
     while (!done_) {
         while (!paused_) {
-            Timer t = new Timer(false);
-            t.start();
+//            Timer t = new Timer(false);
+//            t.start();
             auto tup = ((PipelineGPU *)pipeline_)->update_batches_->blocking_pop();
-            t.stop();
-            std::cout<<"remote to host block: "<<t.getDuration()<<"\n";
-            t.start();
+//            t.stop();
+//            std::cout<<"remote to host block: "<<t.getDuration()<<"\n";
+//            t.start();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -391,8 +391,8 @@ void RemoteToHostWorker::run() {
             lock.unlock();
 
             batch->remoteTo(pipeline_->model_->pg_gloo_->pg, parent, tag);
-            t.stop();
-            std::cout<<"remote to host: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"remote to host: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -401,8 +401,8 @@ void RemoteToHostWorker::run() {
 void RemoteListenForUpdatesWorker::run() {
     while (!done_) {
         while (!paused_) {
-            Timer t = new Timer(false);
-            t.start();
+//            Timer t = new Timer(false);
+//            t.start();
             // NOTE: this "train" is probably not set correctly all the time
             shared_ptr<Batch> batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
 
@@ -434,8 +434,8 @@ void RemoteListenForUpdatesWorker::run() {
             batch->remoteReceive(pipeline_->model_->pg_gloo_->pg, child, tag);
 
             ((PipelineGPU *)pipeline_)->update_batches_->blocking_push(batch);
-            t.stop();
-            std::cout<<"remote listen: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"remote listen: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
