@@ -489,7 +489,8 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 
         batch->sub_batches_ = sub_batches;
 
-//        loadCPUParameters(batch);
+        if (compute_worker_)
+            loadCPUParameters(batch, worker_id);
 
         return batch;
     }
@@ -662,6 +663,11 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
 
                 if (batch->sub_batches_.size() > 0) {
 
+                    if (batch->sub_batches_[0]->node_features_.defined()) {
+                        std::cout<<"ALREADY LOADED\n";
+                        return;
+                    }
+
                     torch::Tensor unique_indices;
 
                     if (batch->creator_id_ != -1) {
@@ -714,7 +720,8 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
 
 
                 } else {
-                    batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+                    if (!batch->node_features_.defined())
+                        batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
                 }
 
 
