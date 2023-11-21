@@ -705,7 +705,7 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                             }
 
 //                            batch->sub_batches_[i]->node_features_ = unique_features.narrow(0, count, size);
-                            batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, count, size));
+                            batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
                         }
                     }
 
