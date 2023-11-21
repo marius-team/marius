@@ -665,6 +665,8 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
 //                                  << batch->sub_batches_[i]->unique_node_indices_.device() << "\n";
                     }
 
+                    Timer t = new Timer(false);
+                    t.start();
 //                    std::cout << "cat\n";
                     torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
 //                    std::cout << all_unique_nodes.sizes() << "\n";
@@ -676,6 +678,8 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
 //                    std::cout << inverse.sizes() << " " << inverse.device() << "\n";
 //                    std::cout << unique_features.sizes() << " " << unique_features.device() << "\n";
                     std::cout<<unique_indices.size(0)<<" vs " <<all_unique_nodes.size(0)<<"\n";
+                    t.stop();
+                    std::cout<<"uniques: "<<t.getDuration()<<"\n";
 
 //                    std::cout << "end cat\n";
                     int count = 0;
