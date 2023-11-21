@@ -181,12 +181,12 @@ void ComputeWorkerGPU::run() {
 
     while (!done_) {
         while (!paused_) {
-//            Timer t = new Timer(false);
+            Timer t = new Timer(false);
 //            t.start();
             auto tup = ((PipelineGPU *)pipeline_)->device_loaded_batches_[gpu_id_]->blocking_pop();
 //            t.stop();
 //            std::cout<<"compute block: "<<t.getDuration()<<"\n";
-//            t.start();
+            t.start();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -315,8 +315,8 @@ void ComputeWorkerGPU::run() {
                     batch->clear();
                 }
             }
-//            t.stop();
-//            std::cout<<"compute: "<<t.getDuration()<<"\n";
+            t.stop();
+            std::cout<<"compute: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
