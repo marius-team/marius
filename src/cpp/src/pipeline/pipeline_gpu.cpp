@@ -565,12 +565,12 @@ void PipelineGPU::initialize() {
                 addWorkersToPool(0, LOAD_BATCH_ID, pipeline_options_->batch_loader_threads);
 
             if (batch_worker_ and batch_worker_needs_remote_)
-                addWorkersToPool(5, REMOTE_TO_DEVICE_ID, pipeline_options_->batch_transfer_threads);
+                addWorkersToPool(5, REMOTE_TO_DEVICE_ID, pipeline_options_->remote_transfer_threads);
             else if (compute_worker_)
                 addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
 
             if (compute_worker_ and compute_worker_needs_remote_)
-                addWorkersToPool(6, REMOTE_LOADER_ID, pipeline_options_->batch_loader_threads);
+                addWorkersToPool(6, REMOTE_LOADER_ID, pipeline_options_->remote_loader_threads);
 
             if (compute_worker_)
                 addWorkersToPool(2, GPU_COMPUTE_ID, 1, model_->device_models_.size());  // Only one std::thread manages GPU
@@ -579,12 +579,12 @@ void PipelineGPU::initialize() {
                 addWorkersToPool(3, D2H_TRANSFER_ID, pipeline_options_->gradient_transfer_threads);
 
             if ((compute_worker_ and compute_worker_needs_remote_) or (batch_worker_ and batch_worker_needs_remote_))
-                addWorkersToPool(8, REMOTE_TO_HOST_ID, pipeline_options_->gradient_transfer_threads);
+                addWorkersToPool(8, REMOTE_TO_HOST_ID, pipeline_options_->remote_gradient_transfer_threads);
             else if (model_->has_embeddings() and batch_worker_)
                 addWorkersToPool(4, UPDATE_BATCH_ID, pipeline_options_->gradient_update_threads);
 
             if (batch_worker_ and batch_worker_needs_remote_)
-                addWorkersToPool(7, REMOTE_LISTEN_FOR_UPDATES_ID, pipeline_options_->gradient_update_threads);
+                addWorkersToPool(7, REMOTE_LISTEN_FOR_UPDATES_ID, pipeline_options_->remote_listen_threads);
 
         } else {
             if (batch_worker_)

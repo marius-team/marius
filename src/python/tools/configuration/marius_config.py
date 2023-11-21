@@ -753,10 +753,14 @@ class PipelineConfig:
     gradients_device_queue_size: int = 4
     gradients_host_queue_size: int = 4
     batch_loader_threads: int = 4
+    remote_loader_threads: int = 4
     batch_transfer_threads: int = 2
+    remote_transfer_threads: int = 2
     compute_threads: int = 1
     gradient_transfer_threads: int = 2
+    remote_gradient_transfer_threads: int = 2
     gradient_update_threads: int = 4
+    remote_listen_threads: int = 4
 
     def __post_init__(self):
         # for the sync setting, pipeline values can be ignored

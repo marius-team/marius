@@ -109,10 +109,14 @@ struct PipelineConfig {
     int gradients_device_queue_size;
     int gradients_host_queue_size;
     int batch_loader_threads;
+    int remote_loader_threads;
     int batch_transfer_threads;
+    int remote_transfer_threads;
     int compute_threads;
     int gradient_transfer_threads;
+    int remote_gradient_transfer_threads;
     int gradient_update_threads;
+    int remote_listen_threads;
 };
 
 struct CheckpointConfig {

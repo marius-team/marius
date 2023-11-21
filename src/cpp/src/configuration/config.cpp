@@ -456,10 +456,14 @@ shared_ptr<PipelineConfig> initPipelineConfig(pyobj python_config) {
         ret_config->gradients_device_queue_size = cast_helper<int>(python_config.attr("gradients_device_queue_size"));
         ret_config->gradients_host_queue_size = cast_helper<int>(python_config.attr("gradients_host_queue_size"));
         ret_config->batch_loader_threads = cast_helper<int>(python_config.attr("batch_loader_threads"));
+        ret_config->remote_loader_threads = cast_helper<int>(python_config.attr("remote_loader_threads"));
         ret_config->batch_transfer_threads = cast_helper<int>(python_config.attr("batch_transfer_threads"));
+        ret_config->remote_transfer_threads = cast_helper<int>(python_config.attr("remote_transfer_threads"));
         ret_config->compute_threads = cast_helper<int>(python_config.attr("compute_threads"));
         ret_config->gradient_transfer_threads = cast_helper<int>(python_config.attr("gradient_transfer_threads"));
+        ret_config->remote_gradient_transfer_threads = cast_helper<int>(python_config.attr("remote_gradient_transfer_threads"));
         ret_config->gradient_update_threads = cast_helper<int>(python_config.attr("gradient_update_threads"));
+        ret_config->remote_listen_threads = cast_helper<int>(python_config.attr("remote_listen_threads"));
     }
 
     return ret_config;
