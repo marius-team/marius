@@ -294,12 +294,20 @@ void DENSEGraph::to(torch::Device device, CudaStream *compute_stream, CudaStream
 }
 
 void DENSEGraph::send(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag) {
-    send_tensor(node_ids_, pg, worker_id, tag);
     send_tensor(hop_offsets_, pg, worker_id, tag);
 
+    send_tensor(node_ids_, pg, worker_id, tag);
     send_tensor(out_offsets_, pg, worker_id, tag);
-
     send_tensor(in_offsets_, pg, worker_id, tag);
+//    send_tensor(torch::cat({out_offsets_, in_offsets_}, 0), pg, worker_id, tag);
+//
+//    torch::Tensor tmp = torch::cat({out_neighbors_vec_}, 0);
+//    out_neighbors_vec_ = {};
+//    out_neighbors_vec_.emplace_back(tmp);
+//
+//    tmp = torch::cat({in_neighbors_vec_}, 0);
+//    in_neighbors_vec_ = {};
+//    in_neighbors_vec_.emplace_back(tmp);
 
     int in_size = in_neighbors_vec_.size();
     int out_size = out_neighbors_vec_.size();
@@ -326,12 +334,17 @@ void DENSEGraph::send(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int 
 }
 
 void DENSEGraph::receive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag) {
-    node_ids_ = receive_tensor(pg, worker_id, tag);
     hop_offsets_ = receive_tensor(pg, worker_id, tag);
 
+    node_ids_ = receive_tensor(pg, worker_id, tag);
     out_offsets_ = receive_tensor(pg, worker_id, tag);
-
     in_offsets_ = receive_tensor(pg, worker_id, tag);
+//
+//    torch::Tensor offsets = receive_tensor(pg, worker_id, tag);
+//    out_offsets_ = offsets.narrow(0, 0, offsets.size(0)/2);
+//    in_offsets_ = offsets.narrow(0, offsets.size(0)/2, offsets.size(0)/2);
+
+//    if (!torch::equal(out_offsets_, out_offsets1_)) throw MariusRuntimeException("");
 
     torch::Tensor metadata = torch::tensor({-1, -1, -1, -1}, {torch::kInt64});
     std::vector<torch::Tensor> transfer_vec;

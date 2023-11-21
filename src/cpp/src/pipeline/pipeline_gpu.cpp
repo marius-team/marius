@@ -151,14 +151,20 @@ void BatchToDeviceWorker::run() {
             }
 
             if (batch->sub_batches_.size() > 0) {
-                #pragma omp parallel for
+//                #pragma omp parallel for # TODO
                 for (int i = 0; i < batch->sub_batches_.size(); i++) {
                     if (!batch->sub_batches_[i]->node_features_.defined())
                         batch->sub_batches_[i]->node_features_ = pipeline_->dataloader_->graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
+//                        batch->sub_batches_[i]->node_labels_ = pipeline_->dataloader_->graph_storage_->getNodeLabels(
+//                                batch->sub_batches_[i]->dense_graph_.node_ids_.narrow(0, batch->sub_batches_[i]->dense_graph_.hop_offsets_[-2].item<int64_t>(),
+//                                        (batch->sub_batches_[i]->dense_graph_.node_ids_.size(0)-batch->sub_batches_[i]->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
                 }
             } else {
                 if (!batch->node_features_.defined())
                     batch->node_features_ = pipeline_->dataloader_->graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+//                    batch->node_labels_ = pipeline_->dataloader_->graph_storage_->getNodeLabels(
+//                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
+//                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
             }
 
             batchToDevice(pipeline_, batch);
