@@ -182,6 +182,8 @@ class DataLoader {
      */
     void unloadStorage(bool write = false) { graph_storage_->unload(write); }
 
+    torch::Tensor computeUniques(torch::Tensor node_ids, int64_t num_nodes_in_memory);
+
     /**
      * Gets the number of edges from the graph storage.
      * @return Number of edges in the graph

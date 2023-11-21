@@ -239,6 +239,8 @@ void ComputeWorkerGPU::run() {
                             CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
                             auto device_options = torch::TensorOptions().dtype(torch::kFloat16).device(batch->sub_batches_[i]->node_features_.device());
 
+                            batch->sub_batches_[i]->unique_node_indices_ = torch::searchsorted(batch->sub_batches_[i]->root_node_indices_, batch->sub_batches_[i]->unique_node_indices_);
+
                             batch->sub_batches_[i]->node_features_ = torch::zeros({batch->sub_batches_[i]->unique_node_indices_.size(0), feat_dim}, device_options);
                             torch::index_select_out(batch->sub_batches_[i]->node_features_, unique_features_per_gpu[i], 0, batch->sub_batches_[i]->unique_node_indices_);
 //                            std::cout<<batch->sub_batches_[i]->node_features_.sizes()<<"\n";
