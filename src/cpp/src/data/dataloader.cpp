@@ -92,6 +92,15 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
     pg_gloo_ = nullptr;
     dist_config_ = nullptr;
 //    dist_ = false;
+
+
+    int num_hash_maps = training_config_->pipeline->batch_transfer_threads;
+    if (num_hash_maps > 0) {
+        auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(torch::kCPU);
+        for (int i = 0; i < num_hash_maps; i++) {
+            hash_maps_.emplace_back(torch::zeros({graph_storage_->getNumNodes()}, bool_device_options));
+        }
+    }
 }
 
 DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, int batch_size, shared_ptr<NegativeSampler> negative_sampler,
@@ -631,7 +640,7 @@ void DataLoader::negativeSample(shared_ptr<Batch> batch) {
         negative_sampler_->getNegatives(graph_storage_->current_subgraph_state_->in_memory_subgraph_, batch->edges_, false);
 }
 
-void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
+void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
     if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
         if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
             batch->node_embeddings_ = graph_storage_->getNodeEmbeddings(batch->unique_node_indices_);
@@ -642,7 +651,7 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
     }
 
 //    if (graph_storage_->storage_ptrs_.node_features != nullptr) {
-    if (graph_storage_->storage_ptrs_.node_features != nullptr and compute_worker_) {
+    if (graph_storage_->storage_ptrs_.node_features != nullptr) {
         if (graph_storage_->storage_ptrs_.node_features->device_ != torch::kCUDA) {
             if (only_root_features_) {
                 batch->node_features_ = graph_storage_->getNodeFeatures(batch->root_node_indices_);
@@ -652,58 +661,51 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch) {
 
 
                 if (batch->sub_batches_.size() > 0) {
-//                    std::cout << "start\n";
-                    std::vector<torch::Tensor> all_unique_nodes_vec(batch->sub_batches_.size());
-//                    int total_unique_nodes = 0;
 
-//                    #pragma omp parallel for
-                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                        all_unique_nodes_vec[i] = batch->sub_batches_[i]->unique_node_indices_;
-//                        total_unique_nodes += batch->sub_batches_[i]->unique_node_indices_.size(0);
+                    torch::Tensor unique_indices;
 
-//                        std::cout << batch->sub_batches_[i]->unique_node_indices_.sizes() << " "
-//                                  << batch->sub_batches_[i]->unique_node_indices_.device() << "\n";
+                    if (batch->creator_id_ != -1) {
+                        // received this batch, already have the uniques on the root node_indices_
+                        std::cout<<"received completed batch\n";
+                        unique_indices = batch->sub_batches_[0]->root_node_indices_;
+                    } else {
+                        std::vector <torch::Tensor> all_unique_nodes_vec(batch->sub_batches_.size());
+
+                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                            all_unique_nodes_vec[i] = batch->sub_batches_[i]->unique_node_indices_;
+                        }
+
+                        Timer t = new Timer(false);
+                        t.start();
+                        torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
+                        unique_indices = computeUniques(all_unique_nodes, graph_storage_->getNumNodesInMemory(), id);
+
+                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
+                            batch->sub_batches_[i]->root_node_indices_ = unique_indices;
+                        }
+
+                        t.stop();
+                        std::cout<< "calculated and set uniques: " << t.getDuration() << "\n";
+//                        std::cout<<unique_indices.size(0)<<" vs "<<all_unique_nodes.size(0)<<"\n";
                     }
 
-                    Timer t = new Timer(false);
-                    t.start();
-//                    std::cout << "cat\n";
-                    torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
-//                    std::cout << all_unique_nodes.sizes() << "\n";
-//                    auto unique_nodes = torch::_unique2(all_unique_nodes, true, true, false);
-//                    torch::Tensor unique_indices = std::get<0>(unique_nodes);
-//                    torch::Tensor inverse = std::get<1>(unique_nodes);
-//                    torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
-//                    std::cout << unique_indices.sizes() << "\n";
-//                    std::cout << inverse.sizes() << " " << inverse.device() << "\n";
-//                    std::cout << unique_features.sizes() << " " << unique_features.device() << "\n";
+                    if (load) {
+                        std::cout<<"load\n";
+                        torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
 
-                    torch::Tensor unique_indices = computeUniques(all_unique_nodes, graph_storage_->getNumNodesInMemory());
-                    torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
-
-                    std::cout<<unique_indices.size(0)<<" vs " <<all_unique_nodes.size(0)<<"\n";
-                    t.stop();
-                    std::cout<<"uniques: "<<t.getDuration()<<"\n";
-
-//                    std::cout << "end cat\n";
-                    int count = 0;
-                    int count1 = 0;
-                    int split_size = (int) ceil((float) unique_features.size(0) / batch->sub_batches_.size());
-                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                        if (!batch->sub_batches_[i]->node_features_.defined()) {
-//                            batch->sub_batches_[i]->unique_node_indices_ = inverse.narrow(0, count, batch->sub_batches_[i]->unique_node_indices_.size(0));
-//                            count += batch->sub_batches_[i]->unique_node_indices_.size(0);
-//                            std::cout << batch->sub_batches_[i]->unique_node_indices_.sizes() << "\n";
-                            batch->sub_batches_[i]->root_node_indices_ = unique_indices;
-
+                        int count = 0;
+                        int split_size = (int) ceil((float) unique_features.size(0) / batch->sub_batches_.size());
+                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
                             int size = split_size;
-                            if (count1 + split_size > unique_features.size(0)) size = unique_features.size(0) - count1;
-                            batch->sub_batches_[i]->node_features_ = unique_features.narrow(0, count1, size);
-                            count1 += size;
-//                            std::cout << batch->sub_batches_[i]->node_features_.sizes() << "\n";
+                            if (count + split_size > unique_features.size(0))
+                                size = unique_features.size(0) - count;
+
+                            batch->sub_batches_[i]->node_features_ = unique_features.narrow(0, count, size);
+                            count += size;
                         }
                     }
-//                    std::cout << "end\n";
+
+
                 } else {
                     batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
                 }
@@ -803,7 +805,7 @@ void DataLoader::loadStorage() {
     }
 }
 
-torch::Tensor DataLoader::computeUniques(torch::Tensor node_ids, int64_t num_nodes_in_memory) {
+torch::Tensor DataLoader::computeUniques(torch::Tensor node_ids, int64_t num_nodes_in_memory, int id) {
     unsigned int num_threads = 1;
 
     #ifdef MARIUS_OMP
@@ -816,8 +818,9 @@ torch::Tensor DataLoader::computeUniques(torch::Tensor node_ids, int64_t num_nod
 
     int64_t chunk_size = ceil((double)num_nodes_in_memory / num_threads);
 
-    auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(node_ids.device());
-    torch::Tensor hash_map = torch::zeros({num_nodes_in_memory}, bool_device_options);
+//    auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(node_ids.device());
+//    torch::Tensor hash_map = torch::zeros({num_nodes_in_memory}, bool_device_options);
+    torch::Tensor hash_map = hash_maps_[id];
 
     auto hash_map_accessor = hash_map.accessor<bool, 1>();
     auto nodes_accessor = node_ids.accessor<int64_t, 1>();
@@ -868,7 +871,7 @@ torch::Tensor DataLoader::computeUniques(torch::Tensor node_ids, int64_t num_nod
         for (int64_t j = start; j < end; j++) {
             if (hash_map_accessor[j]) {
                 delta_ids_accessor[private_count++] = j;
-//                hash_map_accessor[j] = 0;
+                hash_map_accessor[j] = 0;
                 grow_count++;
 
                 if (grow_count == upper_bound) {

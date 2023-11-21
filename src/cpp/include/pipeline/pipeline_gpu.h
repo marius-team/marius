@@ -10,7 +10,9 @@
 
 class BatchToDeviceWorker : public Worker {
    public:
-    BatchToDeviceWorker(Pipeline *pipeline) : Worker{pipeline} {};
+    int worker_id_;
+
+    BatchToDeviceWorker(Pipeline *pipeline, int worker_id) : Worker{pipeline}, worker_id_{worker_id} {};
 
     void run() override;
 };
@@ -51,7 +53,9 @@ public:
 
 class RemoteToDeviceWorker : public Worker {
 public:
-    RemoteToDeviceWorker(Pipeline *pipeline) : Worker{pipeline} {};
+    int worker_id_;
+
+    RemoteToDeviceWorker(Pipeline *pipeline, int worker_id) : Worker{pipeline}, worker_id_{worker_id} {};
 
     void run() override;
 };

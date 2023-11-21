@@ -118,10 +118,11 @@ void RemoteToDeviceWorker::run() {
 
             if (child == pipeline_->model_->pg_gloo_->pg->getRank()) { // child is self
                 // need to call regular to device here
-                batchToDevice(pipeline_, batch);
+                batchToDevice(pipeline_, batch); // TODO this would need to load cpu parameters given recent changes
                 continue;
             }
 
+            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_, false);
             batch->creator_id_ = pipeline_->model_->pg_gloo_->pg->getRank();
             batch->remoteTo(pipeline_->model_->pg_gloo_->pg, child, tag);
 //            t.stop();
@@ -150,18 +151,21 @@ void BatchToDeviceWorker::run() {
                 break;
             }
 
-            if (batch->sub_batches_.size() > 0) {
-                if (!batch->sub_batches_[0]->node_features_.defined()) {
-                    pipeline_->dataloader_->loadCPUParameters(batch);
-                }
-            } else {
-                if (!batch->node_features_.defined())
-                    pipeline_->dataloader_->loadCPUParameters(batch);
-//                    batch->node_features_ = pipeline_->dataloader_->graph_storage_->getNodeFeatures(batch->unique_node_indices_);
-//                    batch->node_labels_ = pipeline_->dataloader_->graph_storage_->getNodeLabels(
-//                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
-//                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
-            }
+
+//            if (batch->sub_batches_.size() > 0) {
+//                if (!batch->sub_batches_[0]->node_features_.defined()) {
+//                    pipeline_->dataloader_->loadCPUParameters(batch);
+//                }
+//            } else {
+//                if (!batch->node_features_.defined())
+//                    pipeline_->dataloader_->loadCPUParameters(batch);
+////                    batch->node_features_ = pipeline_->dataloader_->graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+////                    batch->node_labels_ = pipeline_->dataloader_->graph_storage_->getNodeLabels(
+////                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
+////                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
+//            }
+            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
+
 
             batchToDevice(pipeline_, batch);
             t.stop();

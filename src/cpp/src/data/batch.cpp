@@ -102,7 +102,7 @@ void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int t
 //
 //    send_tensor(neg_edges_, pg, worker_id, tag);
 //
-//    send_tensor(root_node_indices_, pg, worker_id, tag);
+    send_tensor(root_node_indices_, pg, worker_id, tag);
 
     send_tensor(unique_node_indices_, pg, worker_id, tag);
 
@@ -177,7 +177,7 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
 //
 //    neg_edges_ = receive_tensor(pg, worker_id, tag);
 
-//    root_node_indices_ = receive_tensor(pg, worker_id, tag);
+    root_node_indices_ = receive_tensor(pg, worker_id, tag);
 
     unique_node_indices_ = receive_tensor(pg, worker_id, tag);
 

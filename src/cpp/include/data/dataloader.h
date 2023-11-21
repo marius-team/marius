@@ -79,6 +79,8 @@ class DataLoader {
     bool batch_worker_;
     bool compute_worker_;
 
+    std::vector<torch::Tensor> hash_maps_;
+
     DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask learning_task, bool use_partition_embeddings,
                shared_ptr<TrainingConfig> training_config, shared_ptr<EvaluationConfig> evaluation_config, shared_ptr<EncoderConfig> encoder_config, bool batch_worker = true, bool compute_worker = true);
 
@@ -149,7 +151,7 @@ class DataLoader {
      * Loads CPU parameters into batch
      * @param batch: Batch object to load parameters into.
      */
-    void loadCPUParameters(shared_ptr<Batch> batch);
+    void loadCPUParameters(shared_ptr<Batch> batch, int id = 0, bool load = true);
 
     /**
      * Loads GPU parameters into batch
@@ -182,7 +184,7 @@ class DataLoader {
      */
     void unloadStorage(bool write = false) { graph_storage_->unload(write); }
 
-    torch::Tensor computeUniques(torch::Tensor node_ids, int64_t num_nodes_in_memory);
+    torch::Tensor computeUniques(torch::Tensor node_ids, int64_t num_nodes_in_memory, int id);
 
     /**
      * Gets the number of edges from the graph storage.

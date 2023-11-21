@@ -133,7 +133,7 @@ shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id, int w
     if (worker_type == LOAD_BATCH_ID) {
         worker = std::make_shared<LoadBatchWorker>(this, worker_id);
     } else if (worker_type == H2D_TRANSFER_ID) {
-        worker = std::make_shared<BatchToDeviceWorker>(this);
+        worker = std::make_shared<BatchToDeviceWorker>(this, worker_id);
     } else if (worker_type == CPU_COMPUTE_ID) {
         worker = std::make_shared<ComputeWorkerCPU>(this);
     } else if (worker_type == GPU_COMPUTE_ID) {
@@ -153,7 +153,7 @@ shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id, int w
     else if (worker_type == REMOTE_LOADER_ID) {
         worker = std::make_shared<RemoteLoadWorker>(this);
     } else if (worker_type == REMOTE_TO_DEVICE_ID) {
-        worker = std::make_shared<RemoteToDeviceWorker>(this);
+        worker = std::make_shared<RemoteToDeviceWorker>(this, worker_id);
     } else if (worker_type == REMOTE_TO_HOST_ID) {
         worker = std::make_shared<RemoteToHostWorker>(this);
     } else if (worker_type == REMOTE_LISTEN_FOR_UPDATES_ID) {
