@@ -91,52 +91,52 @@ void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int t
     }
 
     if (sub_batches_.size() > 0) {
-//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
         for (int i = 0; i < sub_batches_.size(); i++) {
-            sub_batches_[i]->remoteTo(pg, worker_id, tag, false);
+            sub_batches_[i]->remoteTo(pg, worker_id, tag+i, false);
         }
         return;
     }
 
-    send_tensor(edges_, pg, worker_id, tag);
-
-    send_tensor(neg_edges_, pg, worker_id, tag);
-
-    send_tensor(root_node_indices_, pg, worker_id, tag);
+//    send_tensor(edges_, pg, worker_id, tag);
+//
+//    send_tensor(neg_edges_, pg, worker_id, tag);
+//
+//    send_tensor(root_node_indices_, pg, worker_id, tag);
 
     send_tensor(unique_node_indices_, pg, worker_id, tag);
 
     send_tensor(node_labels_, pg, worker_id, tag);
 
-    send_tensor(src_neg_indices_mapping_, pg, worker_id, tag);
-
-    send_tensor(dst_neg_indices_mapping_, pg, worker_id, tag);
-
-    send_tensor(src_neg_filter_, pg, worker_id, tag);
-
-    send_tensor(dst_neg_filter_, pg, worker_id, tag);
-
-    send_tensor(node_embeddings_, pg, worker_id, tag);
-
-    send_tensor(node_embeddings_state_, pg, worker_id, tag);
-
-    send_tensor(node_features_, pg, worker_id, tag);
-
-    send_tensor(encoded_uniques_, pg, worker_id, tag);
+//    send_tensor(src_neg_indices_mapping_, pg, worker_id, tag);
+//
+//    send_tensor(dst_neg_indices_mapping_, pg, worker_id, tag);
+//
+//    send_tensor(src_neg_filter_, pg, worker_id, tag);
+//
+//    send_tensor(dst_neg_filter_, pg, worker_id, tag);
+//
+//    send_tensor(node_embeddings_, pg, worker_id, tag);
+//
+//    send_tensor(node_embeddings_state_, pg, worker_id, tag);
+//
+//    send_tensor(node_features_, pg, worker_id, tag);
+//
+//    send_tensor(encoded_uniques_, pg, worker_id, tag);
 
     dense_graph_.send(pg, worker_id, tag);
 
-    send_tensor(node_gradients_, pg, worker_id, tag);
-
-    send_tensor(node_state_update_, pg, worker_id, tag);
-
-    send_tensor(pos_scores_, pg, worker_id, tag);
-
-    send_tensor(neg_scores_, pg, worker_id, tag);
-
-    send_tensor(inv_pos_scores_, pg, worker_id, tag);
-
-    send_tensor(inv_neg_scores_, pg, worker_id, tag);
+//    send_tensor(node_gradients_, pg, worker_id, tag);
+//
+//    send_tensor(node_state_update_, pg, worker_id, tag);
+//
+//    send_tensor(pos_scores_, pg, worker_id, tag);
+//
+//    send_tensor(neg_scores_, pg, worker_id, tag);
+//
+//    send_tensor(inv_pos_scores_, pg, worker_id, tag);
+//
+//    send_tensor(inv_neg_scores_, pg, worker_id, tag);
 
     send_tensor(y_pred_, pg, worker_id, tag);
 
@@ -164,61 +164,61 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
     }
 
     if (sub_batches_.size() > 0) {
-//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
         for (int i = 0; i < sub_batches_.size(); i++) {
-            sub_batches_[i]->remoteReceive(pg, worker_id, tag, false);
+            sub_batches_[i]->remoteReceive(pg, worker_id, tag + i, false);
         }
         return;
     }
     Timer t = new Timer(false);
     t.start();
 
-    edges_ = receive_tensor(pg, worker_id, tag);
+//    edges_ = receive_tensor(pg, worker_id, tag);
+//
+//    neg_edges_ = receive_tensor(pg, worker_id, tag);
 
-    neg_edges_ = receive_tensor(pg, worker_id, tag);
-
-    root_node_indices_ = receive_tensor(pg, worker_id, tag);
+//    root_node_indices_ = receive_tensor(pg, worker_id, tag);
 
     unique_node_indices_ = receive_tensor(pg, worker_id, tag);
 
     node_labels_ = receive_tensor(pg, worker_id, tag);
 
-    src_neg_indices_mapping_ = receive_tensor(pg, worker_id, tag);
+//    src_neg_indices_mapping_ = receive_tensor(pg, worker_id, tag);
 
-    dst_neg_indices_mapping_ = receive_tensor(pg, worker_id, tag);
+//    dst_neg_indices_mapping_ = receive_tensor(pg, worker_id, tag);
 
-    src_neg_filter_ = receive_tensor(pg, worker_id, tag);
+//    src_neg_filter_ = receive_tensor(pg, worker_id, tag);
 
-    dst_neg_filter_ = receive_tensor(pg, worker_id, tag);
+//    dst_neg_filter_ = receive_tensor(pg, worker_id, tag);
 
-    node_embeddings_ = receive_tensor(pg, worker_id, tag);
+//    node_embeddings_ = receive_tensor(pg, worker_id, tag);
 
-    node_embeddings_state_ = receive_tensor(pg, worker_id, tag);
+//    node_embeddings_state_ = receive_tensor(pg, worker_id, tag);
 
-    node_features_ = receive_tensor(pg, worker_id, tag);
+//    node_features_ = receive_tensor(pg, worker_id, tag);
 
-    encoded_uniques_ = receive_tensor(pg, worker_id, tag);
+//    encoded_uniques_ = receive_tensor(pg, worker_id, tag);
 
     dense_graph_.receive(pg, worker_id, tag);
 
-    node_gradients_ = receive_tensor(pg, worker_id, tag);
+//    node_gradients_ = receive_tensor(pg, worker_id, tag);
 
-    node_state_update_ = receive_tensor(pg, worker_id, tag);
+//    node_state_update_ = receive_tensor(pg, worker_id, tag);
 
-    pos_scores_ = receive_tensor(pg, worker_id, tag);
+//    pos_scores_ = receive_tensor(pg, worker_id, tag);
 
-    neg_scores_ = receive_tensor(pg, worker_id, tag);
+//    neg_scores_ = receive_tensor(pg, worker_id, tag);
 
-    inv_pos_scores_ = receive_tensor(pg, worker_id, tag);
+//    inv_pos_scores_ = receive_tensor(pg, worker_id, tag);
 
-    inv_neg_scores_ = receive_tensor(pg, worker_id, tag);
+//    inv_neg_scores_ = receive_tensor(pg, worker_id, tag);
 
     y_pred_ = receive_tensor(pg, worker_id, tag);
     t.stop();
-//    std::cout<<"batch recv: "<<t.getDuration()<<"\n";
+    std::cout<<"batch recv: "<<t.getDuration()<<"\n";
 
     t_full.stop();
-//    std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";
+    std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";
 }
 
 void Batch::accumulateGradients(float learning_rate) {
