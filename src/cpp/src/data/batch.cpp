@@ -91,7 +91,7 @@ void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int t
     }
 
     if (sub_batches_.size() > 0) {
-//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
         for (int i = 0; i < sub_batches_.size(); i++) {
             sub_batches_[i]->remoteTo(pg, worker_id, tag+i, false);
         }
@@ -138,7 +138,7 @@ void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int t
 //
 //    send_tensor(inv_neg_scores_, pg, worker_id, tag);
 
-    send_tensor(y_pred_, pg, worker_id, tag);
+//    send_tensor(y_pred_, pg, worker_id, tag);
 
     // can clear batch, it's sent to another machine at this point
     clear();
@@ -164,14 +164,14 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
     }
 
     if (sub_batches_.size() > 0) {
-//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
         for (int i = 0; i < sub_batches_.size(); i++) {
             sub_batches_[i]->remoteReceive(pg, worker_id, tag + i, false);
         }
         return;
     }
-    Timer t = new Timer(false);
-    t.start();
+//    Timer t = new Timer(false);
+//    t.start();
 
 //    edges_ = receive_tensor(pg, worker_id, tag);
 //
@@ -213,9 +213,9 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
 
 //    inv_neg_scores_ = receive_tensor(pg, worker_id, tag);
 
-    y_pred_ = receive_tensor(pg, worker_id, tag);
-    t.stop();
-    std::cout<<"batch recv: "<<t.getDuration()<<"\n";
+//    y_pred_ = receive_tensor(pg, worker_id, tag);
+//    t.stop();
+//    std::cout<<"batch recv: "<<t.getDuration()<<"\n";
 
     t_full.stop();
     std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";

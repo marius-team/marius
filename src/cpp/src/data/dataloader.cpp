@@ -489,8 +489,8 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 
         batch->sub_batches_ = sub_batches;
 
-        if (compute_worker_)
-            loadCPUParameters(batch, worker_id);
+//        if (compute_worker_)
+//            loadCPUParameters(batch, worker_id);
 
         return batch;
     }
@@ -664,7 +664,7 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                 if (batch->sub_batches_.size() > 0) {
 
                     if (batch->sub_batches_[0]->node_features_.defined()) {
-                        std::cout<<"ALREADY LOADED\n";
+//                        std::cout<<"ALREADY LOADED\n";
                         return;
                     }
 
@@ -672,7 +672,7 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
 
                     if (batch->creator_id_ != -1) {
                         // received this batch, already have the uniques on the root node_indices_
-                        std::cout<<"received completed batch\n";
+//                        std::cout<<"received completed batch\n";
                         unique_indices = batch->sub_batches_[0]->root_node_indices_;
                     } else {
                         std::vector <torch::Tensor> all_unique_nodes_vec(batch->sub_batches_.size());
@@ -681,8 +681,8 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                             all_unique_nodes_vec[i] = batch->sub_batches_[i]->unique_node_indices_;
                         }
 
-                        Timer t = new Timer(false);
-                        t.start();
+//                        Timer t = new Timer(false);
+//                        t.start();
                         torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
                         unique_indices = computeUniques(all_unique_nodes, graph_storage_->getNumNodesInMemory(), id);
 
@@ -690,13 +690,13 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                             batch->sub_batches_[i]->root_node_indices_ = unique_indices;
                         }
 
-                        t.stop();
-                        std::cout<< "calculated and set uniques: " << t.getDuration() << "\n";
+//                        t.stop();
+//                        std::cout<< "calculated and set uniques: " << t.getDuration() << "\n";
 //                        std::cout<<unique_indices.size(0)<<" vs "<<all_unique_nodes.size(0)<<"\n";
                     }
 
                     if (load) {
-                        std::cout<<"load\n";
+//                        std::cout<<"load\n";
 //                        torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
 
                         int split_size = (int) ceil((float) unique_indices.size(0) / batch->sub_batches_.size());
