@@ -693,7 +693,7 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                         std::cout<<"load\n";
 //                        torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
 
-                        int split_size = (int) ceil((float) unique_features.size(0) / batch->sub_batches_.size());
+                        int split_size = (int) ceil((float) unique_indices.size(0) / batch->sub_batches_.size());
 
                         #pragma omp parallel for
                         for (int i = 0; i < batch->sub_batches_.size(); i++) {
