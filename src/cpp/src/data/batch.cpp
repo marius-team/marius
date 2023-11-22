@@ -145,8 +145,8 @@ void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int t
 }
 
 void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag, bool receive_meta) {
-    Timer t_full = new Timer(false);
-    t_full.start();
+//    Timer t_full = new Timer(false);
+//    t_full.start();
 
     if (receive_meta) {
         torch::Tensor metadata = torch::tensor({-1, -1, -1}, {torch::kInt32});
@@ -217,8 +217,8 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
 //    t.stop();
 //    std::cout<<"batch recv: "<<t.getDuration()<<"\n";
 
-    t_full.stop();
-    std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";
+//    t_full.stop();
+//    std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";
 }
 
 void Batch::accumulateGradients(float learning_rate) {
