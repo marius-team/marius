@@ -172,7 +172,7 @@ void BatchSliceWorker::run() {
 ////                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
 ////                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
 //            }
-            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
+//            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
 
             ((PipelineGPU *)pipeline_)->loaded_sliced_batches_->blocking_push(batch);
 
@@ -215,9 +215,9 @@ void BatchToDeviceWorker::run() {
 ////                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
 ////                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
 //            }
-//            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
-//            t.stop();
-//            std::cout<<"batch load: "<<t.getDuration()<<"\n";
+            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
+            t.stop();
+            std::cout<<"batch load: "<<t.getDuration()<<"\n";
 
 //            t.start();
             batchToDevice(pipeline_, batch);
