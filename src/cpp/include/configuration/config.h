@@ -105,11 +105,13 @@ struct PipelineConfig {
     int gpu_sync_interval;
     bool gpu_model_average;
     int batch_host_queue_size;
+    int batch_sliced_queue_size;
     int batch_device_queue_size;
     int gradients_device_queue_size;
     int gradients_host_queue_size;
     int batch_loader_threads;
     int remote_loader_threads;
+    int batch_slice_threads;
     int batch_transfer_threads;
     int remote_transfer_threads;
     int compute_threads;

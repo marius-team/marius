@@ -158,6 +158,8 @@ shared_ptr<Worker> Pipeline::initWorkerOfType(int worker_type, int gpu_id, int w
         worker = std::make_shared<RemoteToHostWorker>(this);
     } else if (worker_type == REMOTE_LISTEN_FOR_UPDATES_ID) {
         worker = std::make_shared<RemoteListenForUpdatesWorker>(this);
+    } else if (worker_type == SLICE_BATCH_ID) {
+        worker = std::make_shared<BatchSliceWorker>(this, worker_id);
     }
 
     worker->spawn();

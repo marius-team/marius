@@ -8,6 +8,15 @@
 #include "pipeline.h"
 #include "queue.h"
 
+class BatchSliceWorker : public Worker {
+public:
+    int worker_id_;
+
+    BatchSliceWorker(Pipeline *pipeline, int worker_id) : Worker{pipeline}, worker_id_{worker_id} {};
+
+    void run() override;
+};
+
 class BatchToDeviceWorker : public Worker {
    public:
     int worker_id_;

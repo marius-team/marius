@@ -749,11 +749,13 @@ class PipelineConfig:
     gpu_model_average: bool = True
     staleness_bound: int = 16
     batch_host_queue_size: int = 4
+    batch_sliced_queue_size: int = 4
     batch_device_queue_size: int = 4
     gradients_device_queue_size: int = 4
     gradients_host_queue_size: int = 4
     batch_loader_threads: int = 4
     remote_loader_threads: int = 4
+    batch_slice_threads: int = 2
     batch_transfer_threads: int = 2
     remote_transfer_threads: int = 2
     compute_threads: int = 1

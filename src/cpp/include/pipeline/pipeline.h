@@ -82,6 +82,7 @@ class Pipeline {
     std::atomic<int64_t> edges_processed_;
 
     shared_ptr<Queue<shared_ptr<Batch>>> loaded_batches_;
+    shared_ptr<Queue<shared_ptr<Batch>>> loaded_sliced_batches_;
     shared_ptr<Queue<shared_ptr<Batch>>> update_batches_;
 
     std::mutex *pipeline_lock_;

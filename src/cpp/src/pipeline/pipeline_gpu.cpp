@@ -140,7 +140,7 @@ void RemoteToDeviceWorker::run() {
     }
 }
 
-void BatchToDeviceWorker::run() {
+void BatchSliceWorker::run() {
     unsigned int rand_seed = rand();
 
     int assign_id = 0;
@@ -173,10 +173,53 @@ void BatchToDeviceWorker::run() {
 ////                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
 //            }
             pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
-            t.stop();
-            std::cout<<"batch load: "<<t.getDuration()<<"\n";
 
+            ((PipelineGPU *)pipeline_)->loaded_sliced_batches_->blocking_push(batch);
+
+            t.stop();
+            std::cout<<"batch slice: "<<t.getDuration()<<"\n";
+        }
+        nanosleep(&sleep_time_, NULL);
+    }
+}
+
+void BatchToDeviceWorker::run() {
+    unsigned int rand_seed = rand();
+
+    int assign_id = 0;
+
+    while (!done_) {
+        while (!paused_) {
+            Timer t = new Timer(false);
+//            t.start();
+            auto tup = ((PipelineGPU *)pipeline_)->loaded_sliced_batches_->blocking_pop();
+//            t.stop();
+//            std::cout<<"batch to block: "<<t.getDuration()<<"\n";
             t.start();
+            bool popped = std::get<0>(tup);
+            shared_ptr<Batch> batch = std::get<1>(tup);
+            if (!popped) {
+                break;
+            }
+
+
+//            if (batch->sub_batches_.size() > 0) {
+//                if (!batch->sub_batches_[0]->node_features_.defined()) {
+//                    pipeline_->dataloader_->loadCPUParameters(batch);
+//                }
+//            } else {
+//                if (!batch->node_features_.defined())
+//                    pipeline_->dataloader_->loadCPUParameters(batch);
+////                    batch->node_features_ = pipeline_->dataloader_->graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+////                    batch->node_labels_ = pipeline_->dataloader_->graph_storage_->getNodeLabels(
+////                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
+////                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
+//            }
+//            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
+//            t.stop();
+//            std::cout<<"batch load: "<<t.getDuration()<<"\n";
+
+//            t.start();
             batchToDevice(pipeline_, batch);
             t.stop();
             std::cout<<"batch to: "<<t.getDuration()<<"\n";
@@ -546,6 +589,7 @@ PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mo
     // Note that sometimes we don't actually need e.g., device_loaded_batches (for a batch worker but not compute worker)
     if (train_) {
         loaded_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
+        loaded_sliced_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_sliced_queue_size);
         for (int i = 0; i < model_->device_models_.size(); i++) {
             device_loaded_batches_.emplace_back(std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_device_queue_size));
             if (model_->has_embeddings()) {
@@ -558,6 +602,7 @@ PipelineGPU::PipelineGPU(shared_ptr<DataLoader> dataloader, shared_ptr<Model> mo
         }
     } else {
         loaded_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_host_queue_size);
+        loaded_sliced_batches_ = std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_sliced_queue_size);
         for (int i = 0; i < model_->device_models_.size(); i++) {
             device_loaded_batches_.emplace_back(std::make_shared<Queue<shared_ptr<Batch>>>(pipeline_options_->batch_device_queue_size));
             if (compute_worker_needs_remote_) {
@@ -610,6 +655,7 @@ PipelineGPU::~PipelineGPU() {
     delete gpu_sync_lock_;
 
     loaded_batches_ = nullptr;
+    loaded_sliced_batches_ = nullptr;
     device_loaded_batches_ = {};
 
     if (train_) {
@@ -648,8 +694,10 @@ void PipelineGPU::initialize() {
 
             if (batch_worker_ and batch_worker_needs_remote_)
                 addWorkersToPool(5, REMOTE_TO_DEVICE_ID, pipeline_options_->remote_transfer_threads);
-            else if (compute_worker_)
+            else if (compute_worker_) {
+                addWorkersToPool(9, SLICE_BATCH_ID, pipeline_options_->batch_slice_threads);
                 addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
+            }
 
             if (compute_worker_ and compute_worker_needs_remote_)
                 addWorkersToPool(6, REMOTE_LOADER_ID, pipeline_options_->remote_loader_threads);
@@ -674,8 +722,10 @@ void PipelineGPU::initialize() {
 
             if (batch_worker_ and batch_worker_needs_remote_)
                 addWorkersToPool(5, REMOTE_TO_DEVICE_ID, pipeline_options_->batch_transfer_threads);
-            else if (compute_worker_)
+            else if (compute_worker_) {
+                addWorkersToPool(9, SLICE_BATCH_ID, pipeline_options_->batch_slice_threads);
                 addWorkersToPool(1, H2D_TRANSFER_ID, pipeline_options_->batch_transfer_threads);
+            }
 
             if (compute_worker_ and compute_worker_needs_remote_)
                 addWorkersToPool(6, REMOTE_LOADER_ID, pipeline_options_->batch_loader_threads);
@@ -726,6 +776,7 @@ void PipelineGPU::pauseAndFlush() {
 void PipelineGPU::flushQueues() {
     if (train_) {
         loaded_batches_->flush();
+        loaded_sliced_batches_->flush();
         for (auto d : device_loaded_batches_) {
             d->flush();
         }
@@ -741,6 +792,7 @@ void PipelineGPU::flushQueues() {
         }
     } else {
         loaded_batches_->flush();
+        loaded_sliced_batches_->flush();
         for (auto d : device_loaded_batches_) {
             d->flush();
         }
@@ -751,6 +803,8 @@ void PipelineGPU::setQueueExpectingData(bool expecting_data) {
     if (train_) {
         loaded_batches_->expecting_data_ = expecting_data;
         loaded_batches_->cv_->notify_all();
+        loaded_sliced_batches_->expecting_data_ = expecting_data;
+        loaded_sliced_batches_->cv_->notify_all();
         for (auto d : device_loaded_batches_) {
             d->expecting_data_ = expecting_data;
             d->cv_->notify_all();
@@ -770,6 +824,8 @@ void PipelineGPU::setQueueExpectingData(bool expecting_data) {
     } else {
         loaded_batches_->expecting_data_ = expecting_data;
         loaded_batches_->cv_->notify_all();
+        loaded_sliced_batches_->expecting_data_ = expecting_data;
+        loaded_sliced_batches_->cv_->notify_all();
         for (auto d : device_loaded_batches_) {
             d->expecting_data_ = expecting_data;
             d->cv_->notify_all();

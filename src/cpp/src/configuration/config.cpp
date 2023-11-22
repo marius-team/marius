@@ -452,11 +452,13 @@ shared_ptr<PipelineConfig> initPipelineConfig(pyobj python_config) {
         ret_config->gpu_sync_interval = cast_helper<int>(python_config.attr("gpu_sync_interval"));
         ret_config->gpu_model_average = cast_helper<bool>(python_config.attr("gpu_model_average"));
         ret_config->batch_host_queue_size = cast_helper<int>(python_config.attr("batch_host_queue_size"));
+        ret_config->batch_sliced_queue_size = cast_helper<int>(python_config.attr("batch_sliced_queue_size"));
         ret_config->batch_device_queue_size = cast_helper<int>(python_config.attr("batch_device_queue_size"));
         ret_config->gradients_device_queue_size = cast_helper<int>(python_config.attr("gradients_device_queue_size"));
         ret_config->gradients_host_queue_size = cast_helper<int>(python_config.attr("gradients_host_queue_size"));
         ret_config->batch_loader_threads = cast_helper<int>(python_config.attr("batch_loader_threads"));
         ret_config->remote_loader_threads = cast_helper<int>(python_config.attr("remote_loader_threads"));
+        ret_config->batch_slice_threads = cast_helper<int>(python_config.attr("batch_slice_threads"));
         ret_config->batch_transfer_threads = cast_helper<int>(python_config.attr("batch_transfer_threads"));
         ret_config->remote_transfer_threads = cast_helper<int>(python_config.attr("remote_transfer_threads"));
         ret_config->compute_threads = cast_helper<int>(python_config.attr("compute_threads"));
