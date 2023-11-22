@@ -14,7 +14,7 @@
 
 void batchToDevice(Pipeline* pipeline_, shared_ptr<Batch> batch) {
     if (batch->sub_batches_.size() > 0) {
-//        #pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < batch->sub_batches_.size(); i++) {
             batch->sub_batches_[i]->to(pipeline_->model_->device_models_[i]->device_, pipeline_->dataloader_->compute_streams_[i]);
         }

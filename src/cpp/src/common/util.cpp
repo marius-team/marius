@@ -135,7 +135,7 @@ torch::Tensor transfer_tensor(torch::Tensor input, torch::Device device, CudaStr
 #ifdef MARIUS_CUDA
         if (device.is_cuda() || input.device().is_cuda()) {
             if (compute_stream != nullptr) input.record_stream(*compute_stream);
-            if (transfer_stream != nullptr) input.record_stream(*transfer_stream);
+//            if (transfer_stream != nullptr) input.record_stream(*transfer_stream);
         }
 #endif
     }
