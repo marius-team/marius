@@ -76,7 +76,11 @@ void RemoteLoadWorker::run() {
                 batch->sub_batches_ = sub_batches;
             }
 
+            Timer t = new Timer(false);
+            t.start();
             batch->remoteReceive(pipeline_->model_->pg_gloo_->pg, parent, tag);
+            t.stop();
+            std::cout<<"remote load: "<<t.getDuration()<<"\n";
 //            if (batch->sub_batches_.size() > 0) {
 //                for (int i = 0; i < batch->sub_batches_.size(); i++) {
 //                    batch->sub_batches_[i]->node_features_ = pipeline_->dataloader_->graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
