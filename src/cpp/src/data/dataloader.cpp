@@ -95,6 +95,7 @@ DataLoader::DataLoader(shared_ptr<GraphModelStorage> graph_storage, LearningTask
 
 
     int num_hash_maps = training_config_->pipeline->batch_transfer_threads;
+    if (training_config_->pipeline->remote_transfer_threads > num_hash_maps) num_hash_maps = training_config_->pipeline->remote_transfer_threads;
     if (num_hash_maps > 0) {
         auto bool_device_options = torch::TensorOptions().dtype(torch::kBool).device(torch::kCPU);
         for (int i = 0; i < num_hash_maps; i++) {
