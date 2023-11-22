@@ -532,6 +532,7 @@ torch::Tensor splitTensorAcrossMachines(torch::Tensor input, shared_ptr<c10d::Pr
     int num_batch_workers = 0;
     for (auto worker_config : dist_config->workers) {
         if (worker_config->type == WorkerType::BATCH) {
+//        if (worker_config->type == WorkerType::BATCH and !std::dynamic_pointer_cast<BatchWorkerOptions>(worker_config->options)->also_compute) {
             num_batch_workers++;
         }
     }
@@ -707,7 +708,10 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getDiagOrdering(int num
         if (split_train_nodes) {
             torch::Tensor input = torch::randperm(train_nodes.size(0), torch::kInt32);
             torch::Tensor local_split = splitTensorAcrossMachines(input, pg_gloo, dist_config);
-            train_nodes = train_nodes.index_select(0, local_split);
+            if (local_split.defined())
+                train_nodes = train_nodes.index_select(0, local_split);
+            else
+                train_nodes = torch::zeros({0}, input.options());
         }
 
         auto train_nodes_per_buffer = randomlyAssignTrainNodesToBuffers(buffer_states, train_nodes, total_num_nodes, num_partitions, buffer_capacity);

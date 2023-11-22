@@ -147,12 +147,12 @@ void BatchSliceWorker::run() {
 
     while (!done_) {
         while (!paused_) {
-            Timer t = new Timer(false);
+//            Timer t = new Timer(false);
 //            t.start();
             auto tup = ((PipelineGPU *)pipeline_)->loaded_batches_->blocking_pop();
 //            t.stop();
 //            std::cout<<"batch to block: "<<t.getDuration()<<"\n";
-            t.start();
+//            t.start();
             bool popped = std::get<0>(tup);
             shared_ptr<Batch> batch = std::get<1>(tup);
             if (!popped) {
@@ -176,8 +176,8 @@ void BatchSliceWorker::run() {
 
             ((PipelineGPU *)pipeline_)->loaded_sliced_batches_->blocking_push(batch);
 
-            t.stop();
-            std::cout<<"batch slice: "<<t.getDuration()<<"\n";
+//            t.stop();
+//            std::cout<<"batch slice: "<<t.getDuration()<<"\n";
         }
         nanosleep(&sleep_time_, NULL);
     }
@@ -219,7 +219,7 @@ void BatchToDeviceWorker::run() {
             t.stop();
             std::cout<<"batch load: "<<t.getDuration()<<"\n";
 
-//            t.start();
+            t.start();
             batchToDevice(pipeline_, batch);
             t.stop();
             std::cout<<"batch to: "<<t.getDuration()<<"\n";

@@ -111,7 +111,7 @@ bool Pipeline::isDone() {
 //    }
 
     if (batch_worker_) {
-        bool done_locally = (batches_in_flight_ <= 0) && dataloader_->epochComplete();
+        bool done_locally = (batches_in_flight_ <= 0) && (dataloader_->epochComplete() or dataloader_->batches_.size() == 0);
         if (done_locally and compute_worker_ and compute_worker_needs_remote_) {
 //            model_->distNotifyCompleteAndWait(train_, false);
             if (!model_->already_notified_) {

@@ -390,7 +390,7 @@ shared_ptr<Batch> DataLoader::getNextBatch() {
 
 bool DataLoader::hasNextBatch() {
     batch_lock_->lock();
-    bool ret = !all_read_;
+    bool ret = !all_read_ && !(batches_.size() == 0 and graph_storage_->useInMemorySubGraph() and !graph_storage_->hasSwap());
     batch_lock_->unlock();
     return ret;
 }
