@@ -214,12 +214,14 @@ void ComputeWorkerGPU::run() {
 
                     int unique_size = 0;
                     int feat_dim = batch->sub_batches_[0]->node_features_.size(1);
+                    int root_dim = batch->sub_batches_[0]->root_node_indices_.size(0);
 //                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
 //                        unique_size += batch->sub_batches_[i]->node_features_.size(0);
 //                    }
                     unique_size = batch->sub_batches_[0]->node_features_.size(0) * batch->sub_batches_.size();
                     std::vector<torch::Tensor> inputs(batch->sub_batches_.size());
                     std::vector<torch::Tensor> unique_features_per_gpu(batch->sub_batches_.size());
+                    std::vector<torch::Tensor> broadcast_list(batch->sub_batches_.size());
 
 //                    std::cout<<"start"<<"\n";
 //                    std::cout<<unique_size<<"\n";
@@ -246,6 +248,12 @@ void ComputeWorkerGPU::run() {
 
                             unique_features_per_gpu[i] = unique_node_features;
                             inputs[i] = batch->sub_batches_[i]->node_features_;
+
+                            device_options = torch::TensorOptions().dtype(batch->sub_batches_[0]->root_node_indices_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
+                            if (i > 0)
+                                broadcast_list[i] = torch::zeros({root_dim}, device_options);
+                            else
+                                broadcast_list[i] = batch->sub_batches_[i]->root_node_indices_;
                         }
 
                         #pragma omp single
@@ -254,6 +262,7 @@ void ComputeWorkerGPU::run() {
 
                             #ifdef MARIUS_CUDA
                                 torch::cuda::nccl::all_gather(inputs, unique_features_per_gpu);//, streams);
+                                torch::cuda::nccl::broadcast(broadcast_list);//, streams);
                             #endif
 
 //                            for (int j = 0; j < batch->sub_batches_.size(); j++) {
@@ -272,7 +281,7 @@ void ComputeWorkerGPU::run() {
                             CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
                             auto device_options = torch::TensorOptions().dtype(batch->sub_batches_[i]->node_features_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
 
-                            batch->sub_batches_[i]->unique_node_indices_ = torch::searchsorted(batch->sub_batches_[i]->root_node_indices_, batch->sub_batches_[i]->unique_node_indices_);
+                            batch->sub_batches_[i]->unique_node_indices_ = torch::searchsorted(broadcast_list[i], batch->sub_batches_[i]->unique_node_indices_);
 
 //                            batch->sub_batches_[i]->node_features_ = torch::zeros({batch->sub_batches_[i]->unique_node_indices_.size(0), feat_dim}, device_options);
 //                            torch::index_select_out(batch->sub_batches_[i]->node_features_, unique_features_per_gpu[i], 0, batch->sub_batches_[i]->unique_node_indices_);

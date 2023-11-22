@@ -686,8 +686,9 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                         torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
                         unique_indices = computeUniques(all_unique_nodes, graph_storage_->getNumNodesInMemory(), id);
 
-                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                            batch->sub_batches_[i]->root_node_indices_ = unique_indices;
+                        batch->sub_batches_[0]->root_node_indices_ = unique_indices;
+                        for (int i = 1; i < batch->sub_batches_.size(); i++) {
+                            batch->sub_batches_[i]->root_node_indices_ = torch::Tensor();
                         }
 
 //                        t.stop();
@@ -713,7 +714,7 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                                 size = unique_indices.size(0) - start;
                             }
 
-//                            batch->sub_batches_[i]->node_features_ = unique_features.narrow(0, count, size);
+//                            batch->sub_batches_[i]->root_node_indices_ = unique_features.narrow(0, count, size);
                             batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
                         }
                     }
