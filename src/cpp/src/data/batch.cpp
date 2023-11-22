@@ -91,7 +91,7 @@ void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int t
     }
 
     if (sub_batches_.size() > 0) {
-//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
         for (int i = 0; i < sub_batches_.size(); i++) {
             sub_batches_[i]->remoteTo(pg, worker_id, tag+i, false);
         }
@@ -164,7 +164,7 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
     }
 
     if (sub_batches_.size() > 0) {
-//        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
+        #pragma omp parallel for // TODO: need to look at whether this works or not (e.g., parallel sending)
         for (int i = 0; i < sub_batches_.size(); i++) {
             sub_batches_[i]->remoteReceive(pg, worker_id, tag + i, false);
         }
