@@ -531,8 +531,8 @@ torch::Tensor splitTensorAcrossMachines(torch::Tensor input, shared_ptr<c10d::Pr
 
     int num_batch_workers = 0;
     for (auto worker_config : dist_config->workers) {
-        if (worker_config->type == WorkerType::BATCH) {
-//        if (worker_config->type == WorkerType::BATCH and !std::dynamic_pointer_cast<BatchWorkerOptions>(worker_config->options)->also_compute) {
+//        if (worker_config->type == WorkerType::BATCH) {
+        if (worker_config->type == WorkerType::BATCH and !std::dynamic_pointer_cast<BatchWorkerOptions>(worker_config->options)->also_compute) {
             num_batch_workers++;
         }
     }
