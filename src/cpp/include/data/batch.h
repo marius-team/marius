@@ -109,5 +109,9 @@ class Batch {
     void clear(bool clear_eval = true); /**< Clears all tensor data in the batch */
 
     double getLoss(LossReduction reduction_type = LossReduction::SUM);
+
+    torch::Tensor to_flat();
+
+    void from_flat(torch::Tensor tensor);
 };
 #endif  // MARIUS_BATCH_H

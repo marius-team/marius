@@ -164,6 +164,10 @@ class DENSEGraph : public MariusGraph {
      */
     void clear();
 
+    torch::Tensor to_flat();
+
+    void from_flat(torch::Tensor tensor);
+
     void to(torch::Device device, CudaStream *compute_stream = nullptr, CudaStream *transfer_stream = nullptr);
 
     void send(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag);

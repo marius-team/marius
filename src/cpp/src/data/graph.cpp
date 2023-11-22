@@ -292,6 +292,119 @@ void DENSEGraph::to(torch::Device device, CudaStream *compute_stream, CudaStream
     buffer_state_ = transfer_tensor(buffer_state_, device, compute_stream, transfer_stream);
 }
 
+torch::Tensor DENSEGraph::to_flat() {
+    int num_ints = 2;
+    int num_tensors = 6;
+
+    torch::Tensor tmp;
+    if (out_neighbors_vec_.size() > 0) {
+        tmp = torch::cat({out_neighbors_vec_}, 0); // TODO: could select column here or earlier if we wanted
+        out_neighbors_vec_ = {};
+        out_neighbors_vec_.emplace_back(tmp);
+    }
+
+    if (in_neighbors_vec_.size() > 0) {
+        tmp = torch::cat({in_neighbors_vec_}, 0);
+        in_neighbors_vec_ = {};
+        in_neighbors_vec_.emplace_back(tmp);
+    }
+
+    torch::Tensor metadata = torch::zeros({num_ints + num_tensors}, {torch::kInt32});
+
+    metadata[0] = num_nodes_in_memory_;
+    metadata[1] = partition_size_;
+    if (hop_offsets_.defined()) metadata[2] = hop_offsets_.size(0);
+    if (node_ids_.defined()) metadata[3] = node_ids_.size(0);
+    if (out_offsets_.defined()) metadata[4] = out_offsets_.size(0);
+    if (in_offsets_.defined()) metadata[5] = in_offsets_.size(0);
+    if (out_neighbors_vec_.size() > 0) metadata[6] = out_neighbors_vec_[0].size(0);
+    if (in_neighbors_vec_.size() > 0) metadata[7] = in_neighbors_vec_[0].size(0);
+
+    torch::Tensor out = torch::zeros({num_ints + num_tensors + torch::sum(metadata.narrow(0, num_ints, num_tensors)).item<int>()}, {torch::kInt32});
+
+    out.narrow(0, 0, num_ints + num_tensors) = metadata;
+
+    int start = num_ints + num_tensors;
+    if (hop_offsets_.defined()) {
+        out.narrow(0, start, hop_offsets_.size(0)) = hop_offsets_.to(torch::kInt32);
+        start += hop_offsets_.size(0);
+    }
+
+    if (node_ids_.defined()) {
+        out.narrow(0, start, node_ids_.size(0)) = node_ids_.to(torch::kInt32);
+        start += node_ids_.size(0);
+    }
+
+    if (out_offsets_.defined()) {
+        out.narrow(0, start, out_offsets_.size(0)) = out_offsets_.to(torch::kInt32);
+        start += out_offsets_.size(0);
+    }
+
+    if (in_offsets_.defined()) {
+        out.narrow(0, start, in_offsets_.size(0)) = in_offsets_.to(torch::kInt32);
+        start += in_offsets_.size(0);
+    }
+
+    if (out_neighbors_vec_.size() > 0) {
+        out.narrow(0, start, out_neighbors_vec_[0].size(0)) = out_neighbors_vec_[0].select(1, 0).to(torch::kInt32);
+        start += out_neighbors_vec_[0].size(0);
+    }
+
+    if (in_neighbors_vec_.size() > 0) {
+        out.narrow(0, start, in_neighbors_vec_[0].size(0)) = in_neighbors_vec_[0].select(1, -1).to(torch::kInt32);
+        start += in_neighbors_vec_[0].size(0);
+    }
+
+    return out;
+}
+
+void DENSEGraph::from_flat(torch::Tensor tensor) {
+    int num_ints = 2;
+    int num_tensors = 6;
+
+    torch::Tensor metadata = tensor.narrow(0, 0, num_ints + num_tensors);
+    auto metadata_accessor = metadata.accessor<int, 1>();
+
+    num_nodes_in_memory_ = metadata_accessor[0];
+    partition_size_ = metadata_accessor[1];
+
+//    auto options = torch::TensorOptions().dtype(get_dtype_from_label(dtype_label));
+//    #ifdef MARIUS_CUDA
+//    options = options.pinned_memory(true);
+//    #endif
+
+    int start = num_ints + num_tensors;
+    if (metadata_accessor[2] > 0) {
+        hop_offsets_ = tensor.narrow(0, start, metadata_accessor[2]);
+        start += metadata_accessor[2];
+    }
+
+    if (metadata_accessor[3] > 0) {
+        node_ids_ = tensor.narrow(0, start, metadata_accessor[3]);
+        start += metadata_accessor[3];
+    }
+
+    if (metadata_accessor[4] > 0) {
+        out_offsets_ = tensor.narrow(0, start, metadata_accessor[4]);
+        start += metadata_accessor[4];
+    }
+
+    if (metadata_accessor[5] > 0) {
+        in_offsets_ = tensor.narrow(0, start, metadata_accessor[5]);
+        start += metadata_accessor[5];
+    }
+
+    if (metadata_accessor[6] > 0) {
+        out_neighbors_vec_.emplace_back(tensor.narrow(0, start, metadata_accessor[6]).unsqueeze(1));
+        start += metadata_accessor[6];
+    }
+
+    if (metadata_accessor[7] > 0) {
+        in_neighbors_vec_.emplace_back(tensor.narrow(0, start, metadata_accessor[7]).unsqueeze(1));
+        start += metadata_accessor[7];
+    }
+}
+
 void DENSEGraph::send(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag) {
     send_tensor(hop_offsets_, pg, worker_id, tag);
 
@@ -463,6 +576,14 @@ void DENSEGraph::performMap() {
         return;
     }
 
+    node_ids_ = node_ids_.to(torch::kInt64);
+
+    if (out_offsets_.defined())
+        out_offsets_ = out_offsets_.to(torch::kInt64);
+    if (in_offsets_.defined())
+        in_offsets_ = in_offsets_.to(torch::kInt64);
+
+
     auto device_options = torch::TensorOptions().dtype(torch::kInt64).device(node_ids_.device());
 
     torch::Tensor local_id_to_batch_map = torch::zeros({num_nodes_in_memory_}, device_options);
@@ -471,7 +592,7 @@ void DENSEGraph::performMap() {
 
     if (out_neighbors_vec_.size() > 0) {
         src_sorted_edges_ = torch::cat({out_neighbors_vec_}, 0);
-        out_neighbors_mapping_ = local_id_to_batch_map.gather(0, src_sorted_edges_.select(1, -1));
+        out_neighbors_mapping_ = local_id_to_batch_map.gather(0, src_sorted_edges_.select(1, -1).to(torch::kInt64));
 
         out_neighbors_vec_ = {};
 
@@ -483,7 +604,7 @@ void DENSEGraph::performMap() {
 
     if (in_neighbors_vec_.size() > 0) {
         dst_sorted_edges_ = torch::cat({in_neighbors_vec_}, 0);
-        in_neighbors_mapping_ = local_id_to_batch_map.gather(0, dst_sorted_edges_.select(1, 0));
+        in_neighbors_mapping_ = local_id_to_batch_map.gather(0, dst_sorted_edges_.select(1, 0).to(torch::kInt64));
 
         in_neighbors_vec_ = {};
 
