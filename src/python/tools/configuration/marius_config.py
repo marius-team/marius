@@ -804,6 +804,7 @@ class PipelineConfig:
 @dataclass
 class TrainingConfig:
     batch_size: int = 1000
+    num_sub_batches: int = 1
     negative_sampling: NegativeSamplingConfig = MISSING
     num_epochs: int = 10
     pipeline: PipelineConfig = PipelineConfig()

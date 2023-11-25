@@ -157,6 +157,7 @@ struct StorageConfig {
 
 struct TrainingConfig {
     int batch_size;
+    int num_sub_batches;
     shared_ptr<NegativeSamplingConfig> negative_sampling = nullptr;
     int num_epochs;
     shared_ptr<PipelineConfig> pipeline = nullptr;

@@ -28,6 +28,7 @@ class DataLoader {
     std::mutex *sampler_lock_;
     vector<shared_ptr<Batch>> batches_;
     int batch_size_;
+    int num_sub_batches_;
 
     bool single_dataset_;
 
@@ -206,6 +207,7 @@ class DataLoader {
             throw MariusRuntimeException("This dataloader only has a single dataset and cannot switch");
         } else {
             batch_size_ = training_config_->batch_size;
+            num_sub_batches_ = training_config_->num_sub_batches;
             train_ = true;
             graph_storage_->setTrainSet();
             negative_sampler_ = training_negative_sampler_;
@@ -225,6 +227,7 @@ class DataLoader {
             throw MariusRuntimeException("This dataloader only has a single dataset and cannot switch");
         } else {
             batch_size_ = evaluation_config_->batch_size;
+            num_sub_batches_ = 1;
             train_ = false;
             graph_storage_->setValidationSet();
             negative_sampler_ = evaluation_negative_sampler_;
@@ -238,6 +241,7 @@ class DataLoader {
             throw MariusRuntimeException("This dataloader only has a single dataset and cannot switch");
         } else {
             batch_size_ = evaluation_config_->batch_size;
+            num_sub_batches_ = 1;
             train_ = false;
             graph_storage_->setTestSet();
             negative_sampler_ = evaluation_negative_sampler_;

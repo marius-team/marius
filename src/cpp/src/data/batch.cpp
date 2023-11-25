@@ -197,7 +197,7 @@ void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int t
 
 
 
-    torch::Tensor global_metadata = torch::tensor({batch_id_, batch_size_, creator_id_}, {torch::kInt32});
+    torch::Tensor global_metadata = torch::tensor({batch_id_, batch_size_, num_sub_batches_, creator_id_}, {torch::kInt32});
 
     if (sub_batches_.size() > 0) {
         std::vector<torch::Tensor> all_tensors(1+sub_batches_.size()*2);
@@ -301,7 +301,7 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
 ////    std::cout<<"batch recv full: "<<t_full.getDuration()<<"\n";
 
 
-
+    int num_global_ints = 4;
     int num_batch_tensors = 3;
     int num_graph_ints = 2;
     int num_graph_tensors = 6;
@@ -309,11 +309,12 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
 
     torch::Tensor tensor = receive_tensor(pg, worker_id, tag);
 
-    torch::Tensor global_metadata = tensor.narrow(0, 0, 3);
+    torch::Tensor global_metadata = tensor.narrow(0, 0, num_global_ints);
 
     batch_id_ = global_metadata[0].item<int>();
     batch_size_ = global_metadata[1].item<int>();
-    creator_id_ = global_metadata[2].item<int>();
+    num_sub_batches_ = global_metadata[2].item<int>();
+    creator_id_ = global_metadata[3].item<int>();
 
     if (sub_batches_.size() > 0) {
         torch::Tensor sub_batch_data = tensor.narrow(0, global_metadata.size(0), tensor.size(0) - global_metadata.size(0));

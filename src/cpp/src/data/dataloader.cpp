@@ -272,6 +272,7 @@ void DataLoader::initializeBatches(bool prepare_encode) {
         curr_batch->batch_id_ = batch_id + batch_id_offset_;
         curr_batch->start_idx_ = start_idx;
         curr_batch->batch_size_ = batch_size;
+        curr_batch->num_sub_batches_ = num_sub_batches_;
 
         if (prepare_encode) {
             curr_batch->task_ = LearningTask::ENCODE;
@@ -433,16 +434,17 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 
     if (train_ and graph_storage_->num_gpus_ > 1) {
         std::vector <shared_ptr<Batch>> sub_batches;
-        int num_devices = graph_storage_->num_gpus_;        //graph_storage_->storage_config_->device_ids.size();
+        int num_batches = graph_storage_->num_gpus_ * num_sub_batches_;        //graph_storage_->storage_config_->device_ids.size();
+//        std::cout<<"num_batches: "<<num_batches<<"\n";
 
         if (batch->task_ == LearningTask::LINK_PREDICTION) {
             torch::Tensor edges = edge_sampler_->getEdges(batch);
             int64_t num_edges = edges.size(0);
 
-            int64_t edges_per_batch = num_edges / num_devices;
+            int64_t edges_per_batch = num_edges / num_batches;
 
             int64_t offset = 0;
-            for (int i = 0; i < num_devices; i++) {
+            for (int i = 0; i < num_batches; i++) {
                 shared_ptr<Batch> sub_batch = std::make_shared<Batch>(train_);
                 if (offset + edges_per_batch > num_edges) {
                     edges_per_batch = num_edges - offset;
@@ -466,10 +468,10 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
                     torch::kInt64);
             int64_t num_nodes = node_ids.size(0);
 
-            int64_t nodes_per_batch = num_nodes / num_devices;
+            int64_t nodes_per_batch = num_nodes / num_batches;
 
             int64_t offset = 0;
-            for (int i = 0; i < num_devices; i++) {
+            for (int i = 0; i < num_batches; i++) {
                 shared_ptr<Batch> sub_batch = std::make_shared<Batch>(train_);
                 if (offset + nodes_per_batch > num_nodes) {
                     nodes_per_batch = num_nodes - offset;
@@ -489,6 +491,7 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
         }
 
         batch->sub_batches_ = sub_batches;
+//        std::cout<<"batch sub batches: "<<batch->sub_batches_.size()<<"\n";
 
 //        if (compute_worker_)
 //            loadCPUParameters(batch, worker_id);

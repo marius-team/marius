@@ -536,6 +536,7 @@ shared_ptr<TrainingConfig> initTrainingConfig(pyobj python_config) {
     shared_ptr<TrainingConfig> ret_config = std::make_shared<TrainingConfig>();
 
     ret_config->batch_size = cast_helper<int>(python_config.attr("batch_size"));
+    ret_config->num_sub_batches = cast_helper<int>(python_config.attr("num_sub_batches"));
     ret_config->negative_sampling = initNegativeSamplingConfig(python_config.attr("negative_sampling"));
     ret_config->pipeline = initPipelineConfig(python_config.attr("pipeline"));
     ret_config->logs_per_epoch = cast_helper<int>(python_config.attr("logs_per_epoch"));

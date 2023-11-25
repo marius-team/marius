@@ -14,9 +14,12 @@
 
 void batchToDevice(Pipeline* pipeline_, shared_ptr<Batch> batch) {
     if (batch->sub_batches_.size() > 0) {
-        #pragma omp parallel for
-        for (int i = 0; i < batch->sub_batches_.size(); i++) {
-            batch->sub_batches_[i]->to(pipeline_->model_->device_models_[i]->device_, pipeline_->dataloader_->compute_streams_[i]);
+        int chunk_size = batch->sub_batches_.size() / batch->num_sub_batches_;
+        for (int j = 0; j < batch->num_sub_batches_; j++) {
+            #pragma omp parallel for
+            for (int i = 0; i < chunk_size; i++) {
+                batch->sub_batches_[i+chunk_size*j]->to(pipeline_->model_->device_models_[i]->device_, pipeline_->dataloader_->compute_streams_[i]);
+            }
         }
     } else {
         batch->to(pipeline_->model_->device_models_[0]->device_, pipeline_->dataloader_->compute_streams_[0]);
@@ -69,7 +72,7 @@ void RemoteLoadWorker::run() {
 
             if (pipeline_->model_->device_models_.size() > 1 and pipeline_->isTrain()) {
                 std::vector <shared_ptr<Batch>> sub_batches;
-                for (int i = 0; i < pipeline_->model_->device_models_.size(); i++) {
+                for (int i = 0; i < pipeline_->model_->device_models_.size() * pipeline_->dataloader_->num_sub_batches_; i++) {
                     shared_ptr<Batch> sub_batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
                     sub_batches.emplace_back(sub_batch);
                 }
@@ -251,7 +254,7 @@ void ComputeWorkerGPU::run() {
             if (pipeline_->isTrain()) {
                 // train batch
                 if (batch->sub_batches_.size() > 0) {
-                    int i = gpu_id_;
+//                    int i = gpu_id_;
 
                     std::vector<CudaStream> streams_for_multi_guard;
                     for (int i = 0; i < pipeline_->dataloader_->graph_storage_->num_gpus_; i++) {
@@ -265,100 +268,134 @@ void ComputeWorkerGPU::run() {
 //                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
 //                        unique_size += batch->sub_batches_[i]->node_features_.size(0);
 //                    }
-                    unique_size = batch->sub_batches_[0]->node_features_.size(0) * batch->sub_batches_.size();
-                    std::vector<torch::Tensor> inputs(batch->sub_batches_.size());
-                    std::vector<torch::Tensor> unique_features_per_gpu(batch->sub_batches_.size());
-                    std::vector<torch::Tensor> broadcast_list(batch->sub_batches_.size());
+
+                    int chunk_size = batch->sub_batches_.size() / batch->num_sub_batches_;
+
+                    unique_size = batch->sub_batches_[0]->node_features_.size(0) * chunk_size;
+                    std::vector<torch::Tensor> inputs(chunk_size);
+                    std::vector<torch::Tensor> unique_features_per_gpu(chunk_size);
+                    std::vector<std::vector<torch::Tensor>> unique_gathered_features_per_gpu(chunk_size);
+                    std::vector<torch::Tensor> broadcast_list(chunk_size);
 
 //                    std::cout<<"start"<<"\n";
 //                    std::cout<<unique_size<<"\n";
 //                    std::cout<<feat_dim<<"\n";
+//                    std::cout<<"NUM_SUB_BATCHES: "<<batch->num_sub_batches_<<"\n";
+//                    std::cout<<batch->sub_batches_.size()<<" "<<batch->num_sub_batches_<<"\n";
+//                    std::cout<<"chunk size"<<chunk_size<<"\n";
 
 
-                    #pragma omp parallel
-                    {
-                        #pragma omp for
-                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                            CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
-                            auto device_options = torch::TensorOptions().dtype(batch->sub_batches_[i]->node_features_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
-
-                            torch::Tensor unique_node_features = torch::zeros({unique_size, feat_dim}, device_options);
-////                            std::cout<<unique_node_features.sizes()<<"\n";
-//
-//                            int count = 0;
-//                            for (int j = 0; j < batch->sub_batches_.size(); j++) {
-//                                unique_node_features.narrow(0, count, batch->sub_batches_[j]->node_features_.size(0)).copy_(batch->sub_batches_[j]->node_features_);
-//                                count += batch->sub_batches_[j]->node_features_.size(0);
-////                                std::cout<<unique_node_features.sizes()<<"\n";
-//                                unique_features_per_gpu[i*batch->sub_batches_.size() + j] = torch::zeros({batch->sub_batches_[j]->node_features_.size(0), feat_dim}, device_options);
-//                            }
-
-                            unique_features_per_gpu[i] = unique_node_features;
-                            inputs[i] = batch->sub_batches_[i]->node_features_;
-
-                            device_options = torch::TensorOptions().dtype(batch->sub_batches_[0]->root_node_indices_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
-                            if (i > 0)
-                                broadcast_list[i] = torch::zeros({root_dim}, device_options);
-                            else
-                                broadcast_list[i] = batch->sub_batches_[i]->root_node_indices_;
-                        }
-
-                        #pragma omp single
+                    for (int j = 0; j < batch->num_sub_batches_; j++) {
+                        #pragma omp parallel
                         {
-                            CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
+                            #pragma omp for
+                            for (int i = 0; i < chunk_size; i++) {
+                                CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
+                                auto device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_features_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_features_.device());
 
-                            #ifdef MARIUS_CUDA
-                                torch::cuda::nccl::all_gather(inputs, unique_features_per_gpu);//, streams);
-                                torch::cuda::nccl::broadcast(broadcast_list);//, streams);
-                            #endif
+                                torch::Tensor unique_node_features = torch::zeros({unique_size, feat_dim}, device_options);
+    ////                            std::cout<<unique_node_features.sizes()<<"\n";
+    //
+    //                            int count = 0;
+    //                            for (int j = 0; j < batch->sub_batches_.size(); j++) {
+    //                                unique_node_features.narrow(0, count, batch->sub_batches_[j]->node_features_.size(0)).copy_(batch->sub_batches_[j]->node_features_);
+    //                                count += batch->sub_batches_[j]->node_features_.size(0);
+    ////                                std::cout<<unique_node_features.sizes()<<"\n";
+    //                                unique_features_per_gpu[i*batch->sub_batches_.size() + j] = torch::zeros({batch->sub_batches_[j]->node_features_.size(0), feat_dim}, device_options);
+    //                            }
 
-//                            for (int j = 0; j < batch->sub_batches_.size(); j++) {
-//                                if (!device_models_[j]->named_parameters()[key].mutable_grad().defined()) {
-//                                    device_models_[j]->named_parameters()[key].mutable_grad() = torch::zeros_like(device_models_[j]->named_parameters()[key]);
-//                                }
-//                                // this line for averaging
-//                                device_models_[j]->named_parameters()[key].mutable_grad() /= (float_t) num_gpus;
-//
-//                                input_gradients[j] = device_models_[j]->named_parameters()[key].mutable_grad();
-//                            }
-                        }
+                                unique_features_per_gpu[i] = unique_node_features;
+                                inputs[i] = batch->sub_batches_[i+chunk_size*j]->node_features_;
 
-                        #pragma omp for
-                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                            CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
-                            auto device_options = torch::TensorOptions().dtype(batch->sub_batches_[i]->node_features_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
+                                if (j == 0) {
+                                    device_options = torch::TensorOptions().dtype(batch->sub_batches_[0]->root_node_indices_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
+                                    if (i > 0)
+                                        broadcast_list[i] = torch::zeros({root_dim}, device_options);
+                                    else
+                                        broadcast_list[i] = batch->sub_batches_[i]->root_node_indices_;
+                                }
+                            }
 
-                            batch->sub_batches_[i]->unique_node_indices_ = torch::searchsorted(broadcast_list[i], batch->sub_batches_[i]->unique_node_indices_);
+                            #pragma omp single
+                            {
+                                CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
 
-//                            batch->sub_batches_[i]->node_features_ = torch::zeros({batch->sub_batches_[i]->unique_node_indices_.size(0), feat_dim}, device_options);
-//                            torch::index_select_out(batch->sub_batches_[i]->node_features_, unique_features_per_gpu[i], 0, batch->sub_batches_[i]->unique_node_indices_);
-//                            std::cout<<batch->sub_batches_[i]->node_features_.sizes()<<"\n";
-                            batch->sub_batches_[i]->node_features_ = unique_features_per_gpu[i].index_select(0, batch->sub_batches_[i]->unique_node_indices_);
+                                #ifdef MARIUS_CUDA
+                                    torch::cuda::nccl::all_gather(inputs, unique_features_per_gpu);//, streams);
+                                    if (j == 0)
+                                        torch::cuda::nccl::broadcast(broadcast_list);//, streams);
+                                #endif
 
-                            pipeline_->model_->device_models_[i]->clear_grad();
-                            pipeline_->model_->device_models_[i]->train_batch(batch->sub_batches_[i], false);
-                        }
+    //                            for (int j = 0; j < batch->sub_batches_.size(); j++) {
+    //                                if (!device_models_[j]->named_parameters()[key].mutable_grad().defined()) {
+    //                                    device_models_[j]->named_parameters()[key].mutable_grad() = torch::zeros_like(device_models_[j]->named_parameters()[key]);
+    //                                }
+    //                                // this line for averaging
+    //                                device_models_[j]->named_parameters()[key].mutable_grad() /= (float_t) num_gpus;
+    //
+    //                                input_gradients[j] = device_models_[j]->named_parameters()[key].mutable_grad();
+    //                            }
+                            }
 
-                        #pragma omp single
-                        {
-                            CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
-                            pipeline_->model_->all_reduce();
-                            pipeline_->model_->distGradSync();
-                        }
-
-                        #pragma omp for
-                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                            CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
-                            pipeline_->model_->device_models_[i]->step();
-                        }
-
-                        #pragma omp single
-                        {
-                            // TODO: should this be on this stream?
-                            CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
-                            pipeline_->model_->distModelSync();
+                            #pragma omp for
+                            for (int i = 0; i < chunk_size; i++) {
+                                CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
+                                unique_gathered_features_per_gpu[i].emplace_back(unique_features_per_gpu[i]);
+                            }
                         }
                     }
+
+                    if (batch->num_sub_batches_ > 1) {
+                        #pragma omp for
+                        for (int i = 0; i < chunk_size; i++) {
+                            CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
+                            unique_features_per_gpu[i] = torch::cat({unique_gathered_features_per_gpu[i]}, 0);
+                        }
+                    }
+
+                    // Train on each chunk of sub batches, one at a time
+                    for (int j = 0; j < batch->num_sub_batches_; j++) {
+                        #pragma omp parallel
+                        {
+                            #pragma omp for
+                            for (int i = 0; i < chunk_size; i++) {
+                                CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
+                                auto device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_features_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_features_.device());
+
+                                batch->sub_batches_[i+chunk_size*j]->unique_node_indices_ = torch::searchsorted(broadcast_list[i], batch->sub_batches_[i+chunk_size*j]->unique_node_indices_);
+
+    //                            batch->sub_batches_[i]->node_features_ = torch::zeros({batch->sub_batches_[i]->unique_node_indices_.size(0), feat_dim}, device_options);
+    //                            torch::index_select_out(batch->sub_batches_[i]->node_features_, unique_features_per_gpu[i], 0, batch->sub_batches_[i]->unique_node_indices_);
+    //                            std::cout<<batch->sub_batches_[i]->node_features_.sizes()<<"\n";
+                                batch->sub_batches_[i+chunk_size*j]->node_features_ = unique_features_per_gpu[i].index_select(0, batch->sub_batches_[i+chunk_size*j]->unique_node_indices_);
+
+                                pipeline_->model_->device_models_[i]->clear_grad();
+                                pipeline_->model_->device_models_[i]->train_batch(batch->sub_batches_[i+chunk_size*j], false);
+                            }
+
+                            #pragma omp single
+                            {
+                                CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
+                                pipeline_->model_->all_reduce();
+                                pipeline_->model_->distGradSync();
+                            }
+
+                            #pragma omp for
+                            for (int i = 0; i < chunk_size; i++) {
+                                CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
+                                pipeline_->model_->device_models_[i]->step();
+                            }
+
+                            #pragma omp single
+                            {
+                                // TODO: should this be on this stream?
+                                CudaMultiStreamGuard multi_guard(streams_for_multi_guard);
+                                pipeline_->model_->distModelSync();
+                            }
+                        }
+                    }
+
+                    //TODO: here we should undo the uniques for the node embedding transfer back?
 
                 } else {
                     CudaStreamGuard stream_guard(compute_stream);
