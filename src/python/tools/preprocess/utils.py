@@ -39,20 +39,115 @@ def extract_file(filepath, remove_input=True):
         if tarfile.is_tarfile(str(filepath)):
             if str(filepath).endswith(".gzip") or str(filepath).endswith(".gz"):
                 with tarfile.open(filepath, "r:gz") as tar:
-                    tar.extractall(path=filepath.parent)
+                    def is_within_directory(directory, target):
+                        
+                        abs_directory = os.path.abspath(directory)
+                        abs_target = os.path.abspath(target)
+                    
+                        prefix = os.path.commonprefix([abs_directory, abs_target])
+                        
+                        return prefix == abs_directory
+                    
+                    def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                    
+                        for member in tar.getmembers():
+                            member_path = os.path.join(path, member.name)
+                            if not is_within_directory(path, member_path):
+                                raise Exception("Attempted Path Traversal in Tar File")
+                    
+                        tar.extractall(path, members, numeric_owner=numeric_owner) 
+                        
+                    
+                    safe_extract(tar, path=filepath.parent)
             elif str(filepath).endswith(".tar.gz") or str(filepath).endswith(".tgz"):
                 with tarfile.open(filepath, "r:gz") as tar:
-                    tar.extractall(path=filepath.parent)
+                    def is_within_directory(directory, target):
+                        
+                        abs_directory = os.path.abspath(directory)
+                        abs_target = os.path.abspath(target)
+                    
+                        prefix = os.path.commonprefix([abs_directory, abs_target])
+                        
+                        return prefix == abs_directory
+                    
+                    def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                    
+                        for member in tar.getmembers():
+                            member_path = os.path.join(path, member.name)
+                            if not is_within_directory(path, member_path):
+                                raise Exception("Attempted Path Traversal in Tar File")
+                    
+                        tar.extractall(path, members, numeric_owner=numeric_owner) 
+                        
+                    
+                    safe_extract(tar, path=filepath.parent)
             elif str(filepath).endswith(".tar"):
                 with tarfile.open(filepath, "r:") as tar:
-                    tar.extractall(path=filepath.parent)
+                    def is_within_directory(directory, target):
+                        
+                        abs_directory = os.path.abspath(directory)
+                        abs_target = os.path.abspath(target)
+                    
+                        prefix = os.path.commonprefix([abs_directory, abs_target])
+                        
+                        return prefix == abs_directory
+                    
+                    def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                    
+                        for member in tar.getmembers():
+                            member_path = os.path.join(path, member.name)
+                            if not is_within_directory(path, member_path):
+                                raise Exception("Attempted Path Traversal in Tar File")
+                    
+                        tar.extractall(path, members, numeric_owner=numeric_owner) 
+                        
+                    
+                    safe_extract(tar, path=filepath.parent)
             elif str(filepath).endswith(".bz2"):
                 with tarfile.open(filepath, "r:bz2") as tar:
-                    tar.extractall(path=filepath.parent)
+                    def is_within_directory(directory, target):
+                        
+                        abs_directory = os.path.abspath(directory)
+                        abs_target = os.path.abspath(target)
+                    
+                        prefix = os.path.commonprefix([abs_directory, abs_target])
+                        
+                        return prefix == abs_directory
+                    
+                    def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                    
+                        for member in tar.getmembers():
+                            member_path = os.path.join(path, member.name)
+                            if not is_within_directory(path, member_path):
+                                raise Exception("Attempted Path Traversal in Tar File")
+                    
+                        tar.extractall(path, members, numeric_owner=numeric_owner) 
+                        
+                    
+                    safe_extract(tar, path=filepath.parent)
             else:
                 try:
                     with tarfile.open(filepath, "r:gz") as tar:
-                        tar.extractall(path=filepath.parent)
+                        def is_within_directory(directory, target):
+                            
+                            abs_directory = os.path.abspath(directory)
+                            abs_target = os.path.abspath(target)
+                        
+                            prefix = os.path.commonprefix([abs_directory, abs_target])
+                            
+                            return prefix == abs_directory
+                        
+                        def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                        
+                            for member in tar.getmembers():
+                                member_path = os.path.join(path, member.name)
+                                if not is_within_directory(path, member_path):
+                                    raise Exception("Attempted Path Traversal in Tar File")
+                        
+                            tar.extractall(path, members, numeric_owner=numeric_owner) 
+                            
+                        
+                        safe_extract(tar, path=filepath.parent)
                 except tarfile.TarError:
                     raise RuntimeError(
                         "Unrecognized file format, may need to perform extraction manually with a custom dataset."
