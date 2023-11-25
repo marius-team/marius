@@ -81,7 +81,6 @@ class OGBNArxiv(NodeClassificationDataset):
             output_dir=self.output_directory,
             train_edges=self.input_edge_list_file,
             num_partitions=num_partitions,
-            columns=[0, 1],
             src_column=0,
             dst_column=1,
             remap_ids=remap_ids,
