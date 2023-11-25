@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
@@ -9,7 +10,7 @@ from marius.tools.preprocess.converters.readers.reader import Reader
 class SparkDelimitedFileReader(Reader):
     def __init__(
         self,
-        spark: SparkSession,
+        spark: SparkSession.builder.appName("marius_spark").getOrCreate(),
         train_edges: Path,
         valid_edges: Path = None,
         test_edges: Path = None,
@@ -39,6 +40,21 @@ class SparkDelimitedFileReader(Reader):
 
         self.spark = spark
 
+        if train_edges.startswith("s3a://"):
+            if 'AWS_ACCESS_KEY_ID' not in os.environ or 'AWS_SECRET_ACCESS_KEY' not in os.environ or \
+                    'S3_BUCKET' not in os.environ:
+                print("Edge path is an s3 path, but required env variables not set. {}, {} and {} need to be set".format(
+                        "AWS_ACCESS_KEY_ID",
+                        "AWS_SECRET_ACCESS_KEY",
+                        "S3_BUCKET"
+                ))
+                exit()
+            self.spark._jsc.hadoopConfiguration().set('fs.s3a.aws.credentials.provider',
+                                                      'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider')
+            self.spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", os.getenv('AWS_ACCESS_KEY_ID'))
+            self.spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", os.getenv('AWS_SECRET_ACCESS_KEY'))
+            self.spark._jsc.hadoopConfiguration().set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+        
         self.train_edges = train_edges
         self.valid_edges = valid_edges
         self.test_edges = test_edges

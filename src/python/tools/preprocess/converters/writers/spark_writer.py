@@ -1,6 +1,7 @@
 import glob
 import os
 import re
+import shutil
 import sys
 from pathlib import Path
 from random import randint
@@ -8,6 +9,7 @@ from random import randint
 import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
+import s3fs
 
 from marius.tools.configuration.constants import PathConstants
 from marius.tools.configuration.marius_config import DatasetConfig
@@ -109,11 +111,18 @@ def write_partitioned_df_to_csv(partition_triples, num_partitions, output_filena
 
 
 class SparkWriter(object):
-    def __init__(self, spark, output_dir, partitioned_evaluation):
+    def __init__(self, spark, output_dir, output_to_s3, partitioned_evaluation):
         super().__init__()
 
         self.spark = spark
         self.output_dir = output_dir
+        self.output_to_s3 = output_to_s3
+        if self.output_to_s3:
+            self.s3_bucket = os.getenv("S3_BUCKET")
+            self.s3 = s3fs.S3FileSystem(
+                key=os.getenv('AWS_ACCESS_KEY_ID'), 
+                secret=os.getenv('AWS_SECRET_ACCESS_KEY')
+            )
         self.partitioned_evaluation = partitioned_evaluation
 
     def write_to_csv(self, train_edges_df, valid_edges_df, test_edges_df, nodes_df, rels_df, num_partitions):
@@ -205,15 +214,31 @@ class SparkWriter(object):
         tmp_test_file = TMP_DATA_DIRECTORY + "tmp_test_edges.tmp"
 
         print("Converting to binary")
-        os.rename(train_file, tmp_train_file)
+        shutil.move(train_file, tmp_train_file)
         convert_to_binary(tmp_train_file, train_file)
 
         if valid_edges_df is not None:
-            os.rename(valid_file, tmp_valid_file)
+            shutil.move(valid_file, tmp_valid_file)
             convert_to_binary(tmp_valid_file, valid_file)
 
         if test_edges_df is not None:
-            os.rename(test_file, tmp_test_file)
+            shutil.move(test_file, tmp_test_file)
             convert_to_binary(tmp_test_file, test_file)
 
+        if self.output_to_s3:
+            self.upload_files_to_s3()
+        
         return dataset_stats
+
+    def upload_files_to_s3(self):
+        dataset_yaml_file = str(self.output_dir / Path("dataset.yaml"))
+        train_file = str(self.output_dir / Path(PathConstants.train_edges_path))
+        valid_file = str(self.output_dir / Path(PathConstants.valid_edges_path))
+        test_file = str(self.output_dir / Path(PathConstants.test_edges_path))
+
+        self.s3.put(dataset_yaml_file, str(self.s3_bucket / Path("dataset.yaml")))
+        self.s3.put(train_file, str(self.s3_bucket / Path(PathConstants.train_edges_path)))
+        self.s3.put(valid_file, str(self.s3_bucket / Path(PathConstants.valid_edges_path)))
+        self.s3.put(test_file, str(self.s3_bucket / Path(PathConstants.test_edges_path)))
+        
+        # we can optionally delete the pre-processed files from the local system
