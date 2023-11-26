@@ -677,23 +677,23 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                     if (batch->creator_id_ != -1) {
                         // received this batch, already have the uniques on the root node_indices_
 //                        std::cout<<"received completed batch\n";
-                        unique_indices = batch->sub_batches_[0]->root_node_indices_;
+//                        unique_indices = batch->sub_batches_[0]->root_node_indices_;
                     } else {
-                        std::vector <torch::Tensor> all_unique_nodes_vec(batch->sub_batches_.size());
-
-                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                            all_unique_nodes_vec[i] = batch->sub_batches_[i]->unique_node_indices_;
-                        }
-
-//                        Timer t = new Timer(false);
-//                        t.start();
-                        torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
-                        unique_indices = computeUniques(all_unique_nodes, graph_storage_->getNumNodesInMemory(), id);
-
-                        batch->sub_batches_[0]->root_node_indices_ = unique_indices;
-                        for (int i = 1; i < batch->sub_batches_.size(); i++) {
-                            batch->sub_batches_[i]->root_node_indices_ = torch::Tensor();
-                        }
+//                        std::vector <torch::Tensor> all_unique_nodes_vec(batch->sub_batches_.size());
+//
+//                        for (int i = 0; i < batch->sub_batches_.size(); i++) {
+//                            all_unique_nodes_vec[i] = batch->sub_batches_[i]->unique_node_indices_;
+//                        }
+//
+////                        Timer t = new Timer(false);
+////                        t.start();
+//                        torch::Tensor all_unique_nodes = torch::cat({all_unique_nodes_vec}, 0);
+//                        unique_indices = computeUniques(all_unique_nodes, graph_storage_->getNumNodesInMemory(), id);
+//
+//                        batch->sub_batches_[0]->root_node_indices_ = unique_indices;
+//                        for (int i = 1; i < batch->sub_batches_.size(); i++) {
+//                            batch->sub_batches_[i]->root_node_indices_ = torch::Tensor();
+//                        }
 
 //                        t.stop();
 //                        std::cout<< "calculated and set uniques: " << t.getDuration() << "\n";
@@ -704,22 +704,23 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
 //                        std::cout<<"load\n";
 //                        torch::Tensor unique_features = graph_storage_->getNodeFeatures(unique_indices);
 
-                        int split_size = (int) ceil((float) unique_indices.size(0) / batch->sub_batches_.size());
-                        int padded_size = split_size*batch->sub_batches_.size();
-                        int actual_size = unique_indices.size(0);
-                        unique_indices = torch::cat({unique_indices, torch::zeros({padded_size-actual_size}, unique_indices.options())}, 0);
+//                        int split_size = (int) ceil((float) unique_indices.size(0) / batch->sub_batches_.size());
+//                        int padded_size = split_size*batch->sub_batches_.size();
+//                        int actual_size = unique_indices.size(0);
+//                        unique_indices = torch::cat({unique_indices, torch::zeros({padded_size-actual_size}, unique_indices.options())}, 0);
 
                         #pragma omp parallel for
                         for (int i = 0; i < batch->sub_batches_.size(); i++) {
-                            int size = split_size;
-                            int start = i*split_size;
-
-                            if (start + size > unique_indices.size(0)) {
-                                size = unique_indices.size(0) - start;
-                            }
+//                            int size = split_size;
+//                            int start = i*split_size;
+//
+//                            if (start + size > unique_indices.size(0)) {
+//                                size = unique_indices.size(0) - start;
+//                            }
 
 //                            batch->sub_batches_[i]->root_node_indices_ = unique_features.narrow(0, count, size);
-                            batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
+//                            batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
+                            batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
                         }
                     }
 
