@@ -27,7 +27,11 @@ void LoadBatchWorker::run() {
                 pipeline_->batches_in_flight_++;
                 lock.unlock();
 
+                Timer t = new Timer(false);
+                t.start();
                 shared_ptr<Batch> batch = pipeline_->dataloader_->getBatch(c10::nullopt, false, worker_id_);
+                t.stop();
+                std::cout<<"getBatch: "<<t.getDuration()<<"\n";
 
                 if (batch == nullptr) {
                     break;
