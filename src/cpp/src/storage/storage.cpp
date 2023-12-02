@@ -663,6 +663,26 @@ void InMemory::indexAdd(Indices indices, torch::Tensor values) {
     if (values.device().is_cuda()) {
         data_.index_add_(0, indices, values);
     } else {
+
+        if (data_.dtype() == torch::kFloat16) {
+//            auto data_accessor = data_.accessor<float16_t, 2>();
+//            auto ids_accessor = indices.accessor<int64_t, 1>();
+//            auto values_accessor = values.accessor<float16_t, 2>();
+//
+//            int d = values.size(1);
+//            int64_t size = indices.size(0);
+//            #pragma omp parallel for
+//            for (int64_t i = 0; i < size; i++) {
+//                for (int j = 0; j < d; j++) {
+//                    data_accessor[ids_accessor[i]][j] += values_accessor[i][j];
+//                }
+//            }
+
+            data_.index_add_(0, indices, values);
+
+            return;
+        }
+
         // assumes this operation is only used on float valued data.
         auto data_accessor = data_.accessor<float, 2>();
         auto ids_accessor = indices.accessor<int64_t, 1>();
@@ -670,7 +690,7 @@ void InMemory::indexAdd(Indices indices, torch::Tensor values) {
 
         int d = values.size(1);
         int64_t size = indices.size(0);
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int64_t i = 0; i < size; i++) {
             for (int j = 0; j < d; j++) {
                 data_accessor[ids_accessor[i]][j] += values_accessor[i][j];

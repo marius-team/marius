@@ -52,7 +52,7 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared
         case StorageBackend::FLAT_FILE: {
             if (num_train != -1) {
                 train_edge_storage = std::make_shared<FlatFile>(train_filename, num_train, num_columns, dtype);
-                train_edge_storage_dst_sort = std::make_shared<InMemory>(train_dst_sort_filename, num_train, num_columns, dtype, torch::kCPU); // ARMADA tmp
+//                train_edge_storage_dst_sort = std::make_shared<InMemory>(train_dst_sort_filename, num_train, num_columns, dtype, torch::kCPU); // ARMADA tmp
             }
             if (num_valid != -1) {
                 valid_edge_storage = std::make_shared<FlatFile>(valid_filename, num_valid, num_columns, dtype);
@@ -179,7 +179,7 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeEmbeddings(sh
                 curr_num_nodes = MAX_NODE_EMBEDDING_INIT_SIZE;
             }
 
-            torch::Tensor weights = initialize_subtensor(init_config, {curr_num_nodes, embedding_dim}, {num_nodes, embedding_dim}, torch::TensorOptions());
+            torch::Tensor weights = initialize_subtensor(init_config, {curr_num_nodes, embedding_dim}, {num_nodes, embedding_dim}, torch::TensorOptions().dtype(dtype));
             OptimizerState emb_state = torch::zeros_like(weights);
             init_node_embeddings->append(weights);
             init_optimizer_state_storage->append(emb_state);

@@ -175,7 +175,7 @@ void BatchSliceWorker::run() {
 ////                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
 ////                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
 //            }
-//            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
+            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
 
             ((PipelineGPU *)pipeline_)->loaded_sliced_batches_->blocking_push(batch);
 
@@ -218,7 +218,7 @@ void BatchToDeviceWorker::run() {
 ////                            batch->dense_graph_.node_ids_.narrow(0, batch->dense_graph_.hop_offsets_[-2].item<int64_t>(),
 ////                                                                 (batch->dense_graph_.node_ids_.size(0)-batch->dense_graph_.hop_offsets_[-2]).item<int64_t>())).flatten(0, 1);
 //            }
-            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
+//            pipeline_->dataloader_->loadCPUParameters(batch, worker_id_);
 //            t.stop();
 //            std::cout<<"batch load: "<<t.getDuration()<<"\n";
 
@@ -262,8 +262,11 @@ void ComputeWorkerGPU::run() {
                     }
 
 
+                    bool nc = batch->sub_batches_[0]->node_features_.defined();
                     int unique_size = 0;
-                    int feat_dim = batch->sub_batches_[0]->node_features_.size(1);
+                    int feat_dim;
+                    if (nc) feat_dim = batch->sub_batches_[0]->node_features_.size(1);
+                    else feat_dim = batch->sub_batches_[0]->node_embeddings_.size(1);
                     int root_dim = batch->sub_batches_[0]->root_node_indices_.size(0);
 //                    for (int i = 0; i < batch->sub_batches_.size(); i++) {
 //                        unique_size += batch->sub_batches_[i]->node_features_.size(0);
@@ -271,10 +274,14 @@ void ComputeWorkerGPU::run() {
 
                     int chunk_size = batch->sub_batches_.size() / batch->num_sub_batches_;
 
-                    unique_size = batch->sub_batches_[0]->node_features_.size(0) * chunk_size;
+                    if (nc) unique_size = batch->sub_batches_[0]->node_features_.size(0) * chunk_size;
+                    else unique_size = batch->sub_batches_[0]->node_embeddings_.size(0) * chunk_size;
                     std::vector<torch::Tensor> inputs(chunk_size);
+                    std::vector<torch::Tensor> inputs_state(chunk_size);
                     std::vector<torch::Tensor> unique_features_per_gpu(chunk_size);
+                    std::vector<torch::Tensor> unique_features_state_per_gpu(chunk_size);
                     std::vector<std::vector<torch::Tensor>> unique_gathered_features_per_gpu(chunk_size);
+                    std::vector<std::vector<torch::Tensor>> unique_gathered_features_state_per_gpu(chunk_size);
                     std::vector<torch::Tensor> broadcast_list(chunk_size);
 
 //                    std::cout<<"start"<<"\n";
@@ -291,9 +298,13 @@ void ComputeWorkerGPU::run() {
                             #pragma omp for
                             for (int i = 0; i < chunk_size; i++) {
                                 CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
-                                auto device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_features_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_features_.device());
+                                torch::TensorOptions device_options;
+                                if (nc) device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_features_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_features_.device());
+                                else device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_embeddings_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_embeddings_.device());
 
                                 torch::Tensor unique_node_features = torch::zeros({unique_size, feat_dim}, device_options);
+                                torch::Tensor unique_node_features_state;
+                                if (!nc) unique_node_features_state = torch::zeros({unique_size, feat_dim}, device_options);
     ////                            std::cout<<unique_node_features.sizes()<<"\n";
     //
     //                            int count = 0;
@@ -305,10 +316,17 @@ void ComputeWorkerGPU::run() {
     //                            }
 
                                 unique_features_per_gpu[i] = unique_node_features;
-                                inputs[i] = batch->sub_batches_[i+chunk_size*j]->node_features_;
+                                if (!nc) unique_features_state_per_gpu[i] = unique_node_features_state;
+
+                                if (nc) inputs[i] = batch->sub_batches_[i+chunk_size*j]->node_features_;
+                                else {
+                                    inputs[i] = batch->sub_batches_[i+chunk_size*j]->node_embeddings_;
+                                    inputs_state[i] = batch->sub_batches_[i+chunk_size*j]->node_embeddings_state_;
+                                }
 
                                 if (j == 0) {
-                                    device_options = torch::TensorOptions().dtype(batch->sub_batches_[0]->root_node_indices_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
+                                    if (nc) device_options = torch::TensorOptions().dtype(batch->sub_batches_[0]->root_node_indices_.dtype()).device(batch->sub_batches_[i]->node_features_.device());
+                                    else device_options = torch::TensorOptions().dtype(batch->sub_batches_[0]->root_node_indices_.dtype()).device(batch->sub_batches_[i]->node_embeddings_.device());
                                     if (i > 0)
                                         broadcast_list[i] = torch::zeros({root_dim}, device_options);
                                     else
@@ -322,6 +340,7 @@ void ComputeWorkerGPU::run() {
 
                                 #ifdef MARIUS_CUDA
                                     torch::cuda::nccl::all_gather(inputs, unique_features_per_gpu);//, streams);
+                                    if (!nc) torch::cuda::nccl::all_gather(inputs_state, unique_features_state_per_gpu);//, streams);
                                     if (j == 0)
                                         torch::cuda::nccl::broadcast(broadcast_list);//, streams);
                                 #endif
@@ -341,6 +360,7 @@ void ComputeWorkerGPU::run() {
                             for (int i = 0; i < chunk_size; i++) {
                                 CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
                                 unique_gathered_features_per_gpu[i].emplace_back(unique_features_per_gpu[i]);
+                                if (!nc) unique_gathered_features_state_per_gpu[i].emplace_back(unique_features_state_per_gpu[i]);
                             }
                         }
                     }
@@ -350,6 +370,7 @@ void ComputeWorkerGPU::run() {
                         for (int i = 0; i < chunk_size; i++) {
                             CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
                             unique_features_per_gpu[i] = torch::cat({unique_gathered_features_per_gpu[i]}, 0);
+                            if (!nc) unique_features_state_per_gpu[i] = torch::cat({unique_gathered_features_state_per_gpu[i]}, 0);
                         }
                     }
 
@@ -360,14 +381,22 @@ void ComputeWorkerGPU::run() {
                             #pragma omp for
                             for (int i = 0; i < chunk_size; i++) {
                                 CudaStreamGuard stream_guard(*(pipeline_->dataloader_->compute_streams_[i]));
-                                auto device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_features_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_features_.device());
+                                torch::TensorOptions device_options;
+                                if (nc) device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_features_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_features_.device());
+                                else device_options = torch::TensorOptions().dtype(batch->sub_batches_[i+chunk_size*j]->node_embeddings_.dtype()).device(batch->sub_batches_[i+chunk_size*j]->node_embeddings_.device());
 
-                                batch->sub_batches_[i+chunk_size*j]->unique_node_indices_ = torch::searchsorted(broadcast_list[i], batch->sub_batches_[i+chunk_size*j]->unique_node_indices_);
+//                                batch->sub_batches_[i+chunk_size*j]->unique_node_indices_ = torch::searchsorted(broadcast_list[i], batch->sub_batches_[i+chunk_size*j]->unique_node_indices_);
+                                torch::Tensor tmp = torch::searchsorted(broadcast_list[i], batch->sub_batches_[i+chunk_size*j]->unique_node_indices_);
+
 
     //                            batch->sub_batches_[i]->node_features_ = torch::zeros({batch->sub_batches_[i]->unique_node_indices_.size(0), feat_dim}, device_options);
     //                            torch::index_select_out(batch->sub_batches_[i]->node_features_, unique_features_per_gpu[i], 0, batch->sub_batches_[i]->unique_node_indices_);
     //                            std::cout<<batch->sub_batches_[i]->node_features_.sizes()<<"\n";
-                                batch->sub_batches_[i+chunk_size*j]->node_features_ = unique_features_per_gpu[i].index_select(0, batch->sub_batches_[i+chunk_size*j]->unique_node_indices_);
+                                if (nc) batch->sub_batches_[i+chunk_size*j]->node_features_ = unique_features_per_gpu[i].index_select(0, tmp);
+                                else {
+                                    batch->sub_batches_[i+chunk_size*j]->node_embeddings_ = unique_features_per_gpu[i].index_select(0, tmp);
+                                    batch->sub_batches_[i+chunk_size*j]->node_embeddings_state_ = unique_features_state_per_gpu[i].index_select(0, tmp);
+                                }
 
                                 pipeline_->model_->device_models_[i]->clear_grad();
                                 pipeline_->model_->device_models_[i]->train_batch(batch->sub_batches_[i+chunk_size*j], false);
@@ -556,6 +585,9 @@ void RemoteToHostWorker::run() {
             pipeline_->bwd_parent_tags_[parent_id] = pipeline_->bwd_parent_tags_[parent_id] + 8;
             lock.unlock();
 
+            pipeline_->dataloader_->updateEmbeddings(batch, false); // done locally on cw cache
+            batch->clear();
+
             batch->remoteTo(pipeline_->model_->pg_gloo_->pg, parent, tag);
 //            t.stop();
 //            std::cout<<"remote to host: "<<t.getDuration()<<"\n";
@@ -588,14 +620,14 @@ void RemoteListenForUpdatesWorker::run() {
 
             // NC batch finished notifications won't send batch sub_batches_ even if there were some,
             // they are cleared as they don't contain useful information. Eval also doesn't contain sub batches
-            if (pipeline_->model_->device_models_.size() > 1 and pipeline_->has_embeddings() and pipeline_->isTrain()) {
-                std::vector <shared_ptr<Batch>> sub_batches;
-                for (int i = 0; i < pipeline_->model_->device_models_.size(); i++) {
-                    shared_ptr<Batch> sub_batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
-                    sub_batches.emplace_back(sub_batch);
-                }
-                batch->sub_batches_ = sub_batches;
-            }
+//            if (pipeline_->model_->device_models_.size() > 1 and pipeline_->has_embeddings() and pipeline_->isTrain()) {
+//                std::vector <shared_ptr<Batch>> sub_batches;
+//                for (int i = 0; i < pipeline_->model_->device_models_.size(); i++) {
+//                    shared_ptr<Batch> sub_batch = std::make_shared<Batch>(pipeline_->dataloader_->train_);
+//                    sub_batches.emplace_back(sub_batch);
+//                }
+//                batch->sub_batches_ = sub_batches;
+//            }
 
             batch->remoteReceive(pipeline_->model_->pg_gloo_->pg, child, tag);
 

@@ -372,7 +372,8 @@ void GraphModelStorage::decoderOnlyInMemorySubgraph(shared_ptr<InMemorySubgraphS
     }
 
     torch::Tensor in_mem_edge_bucket_starts = in_mem_edge_bucket_sizes.cumsum(0);
-    int64_t total_size = in_mem_edge_bucket_starts[-1].item<int64_t>();
+    int64_t total_size = 0;
+    if (in_mem_edge_bucket_starts.size(0) > 0) total_size = in_mem_edge_bucket_starts[-1].item<int64_t>();
     in_mem_edge_bucket_starts = in_mem_edge_bucket_starts - in_mem_edge_bucket_sizes;
 
     auto in_mem_edge_bucket_starts_accessor = in_mem_edge_bucket_starts.accessor<int64_t, 1>();
@@ -398,6 +399,8 @@ void GraphModelStorage::decoderOnlyInMemorySubgraph(shared_ptr<InMemorySubgraphS
         int64_t edge_bucket_size = in_mem_edge_bucket_sizes_accessor[i];
         int64_t edge_bucket_start = global_edge_bucket_starts_accessor[i];
         int64_t local_offset = in_mem_edge_bucket_starts_accessor[i];
+
+//        subgraph->all_in_memory_mapped_edges_.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.edges->range(edge_bucket_start, edge_bucket_size);
 
         torch::Tensor current_edge_bucket = torch::empty({edge_bucket_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
         current_edge_bucket.narrow(0, 0, edge_bucket_size) = storage_ptrs_.train_edges->range(edge_bucket_start, edge_bucket_size);
@@ -484,7 +487,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
         auto in_mem_edge_bucket_starts_accessor = in_mem_edge_bucket_starts.accessor<int64_t, 1>();
 
         current_subgraph_state_->all_in_memory_edges_ = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
-        torch::Tensor tmp_dst_sort = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+//        torch::Tensor tmp_dst_sort = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
 
 #pragma omp parallel for
         for (int i = 0; i < num_edge_buckets_in_mem; i++) {
@@ -494,7 +497,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
 
             current_subgraph_state_->all_in_memory_edges_.narrow(0, local_offset, edge_bucket_size) =
                 storage_ptrs_.edges->range(edge_bucket_start, edge_bucket_size);
-            tmp_dst_sort.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges_dst_sort->range(edge_bucket_start, edge_bucket_size);
+//            tmp_dst_sort.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.train_edges_dst_sort->range(edge_bucket_start, edge_bucket_size);
         }
 
         int64_t partition_size = -1;
@@ -514,7 +517,8 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
 
 //        torch::Tensor mapped_edges;
 //        torch::Tensor mapped_edges_dst_sort;
-        torch::Tensor mapped_edges = current_subgraph_state_->all_in_memory_edges_;  // torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+//        torch::Tensor mapped_edges = current_subgraph_state_->all_in_memory_edges_;
+        torch::Tensor mapped_edges = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
         torch::Tensor mapped_edges_dst_sort;
 //        if (storage_ptrs_.edges->dim1_size_ == 3) {
 //            mapped_edges =
@@ -533,30 +537,32 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
 //            std::runtime_error("Unexpected number of edge columns");
 //        }
 
-//        int dst_index = storage_ptrs_.edges->dim1_size_ - 1;
-//        auto all_in_memory_edges_accessor = current_subgraph_state_->all_in_memory_edges_.accessor<int64_t, 2>();
-//        auto mapped_edges_accessor = mapped_edges.accessor<int64_t, 2>();
-//        auto buffer_offsets_accessor = buffer_offsets.accessor<int64_t, 1>();
-//
-//        #pragma omp parallel for
-//        for (int i = 0; i < total_size; i++) {
-//            int64_t src_global_id = all_in_memory_edges_accessor[i][0];
-//            int64_t dst_global_id = all_in_memory_edges_accessor[i][dst_index];
-//
-//            int64_t src_partition = src_global_id / partition_size;
-//            int64_t dst_partition = dst_global_id / partition_size;
-//
-//            mapped_edges_accessor[i][0] = buffer_offsets_accessor[src_partition] + src_global_id - (src_partition * partition_size);
-//            if (dst_index == 2) mapped_edges_accessor[i][1] = all_in_memory_edges_accessor[i][1];
-//            mapped_edges_accessor[i][dst_index] = buffer_offsets_accessor[dst_partition] + dst_global_id - (dst_partition * partition_size);
-//        }
+        int dst_index = storage_ptrs_.edges->dim1_size_ - 1;
+        auto all_in_memory_edges_accessor = current_subgraph_state_->all_in_memory_edges_.accessor<int64_t, 2>();
+        auto mapped_edges_accessor = mapped_edges.accessor<int64_t, 2>();
+        auto buffer_offsets_accessor = buffer_offsets.accessor<int64_t, 1>();
+
+        #pragma omp parallel for
+        for (int i = 0; i < total_size; i++) {
+            int64_t src_global_id = all_in_memory_edges_accessor[i][0];
+            int64_t dst_global_id = all_in_memory_edges_accessor[i][dst_index];
+
+            int64_t src_partition = src_global_id / partition_size;
+            int64_t dst_partition = dst_global_id / partition_size;
+
+            mapped_edges_accessor[i][0] = buffer_offsets_accessor[src_partition] + src_global_id - (src_partition * partition_size);
+            if (dst_index == 2) mapped_edges_accessor[i][1] = all_in_memory_edges_accessor[i][1];
+            mapped_edges_accessor[i][dst_index] = buffer_offsets_accessor[dst_partition] + dst_global_id - (dst_partition * partition_size);
+        }
 
 //        current_subgraph_state_->all_in_memory_edges_ = torch::Tensor();
 
         current_subgraph_state_->all_in_memory_mapped_edges_ = mapped_edges;
 
-        mapped_edges = mapped_edges;//merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, true);
-        mapped_edges_dst_sort = tmp_dst_sort;//merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, false);
+//        mapped_edges = mapped_edges;
+//        mapped_edges_dst_sort = tmp_dst_sort;//merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, false);
+        mapped_edges = merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, true);
+        mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges, in_mem_edge_bucket_starts, buffer_size, false);
 
         mapped_edges = mapped_edges.to(torch::kInt64);
         mapped_edges_dst_sort = mapped_edges_dst_sort.to(torch::kInt64);

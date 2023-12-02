@@ -196,7 +196,8 @@ void DataLoader::setActiveEdges() {
         }
 
         torch::Tensor local_offsets = edge_bucket_sizes.cumsum(0);
-        int64_t total_size = local_offsets[-1].item<int64_t>();
+        int64_t total_size = 0;
+        if (local_offsets.size(0) > 0) total_size = local_offsets[-1].item<int64_t>();
         local_offsets = local_offsets - edge_bucket_sizes;
 
         auto local_offsets_accessor = local_offsets.accessor<int64_t, 1>();
@@ -646,18 +647,18 @@ void DataLoader::negativeSample(shared_ptr<Batch> batch) {
 }
 
 void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
-    if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
-        if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
-            batch->node_embeddings_ = graph_storage_->getNodeEmbeddings(batch->unique_node_indices_);
-            if (train_) {
-                batch->node_embeddings_state_ = graph_storage_->getNodeEmbeddingState(batch->unique_node_indices_);
-            }
-        }
-    }
+//    if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
+//        if (graph_storage_->storage_ptrs_.node_embeddings->device_ != torch::kCUDA) {
+//            batch->node_embeddings_ = graph_storage_->getNodeEmbeddings(batch->unique_node_indices_);
+//            if (train_) {
+//                batch->node_embeddings_state_ = graph_storage_->getNodeEmbeddingState(batch->unique_node_indices_);
+//            }
+//        }
+//    }
 
 //    if (graph_storage_->storage_ptrs_.node_features != nullptr) {
-    if (graph_storage_->storage_ptrs_.node_features != nullptr) {
-        if (graph_storage_->storage_ptrs_.node_features->device_ != torch::kCUDA) {
+//    if (graph_storage_->storage_ptrs_.node_features != nullptr) {
+//        if (graph_storage_->storage_ptrs_.node_features->device_ != torch::kCUDA) {
             if (only_root_features_) {
                 batch->node_features_ = graph_storage_->getNodeFeatures(batch->root_node_indices_);
             } else {
@@ -719,23 +720,45 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                             }
 
 //                            batch->sub_batches_[i]->root_node_indices_ = unique_features.narrow(0, count, size);
-                            batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
-//                            batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
+
+
+                            if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
+                                batch->sub_batches_[i]->node_embeddings_ = graph_storage_->getNodeEmbeddings(unique_indices.narrow(0, start, size));
+//                                batch->sub_batches_[i]->node_embeddings_ = graph_storage_->getNodeEmbeddings(batch->sub_batches_[i]->unique_node_indices_);
+                                if (train_) {
+                                    batch->sub_batches_[i]->node_embeddings_state_ = graph_storage_->getNodeEmbeddingState(unique_indices.narrow(0, start, size));
+//                                    batch->sub_batches_[i]->node_embeddings_state_ = graph_storage_->getNodeEmbeddingState(batch->sub_batches_[i]->unique_node_indices_);
+                                }
+                            } else {
+                                batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
+//                                batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
+                            }
+
+
                         }
                     }
 
 
                 } else {
-                    if (!batch->node_features_.defined())
-                        batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+                    if (graph_storage_->storage_ptrs_.node_embeddings != nullptr) {
+                        if (!batch->node_embeddings_.defined()) {
+                            batch->node_embeddings_ = graph_storage_->getNodeEmbeddings(batch->unique_node_indices_);
+                            if (train_) {
+                                batch->node_embeddings_state_ = graph_storage_->getNodeEmbeddingState(batch->unique_node_indices_);
+                            }
+                        }
+                    } else {
+                        if (!batch->node_features_.defined())
+                            batch->node_features_ = graph_storage_->getNodeFeatures(batch->unique_node_indices_);
+                    }
                 }
 
 
 
 
             }
-        }
-    }
+//        }
+//    }
 
     batch->status_ = BatchStatus::LoadedEmbeddings;
     batch->load_timestamp_ = timestamp_;

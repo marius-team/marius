@@ -277,6 +277,8 @@ EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val) {
         return EdgeBucketOrdering::COMET;
     } else if (string_val == "DIAG") {
         return EdgeBucketOrdering::DIAG;
+    } else if (string_val == "DIST_IN_MEMORY") {
+        return EdgeBucketOrdering::DIST_IN_MEMORY;
     } else if (string_val == "CUSTOM") {
         return EdgeBucketOrdering::CUSTOM;
     } else {

@@ -73,7 +73,7 @@ enum class StorageBackend { PARTITION_BUFFER, FLAT_FILE, HOST_MEMORY, DEVICE_MEM
 
 StorageBackend getStorageBackend(std::string string_val);
 
-enum class EdgeBucketOrdering { OLD_BETA, NEW_BETA, ALL_BETA, COMET, DIAG, CUSTOM };
+enum class EdgeBucketOrdering { OLD_BETA, NEW_BETA, ALL_BETA, COMET, DIAG, DIST_IN_MEMORY, CUSTOM };
 
 EdgeBucketOrdering getEdgeBucketOrderingEnum(std::string string_val);
 

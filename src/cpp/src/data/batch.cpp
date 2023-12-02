@@ -78,13 +78,18 @@ void Batch::to(torch::Device device, CudaStream *compute_stream) {
 }
 
 torch::Tensor Batch::to_flat() {
-    int num_tensors = 3;
+    int num_tensors = 8;
 
     torch::Tensor metadata = torch::zeros({num_tensors}, {torch::kInt32});
 
     if (root_node_indices_.defined()) metadata[0] = root_node_indices_.size(0);
     if (unique_node_indices_.defined()) metadata[1] = unique_node_indices_.size(0);
     if (node_labels_.defined()) metadata[2] = node_labels_.size(0);
+    if (edges_.defined()) metadata[3] = edges_.flatten().size(0);
+    if (src_neg_indices_mapping_.defined()) metadata[4] = src_neg_indices_mapping_.flatten().size(0);
+    if (dst_neg_indices_mapping_.defined()) metadata[5] = dst_neg_indices_mapping_.flatten().size(0);
+    if (src_neg_filter_.defined()) metadata[6] = src_neg_filter_.flatten().size(0);
+    if (dst_neg_filter_.defined()) metadata[7] = dst_neg_filter_.flatten().size(0);
 
     torch::Tensor out = torch::zeros({num_tensors + torch::sum(metadata).item<int>()}, {torch::kInt32});
 
@@ -106,11 +111,48 @@ torch::Tensor Batch::to_flat() {
         start += node_labels_.size(0);
     }
 
+
+    if (edges_.defined()) {
+        out.narrow(0, start, edges_.flatten().size(0)) = edges_.flatten().to(torch::kInt32);
+        start += edges_.flatten().size(0);
+    }
+
+//    if (neg_edges_.defined()) {
+//        out.narrow(0, start, neg_edges_.size(0)) = neg_edges_.to(torch::kInt32);
+//        start += neg_edges_.size(0);
+//    }
+
+    if (src_neg_indices_mapping_.defined()) {
+        out.narrow(0, start, src_neg_indices_mapping_.flatten().size(0)) = src_neg_indices_mapping_.flatten().to(torch::kInt32);
+        start += src_neg_indices_mapping_.flatten().size(0);
+    }
+
+    if (dst_neg_indices_mapping_.defined()) {
+        out.narrow(0, start, dst_neg_indices_mapping_.flatten().size(0)) = dst_neg_indices_mapping_.flatten().to(torch::kInt32);
+        start += dst_neg_indices_mapping_.flatten().size(0);
+    }
+
+    if (src_neg_filter_.defined()) {
+        out.narrow(0, start, src_neg_filter_.flatten().size(0)) = src_neg_filter_.flatten().to(torch::kInt32);
+        start += src_neg_filter_.flatten().size(0);
+    }
+
+    if (dst_neg_filter_.defined()) {
+        out.narrow(0, start, dst_neg_filter_.flatten().size(0)) = dst_neg_filter_.flatten().to(torch::kInt32);
+        start += dst_neg_filter_.flatten().size(0);
+    }
+//    exit(0);
+
+//    std::cout<<src_neg_indices_mapping_.sizes()<<"\n";
+//    std::cout<<dst_neg_indices_mapping_.sizes()<<"\n";
+//    std::cout<<src_neg_filter_.sizes()<<"\n";
+//    std::cout<<dst_neg_filter_.sizes()<<"\n";
+
     return out;
 }
 
 void Batch::from_flat(torch::Tensor tensor) {
-    int num_tensors = 3;
+    int num_tensors = 8;
 
     torch::Tensor metadata = tensor.narrow(0, 0, num_tensors);
     auto metadata_accessor = metadata.accessor<int, 1>();
@@ -130,6 +172,38 @@ void Batch::from_flat(torch::Tensor tensor) {
         node_labels_ = tensor.narrow(0, start, metadata_accessor[2]);
         start += metadata_accessor[2];
     }
+
+
+    if (metadata_accessor[3] > 0) {
+        edges_ = tensor.narrow(0, start, metadata_accessor[3]);
+        edges_ = edges_.view({-1, 3});
+        start += metadata_accessor[3];
+    }
+
+    if (metadata_accessor[4] > 0) {
+        src_neg_indices_mapping_ = tensor.narrow(0, start, metadata_accessor[4]);
+        src_neg_indices_mapping_ = src_neg_indices_mapping_.view({10, 500}); // TODO
+        start += metadata_accessor[4];
+    }
+
+    if (metadata_accessor[5] > 0) {
+        dst_neg_indices_mapping_ = tensor.narrow(0, start, metadata_accessor[5]);
+        dst_neg_indices_mapping_ = dst_neg_indices_mapping_.view({10, 500});
+        start += metadata_accessor[5];
+    }
+
+    if (metadata_accessor[6] > 0) {
+        src_neg_filter_ = tensor.narrow(0, start, metadata_accessor[6]);
+        src_neg_filter_ = src_neg_filter_.view({-1, 2});
+        start += metadata_accessor[6];
+    }
+
+    if (metadata_accessor[7] > 0) {
+        dst_neg_filter_ = tensor.narrow(0, start, metadata_accessor[7]);
+        dst_neg_filter_ = dst_neg_filter_.view({-1, 2});
+        start += metadata_accessor[7];
+    }
+
 }
 
 void Batch::remoteTo(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, int tag, bool send_meta) {
@@ -302,7 +376,7 @@ void Batch::remoteReceive(shared_ptr<c10d::ProcessGroupGloo> pg, int worker_id, 
 
 
     int num_global_ints = 4;
-    int num_batch_tensors = 3;
+    int num_batch_tensors = 8;
     int num_graph_ints = 2;
     int num_graph_tensors = 6;
 
@@ -393,7 +467,7 @@ void Batch::embeddingsToHost() {
     }
 
     if (node_gradients_.defined() && node_gradients_.device().is_cuda()) {
-        auto grad_opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU).pinned_memory(true); // TODO: float16?
+        auto grad_opts = torch::TensorOptions().dtype(node_gradients_.dtype()).device(torch::kCPU).pinned_memory(true);
         Gradients temp_grads = torch::empty(node_gradients_.sizes(), grad_opts);
         temp_grads.copy_(node_gradients_, false);
 

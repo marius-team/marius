@@ -467,14 +467,34 @@ void PartitionBuffer::indexAdd(torch::Tensor indices, torch::Tensor values) {
     }
     // buffer_tensor_view_.index_add_(0, indices, values);
 
+    indices = indices.to(torch::kInt64);
+
+    if (buffer_tensor_view_.dtype() == torch::kFloat16) {
+//        auto data_accessor = buffer_tensor_view_.accessor<float16_t, 2>();
+//        auto ids_accessor = indices.accessor<int64_t, 1>();
+//        auto values_accessor = values.accessor<float16_t, 2>();
+//
+//        int d = values.size(1);
+//        int64_t size = indices.size(0);
+//        #pragma omp parallel for
+//        for (int64_t i = 0; i < size; i++) {
+//            for (int j = 0; j < d; j++) {
+//                data_accessor[ids_accessor[i]][j] += values_accessor[i][j];
+//            }
+//        }
+        buffer_tensor_view_.index_add_(0, indices, values);
+
+        return;
+    }
+
     // assumes this operation is only used on float valued data, and this op takes place on the CPU
-    auto data_accessor = buffer_tensor_view_.accessor<float, 2>(); // TODO: float16?
+    auto data_accessor = buffer_tensor_view_.accessor<float, 2>();
     auto ids_accessor = indices.accessor<int64_t, 1>();
     auto values_accessor = values.accessor<float, 2>();
 
     int d = values.size(1);
     int64_t size = indices.size(0);
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int64_t i = 0; i < size; i++) {
         for (int j = 0; j < d; j++) {
             data_accessor[ids_accessor[i]][j] += values_accessor[i][j];

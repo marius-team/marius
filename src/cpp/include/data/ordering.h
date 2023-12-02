@@ -29,7 +29,7 @@ vector<vector<std::pair<int, int>>> greedyAssignEdgeBucketsToBuffers(vector<vect
 vector<vector<std::pair<int, int>>> randomlyAssignEdgeBucketsToBuffers(vector<vector<int>> buffer_states, int num_partitions);
 
 vector<vector<int>> convertToFinePartitions(vector<vector<int>> coarse_buffer_states, int num_partitions, int buffer_capacity,
-                                            int fine_to_coarse_ratio, int num_cache_partitions);
+                                            int fine_to_coarse_ratio, int num_cache_partitions, bool rand = true);
 
 std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getTwoLevelBetaOrdering(int num_partitions, int buffer_capacity, int fine_to_coarse_ratio,
                                                                                  int num_cache_partitions, bool randomly_assign_edge_buckets);
@@ -41,7 +41,7 @@ std::tuple<vector<torch::Tensor>, vector<torch::Tensor>> getNodePartitionOrderin
                                                                                   int fine_to_coarse_ratio, int num_cache_partitions,
                                                                                   shared_ptr<c10d::ProcessGroupGloo> pg_gloo, shared_ptr<DistributedConfig> dist_config);
 
-vector<torch::Tensor> getDispersedOrderingHelper(int num_partitions, int buffer_capacity);
+vector<torch::Tensor> getDispersedOrderingHelper(int num_partitions, int buffer_capacity, bool rand = true);
 
 vector<torch::Tensor> randomlyAssignTrainNodesToBuffers(vector<torch::Tensor> buffer_states, Indices train_nodes,
                                                         int64_t total_num_nodes, int num_partitions, int buffer_capacity);
