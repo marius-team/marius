@@ -730,8 +730,8 @@ void DataLoader::loadCPUParameters(shared_ptr<Batch> batch, int id, bool load) {
                                     batch->sub_batches_[i]->node_embeddings_state_ = graph_storage_->getNodeEmbeddingState(batch->sub_batches_[i]->unique_node_indices_);
                                 }
                             } else {
-                                batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
-//                                batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
+//                                batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(unique_indices.narrow(0, start, size));
+                                batch->sub_batches_[i]->node_features_ = graph_storage_->getNodeFeatures(batch->sub_batches_[i]->unique_node_indices_);
                             }
 
 
