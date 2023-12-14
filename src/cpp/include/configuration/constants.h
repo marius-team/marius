@@ -26,6 +26,7 @@ const string dst_sort = "_dst_sort";
 
 const string edges_directory = "edges/";
 const string edges_file = "edges";
+const string weights = "_weights";
 const string edge_partition_offsets_file = "partition_offsets.txt";
 
 const string node_mapping_file = "node_mapping.txt";

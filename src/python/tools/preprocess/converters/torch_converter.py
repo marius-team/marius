@@ -579,12 +579,11 @@ class TorchEdgeListConverter(object):
 
         # Determine if this has edge types
         self.has_rels = self.column_mappings[ColNames.EDGE_TYPE_COL] is not None
+        self.weight_dtype = torch.float32
         if dtype.upper() == "INT32" or dtype.upper() == "INT":
-            self.dtype = torch.int32
-            self.weight_dtype = torch.float32
+            self.dtype = torch.int32            
         elif dtype.upper() == "INT64" or dtype.upper() == "LONG":
             self.dtype = torch.int64
-            self.weight_dtype = torch.float64
         else:
             raise RuntimeError("Unrecognized datatype")
 

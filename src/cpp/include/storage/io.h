@@ -8,18 +8,18 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-
+#include <unistd.h>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <string>
+#include <map>
 
 #include "common/datatypes.h"
 #include "storage/graph_storage.h"
 #include "storage/storage.h"
 
-std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config,
-                                                                                                               LearningTask learning_task);
+std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config, LearningTask learning_task);
 
 std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeEmbeddings(std::shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config,
                                                                               bool reinitialize, bool train, std::shared_ptr<InitConfig> init_config);

@@ -42,6 +42,7 @@ class Storage {
     torch::Tensor data_;
     torch::Device device_;
     string filename_;
+    bool loaded_;
 
     Storage();
 
@@ -55,6 +56,8 @@ class Storage {
 
     virtual void indexPut(Indices indices, torch::Tensor values) = 0;
 
+    virtual void rangePut(int64_t offset, torch::Tensor values) = 0;
+
     virtual void rangePut(int64_t offset, int64_t n, torch::Tensor values) = 0;
 
     virtual void load() = 0;
@@ -65,7 +68,7 @@ class Storage {
 
     virtual void shuffle() = 0;
 
-    virtual void sort(bool src) = 0;
+    virtual void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) = 0;
 
     int64_t getDim0() { return dim0_size_; }
 
@@ -88,10 +91,8 @@ class Storage {
 /** Storage which uses the partition buffer, used for node embeddings and optimizer state */
 class PartitionBufferStorage : public Storage {
    public:
-    bool loaded_;
 
     PartitionBuffer *buffer_;
-
     shared_ptr<PartitionBufferOptions> options_;
 
     PartitionBufferStorage(string filename, int64_t dim0_size, int64_t dim1_size, shared_ptr<PartitionBufferOptions> options);
@@ -102,7 +103,7 @@ class PartitionBufferStorage : public Storage {
 
     ~PartitionBufferStorage();
 
-    void rangePut(int64_t offset, torch::Tensor values);
+    void rangePut(int64_t offset, torch::Tensor values) override;
 
     void append(torch::Tensor values);
 
@@ -124,7 +125,7 @@ class PartitionBufferStorage : public Storage {
 
     void shuffle() override;
 
-    void sort(bool src) override;
+    void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) override;
 
     Indices getRandomIds(int64_t size) { return buffer_->getRandomIds(size); }
 
@@ -150,8 +151,6 @@ class FlatFile : public Storage {
    private:
     int fd_;
 
-    bool loaded_;
-
    public:
     FlatFile(string filename, int64_t dim0_size, int64_t dim1_size, torch::Dtype dtype, bool alloc = false);
 
@@ -161,7 +160,7 @@ class FlatFile : public Storage {
 
     ~FlatFile(){};
 
-    void rangePut(int64_t offset, torch::Tensor values);
+    void rangePut(int64_t offset, torch::Tensor values) override;
 
     void append(torch::Tensor values);
 
@@ -183,7 +182,7 @@ class FlatFile : public Storage {
 
     void shuffle() override;
 
-    void sort(bool src) override;
+    void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) override;
 
     void move(string new_filename);
 
@@ -198,8 +197,6 @@ class FlatFile : public Storage {
 class InMemory : public Storage {
    private:
     int fd_;
-
-    bool loaded_;
 
    public:
     InMemory(string filename, int64_t dim0_size, int64_t dim1_size, torch::Dtype dtype, torch::Device device);
@@ -226,11 +223,14 @@ class InMemory : public Storage {
 
     void indexPut(Indices indices, torch::Tensor values) override;
 
+    void rangePut(int64_t offset, torch::Tensor values) override;
+
     void rangePut(int64_t offset, int64_t n, torch::Tensor values) override;
 
     void shuffle() override;
 
-    void sort(bool src) override;
+    void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) override;
+
 };
 
 #endif  // MARIUS_STORAGE_H
