@@ -1,7 +1,5 @@
 #include "testing_util.h"
-
 #include "gtest/gtest.h"
-#include "util.h"
 
 int createTmpFile(std::string &filename) { return open(filename.c_str(), O_RDWR | O_CREAT, 0777); }
 
@@ -33,13 +31,31 @@ bool checkPermOf2dTensor(torch::Tensor &a, torch::Tensor &b) {
     return true;
 }
 
-void sortWithinEdgeBuckets(torch::Tensor &rand_tensor, vector<int64_t> &edge_bucket_sizes, int sort_dim) {
+bool checkPermWithBuckets(torch::Tensor &original_tensor, torch::Tensor &shuffled_tensor, vector<int64_t> &edge_bucket_sizes) {
+    int64_t offset = 0;
+    for (auto itr = edge_bucket_sizes.begin(); itr != edge_bucket_sizes.end(); itr++) {
+        torch::Tensor original_chunk = original_tensor.slice(0, offset, offset + *itr);
+        torch::Tensor shuffled_chunk = shuffled_tensor.slice(0, offset, offset + *itr);
+        if(!checkPermOf2dTensor(original_chunk, shuffled_chunk)) {
+            return false; 
+        }
+        offset += *itr;
+    }
+    return true;
+}
+
+void sortWithinEdgeBuckets(torch::Tensor &rand_tensor, vector<int64_t> &edge_bucket_sizes, int sort_dim, torch::Tensor* weight_tensor) {
     int64_t offset = 0;
     for (auto itr = edge_bucket_sizes.begin(); itr != edge_bucket_sizes.end(); itr++) {
         torch::Tensor edge_bucket = rand_tensor.slice(0, offset, offset + *itr);
-        edge_bucket.copy_(edge_bucket.index_select(0, torch::argsort(edge_bucket.select(1, sort_dim))));
+        torch::Tensor sort_order = torch::argsort(edge_bucket.select(1, sort_dim));
+        edge_bucket.copy_(edge_bucket.index_select(0, sort_order));
         rand_tensor.slice(0, offset, offset + *itr) = edge_bucket;
-        edge_bucket = torch::Tensor();
+        if(weight_tensor != nullptr) {
+            torch::Tensor weight_bucket = weight_tensor->slice(0, offset, offset + *itr);
+            weight_bucket.copy_(weight_bucket.index_select(0, sort_order));
+            weight_tensor->slice(0, offset, offset + *itr) = weight_bucket;
+        }
         offset += *itr;
     }
 }

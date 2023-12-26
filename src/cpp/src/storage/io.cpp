@@ -201,7 +201,6 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
         }
     }
 
-    SPDLOG_INFO("Use buffer has value of {}", use_buffer);
     if (use_buffer) {
         
         string train_edges_partitions =

@@ -6,7 +6,6 @@
 #include "gtest/gtest.h"
 #include "storage/storage.h"
 #include "testing_util.h"
-#include "util.h"
 
 #define tryNextSwapAndAssert(pb, admits_, evicts_) \
     ASSERT_EQ(pb->hasSwap(), true);                \

@@ -66,7 +66,7 @@ class Storage {
 
     virtual void unload(bool write = false) = 0;
 
-    virtual void shuffle() = 0;
+    virtual void shuffle(std::shared_ptr<Storage> weight_file = nullptr) = 0;
 
     virtual void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) = 0;
 
@@ -123,7 +123,7 @@ class PartitionBufferStorage : public Storage {
 
     void rangePut(int64_t offset, int64_t n, torch::Tensor values) override;
 
-    void shuffle() override;
+    void shuffle(std::shared_ptr<Storage> weight_file = nullptr) override;
 
     void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) override;
 
@@ -180,7 +180,7 @@ class FlatFile : public Storage {
 
     void rangePut(int64_t offset, int64_t n, torch::Tensor values) override;
 
-    void shuffle() override;
+    void shuffle(std::shared_ptr<Storage> weight_file = nullptr) override;
 
     void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) override;
 
@@ -227,7 +227,7 @@ class InMemory : public Storage {
 
     void rangePut(int64_t offset, int64_t n, torch::Tensor values) override;
 
-    void shuffle() override;
+    void shuffle(std::shared_ptr<Storage> weight_file = nullptr) override;
 
     void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) override;
 
