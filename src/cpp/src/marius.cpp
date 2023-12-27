@@ -107,7 +107,7 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
     auto model = std::get<0>(tup);
     auto graph_model_storage = std::get<1>(tup);
     auto dataloader = std::get<2>(tup);
-    
+
     /*
     shared_ptr<Trainer> trainer;
     shared_ptr<Evaluator> evaluator;
@@ -204,7 +204,7 @@ void marius(int argc, char *argv[]) {
         marius_train(marius_config);
     } else {
         marius_eval(marius_config);
-    } 
+    }
 }
 
 int main(int argc, char *argv[]) { marius(argc, argv); }

@@ -362,7 +362,7 @@ void FlatFile::shuffle(std::shared_ptr<Storage> weight_file) {
     // Load the weight file
     bool weights_exist = weight_file != nullptr;
     bool weights_loaded = weights_exist && weight_file->loaded_;
-    if(weights_exist && !weights_loaded) {
+    if (weights_exist && !weights_loaded) {
         weight_file->load();
     }
 
@@ -376,7 +376,7 @@ void FlatFile::shuffle(std::shared_ptr<Storage> weight_file) {
                 curr_size = MAX_SHUFFLE_SIZE;
             }
 
-            // Randomly shuffle this chunk 
+            // Randomly shuffle this chunk
             torch::Tensor chunk = range(offset, curr_size);
             auto opts = torch::TensorOptions().dtype(torch::kInt64).device(torch::kCPU);
             torch::Tensor sort_order = torch::randperm(chunk.size(0), opts);
@@ -384,7 +384,7 @@ void FlatFile::shuffle(std::shared_ptr<Storage> weight_file) {
             rangePut(offset, chunk);
 
             // Shuffle the weight chunk using the same sort order
-            if(weights_exist) {
+            if (weights_exist) {
                 torch::Tensor weight_chunk = weight_file->range(offset, curr_size);
                 weight_chunk.copy_(weight_chunk.index_select(0, sort_order));
                 weight_file->rangePut(offset, weight_chunk);
@@ -404,7 +404,7 @@ void FlatFile::shuffle(std::shared_ptr<Storage> weight_file) {
             rangePut(offset, edge_bucket);
 
             // Shuffle the weight chunk using the same sort order
-            if(weights_exist) {
+            if (weights_exist) {
                 torch::Tensor weight_chunk = weight_file->range(offset, *itr);
                 weight_chunk.copy_(weight_chunk.index_select(0, sort_order));
                 weight_file->rangePut(offset, weight_chunk);
@@ -413,9 +413,9 @@ void FlatFile::shuffle(std::shared_ptr<Storage> weight_file) {
             offset += *itr;
         }
     }
-    
+
     // Unload the weight file
-    if(weights_exist && !weights_loaded) {
+    if (weights_exist && !weights_loaded) {
         weight_file->unload(true);
     }
 
@@ -440,7 +440,7 @@ void FlatFile::sort(bool src, std::shared_ptr<Storage> weight_file) {
     }
 
     // Ensure that weights is also loaded
-    if(weights_exist && !weights_loaded) {
+    if (weights_exist && !weights_loaded) {
         weight_file->load();
     }
 
@@ -458,7 +458,7 @@ void FlatFile::sort(bool src, std::shared_ptr<Storage> weight_file) {
             torch::Tensor chunk = range(offset, curr_size);
             torch::Tensor weight_chunk;
 
-            if(weights_exist) {
+            if (weights_exist) {
                 // Fetch the weight chunk
                 weight_chunk = weight_file->range(offset, curr_size);
             }
@@ -469,11 +469,11 @@ void FlatFile::sort(bool src, std::shared_ptr<Storage> weight_file) {
             rangePut(offset, chunk);
 
             // Sort the weights using the same order
-            if(weights_exist) {
+            if (weights_exist) {
                 weight_chunk.copy_(weight_chunk.index_select(0, sort_order));
                 weight_file->rangePut(offset, weight_chunk);
             }
-            
+
             offset += curr_size;
         }
     } else {
@@ -481,10 +481,10 @@ void FlatFile::sort(bool src, std::shared_ptr<Storage> weight_file) {
         // auto opts = torch::TensorOptions().dtype(torch::kInt64).device(torch::kCPU);
         for (auto itr = edge_bucket_sizes_.begin(); itr != edge_bucket_sizes_.end(); itr++) {
             torch::Tensor edge_bucket = range(offset, *itr);
-            torch::Tensor weight_chunk; 
+            torch::Tensor weight_chunk;
 
             // Fetch the weight chunk
-            if(weights_exist) {
+            if (weights_exist) {
                 weight_chunk = weight_file->range(offset, *itr);
             }
 
@@ -494,11 +494,11 @@ void FlatFile::sort(bool src, std::shared_ptr<Storage> weight_file) {
             rangePut(offset, edge_bucket);
 
             // Sort the weights using the same order
-            if(weights_exist) {
+            if (weights_exist) {
                 weight_chunk.copy_(weight_chunk.index_select(0, sort_order));
                 weight_file->rangePut(offset, weight_chunk);
             }
-            
+
             offset += *itr;
         }
     }
@@ -508,9 +508,9 @@ void FlatFile::sort(bool src, std::shared_ptr<Storage> weight_file) {
     }
 
     // Also unload the weights file
-    if(weights_exist && !weights_loaded) {
+    if (weights_exist && !weights_loaded) {
         weight_file->unload(true);
-    } 
+    }
 }
 
 void FlatFile::mem_load() {
@@ -698,7 +698,7 @@ torch::Tensor InMemory::indexRead(Indices indices) {
         } else {
             torch::Tensor out;
             auto out_options = torch::TensorOptions().dtype(dtype_);
-            #ifdef MARIUS_CUDA
+#ifdef MARIUS_CUDA
             out_options = out_options.pinned_memory(true);
 #endif
             out = torch::empty({indices.size(0), dim1_size_}, out_options);
@@ -781,10 +781,30 @@ void InMemory::shuffle(std::shared_ptr<Storage> weight_file) {
         }
     }
 
+    // Load the weights
+    bool weights_exist = weight_file != nullptr;
+    bool weights_loaded = weights_exist && weight_file->loaded_;
+    if (weights_exist && !weights_loaded) {
+        weight_file->load();
+
+        // May also cause silent failures
+        if (!weight_file->loaded_) {
+            return;
+        }
+    }
+
     // full shuffle
     if (edge_bucket_sizes_.empty()) {
         auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
-        data_.copy_(data_.index_select(0, torch::randperm(dim0_size_, opts)));
+        torch::Tensor sort_order = torch::randperm(dim0_size_, opts);
+        data_.copy_(data_.index_select(0, sort_order));
+
+        // Shuffle the weights using the same order
+        if (weights_exist) {
+            torch::Tensor weights_tensor = weight_file->range(0, dim0_size_);
+            weights_tensor.copy_(weights_tensor.index_select(0, sort_order));
+            weight_file->rangePut(0, weights_tensor);
+        }
     }
     // shuffle within edge buckets
     else {
@@ -792,10 +812,24 @@ void InMemory::shuffle(std::shared_ptr<Storage> weight_file) {
         auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
         for (auto itr = edge_bucket_sizes_.begin(); itr != edge_bucket_sizes_.end(); itr++) {
             torch::Tensor edge_bucket = data_.narrow(0, start, *itr);
-            data_.narrow(0, start, *itr) = (edge_bucket.index_select(0, torch::randperm(edge_bucket.size(0), opts)));
+            torch::Tensor sort_order = torch::randperm(edge_bucket.size(0), opts);
+            data_.narrow(0, start, *itr) = edge_bucket.index_select(0, sort_order);
+
+            // Shuffle the weights using the same order
+            if (weights_exist) {
+                torch::Tensor weights_tensor = weight_file->range(start, *itr);
+                weights_tensor.copy_(weights_tensor.index_select(0, sort_order));
+                weight_file->rangePut(start, weights_tensor);
+            }
+
             start += *itr;
         }
     }
+
+    if (weights_exist && !weights_loaded) {
+        weight_file->unload(true);
+    }
+
     if (!loaded) {
         unload(true);
     }
@@ -808,11 +842,6 @@ void InMemory::sort(bool src, std::shared_ptr<Storage> weight_file) {
         sort_dim = -1;
     }
 
-    bool weights_exist = weight_file != nullptr;
-    if(weights_exist && sort_dim == -1) {
-        sort_dim = -2;
-    }
-
     bool loaded = loaded_;
     if (!loaded) {
         load();
@@ -823,33 +852,29 @@ void InMemory::sort(bool src, std::shared_ptr<Storage> weight_file) {
         }
     }
 
-    bool weight_need_to_unload = false;
-    if(weights_exist && !weight_file->loaded_) {
-        weight_need_to_unload = true;
+    bool weights_exist = weight_file != nullptr;
+    bool weights_loaded = weights_exist && weight_file->loaded_;
+    if (weights_exist && !weights_loaded) {
         weight_file->load();
 
         // May also cause silent failure
-        if(!weight_file->loaded_) {
+        if (!weight_file->loaded_) {
             return;
         }
     }
 
     // full sort
     if (edge_bucket_sizes_.empty()) {
-        // auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
-        if(weights_exist) {
-            torch::Tensor weight_data = weight_file->range(0, weight_file->dim0_size_);
-            data_ = torch::cat({data_, weight_data}, 1);
-        }
+        // Sort by sort dimension
+        torch::Tensor sort_order = torch::argsort(data_.select(1, sort_dim));
+        data_.copy_(data_.index_select(0, sort_order));
 
-        data_ = data_.index_select(0, torch::argsort(data_.select(1, sort_dim))); // Sort by sort dimension
-        if(weights_exist) {
-            torch::Tensor sorted_weight_data = data_.slice(1, dim1_size_, dim1_size_ + 1);
-            data_ = data_.slice(1, 0, dim1_size_);
-            weight_file->rangePut(0, sorted_weight_data);
+        // Sort the weights by the same order
+        if (weights_exist) {
+            torch::Tensor weights_tensor = weight_file->range(0, dim0_size_);
+            weights_tensor.copy_(weights_tensor.index_select(0, sort_order));
+            weight_file->rangePut(0, weights_tensor);
         }
-        
-        data_.copy_(data_);
     }
     // sort within edge buckets
     else {
@@ -857,32 +882,25 @@ void InMemory::sort(bool src, std::shared_ptr<Storage> weight_file) {
         // auto opts = torch::TensorOptions().dtype(torch::kInt64).device(data_.device());
         for (auto itr = edge_bucket_sizes_.begin(); itr != edge_bucket_sizes_.end(); itr++) {
             torch::Tensor edge_bucket = data_.narrow(0, start, *itr);
+            torch::Tensor sort_order = torch::argsort(edge_bucket.select(1, sort_dim));
+            data_.narrow(0, start, *itr) = edge_bucket.index_select(0, sort_order);
 
-            if(weights_exist) {
-                // Add the weights tensor to the existing bucket
-                torch::Tensor weight_chunk = weight_file->range(start, *itr);
-                edge_bucket = torch::cat({edge_bucket, weight_chunk}, 1);
+            // Sort the weights using the same order
+            if (weights_exist) {
+                torch::Tensor weights_tensor = weight_file->range(start, *itr);
+                weights_tensor.copy_(weights_tensor.index_select(0, sort_order));
+                weight_file->rangePut(start, weights_tensor);
             }
 
-            // Sort by sort dimension
-            edge_bucket = edge_bucket.index_select(0, torch::argsort(edge_bucket.select(1, sort_dim))); 
-            if(weights_exist) {
-                // Extract the edge weights
-                torch::Tensor sorted_edge_weights = edge_bucket.slice(1, dim1_size_, dim1_size_ + 1);
-                edge_bucket = edge_bucket.slice(1, 0, dim1_size_);
-                weight_file->rangePut(start, sorted_edge_weights);
-            }
-
-            data_.narrow(0, start, *itr) = (edge_bucket);
             start += *itr;
         }
+    }
+
+    if (weights_exist && !weights_loaded) {
+        weight_file->unload(true);
     }
 
     if (!loaded) {
         unload(true);
     }
-
-    if(weights_exist && weight_need_to_unload) {
-        weight_file->unload(true);
-    } 
 }

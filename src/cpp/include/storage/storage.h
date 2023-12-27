@@ -91,7 +91,6 @@ class Storage {
 /** Storage which uses the partition buffer, used for node embeddings and optimizer state */
 class PartitionBufferStorage : public Storage {
    public:
-
     PartitionBuffer *buffer_;
     shared_ptr<PartitionBufferOptions> options_;
 
@@ -230,7 +229,6 @@ class InMemory : public Storage {
     void shuffle(std::shared_ptr<Storage> weight_file = nullptr) override;
 
     void sort(bool src, std::shared_ptr<Storage> weight_file = nullptr) override;
-
 };
 
 #endif  // MARIUS_STORAGE_H

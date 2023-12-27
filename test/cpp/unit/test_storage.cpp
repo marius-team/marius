@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <unistd.h>
+
 #include <memory>
 
 #include "configuration/config.h"
@@ -24,6 +25,8 @@ class StorageTest : public ::testing::Test {
     vector<torch::Dtype> dtype_array;
     vector<int> dtype_size_array;
     vector<torch::Tensor> rand_tensors_array;
+    std::string edges_weight_path;
+    int weight_file_fd;
 
     StorageTest() {
         dim0_size = 46;
@@ -42,6 +45,9 @@ class StorageTest : public ::testing::Test {
             torch::Tensor rand_tensor = getRandTensor(dim0_size, dim1_size, dtype_array[i]);
             rand_tensors_array.push_back(rand_tensor);
         }
+
+        edges_weight_path = testing::TempDir() + "flat_file_edge_weights.txt";
+        weight_file_fd = createTmpFile(edges_weight_path);
     }
 
     void TearDown() override {
@@ -49,6 +55,9 @@ class StorageTest : public ::testing::Test {
             close(fd_array[i]);
             remove(filenames_array[i].c_str());
         }
+
+        close(weight_file_fd);
+        remove(edges_weight_path.c_str());
     }
 };
 
@@ -57,10 +66,8 @@ class FlatFileTest : public StorageTest {
     int num_edges;
     int num_cols;
     int num_nodes;
-    int weight_file_fd;
     std::string edges_data_path;
     std::string edges_bucket_partition_path;
-    std::string edges_weight_path;
 
     FlatFileTest() {
         num_edges = 1000;
@@ -68,14 +75,9 @@ class FlatFileTest : public StorageTest {
         num_nodes = 100;
         edges_data_path = testing::TempDir() + "flat_file_edges.bin";
         edges_bucket_partition_path = testing::TempDir() + "flat_file_edge_partitions.txt";
-        edges_weight_path = testing::TempDir() + "flat_file_edge_weights.txt";
-        weight_file_fd = createTmpFile(edges_weight_path);
     }
 
-    ~FlatFileTest() {
-        close(weight_file_fd);
-        remove(edges_weight_path.c_str());
-    }
+    ~FlatFileTest() {}
 };
 
 class InMemoryTest : public StorageTest {
@@ -253,7 +255,7 @@ TEST_F(FlatFileTest, TestFlatFileShuffleEdges) {
     // Shuffle the flat file
     flat_file.readPartitionSizes(edges_bucket_partition_path);
     flat_file.shuffle();
-    flat_file.load(); 
+    flat_file.load();
     torch::Tensor shuffled_tensor = flat_file.range(0, num_edges);
     vector<int64_t> edge_bucket_sizes = flat_file.getEdgeBucketSizes();
     ASSERT_EQ(checkPermWithBuckets(rand_tensor, shuffled_tensor, edge_bucket_sizes), true);
@@ -284,7 +286,7 @@ TEST_F(FlatFileTest, TestFlatFileShuffleEdgesWithWeights) {
     // Shuffle the flat file
     flat_file.readPartitionSizes(edges_bucket_partition_path);
     flat_file.shuffle(weight_file);
-    flat_file.load(); 
+    flat_file.load();
     torch::Tensor shuffled_tensor = flat_file.range(0, num_edges);
     vector<int64_t> edge_bucket_sizes = flat_file.getEdgeBucketSizes();
     torch::Tensor shuffled_weight_tensor = weight_file->range(0, num_edges);
@@ -447,7 +449,7 @@ TEST_F(InMemoryTest, TestIndexRead) {
         in_memory.load();
         torch::Tensor rand_tensor = getRandTensor(10, dim1_size, dtype_array[i]);
         ASSERT_EQ(pread_wrapper(fd_array[i], rand_tensor.data_ptr(), 10 * dim1_size * dtype_size_array[i], 10 * dim1_size * dtype_size_array[i]),
-            10 * dim1_size * dtype_size_array[i]);
+                  10 * dim1_size * dtype_size_array[i]);
         ASSERT_EQ(in_memory.indexRead(torch::arange(10, 20)).equal(rand_tensor), true);
 
         ASSERT_THROW(in_memory.indexRead(torch::randint(100, {10, 10}, dtype_array[i])), std::runtime_error);
@@ -512,6 +514,89 @@ TEST_F(InMemoryTest, TestInMemoryShuffle) {
     }
 }
 
+TEST_F(InMemoryTest, TestInMemoryShuffleWithWeights) {
+    // Create the initial weight file
+    shared_ptr<Storage> weight_file = std::make_shared<InMemory>(edges_weight_path, dim0_size, 1, torch::kFloat32, torch::kCPU);
+    torch::Tensor weight_tensor = getRandTensor(dim0_size, 1, torch::kFloat32);
+    weight_file->load();
+
+    for (int i = 0; i < dtype_size_array.size(); i++) {
+        // Created in memory file
+        InMemory in_memory(filenames_array[i], dim0_size, dim1_size, dtype_array[i], torch::kCPU);
+        torch::Tensor rand_tensor = rand_tensors_array[i].slice(0, 0, dim0_size);
+        in_memory.load();
+        in_memory.rangePut(0, rand_tensor);
+
+        // Shuffle the file
+        weight_file->rangePut(0, weight_tensor);
+        in_memory.shuffle(weight_file);
+
+        // Verify the permutation
+        rand_tensors_array[i] = in_memory.range(0, dim0_size);
+        ASSERT_EQ(checkPermOf2dTensor(rand_tensors_array[i], rand_tensor), true);
+        torch::Tensor sorted_weight_tensor = weight_file->range(0, dim0_size);
+        ASSERT_EQ(checkPermOf2dTensor(sorted_weight_tensor, weight_tensor), true);
+    }
+}
+
+TEST_F(InMemoryTest, TestInMemoryShuffleEdges) {
+    // Create and populate the in memory storage
+    torch::Tensor rand_tensor = getRandTensor(num_edges, num_cols, torch::kInt32, num_nodes);
+    createTmpFile(edges_data_path);
+    InMemory in_memory(edges_data_path, num_edges, num_cols, torch::kInt32, torch::kCPU);
+    in_memory.load();
+    in_memory.rangePut(0, rand_tensor);
+
+    vector<int64_t> partition_sizes = partitionEdges(rand_tensor, 3, num_nodes + 1);
+    createTmpFile(edges_bucket_partition_path);
+    {
+        std::ofstream ostrm;
+        ostrm.open(edges_bucket_partition_path, std::ios::out | std::ios::trunc);
+        for (int i = 0; i < partition_sizes.size(); i++) ostrm << partition_sizes[i] << "\n";
+        ostrm.close();
+    }
+
+    // Shuffle the file
+    in_memory.readPartitionSizes(edges_bucket_partition_path);
+    in_memory.shuffle();
+    torch::Tensor shuffled_tensor = in_memory.range(0, num_edges);
+    vector<int64_t> edge_bucket_sizes = in_memory.getEdgeBucketSizes();
+    ASSERT_EQ(checkPermWithBuckets(rand_tensor, shuffled_tensor, edge_bucket_sizes), true);
+}
+
+TEST_F(InMemoryTest, TestInMemoryShuffleEdgesWithWeights) {
+    // Create and populate the in memory storage
+    torch::Tensor rand_tensor = getRandTensor(num_edges, num_cols, torch::kInt32, num_nodes);
+    createTmpFile(edges_data_path);
+    InMemory in_memory(edges_data_path, num_edges, num_cols, torch::kInt32, torch::kCPU);
+    in_memory.load();
+    in_memory.rangePut(0, rand_tensor);
+
+    // Created weights file
+    shared_ptr<Storage> weight_file = std::make_shared<InMemory>(edges_weight_path, num_edges, 1, torch::kFloat32, torch::kCPU);
+    torch::Tensor weight_tensor = getRandTensor(num_edges, 1, torch::kFloat32);
+    weight_file->load();
+    weight_file->rangePut(0, weight_tensor);
+
+    vector<int64_t> partition_sizes = partitionEdges(rand_tensor, 3, num_nodes + 1);
+    createTmpFile(edges_bucket_partition_path);
+    {
+        std::ofstream ostrm;
+        ostrm.open(edges_bucket_partition_path, std::ios::out | std::ios::trunc);
+        for (int i = 0; i < partition_sizes.size(); i++) ostrm << partition_sizes[i] << "\n";
+        ostrm.close();
+    }
+
+    // Shuffle the file with weights
+    in_memory.readPartitionSizes(edges_bucket_partition_path);
+    in_memory.shuffle(weight_file);
+    torch::Tensor shuffled_tensor = in_memory.range(0, num_edges);
+    vector<int64_t> edge_bucket_sizes = in_memory.getEdgeBucketSizes();
+    torch::Tensor shuffled_weight_tensor = weight_file->range(0, num_edges);
+    ASSERT_EQ(checkPermWithBuckets(rand_tensor, shuffled_tensor, edge_bucket_sizes), true);
+    ASSERT_EQ(checkPermWithBuckets(weight_tensor, shuffled_weight_tensor, edge_bucket_sizes), true);
+}
+
 TEST_F(InMemoryTest, TestInMemorySort) {
     for (int i = 0; i < dtype_array.size(); i++) {
         InMemory in_memory(filenames_array[i], rand_tensors_array[i], torch::kCPU);
@@ -526,11 +611,53 @@ TEST_F(InMemoryTest, TestInMemorySort) {
     }
 }
 
+TEST_F(InMemoryTest, TestInMemoryWeightSort) {
+    // Create the initial weight file
+    shared_ptr<Storage> weight_file = std::make_shared<InMemory>(edges_weight_path, dim0_size, 1, torch::kFloat32, torch::kCPU);
+    torch::Tensor weight_tensor = getRandTensor(dim0_size, 1, torch::kFloat32);
+    weight_file->load();
+
+    for (int i = 0; i < dtype_size_array.size(); i++) {
+        // Create the file
+        InMemory in_memory(filenames_array[i], dim0_size, dim1_size, dtype_array[i], torch::kCPU);
+        in_memory.load();
+        in_memory.rangePut(0, rand_tensors_array[i]);
+
+        // Sort using the src column and verify that it matches expected
+        weight_file->rangePut(0, weight_tensor);
+        in_memory.sort(true, weight_file);
+        torch::Tensor actual_src_sort = in_memory.range(0, dim0_size);
+        torch::Tensor actual_src_weights = weight_file->range(0, dim0_size);
+        torch::Tensor expected_src_sort = rand_tensors_array[i].slice(0, 0, dim0_size);
+        torch::Tensor expected_src_weights = weight_tensor.slice(0, 0, dim0_size);
+        torch::Tensor src_sort_order = torch::argsort(expected_src_sort.select(1, 0));
+        expected_src_sort.copy_(expected_src_sort.index_select(0, src_sort_order));
+        expected_src_weights.copy_(expected_src_weights.index_select(0, src_sort_order));
+        ASSERT_EQ(expected_src_sort.equal(actual_src_sort), true);
+        ASSERT_EQ(expected_src_weights.equal(actual_src_weights), true);
+
+        // Now sort using the last column and make sure that produces the same result
+        weight_file->rangePut(0, weight_tensor);
+        in_memory.sort(false, weight_file);
+        torch::Tensor actual_dst_sort = in_memory.range(0, dim0_size);
+        torch::Tensor actual_dst_weights = weight_file->range(0, dim0_size);
+        torch::Tensor expected_dst_sort = rand_tensors_array[i].slice(0, 0, dim0_size);
+        torch::Tensor expected_dst_weights = weight_tensor.slice(0, 0, dim0_size);
+        torch::Tensor dst_sort_order = torch::argsort(expected_dst_sort.select(1, -1));
+        expected_dst_sort.copy_(expected_dst_sort.index_select(0, dst_sort_order));
+        expected_dst_weights.copy_(expected_dst_weights.index_select(0, dst_sort_order));
+        ASSERT_EQ(expected_dst_sort.equal(actual_dst_sort), true);
+        ASSERT_EQ(expected_dst_weights.equal(actual_dst_weights), true);
+    }
+}
+
 TEST_F(InMemoryTest, TestInMemorySortEdges) {
     torch::Tensor rand_tensor = getRandTensor(num_edges, num_cols, torch::kInt32, num_nodes);
     createTmpFile(edges_data_path);
 
     InMemory in_memory(edges_data_path, num_edges, num_cols, torch::kInt32, torch::kCPU);
+    in_memory.load();
+    in_memory.rangePut(0, rand_tensor);
     vector<int64_t> partition_sizes = partitionEdges(rand_tensor, 3, num_nodes + 1);
     createTmpFile(edges_bucket_partition_path);
     {
@@ -557,6 +684,59 @@ TEST_F(InMemoryTest, TestInMemorySortEdges) {
     sortWithinEdgeBuckets(rand_tensor_2, edge_bucket_sizes, -1);
     rand_tensor_1 = in_memory.range(0, num_edges);
     ASSERT_EQ(rand_tensor_1.equal(rand_tensor_2), true);
+
+    remove(edges_bucket_partition_path.c_str());
+    remove(edges_data_path.c_str());
+}
+
+TEST_F(InMemoryTest, TestInMemorySortEdgesWithWeight) {
+    torch::Tensor rand_tensor = getRandTensor(num_edges, num_cols, torch::kInt32, num_nodes);
+    createTmpFile(edges_data_path);
+
+    InMemory in_memory(edges_data_path, num_edges, num_cols, torch::kInt32, torch::kCPU);
+    in_memory.load();
+    in_memory.rangePut(0, rand_tensor);
+
+    vector<int64_t> partition_sizes = partitionEdges(rand_tensor, 3, num_nodes + 1);
+    createTmpFile(edges_bucket_partition_path);
+    {
+        std::ofstream ostrm;
+        ostrm.open(edges_bucket_partition_path, std::ios::out | std::ios::trunc);
+        for (int i = 0; i < partition_sizes.size(); i++) ostrm << partition_sizes[i] << "\n";
+        ostrm.close();
+    }
+    in_memory.readPartitionSizes(edges_bucket_partition_path);
+
+    // Create the weight file
+    shared_ptr<Storage> weight_file = std::make_shared<FlatFile>(edges_weight_path, num_edges, 1, torch::kFloat32);
+    torch::Tensor weight_tensor = getRandTensor(num_edges, 1, torch::kFloat32);
+    weight_file->load();
+
+    torch::Tensor rand_tensor_1 = getRandTensor(num_edges, num_cols, torch::kInt32);
+    torch::Tensor rand_tensor_2 = getRandTensor(num_edges, num_cols, torch::kInt32);
+    rand_tensor_1.copy_(in_memory.range(0, num_edges));
+    rand_tensor_2.copy_(rand_tensor_1);
+
+    // Sort using the src column
+    weight_file->rangePut(0, weight_tensor);
+    in_memory.sort(true, weight_file);
+    torch::Tensor expected_src_weight = weight_tensor.slice(0, 0, num_edges);
+    vector<int64_t> edge_bucket_sizes = in_memory.getEdgeBucketSizes();
+    sortWithinEdgeBuckets(rand_tensor_2, edge_bucket_sizes, 0, &expected_src_weight);
+    rand_tensor_1 = in_memory.range(0, num_edges);
+    ASSERT_EQ(rand_tensor_1.equal(rand_tensor_2), true);
+    torch::Tensor actual_src_weight = weight_file->range(0, num_edges);
+    ASSERT_EQ(expected_src_weight.equal(actual_src_weight), true);
+
+    // Sort using the dst column
+    weight_file->rangePut(0, weight_tensor);
+    in_memory.sort(false, weight_file);
+    torch::Tensor expected_dst_weight = weight_tensor.slice(0, 0, num_edges);
+    sortWithinEdgeBuckets(rand_tensor_2, edge_bucket_sizes, -1, &expected_dst_weight);
+    rand_tensor_1 = in_memory.range(0, num_edges);
+    ASSERT_EQ(rand_tensor_1.equal(rand_tensor_2), true);
+    torch::Tensor actual_dst_weight = weight_file->range(0, num_edges);
+    ASSERT_EQ(expected_dst_weight.equal(actual_dst_weight), true);
 
     remove(edges_bucket_partition_path.c_str());
     remove(edges_data_path.c_str());

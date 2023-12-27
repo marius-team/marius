@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import numpy as np
 from omegaconf import OmegaConf
 
 from marius.tools.configuration.constants import PathConstants

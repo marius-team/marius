@@ -9,11 +9,12 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string>
+
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <map>
+#include <memory>
+#include <string>
 
 #include "common/datatypes.h"
 #include "storage/graph_storage.h"

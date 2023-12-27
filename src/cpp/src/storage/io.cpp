@@ -10,7 +10,7 @@
 #include "reporting/logger.h"
 
 // Borrowed from https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exists-using-standard-c-c11-14-17-c
-inline bool does_file_exists (const std::string& file_path) {
+inline bool does_file_exists(const std::string& file_path) {
     std::ifstream curr_file(file_path.c_str());
     return curr_file.good();
 }
@@ -25,23 +25,23 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
         storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edges_file + PathConstants::file_ext;
 
     string train_dst_sort_filename = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training +
-        PathConstants::edges_file + PathConstants::dst_sort + PathConstants::file_ext;
-    
+                                     PathConstants::edges_file + PathConstants::dst_sort + PathConstants::file_ext;
+
     // Determine the paths of the weights file
-    string train_weights_file = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + 
-        PathConstants::edges_file + PathConstants::weights + PathConstants::file_ext;
+    string train_weights_file = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edges_file +
+                                PathConstants::weights + PathConstants::file_ext;
     bool train_weights_exist = does_file_exists(train_weights_file);
-    
-    string valid_weights_file = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::validation + 
-        PathConstants::edges_file + PathConstants::weights + PathConstants::file_ext;
+
+    string valid_weights_file = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::validation + PathConstants::edges_file +
+                                PathConstants::weights + PathConstants::file_ext;
     bool valid_weights_exist = does_file_exists(valid_weights_file);
-    
-    string test_weights_file = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + 
-        PathConstants::edges_file + PathConstants::weights + PathConstants::file_ext;
+
+    string test_weights_file = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edges_file +
+                               PathConstants::weights + PathConstants::file_ext;
     bool test_weights_exist = does_file_exists(test_weights_file);
 
-    string train_dst_sort_weights_file =  storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training +
-        PathConstants::edges_file + PathConstants::dst_sort + PathConstants::weights + PathConstants::file_ext;   
+    string train_dst_sort_weights_file = storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training +
+                                         PathConstants::edges_file + PathConstants::dst_sort + PathConstants::weights + PathConstants::file_ext;
     bool train_sort_weights_exist = does_file_exists(train_dst_sort_weights_file);
 
     // Create the storage objects
@@ -57,7 +57,7 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
     int64_t num_train = 0;
     int64_t num_valid = 0;
     int64_t num_test = 0;
-    
+
     if (learning_task == LearningTask::LINK_PREDICTION) {
         num_train = storage_config->dataset->num_train;
         num_valid = storage_config->dataset->num_valid;
@@ -74,7 +74,6 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
         num_columns = 2;
     }
 
-
     switch (storage_config->edges->type) {
         case StorageBackend::PARTITION_BUFFER: {
             SPDLOG_ERROR("Backend type not available for edges.");
@@ -84,24 +83,24 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
             SPDLOG_INFO("Loading using flat file");
             if (num_train != -1) {
                 train_edge_storage = std::make_shared<FlatFile>(train_filename, num_train, num_columns, dtype);
-                
-                if(train_weights_exist) {
+
+                if (train_weights_exist) {
                     train_edge_weights_storage = std::make_shared<FlatFile>(train_weights_file, num_train, 1, weights_dtype);
-                } 
+                }
             }
             if (num_valid != -1) {
                 valid_edge_storage = std::make_shared<FlatFile>(valid_filename, num_valid, num_columns, dtype);
 
-                if(valid_weights_exist) {
+                if (valid_weights_exist) {
                     valid_edge_weights_storage = std::make_shared<FlatFile>(valid_weights_file, num_train, 1, weights_dtype);
-                } 
+                }
             }
             if (num_test != -1) {
                 test_edge_storage = std::make_shared<FlatFile>(test_filename, num_test, num_columns, dtype);
 
-                if(test_weights_exist) {
+                if (test_weights_exist) {
                     test_edge_weights_storage = std::make_shared<FlatFile>(test_weights_file, num_train, 1, weights_dtype);
-                } 
+                }
             }
 
             break;
@@ -113,36 +112,34 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
                 if (!storage_config->train_edges_pre_sorted) {
                     copyFile(train_filename, train_dst_sort_filename);
 
-                    if(train_weights_exist) {
+                    if (train_weights_exist) {
                         copyFile(train_weights_file, train_dst_sort_weights_file);
                     }
                 }
 
                 if (train_weights_exist) {
                     train_edge_weights_storage = std::make_shared<InMemory>(train_weights_file, num_train, 1, weights_dtype, torch::kCPU);
-                } 
+                }
 
                 // Load the sorted file
                 train_edge_storage_dst_sort = std::make_shared<InMemory>(train_dst_sort_filename, num_train, num_columns, dtype, torch::kCPU);
-                if(does_file_exists(train_dst_sort_weights_file)) {
+                if (does_file_exists(train_dst_sort_weights_file)) {
                     train_edge_dst_sort_weights_storage = std::make_shared<InMemory>(train_dst_sort_weights_file, num_train, 1, weights_dtype, torch::kCPU);
                 }
-               
             }
             if (num_valid != -1) {
                 valid_edge_storage = std::make_shared<InMemory>(valid_filename, num_valid, num_columns, dtype, torch::kCPU);
 
-                
                 if (valid_weights_exist) {
                     valid_edge_weights_storage = std::make_shared<InMemory>(valid_weights_file, num_valid, 1, weights_dtype, torch::kCPU);
-                } 
+                }
             }
             if (num_test != -1) {
                 test_edge_storage = std::make_shared<InMemory>(test_filename, num_test, num_columns, dtype, torch::kCPU);
-                
-                if(test_weights_exist) {
+
+                if (test_weights_exist) {
                     test_edge_weights_storage = std::make_shared<InMemory>(test_weights_file, num_test, 1, weights_dtype, torch::kCPU);
-                } 
+                }
             }
             break;
         }
@@ -153,35 +150,35 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
                 if (!storage_config->train_edges_pre_sorted) {
                     copyFile(train_filename, train_dst_sort_filename);
 
-                    if(train_weights_exist) {
+                    if (train_weights_exist) {
                         copyFile(train_weights_file, train_dst_sort_weights_file);
                     }
                 }
 
                 if (train_weights_exist) {
                     train_edge_weights_storage = std::make_shared<InMemory>(train_weights_file, num_train, 1, weights_dtype, storage_config->device_type);
-                } 
+                }
 
                 // Load the sorted file
                 train_edge_storage_dst_sort = std::make_shared<InMemory>(train_dst_sort_filename, num_train, num_columns, dtype, storage_config->device_type);
-                if(does_file_exists(train_dst_sort_weights_file)) {
-                    train_edge_dst_sort_weights_storage = std::make_shared<InMemory>(train_dst_sort_weights_file, num_train, 1, weights_dtype, storage_config->device_type);
+                if (does_file_exists(train_dst_sort_weights_file)) {
+                    train_edge_dst_sort_weights_storage =
+                        std::make_shared<InMemory>(train_dst_sort_weights_file, num_train, 1, weights_dtype, storage_config->device_type);
                 }
-                
             }
             if (num_valid != -1) {
                 valid_edge_storage = std::make_shared<InMemory>(valid_filename, num_valid, num_columns, dtype, storage_config->device_type);
 
                 if (valid_weights_exist) {
                     valid_edge_weights_storage = std::make_shared<InMemory>(valid_weights_file, num_valid, 1, weights_dtype, storage_config->device_type);
-                } 
+                }
             }
             if (num_test != -1) {
                 test_edge_storage = std::make_shared<InMemory>(test_filename, num_test, num_columns, dtype, storage_config->device_type);
 
-                if(test_weights_exist) {
+                if (test_weights_exist) {
                     test_edge_weights_storage = std::make_shared<InMemory>(test_weights_file, num_test, 1, weights_dtype, storage_config->device_type);
-                } 
+                }
             }
             break;
         }
@@ -202,7 +199,6 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
     }
 
     if (use_buffer) {
-        
         string train_edges_partitions =
             storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edge_partition_offsets_file;
 
@@ -227,10 +223,9 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
         if (train_edge_storage != nullptr) {
             if (!storage_config->train_edges_pre_sorted) {
                 train_edge_storage->sort(true, train_edge_weights_storage);
-                if(train_edge_storage_dst_sort != nullptr) { // If we use FLAT_FILE then train_edge_storage_dst_sort storage is not initialized
+                if (train_edge_storage_dst_sort != nullptr) {  // If we use FLAT_FILE then train_edge_storage_dst_sort storage is not initialized
                     train_edge_storage_dst_sort->sort(false, train_edge_dst_sort_weights_storage);
                 }
-                
             }
         }
     }
@@ -238,23 +233,21 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
     SPDLOG_INFO("Shuffle input has value of {}", storage_config->shuffle_input);
     if (storage_config->shuffle_input) {
         if (valid_edge_storage != nullptr) {
-            valid_edge_storage->shuffle();
+            valid_edge_storage->shuffle(valid_edge_weights_storage);
         }
         if (test_edge_storage != nullptr) {
-            test_edge_storage->shuffle();
+            test_edge_storage->shuffle(test_edge_weights_storage);
         }
     }
 
-    std::map<std::string, shared_ptr<Storage>> storage_ptrs {
-        {"train_edge_storage", train_edge_storage},
-        {"train_edge_storage_dst_sort", train_edge_storage_dst_sort},
-        {"valid_edge_storage", valid_edge_storage},
-        {"test_edge_storage", test_edge_storage},
-        {"train_edge_weights_storage", train_edge_weights_storage},
-        {"valid_edge_weights_storage", valid_edge_weights_storage},
-        {"test_edge_weights_storage", test_edge_weights_storage},
-        {"train_edge_dst_sort_weights_storage", train_edge_dst_sort_weights_storage}
-    };
+    std::map<std::string, shared_ptr<Storage>> storage_ptrs{{"train_edge_storage", train_edge_storage},
+                                                            {"train_edge_storage_dst_sort", train_edge_storage_dst_sort},
+                                                            {"valid_edge_storage", valid_edge_storage},
+                                                            {"test_edge_storage", test_edge_storage},
+                                                            {"train_edge_weights_storage", train_edge_weights_storage},
+                                                            {"valid_edge_weights_storage", valid_edge_weights_storage},
+                                                            {"test_edge_weights_storage", test_edge_weights_storage},
+                                                            {"train_edge_dst_sort_weights_storage", train_edge_dst_sort_weights_storage}};
     return storage_ptrs;
 }
 
@@ -484,7 +477,6 @@ shared_ptr<Storage> initializeNodeLabels(shared_ptr<Model> model, shared_ptr<Sto
 
 shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize, bool train,
                                                               shared_ptr<InitConfig> init_config) {
-
     std::map<std::string, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> node_embeddings = initializeNodeEmbeddings(model, storage_config, reinitialize, train, init_config);
 
@@ -508,7 +500,6 @@ shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> 
 
 shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Model> model, shared_ptr<StorageConfig> storage_config, bool reinitialize,
                                                                   bool train, shared_ptr<InitConfig> init_config) {
-
     std::map<std::string, shared_ptr<Storage>> edge_storages = initializeEdges(storage_config, model->learning_task_);
     std::tuple<shared_ptr<Storage>, shared_ptr<Storage>, shared_ptr<Storage>> node_id_storages = initializeNodeIds(storage_config);
     shared_ptr<Storage> node_features = initializeNodeFeatures(model, storage_config);
