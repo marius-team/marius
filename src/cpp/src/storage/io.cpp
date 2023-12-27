@@ -486,6 +486,9 @@ shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> 
     storage_ptrs.train_edges_dst_sort = edge_storages["train_edges_dst_sort"];
     storage_ptrs.validation_edges = edge_storages["validation_edges"];
     storage_ptrs.test_edges = edge_storages["test_edges"];
+    storage_ptrs.train_edges_weights = edge_storages["train_edge_weights_storage"];
+    storage_ptrs.validation_edges_weights = edge_storages["valid_edge_weights_storage"];
+    storage_ptrs.test_edges_weights = edge_storages["test_edge_weights_storage"];
 
     storage_ptrs.node_features = initializeNodeFeatures(model, storage_config);
     storage_ptrs.node_embeddings = std::get<0>(node_embeddings);
@@ -506,10 +509,10 @@ shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Mod
     shared_ptr<Storage> node_labels = initializeNodeLabels(model, storage_config);
 
     GraphModelStoragePtrs storage_ptrs = {};
-
     storage_ptrs.train_edges = edge_storages["train_edges"];
     storage_ptrs.train_edges_dst_sort = edge_storages["train_edges_dst_sort"];
     storage_ptrs.edges = storage_ptrs.train_edges;
+    storage_ptrs.train_edges_weights = edge_storages["train_edge_weights_storage"];
 
     storage_ptrs.train_nodes = std::get<0>(node_id_storages);
     storage_ptrs.valid_nodes = std::get<1>(node_id_storages);
