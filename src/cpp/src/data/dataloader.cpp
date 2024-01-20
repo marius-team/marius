@@ -199,7 +199,7 @@ void DataLoader::setActiveNodes() {
     graph_storage_->setActiveNodes(node_ids);
 }
 
-void DataLoader::initializeBatches(bool prepare_encode) {
+void DataLoader::initializeBatches(bool prepare_encode, bool in_training_mode) {
     int64_t batch_id = 0;
     int64_t start_idx = 0;
 
@@ -207,6 +207,11 @@ void DataLoader::initializeBatches(bool prepare_encode) {
 
     all_read_ = false;
     int64_t num_items;
+
+    int max_batches = training_config_->batches_per_epoch;
+    if(!in_training_mode) {
+        max_batches = evaluation_config_->batches_per_epoch;
+    }
 
     if (prepare_encode) {
         num_items = graph_storage_->getNumNodes();
@@ -240,9 +245,14 @@ void DataLoader::initializeBatches(bool prepare_encode) {
         batches.emplace_back(curr_batch);
         batch_id++;
         start_idx += batch_size;
-    }
-    batches_ = batches;
 
+        // Only keep the first max_batches batches
+        if(max_batches > 0 && batches.size() >= max_batches) {
+            break;
+        }
+    }
+
+    batches_ = batches;
     batches_left_ = batches_.size();
     batch_iterator_ = batches_.begin();
 }

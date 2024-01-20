@@ -30,7 +30,7 @@ void PipelineEvaluator::evaluate(bool validation) {
         }
     }
 
-    dataloader_->initializeBatches(false);
+    dataloader_->initializeBatches(false, false);
 
     if (dataloader_->evaluation_negative_sampler_ != nullptr) {
         if (dataloader_->evaluation_config_->negative_sampling->filtered) {
@@ -66,7 +66,7 @@ void SynchronousEvaluator::evaluate(bool validation) {
         }
     }
 
-    dataloader_->initializeBatches(false);
+    dataloader_->initializeBatches(false, false);
 
     if (dataloader_->evaluation_negative_sampler_ != nullptr) {
         if (dataloader_->evaluation_config_->negative_sampling->filtered) {

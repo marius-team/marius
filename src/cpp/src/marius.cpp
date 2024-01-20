@@ -108,7 +108,6 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
     auto graph_model_storage = std::get<1>(tup);
     auto dataloader = std::get<2>(tup);
 
-    /*
     shared_ptr<Trainer> trainer;
     shared_ptr<Evaluator> evaluator;
 
@@ -160,7 +159,7 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
         if (marius_config->storage->export_encoded_nodes) {
             encode_and_export(dataloader, model, marius_config);
         }
-    } */
+    } 
 }
 
 void marius_eval(shared_ptr<MariusConfig> marius_config) {
@@ -171,7 +170,6 @@ void marius_eval(shared_ptr<MariusConfig> marius_config) {
 
     shared_ptr<Evaluator> evaluator;
 
-    /*
     if (marius_config->evaluation->epochs_per_eval > 0) {
         if (marius_config->evaluation->pipeline->sync) {
             evaluator = std::make_shared<SynchronousEvaluator>(dataloader, model);
@@ -184,7 +182,6 @@ void marius_eval(shared_ptr<MariusConfig> marius_config) {
     if (marius_config->storage->export_encoded_nodes) {
         encode_and_export(dataloader, model, marius_config);
     }
-    */
 }
 
 void marius(int argc, char *argv[]) {

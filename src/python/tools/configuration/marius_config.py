@@ -724,6 +724,7 @@ class PipelineConfig:
 @dataclass
 class TrainingConfig:
     batch_size: int = 1000
+    batches_per_epoch: int = -1
     negative_sampling: NegativeSamplingConfig = MISSING
     num_epochs: int = 10
     pipeline: PipelineConfig = PipelineConfig()
@@ -776,6 +777,7 @@ class TrainingConfig:
 @dataclass
 class EvaluationConfig:
     batch_size: int = 1000
+    batches_per_epoch: int = -1
     negative_sampling: NegativeSamplingConfig = MISSING
     pipeline: PipelineConfig = PipelineConfig()
     epochs_per_eval: int = 1

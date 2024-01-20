@@ -143,6 +143,7 @@ struct TrainingConfig {
     int batch_size;
     shared_ptr<NegativeSamplingConfig> negative_sampling = nullptr;
     int num_epochs;
+    int batches_per_epoch; 
     shared_ptr<PipelineConfig> pipeline = nullptr;
     int epochs_per_shuffle;
     int logs_per_epoch;
@@ -157,6 +158,7 @@ struct EvaluationConfig {
     shared_ptr<NegativeSamplingConfig> negative_sampling = nullptr;
     shared_ptr<PipelineConfig> pipeline = nullptr;
     int epochs_per_eval;
+    int batches_per_epoch; 
     string checkpoint_dir;
     bool full_graph_evaluation;
 };

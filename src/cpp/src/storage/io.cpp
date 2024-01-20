@@ -16,6 +16,7 @@ inline bool does_file_exists(const std::string& file_path) {
 }
 
 std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config, LearningTask learning_task) {
+
     // Determined the file paths
     string train_filename =
         storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edges_file + PathConstants::file_ext;
@@ -106,7 +107,6 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
             break;
         }
         case StorageBackend::HOST_MEMORY: {
-            SPDLOG_INFO("Loading using host memory");
             if (num_train != -1) {
                 train_edge_storage = std::make_shared<InMemory>(train_filename, num_train, num_columns, dtype, torch::kCPU);
                 if (!storage_config->train_edges_pre_sorted) {
@@ -144,7 +144,6 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
             break;
         }
         case StorageBackend::DEVICE_MEMORY: {
-            SPDLOG_INFO("Loading using device memory");
             if (num_train != -1) {
                 train_edge_storage = std::make_shared<InMemory>(train_filename, num_train, num_columns, dtype, storage_config->device_type);
                 if (!storage_config->train_edges_pre_sorted) {
@@ -230,7 +229,6 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
         }
     }
 
-    SPDLOG_INFO("Shuffle input has value of {}", storage_config->shuffle_input);
     if (storage_config->shuffle_input) {
         if (valid_edge_storage != nullptr) {
             valid_edge_storage->shuffle(valid_edge_weights_storage);
@@ -240,14 +238,15 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
         }
     }
 
-    std::map<std::string, shared_ptr<Storage>> storage_ptrs{{"train_edge_storage", train_edge_storage},
-                                                            {"train_edge_storage_dst_sort", train_edge_storage_dst_sort},
-                                                            {"valid_edge_storage", valid_edge_storage},
-                                                            {"test_edge_storage", test_edge_storage},
+    std::map<std::string, shared_ptr<Storage>> storage_ptrs{{"train_edges", train_edge_storage},
+                                                            {"train_edges_dst_sort", train_edge_storage_dst_sort},
+                                                            {"validation_edges", valid_edge_storage},
+                                                            {"test_edges", test_edge_storage},
                                                             {"train_edge_weights_storage", train_edge_weights_storage},
                                                             {"valid_edge_weights_storage", valid_edge_weights_storage},
                                                             {"test_edge_weights_storage", test_edge_weights_storage},
                                                             {"train_edge_dst_sort_weights_storage", train_edge_dst_sort_weights_storage}};
+    
     return storage_ptrs;
 }
 
@@ -486,7 +485,9 @@ shared_ptr<GraphModelStorage> initializeStorageLinkPrediction(shared_ptr<Model> 
     storage_ptrs.train_edges_dst_sort = edge_storages["train_edges_dst_sort"];
     storage_ptrs.validation_edges = edge_storages["validation_edges"];
     storage_ptrs.test_edges = edge_storages["test_edges"];
+
     storage_ptrs.train_edges_weights = edge_storages["train_edge_weights_storage"];
+    storage_ptrs.train_edges_dst_sort_weights = edge_storages["train_edge_dst_sort_weights_storage"];
     storage_ptrs.validation_edges_weights = edge_storages["valid_edge_weights_storage"];
     storage_ptrs.test_edges_weights = edge_storages["test_edge_weights_storage"];
 
@@ -512,7 +513,11 @@ shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Mod
     storage_ptrs.train_edges = edge_storages["train_edges"];
     storage_ptrs.train_edges_dst_sort = edge_storages["train_edges_dst_sort"];
     storage_ptrs.edges = storage_ptrs.train_edges;
+
     storage_ptrs.train_edges_weights = edge_storages["train_edge_weights_storage"];
+    storage_ptrs.edges_weights = storage_ptrs.train_edges_weights;
+    storage_ptrs.train_edges_dst_sort_weights = edge_storages["train_edge_dst_sort_weights_storage"];
+
 
     storage_ptrs.train_nodes = std::get<0>(node_id_storages);
     storage_ptrs.valid_nodes = std::get<1>(node_id_storages);

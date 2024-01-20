@@ -11,9 +11,11 @@
 
 struct GraphModelStoragePtrs {
     shared_ptr<Storage> edges = nullptr;
+    shared_ptr<Storage> edges_weights = nullptr;
     shared_ptr<Storage> train_edges = nullptr;
-    shared_ptr<Storage> train_edges_dst_sort = nullptr;
     shared_ptr<Storage> train_edges_weights = nullptr;
+    shared_ptr<Storage> train_edges_dst_sort = nullptr;
+    shared_ptr<Storage> train_edges_dst_sort_weights = nullptr;
     shared_ptr<Storage> validation_edges = nullptr;
     shared_ptr<Storage> validation_edges_weights = nullptr;
     shared_ptr<Storage> test_edges = nullptr;

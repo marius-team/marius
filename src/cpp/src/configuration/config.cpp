@@ -473,6 +473,10 @@ shared_ptr<TrainingConfig> initTrainingConfig(pyobj python_config) {
     ret_config->checkpoint = initCheckpointConfig(python_config.attr("checkpoint"));
     ret_config->resume_training = cast_helper<bool>(python_config.attr("resume_training"));
     ret_config->resume_from_checkpoint = cast_helper<string>(python_config.attr("resume_from_checkpoint"));
+    ret_config->batches_per_epoch = -1;
+    if(pybind11::hasattr(python_config, "batches_per_epoch")) { 
+        ret_config->batches_per_epoch = cast_helper<int>(python_config.attr("batches_per_epoch"));
+    }
 
     return ret_config;
 }
@@ -485,6 +489,11 @@ shared_ptr<EvaluationConfig> initEvaluationConfig(pyobj python_config) {
     ret_config->pipeline = initPipelineConfig(python_config.attr("pipeline"));
     ret_config->epochs_per_eval = cast_helper<int>(python_config.attr("epochs_per_eval"));
     ret_config->checkpoint_dir = cast_helper<string>(python_config.attr("checkpoint_dir"));
+    ret_config->batches_per_epoch = -1;
+    if(pybind11::hasattr(python_config, "batches_per_epoch")) {
+        ret_config->batches_per_epoch = cast_helper<int>(python_config.attr("batches_per_epoch"));
+    }
+
     return ret_config;
 }
 

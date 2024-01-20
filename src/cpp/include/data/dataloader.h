@@ -86,7 +86,7 @@ class DataLoader {
 
     void setActiveNodes();
 
-    void initializeBatches(bool prepare_encode = false);
+    void initializeBatches(bool prepare_encode = false, bool in_training_mode = true);
 
     void clearBatches();
 

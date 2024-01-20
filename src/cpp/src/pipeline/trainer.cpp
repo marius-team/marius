@@ -23,6 +23,12 @@ PipelineTrainer::PipelineTrainer(shared_ptr<DataLoader> dataloader, shared_ptr<M
         num_items = dataloader_->graph_storage_->storage_ptrs_.train_nodes->getDim0();
     }
 
+    // Log for every batch
+    if(dataloader_->training_config_->batches_per_epoch > 0) {
+        num_items = dataloader_->training_config_->batches_per_epoch * dataloader_->training_config_->batch_size;
+        logs_per_epoch = dataloader_->training_config_->batches_per_epoch;
+    }
+
     progress_reporter_ = std::make_shared<ProgressReporter>(item_name, num_items, logs_per_epoch);
 
     if (model->device_.is_cuda()) {
@@ -37,7 +43,7 @@ void PipelineTrainer::train(int num_epochs) {
         dataloader_->setTrainSet();
     }
 
-    dataloader_->initializeBatches(false);
+    dataloader_->initializeBatches(false, true);
 
     Timer timer = Timer(false);
     for (int epoch = 0; epoch < num_epochs; epoch++) {
@@ -88,6 +94,12 @@ SynchronousTrainer::SynchronousTrainer(shared_ptr<DataLoader> dataloader, shared
         num_items = dataloader_->graph_storage_->storage_ptrs_.train_nodes->getDim0();
     }
 
+    // Log for every batch
+    if(dataloader_->training_config_->batches_per_epoch > 0) {
+        num_items = dataloader_->training_config_->batches_per_epoch * dataloader_->training_config_->batch_size;
+        logs_per_epoch = dataloader_->training_config_->batches_per_epoch;
+    }
+
     progress_reporter_ = std::make_shared<ProgressReporter>(item_name, num_items, logs_per_epoch);
 }
 
@@ -96,7 +108,7 @@ void SynchronousTrainer::train(int num_epochs) {
         dataloader_->setTrainSet();
     }
 
-    dataloader_->initializeBatches(false);
+    dataloader_->initializeBatches(false, true);
 
     Timer timer = Timer(false);
 

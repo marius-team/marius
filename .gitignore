@@ -171,3 +171,6 @@ Thumbs.db
 
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+
+src/cpp/third_party
+test_datasets
