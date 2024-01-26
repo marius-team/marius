@@ -117,7 +117,7 @@ message(STATUS "PYBIND11_BUILD_ABI:" ${_PYBIND11_BUILD_ABI})
 
 add_compile_definitions(PYBIND11_COMPILER_TYPE="${_PYBIND11_COMPILER_TYPE}" PYBIND11_STDLIB="${_PYBIND11_STDLIB}" PYBIND11_BUILD_ABI="${_PYBIND11_BUILD_ABI}")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS} -g")
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
 message(STATUS "Python3_INCLUDE_DIRS ${Python3_INCLUDE_DIRS}")
@@ -190,13 +190,13 @@ endif ()
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_TSAN)
     message("Using address sanitizer")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -g")
     set(CMAKE_MODULE_LINKER_FLAGS "{$CMAKE_MODULE_LINKER_FLAGS} -fsanitize=thread")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_TSAN)
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_ASAN)
     message("Using thread sanitizer")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -g")
     set(CMAKE_MODULE_LINKER_FLAGS "{$CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address -fsanitize=leak")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug AND MARIUS_USE_ASAN)
 

@@ -736,7 +736,7 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
 
     torch::Tensor new_all_in_memory_edges = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
     torch::Tensor new_all_in_memory_edges_weights;
-    if(hasEdgeWeights()) {
+    if (hasEdgeWeights()) {
         new_all_in_memory_edges_weights = torch::empty({total_size, storage_ptrs_.edges_weights->dim1_size_}, torch::kFloat32);
     }
 
@@ -749,23 +749,25 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
         int64_t local_offset = in_mem_edge_bucket_starts_accessor[i];
 
         if (in_mem) {
-            new_all_in_memory_edges.narrow(0, local_offset, edge_bucket_size) = current_subgraph_state_->all_in_memory_edges_.narrow(0, edge_bucket_start, edge_bucket_size);
-            if(hasEdgeWeights()) {
-                new_all_in_memory_edges_weights.narrow(0, local_offset, edge_bucket_size) = current_subgraph_state_->all_in_memory_edges_weights_.narrow(0, edge_bucket_start, edge_bucket_size);
+            new_all_in_memory_edges.narrow(0, local_offset, edge_bucket_size) =
+                current_subgraph_state_->all_in_memory_edges_.narrow(0, edge_bucket_start, edge_bucket_size);
+            if (hasEdgeWeights()) {
+                new_all_in_memory_edges_weights.narrow(0, local_offset, edge_bucket_size) =
+                    current_subgraph_state_->all_in_memory_edges_weights_.narrow(0, edge_bucket_start, edge_bucket_size);
             }
         } else {
             new_all_in_memory_edges.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.edges->range(edge_bucket_start, edge_bucket_size);
-            if(hasEdgeWeights()) {
-                new_all_in_memory_edges_weights.narrow(0, local_offset, edge_bucket_size) = storage_ptrs_.edges_weights->range(edge_bucket_start, edge_bucket_size);
+            if (hasEdgeWeights()) {
+                new_all_in_memory_edges_weights.narrow(0, local_offset, edge_bucket_size) =
+                    storage_ptrs_.edges_weights->range(edge_bucket_start, edge_bucket_size);
             }
         }
     }
 
     subgraph->all_in_memory_edges_ = new_all_in_memory_edges;
-    if(hasEdgeWeights()) {
+    if (hasEdgeWeights()) {
         subgraph->all_in_memory_edges_weights_ = new_all_in_memory_edges_weights;
     }
-    
 
     if (storage_ptrs_.node_embeddings != nullptr) {
         subgraph->global_to_local_index_map_ =
@@ -803,11 +805,13 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
         subgraph->all_in_memory_edges_weights_ = mapped_edges_weights;
     }
 
-    std::tuple<EdgeList, EdgeList> sorted_mapped_edges = merge_sorted_edge_buckets(mapped_edges, mapped_edges_weights, in_mem_edge_bucket_starts, buffer_size, true);
+    std::tuple<EdgeList, EdgeList> sorted_mapped_edges =
+        merge_sorted_edge_buckets(mapped_edges, mapped_edges_weights, in_mem_edge_bucket_starts, buffer_size, true);
     torch::Tensor src_mapped_edges = std::get<0>(sorted_mapped_edges);
     torch::Tensor src_mapped_edges_weights = std::get<1>(sorted_mapped_edges);
 
-    std::tuple<EdgeList, EdgeList> sorted_mapped_edges_dst_sort = merge_sorted_edge_buckets(mapped_edges, mapped_edges_weights, in_mem_edge_bucket_starts, buffer_size, false);
+    std::tuple<EdgeList, EdgeList> sorted_mapped_edges_dst_sort =
+        merge_sorted_edge_buckets(mapped_edges, mapped_edges_weights, in_mem_edge_bucket_starts, buffer_size, false);
     mapped_edges_dst_sort = std::get<0>(sorted_mapped_edges_dst_sort);
     mapped_edges_dst_sort_weights = std::get<1>(sorted_mapped_edges_dst_sort);
 
@@ -820,7 +824,8 @@ void GraphModelStorage::updateInMemorySubGraph_(shared_ptr<InMemorySubgraphState
         subgraph->in_memory_subgraph_ = nullptr;
     }
 
-    subgraph->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory(), num_hash_maps, src_mapped_edges_weights, mapped_edges_dst_sort_weights);
+    subgraph->in_memory_subgraph_ = std::make_shared<MariusGraph>(mapped_edges, mapped_edges_dst_sort, getNumNodesInMemory(), num_hash_maps,
+                                                                  src_mapped_edges_weights, mapped_edges_dst_sort_weights);
 
     // update state
     subgraph->in_memory_partition_ids_ = new_in_mem_partition_ids;
