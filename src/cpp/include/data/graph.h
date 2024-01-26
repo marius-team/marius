@@ -16,7 +16,9 @@
 class MariusGraph {
    public:
     EdgeList src_sorted_edges_;           // easy access of outgoing neighbors
+    EdgeList src_sorted_edges_weights_;
     EdgeList dst_sorted_edges_;           // easy access of incoming neighbors
+    EdgeList dst_sorted_edges_weights_;
     EdgeList active_in_memory_subgraph_;  // shuffled
 
     int64_t num_nodes_in_memory_;
@@ -40,9 +42,10 @@ class MariusGraph {
 
     MariusGraph();
 
-    MariusGraph(EdgeList edges);
+    MariusGraph(EdgeList edges, EdgeList edges_weights = {});
 
-    MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps = 1);
+    MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps = 1, 
+        EdgeList src_sorted_weights = {}, EdgeList dst_sorted_weights = {});
     // TODO: this change may affect some cpp and python tests
 
     ~MariusGraph();

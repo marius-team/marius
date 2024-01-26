@@ -60,6 +60,7 @@ class Batch {
     Indices dst_neg_indices_mapping_; /**< Maps ids from the sampled nodes, which corrupt the destination nodes of edges, to global node ids */
 
     torch::Tensor edges_;
+    torch::Tensor edges_weights_;
 
     // Encoder
     DENSEGraph dense_graph_;

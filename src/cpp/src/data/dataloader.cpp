@@ -119,6 +119,7 @@ void DataLoader::nextEpoch() {
 
 void DataLoader::setActiveEdges() {
     EdgeList active_edges;
+    EdgeList active_edges_weights;
 
     if (graph_storage_->useInMemorySubGraph()) {
         torch::Tensor edge_bucket_ids = *edge_buckets_per_buffer_iterator_;
@@ -161,6 +162,11 @@ void DataLoader::setActiveEdges() {
 
         active_edges = torch::empty({total_size, graph_storage_->storage_ptrs_.edges->dim1_size_},
                                     graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.options());
+                            
+        if(graph_storage_->hasEdgeWeights()) {
+            active_edges_weights = torch::empty({total_size, graph_storage_->storage_ptrs_.edges_weights->dim1_size_}, 
+                graph_storage_->current_subgraph_state_->all_in_memory_edges_weights_.options());
+        }
 
 #pragma omp parallel for
         for (int i = 0; i < in_memory_edge_bucket_idx.size(0); i++) {
@@ -171,15 +177,30 @@ void DataLoader::setActiveEdges() {
 
             active_edges.narrow(0, local_offset, edge_bucket_size) =
                 graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.narrow(0, edge_bucket_start, edge_bucket_size);
+            
+            
         }
 
     } else {
-        active_edges = graph_storage_->storage_ptrs_.edges->range(0, graph_storage_->storage_ptrs_.edges->getDim0());
+        int num_edges = graph_storage_->storage_ptrs_.edges->getDim0();
+        active_edges = graph_storage_->storage_ptrs_.edges->range(0, num_edges);
+
+        if(graph_storage_->hasEdgeWeights()) {
+            active_edges_weights = graph_storage_->storage_ptrs_.edges_weights->range(0, num_edges);
+        }
     }
 
     auto opts = torch::TensorOptions().dtype(torch::kInt64).device(active_edges.device());
-    active_edges = (active_edges.index_select(0, torch::randperm(active_edges.size(0), opts)));
+    auto permutation = torch::randperm(active_edges.size(0), opts);
+    active_edges = active_edges.index_select(0, permutation);
     graph_storage_->setActiveEdges(active_edges);
+
+    // Also set the active weights
+    if(graph_storage_->hasEdgeWeights()) {
+        active_edges_weights = active_edges_weights.index_select(0, permutation);
+        graph_storage_->setActiveEdgesWeights(active_edges_weights);
+    }
+
 }
 
 void DataLoader::setActiveNodes() {
@@ -397,8 +418,13 @@ shared_ptr<Batch> DataLoader::getBatch(at::optional<torch::Device> device, bool 
 }
 
 void DataLoader::edgeSample(shared_ptr<Batch> batch, int worker_id) {
+    // Load the edges
     if (!batch->edges_.defined()) {
-        batch->edges_ = edge_sampler_->getEdges(batch);
+        std::vector<EdgeList> sampled_edges = edge_sampler_->getEdges(batch);
+        batch->edges_ = sampled_edges.at(0);
+        if(sampled_edges.size() > 1) {
+            batch->edges_weights_ = sampled_edges.at(1);
+        }
     }
 
     if (negative_sampler_ != nullptr) {
@@ -406,7 +432,6 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch, int worker_id) {
     }
 
     std::vector<torch::Tensor> all_ids = {batch->edges_.select(1, 0), batch->edges_.select(1, -1)};
-
     if (batch->src_neg_indices_.defined()) {
         all_ids.emplace_back(batch->src_neg_indices_.flatten(0, 1));
     }

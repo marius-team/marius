@@ -36,7 +36,9 @@ struct GraphModelStoragePtrs {
 
 struct InMemorySubgraphState {
     EdgeList all_in_memory_edges_;
+    EdgeList all_in_memory_edges_weights_;
     EdgeList all_in_memory_mapped_edges_;
+    EdgeList all_in_memory_mapped_edges_weights_;
     torch::Tensor in_memory_partition_ids_;
     torch::Tensor in_memory_edge_bucket_ids_;
     torch::Tensor in_memory_edge_bucket_sizes_;
@@ -64,6 +66,7 @@ class GraphModelStorage {
     // In memory subgraph for partition buffer
 
     EdgeList active_edges_;
+    EdgeList active_edges_weights_;
     Indices active_nodes_;
 
     std::mutex *subgraph_lock_;
@@ -94,15 +97,19 @@ class GraphModelStorage {
 
     void getNextSubGraph();
 
-    EdgeList merge_sorted_edge_buckets(EdgeList edges, torch::Tensor starts, int buffer_size, bool src);
+    std::tuple<EdgeList, EdgeList> merge_sorted_edge_buckets(EdgeList edges, EdgeList edges_weights, torch::Tensor starts, int buffer_size, bool src);
 
     void setEdgesStorage(shared_ptr<Storage> edge_storage);
+
+    void setEdgesWeightsStorage(shared_ptr<Storage> edges_weights_storage);
 
     void setNodesStorage(shared_ptr<Storage> node_storage);
 
     EdgeList getEdges(Indices indices);
 
     EdgeList getEdgesRange(int64_t start, int64_t size);
+
+    EdgeList getEdgesWeightsRange(int64_t start, int64_t size);
 
     Indices getRandomNodeIds(int64_t size);
 
@@ -170,6 +177,8 @@ class GraphModelStorage {
         return (embeddings_buffered || features_buffered) && (train_ || (!full_graph_evaluation_));
     }
 
+    bool hasEdgeWeights() { return storage_ptrs_.edges_weights != nullptr; }
+
     bool hasSwap() {
         if (storage_ptrs_.node_embeddings != nullptr) {
             return std::dynamic_pointer_cast<PartitionBufferStorage>(storage_ptrs_.node_embeddings)->hasSwap();
@@ -224,6 +233,8 @@ class GraphModelStorage {
 
     void setActiveEdges(torch::Tensor active_edges) { active_edges_ = active_edges; }
 
+    void setActiveEdgesWeights(torch::Tensor active_edges_weights) { active_edges_weights_ = active_edges_weights; }
+
     void setActiveNodes(torch::Tensor node_ids) { active_nodes_ = node_ids; }
 
     int64_t getNumActiveEdges() {
@@ -277,6 +288,7 @@ class GraphModelStorage {
 
         if (storage_ptrs_.train_edges != nullptr) {
             setEdgesStorage(storage_ptrs_.train_edges);
+            setEdgesWeightsStorage(storage_ptrs_.train_edges_weights);
         }
 
         if (storage_ptrs_.train_nodes != nullptr) {
@@ -289,6 +301,7 @@ class GraphModelStorage {
 
         if (storage_ptrs_.validation_edges != nullptr) {
             setEdgesStorage(storage_ptrs_.validation_edges);
+            setEdgesWeightsStorage(storage_ptrs_.validation_edges_weights);
         }
 
         if (storage_ptrs_.valid_nodes != nullptr) {
@@ -301,6 +314,7 @@ class GraphModelStorage {
 
         if (storage_ptrs_.test_edges != nullptr) {
             setEdgesStorage(storage_ptrs_.test_edges);
+            setEdgesWeightsStorage(storage_ptrs_.test_edges_weights);
         }
 
         if (storage_ptrs_.test_nodes != nullptr) {

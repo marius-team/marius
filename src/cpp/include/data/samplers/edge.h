@@ -20,8 +20,10 @@ class EdgeSampler {
      * Get edges for a given batch.
      * @param batch Batch to sample into
      * @return Edges sampled for the batch
+               The tensor at index zero is the randomly sampled edges
+               If the size of the returned vector is > 1, then the tensor at index one is the weights associated with those edges
      */
-    virtual EdgeList getEdges(shared_ptr<Batch> batch) = 0;
+    virtual std::vector<EdgeList> getEdges(shared_ptr<Batch> batch) = 0;
 };
 
 class RandomEdgeSampler : public EdgeSampler {
@@ -30,7 +32,7 @@ class RandomEdgeSampler : public EdgeSampler {
 
     RandomEdgeSampler(shared_ptr<GraphModelStorage> graph_storage, bool without_replacement = true);
 
-    EdgeList getEdges(shared_ptr<Batch> batch) override;
+    std::vector<EdgeList> getEdges(shared_ptr<Batch> batch) override;
 };
 
 #endif  // MARIUS_EDGE_H

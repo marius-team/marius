@@ -208,6 +208,7 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
             storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edge_partition_offsets_file;
 
         if (train_edge_storage != nullptr) {
+            std::cout << "Reading train edges partitions from file " << train_edges_partitions << std::endl;
             train_edge_storage->readPartitionSizes(train_edges_partitions);
         }
 
@@ -517,7 +518,6 @@ shared_ptr<GraphModelStorage> initializeStorageNodeClassification(shared_ptr<Mod
     storage_ptrs.train_edges_weights = edge_storages["train_edge_weights_storage"];
     storage_ptrs.edges_weights = storage_ptrs.train_edges_weights;
     storage_ptrs.train_edges_dst_sort_weights = edge_storages["train_edge_dst_sort_weights_storage"];
-
 
     storage_ptrs.train_nodes = std::get<0>(node_id_storages);
     storage_ptrs.valid_nodes = std::get<1>(node_id_storages);
