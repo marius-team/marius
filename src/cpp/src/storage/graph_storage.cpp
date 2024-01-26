@@ -370,7 +370,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
         torch::Tensor in_mem_edge_bucket_ids = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
         torch::Tensor in_mem_edge_bucket_sizes = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
         torch::Tensor global_edge_bucket_starts = torch::zeros({num_edge_buckets_in_mem}, torch::kInt64);
-
+        
         auto in_mem_edge_bucket_ids_accessor = in_mem_edge_bucket_ids.accessor<int64_t, 1>();
         auto in_mem_edge_bucket_sizes_accessor = in_mem_edge_bucket_sizes.accessor<int64_t, 1>();
         auto global_edge_bucket_starts_accessor = global_edge_bucket_starts.accessor<int64_t, 1>();
