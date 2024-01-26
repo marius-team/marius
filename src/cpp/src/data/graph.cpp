@@ -13,20 +13,19 @@
 
 MariusGraph::MariusGraph(){};
 
-MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps, 
-EdgeList src_sorted_weights, EdgeList dst_sorted_weights) {
-
+MariusGraph::MariusGraph(EdgeList src_sorted_edges, EdgeList dst_sorted_edges, int64_t num_nodes_in_memory, int num_hash_maps, EdgeList src_sorted_weights,
+                         EdgeList dst_sorted_weights) {
     num_nodes_in_memory_ = num_nodes_in_memory;
-    
+
     src_sorted_edges_ = src_sorted_edges;
-    if(src_sorted_weights.defined()) {
+    if (src_sorted_weights.defined()) {
         src_sorted_edges_weights_ = src_sorted_weights;
     }
-    
+
     dst_sorted_edges_ = dst_sorted_edges;
-    if(dst_sorted_weights.defined()) {
+    if (dst_sorted_weights.defined()) {
         dst_sorted_edges_weights_ = dst_sorted_weights;
-    }   
+    }
 
     auto contiguous_src = src_sorted_edges_.select(1, 0).contiguous();
     auto contiguous_dst = dst_sorted_edges_.select(1, -1).contiguous();
@@ -56,14 +55,14 @@ MariusGraph::MariusGraph(EdgeList edges, EdgeList edges_weights) {
     auto edges_src_sort_order = edges.select(1, 0).argsort();
     EdgeList src_sorted_edges = edges.index_select(0, edges_src_sort_order);
     EdgeList src_sorted_weights;
-    if(edges_weights.defined()) {
+    if (edges_weights.defined()) {
         src_sorted_weights = edges_weights.index_select(0, edges_src_sort_order);
     }
 
-    auto edges_dst_sort_order =  edges.select(1, -1).argsort();
+    auto edges_dst_sort_order = edges.select(1, -1).argsort();
     EdgeList dst_sorted_edges = edges.index_select(0, edges_dst_sort_order);
     EdgeList dst_sorted_weights;
-    if(edges_weights.defined()) {
+    if (edges_weights.defined()) {
         dst_sorted_weights = edges_weights.index_select(0, edges_dst_sort_order);
     }
 

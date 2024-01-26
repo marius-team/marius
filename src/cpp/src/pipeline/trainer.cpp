@@ -24,7 +24,7 @@ PipelineTrainer::PipelineTrainer(shared_ptr<DataLoader> dataloader, shared_ptr<M
     }
 
     // Log for every batch
-    if(dataloader_->training_config_->batches_per_epoch > 0) {
+    if (dataloader_->training_config_->batches_per_epoch > 0) {
         num_items = dataloader_->training_config_->batches_per_epoch * dataloader_->training_config_->batch_size;
         logs_per_epoch = dataloader_->training_config_->batches_per_epoch;
     }
@@ -95,7 +95,7 @@ SynchronousTrainer::SynchronousTrainer(shared_ptr<DataLoader> dataloader, shared
     }
 
     // Log for every batch
-    if(dataloader_->training_config_->batches_per_epoch > 0) {
+    if (dataloader_->training_config_->batches_per_epoch > 0) {
         num_items = dataloader_->training_config_->batches_per_epoch * dataloader_->training_config_->batch_size;
         logs_per_epoch = dataloader_->training_config_->batches_per_epoch;
     }

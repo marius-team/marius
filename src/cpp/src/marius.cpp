@@ -159,7 +159,7 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
         if (marius_config->storage->export_encoded_nodes) {
             encode_and_export(dataloader, model, marius_config);
         }
-    } 
+    }
 }
 
 void marius_eval(shared_ptr<MariusConfig> marius_config) {

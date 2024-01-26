@@ -16,7 +16,6 @@ inline bool does_file_exists(const std::string& file_path) {
 }
 
 std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageConfig> storage_config, LearningTask learning_task) {
-
     // Determined the file paths
     string train_filename =
         storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::training + PathConstants::edges_file + PathConstants::file_ext;
@@ -247,7 +246,7 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
                                                             {"valid_edge_weights_storage", valid_edge_weights_storage},
                                                             {"test_edge_weights_storage", test_edge_weights_storage},
                                                             {"train_edge_dst_sort_weights_storage", train_edge_dst_sort_weights_storage}};
-    
+
     return storage_ptrs;
 }
 

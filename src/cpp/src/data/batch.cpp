@@ -28,6 +28,8 @@ void Batch::to(torch::Device device, CudaStream *compute_stream) {
 
     edges_ = transfer_tensor(edges_, device, compute_stream, &transfer_stream);
 
+    edges_weights_ = transfer_tensor(edges_, device, compute_stream, &transfer_stream);
+
     neg_edges_ = transfer_tensor(neg_edges_, device, compute_stream, &transfer_stream);
 
     root_node_indices_ = transfer_tensor(root_node_indices_, device, compute_stream, &transfer_stream);

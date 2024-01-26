@@ -162,10 +162,10 @@ void DataLoader::setActiveEdges() {
 
         active_edges = torch::empty({total_size, graph_storage_->storage_ptrs_.edges->dim1_size_},
                                     graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.options());
-                            
-        if(graph_storage_->hasEdgeWeights()) {
-            active_edges_weights = torch::empty({total_size, graph_storage_->storage_ptrs_.edges_weights->dim1_size_}, 
-                graph_storage_->current_subgraph_state_->all_in_memory_edges_weights_.options());
+
+        if (graph_storage_->hasEdgeWeights()) {
+            active_edges_weights = torch::empty({total_size, graph_storage_->storage_ptrs_.edges_weights->dim1_size_},
+                                                graph_storage_->current_subgraph_state_->all_in_memory_edges_weights_.options());
         }
 
 #pragma omp parallel for
@@ -177,15 +177,13 @@ void DataLoader::setActiveEdges() {
 
             active_edges.narrow(0, local_offset, edge_bucket_size) =
                 graph_storage_->current_subgraph_state_->all_in_memory_mapped_edges_.narrow(0, edge_bucket_start, edge_bucket_size);
-            
-            
         }
 
     } else {
         int num_edges = graph_storage_->storage_ptrs_.edges->getDim0();
         active_edges = graph_storage_->storage_ptrs_.edges->range(0, num_edges);
 
-        if(graph_storage_->hasEdgeWeights()) {
+        if (graph_storage_->hasEdgeWeights()) {
             active_edges_weights = graph_storage_->storage_ptrs_.edges_weights->range(0, num_edges);
         }
     }
@@ -196,11 +194,10 @@ void DataLoader::setActiveEdges() {
     graph_storage_->setActiveEdges(active_edges);
 
     // Also set the active weights
-    if(graph_storage_->hasEdgeWeights()) {
+    if (graph_storage_->hasEdgeWeights()) {
         active_edges_weights = active_edges_weights.index_select(0, permutation);
         graph_storage_->setActiveEdgesWeights(active_edges_weights);
     }
-
 }
 
 void DataLoader::setActiveNodes() {
@@ -230,7 +227,7 @@ void DataLoader::initializeBatches(bool prepare_encode, bool in_training_mode) {
     int64_t num_items;
 
     int max_batches = training_config_->batches_per_epoch;
-    if(!in_training_mode) {
+    if (!in_training_mode) {
         max_batches = evaluation_config_->batches_per_epoch;
     }
 
@@ -268,7 +265,7 @@ void DataLoader::initializeBatches(bool prepare_encode, bool in_training_mode) {
         start_idx += batch_size;
 
         // Only keep the first max_batches batches
-        if(max_batches > 0 && batches.size() >= max_batches) {
+        if (max_batches > 0 && batches.size() >= max_batches) {
             break;
         }
     }
@@ -422,7 +419,7 @@ void DataLoader::edgeSample(shared_ptr<Batch> batch, int worker_id) {
     if (!batch->edges_.defined()) {
         std::vector<EdgeList> sampled_edges = edge_sampler_->getEdges(batch);
         batch->edges_ = sampled_edges.at(0);
-        if(sampled_edges.size() > 1) {
+        if (sampled_edges.size() > 1) {
             batch->edges_weights_ = sampled_edges.at(1);
         }
     }
