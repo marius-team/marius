@@ -207,7 +207,6 @@ std::map<std::string, shared_ptr<Storage>> initializeEdges(shared_ptr<StorageCon
             storage_config->dataset->dataset_dir + PathConstants::edges_directory + PathConstants::test + PathConstants::edge_partition_offsets_file;
 
         if (train_edge_storage != nullptr) {
-            std::cout << "Reading train edges partitions from file " << train_edges_partitions << std::endl;
             train_edge_storage->readPartitionSizes(train_edges_partitions);
         }
 

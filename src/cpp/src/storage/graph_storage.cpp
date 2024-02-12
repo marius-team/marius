@@ -352,10 +352,19 @@ bool GraphModelStorage::embeddingsOffDevice() {
     }
 }
 
+void printTensor(std::string tensor_name, torch::Tensor tensor) {
+    auto data_ptr = tensor.data_ptr<int64_t>();
+    int num_elements = tensor.numel();
+    std::cout << "Tensor " << tensor_name << " has values: ";
+    for (int i = 0; i < num_elements; ++i) {
+        std::cout << data_ptr[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
 void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, int num_hash_maps) {
     if (useInMemorySubGraph()) {
         current_subgraph_state_ = std::make_shared<InMemorySubgraphState>();
-
         buffer_state = buffer_state.to(torch::kInt64);
 
         int buffer_size = buffer_state.size(0);
@@ -378,6 +387,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
         torch::Tensor edge_bucket_sizes = torch::from_blob(edge_bucket_sizes_.data(), {(int)edge_bucket_sizes_.size()}, torch::kInt64);
         torch::Tensor edge_bucket_ends_disk = edge_bucket_sizes.cumsum(0);
         torch::Tensor edge_bucket_starts_disk = edge_bucket_ends_disk - edge_bucket_sizes;
+
         auto edge_bucket_sizes_accessor = edge_bucket_sizes.accessor<int64_t, 1>();
         auto edge_bucket_starts_disk_accessor = edge_bucket_starts_disk.accessor<int64_t, 1>();
 
@@ -398,10 +408,9 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
         torch::Tensor in_mem_edge_bucket_starts = in_mem_edge_bucket_sizes.cumsum(0);
         int64_t total_size = in_mem_edge_bucket_starts[-1].item<int64_t>();
         in_mem_edge_bucket_starts = in_mem_edge_bucket_starts - in_mem_edge_bucket_sizes;
-
         auto in_mem_edge_bucket_starts_accessor = in_mem_edge_bucket_starts.accessor<int64_t, 1>();
-
         current_subgraph_state_->all_in_memory_edges_ = torch::empty({total_size, storage_ptrs_.edges->dim1_size_}, torch::kInt64);
+
         if (hasEdgeWeights()) {
             current_subgraph_state_->all_in_memory_edges_weights_ = torch::empty({total_size, storage_ptrs_.edges_weights->dim1_size_}, torch::kFloat32);
         }
@@ -455,10 +464,13 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
             mapped_edges_weights = current_subgraph_state_->all_in_memory_edges_weights_.select(1, 0);
         }
 
+        // Get the edges sorted by src
         std::tuple<EdgeList, EdgeList> sorted_mapped_edges =
             merge_sorted_edge_buckets(mapped_edges, mapped_edges_weights, in_mem_edge_bucket_starts, buffer_size, true);
         mapped_edges = std::get<0>(sorted_mapped_edges);
         mapped_edges_src_weights = std::get<1>(sorted_mapped_edges);
+
+        // Get the edges sorted by dst
         std::tuple<EdgeList, EdgeList> sorted_mapped_edges_dst_sort =
             merge_sorted_edge_buckets(mapped_edges, mapped_edges_weights, in_mem_edge_bucket_starts, buffer_size, false);
         mapped_edges_dst_sort = std::get<0>(sorted_mapped_edges_dst_sort);
@@ -485,6 +497,7 @@ void GraphModelStorage::initializeInMemorySubGraph(torch::Tensor buffer_state, i
                 getNextSubGraph();
             }
         }
+
     } else {
         // Either nothing buffered (in memory training) or eval and doing full graph evaluation
         current_subgraph_state_ = std::make_shared<InMemorySubgraphState>();

@@ -103,6 +103,11 @@ torch::Tensor GATLayer::forward(torch::Tensor inputs, DENSEGraph dense_graph, bo
     nbr_atn_weights = nbr_atn_weights.transpose(0, 2);    // [total_num_nbrs, 1, num_heads_]
     self_atn_weights = self_atn_weights.transpose(0, 2);  // [num_to_encode, 1, num_heads_]
 
+    std::cout << "nbr_atn_weights sizes " << nbr_atn_weights.sizes() << std::endl;
+    std::cout << "self_atn_weights sizes " << self_atn_weights.sizes() << std::endl;
+    std::cout << "neighbor_offsets sizes " << neighbor_offsets.sizes() << std::endl;
+    std::cout << "parent_ids sizes " << parent_ids.sizes() << std::endl;
+    std::cout << "total_neighbors sizes " << total_neighbors.sizes() << std::endl;
     std::tie(nbr_atn_weights, self_atn_weights) = attention_softmax(nbr_atn_weights, self_atn_weights, neighbor_offsets, parent_ids, total_neighbors);
 
     nbr_atn_weights = nbr_atn_weights.transpose(0, 2);

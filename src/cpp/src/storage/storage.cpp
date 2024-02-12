@@ -75,6 +75,7 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, int64_t dim0_siz
     int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
+    std::cout << "Creating buffer with file " << filename_ << std::endl;
     buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
                                   dtype_, filename_, options_->prefetching);
 }
@@ -91,6 +92,7 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, torch::Tensor da
     int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
+    std::cout << "Creating buffer with file " << filename_ << std::endl;
     buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
                                   dtype_, filename_, options_->prefetching);
 }
@@ -105,6 +107,7 @@ PartitionBufferStorage::PartitionBufferStorage(string filename, shared_ptr<Parti
     int64_t partition_size = ceil((double)dim0_size_ / options_->num_partitions);
     device_ = torch::kCPU;
 
+    std::cout << "Creating buffer with file " << filename_ << std::endl;
     buffer_ = new PartitionBuffer(options_->buffer_capacity, options_->num_partitions, options_->fine_to_coarse_ratio, partition_size, dim1_size_, dim0_size_,
                                   dtype_, filename_, options_->prefetching);
 }

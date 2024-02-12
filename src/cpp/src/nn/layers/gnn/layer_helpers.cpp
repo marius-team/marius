@@ -46,7 +46,9 @@ std::tuple<torch::Tensor, torch::Tensor> attention_softmax(torch::Tensor neighbo
     torch::Tensor has_nbrs_mask = torch::not_equal(num_nbrs, 0);
     has_nbrs_mask = has_nbrs_mask.reshape({-1, 1, 1});
 
+    std::cout << "Neighbor attention of size " << neighbor_attention.sizes() << ", and segment offsets of size " << segment_offsets.sizes() << std::endl;
     torch::Tensor seg_max = segmented_max_with_offsets(neighbor_attention, segment_offsets);
+    std::cout << "seg_max of sizes " << seg_max.sizes() << ", and attention of sizes " << self_attention.sizes() << std::endl;
     torch::Tensor attention_max = torch::where(has_nbrs_mask, torch::maximum(seg_max, self_attention), self_attention);
 
     self_attention = torch::exp(self_attention - attention_max);

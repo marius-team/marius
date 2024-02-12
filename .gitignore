@@ -174,3 +174,4 @@ Thumbs.db
 
 src/cpp/third_party
 test_datasets
+simulator/datasets

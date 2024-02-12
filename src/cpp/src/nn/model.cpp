@@ -300,7 +300,6 @@ void Model::train_batch(shared_ptr<Batch> batch, bool call_step) {
 
     if (learning_task_ == LearningTask::LINK_PREDICTION) {
         auto all_scores = forward_lp(batch, true);
-
         torch::Tensor pos_scores = std::get<0>(all_scores);
         torch::Tensor neg_scores = std::get<1>(all_scores);
         torch::Tensor inv_pos_scores = std::get<2>(all_scores);

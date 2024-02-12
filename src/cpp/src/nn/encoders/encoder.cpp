@@ -120,7 +120,7 @@ shared_ptr<Layer> GeneralEncoder::initGNNLayer(std::shared_ptr<LayerConfig> laye
     auto options = std::dynamic_pointer_cast<GNNLayerOptions>(layer_config->options);
 
     std::shared_ptr<Layer> layer;
-
+    bool is_none = options->type == GNNLayerType::NONE;
     if (options->type == GNNLayerType::GRAPH_SAGE) {
         string name = "graph_sage_layer:" + std::to_string(stage_id) + "_" + std::to_string(layer_id);
         layer = std::make_shared<GraphSageLayer>(layer_config, device_);
@@ -138,7 +138,7 @@ shared_ptr<Layer> GeneralEncoder::initGNNLayer(std::shared_ptr<LayerConfig> laye
         layer = std::make_shared<RGCNLayer>(layer_config, num_relations_, device_);
         register_module<RGCNLayer>(name, std::dynamic_pointer_cast<RGCNLayer>(layer));
     } else {
-        throw std::runtime_error("Unrecognized GNN layer type");
+        throw std::runtime_error("Unrecognized GNN layer type of");
     }
 
     return layer;

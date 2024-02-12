@@ -288,9 +288,9 @@ void DataLoader::setBufferOrdering() {
         if (graph_storage_->useInMemorySubGraph()) {
             auto tup = getEdgeBucketOrdering(options->edge_bucket_ordering, options->num_partitions, options->buffer_capacity, options->fine_to_coarse_ratio,
                                              options->num_cache_partitions, options->randomly_assign_edge_buckets);
+
             buffer_states_ = std::get<0>(tup);
             edge_buckets_per_buffer_ = std::get<1>(tup);
-
             edge_buckets_per_buffer_iterator_ = edge_buckets_per_buffer_.begin();
 
             graph_storage_->setBufferOrdering(buffer_states_);
@@ -304,7 +304,6 @@ void DataLoader::setBufferOrdering() {
                 graph_storage_->getNumNodes(), options->num_partitions, options->buffer_capacity, options->fine_to_coarse_ratio, options->num_cache_partitions);
             buffer_states_ = std::get<0>(tup);
             node_ids_per_buffer_ = std::get<1>(tup);
-
             node_ids_per_buffer_iterator_ = node_ids_per_buffer_.begin();
 
             graph_storage_->setBufferOrdering(buffer_states_);
@@ -367,6 +366,7 @@ shared_ptr<Batch> DataLoader::getNextBatch() {
     }
     batch_lock.unlock();
     batch_cv_->notify_all();
+
     return batch;
 }
 

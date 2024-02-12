@@ -376,6 +376,7 @@ void PartitionBuffer::load() {
             SPDLOG_ERROR("Unable to allocate buffer memory\nError: {}", errno);
             throw std::runtime_error("");
         }
+
         memset_wrapper(buff_mem_, 0, capacity_ * partition_size_ * embedding_size_ * dtype_size_);
         buffer_tensor_view_ = torch::from_blob(buff_mem_, {capacity_ * partition_size_, embedding_size_}, dtype_);
 
