@@ -16,11 +16,10 @@ def read_config_file(config_file):
 
 def read_arguments():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("config_file", type=str, help="The config file containing the details for the simulation")
+    parser.add_argument("--config_file", type=str, help="The config file containing the details for the simulation")
+    parser.add_argument("--save_path", required=True, type=str, help="The path to save the resulting image to")
+    parser.add_argument("--graph_title", required=True, type=str, help="The title of the saved graph")
     return parser.parse_args()
-
-
-IMAGES_SAVE_DIR = "images"
 
 
 def main():
@@ -44,8 +43,8 @@ def main():
     print("Got result for", len(pages_loaded), "nodes out of", len(nodes_to_sample), "nodes")
 
     # Save the histogram
-    save_path = os.path.join(IMAGES_SAVE_DIR, os.path.basename(arguments.config_file).replace("json", "png"))
-    visualize_results(pages_loaded, save_path, config["dataset_name"])
+    os.makedirs(os.path.dirname(arguments.save_path), exist_ok=True)
+    visualize_results(pages_loaded, arguments.save_path, arguments.graph_title, config["dataset_name"])
 
 
 if __name__ == "__main__":
