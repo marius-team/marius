@@ -21,8 +21,8 @@ class FeaturesLoader:
 
     def get_node_page(self, node_id):
         node_location = self.node_location_map[node_id]
-        return int(node_id / self.nodes_per_page)
+        return int(node_location / self.nodes_per_page)
 
     def get_total_file_size(self):
-        total_bytes = self.page_size * self.total_bytes
+        total_bytes = self.page_size * self.total_pages
         return humanfriendly.format_size(total_bytes)

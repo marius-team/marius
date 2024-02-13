@@ -44,7 +44,14 @@ def main():
 
     # Save the histogram
     os.makedirs(os.path.dirname(arguments.save_path), exist_ok=True)
-    visualize_results(pages_loaded, arguments.save_path, arguments.graph_title, config["dataset_name"])
+    visualize_arguments = {
+        "pages_loaded": pages_loaded,
+        "save_path": arguments.save_path,
+        "graph_title": arguments.graph_title,
+        "total_space": features_loader.get_total_file_size(),
+        "dataset_name": config["dataset_name"],
+    }
+    visualize_results(visualize_arguments)
 
 
 if __name__ == "__main__":

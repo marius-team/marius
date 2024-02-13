@@ -1,0 +1,8 @@
+{
+    "dataset_name" : "ogbn_arxiv",
+    "features_stats" : {
+        "page_size" : "16 KB",
+        "feature_dimension" : 128,
+        "feature_size" : "float32"
+    }
+}
