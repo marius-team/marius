@@ -40,7 +40,6 @@ def main():
         num_pages_read = sampler.perform_sampling_for_node(curr_node)
         if num_pages_read > 0:
             pages_loaded.append(num_pages_read)
-    print("Got result for", len(pages_loaded), "nodes out of", len(nodes_to_sample), "nodes")
 
     # Save the histogram
     os.makedirs(os.path.dirname(arguments.save_path), exist_ok=True)
