@@ -28,7 +28,7 @@ def main():
 
     # Create the loaders
     data_loader = DatasetLoader(config["dataset_name"])
-    features_loader = FeaturesLoader(data_loader, config["features_stats"])
+    features_loader = get_featurizer(data_loader, config["features_stats"])
     sampler = SubgraphSampler(data_loader, features_loader)
 
     # Perform sampling
@@ -49,6 +49,7 @@ def main():
         "graph_title": arguments.graph_title,
         "total_space": features_loader.get_total_file_size(),
         "dataset_name": config["dataset_name"],
+        "nodes_per_page": features_loader.nodes_per_page,
     }
     visualize_results(visualize_arguments)
 
