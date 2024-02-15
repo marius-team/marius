@@ -2,8 +2,8 @@
     "dataset_name" : "ogbn_arxiv",
     "features_stats" : {
         "featurizer_type" : "neighbors_nearby",
-        "page_size" : "16 KB",
-        "feature_dimension" : 64,
+        "page_size" : "16.384 KB",
+        "feature_dimension" : 128,
         "feature_size" : "float32"
     }
 }

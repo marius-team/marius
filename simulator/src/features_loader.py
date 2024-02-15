@@ -2,6 +2,7 @@ import humanfriendly
 import os
 import math
 import random
+import numpy as np
 
 
 class FeaturesLoader:
@@ -9,7 +10,7 @@ class FeaturesLoader:
         self.data_loader = data_loader
         self.features_stat = features_stat
         self.page_size = humanfriendly.parse_size(features_stat["page_size"])
-        self.feature_size = int("".join(c for c in features_stat["feature_size"] if c.isdigit()))
+        self.feature_size = np.dtype(features_stat["feature_size"]).itemsize
         self.node_feature_size = self.feature_size * features_stat["feature_dimension"]
         self.nodes_per_page = max(int(self.page_size / self.node_feature_size), 1)
         self.initialize()
@@ -22,7 +23,12 @@ class FeaturesLoader:
             random.shuffle(self.node_location_map)
 
     def get_node_page(self, src_node, neighbor_node):
-        return int(self.node_location_map[neighbor_node] / self.nodes_per_page)
+        start_node = int(self.node_location_map[neighbor_node] / self.nodes_per_page)
+        curr_page_nodes = set()
+        for node_id in range(start_node, start_node + self.nodes_per_page):
+            curr_page_nodes.add(node_id)
+
+        return curr_page_nodes
 
     def get_total_file_size(self):
         total_bytes = self.page_size * self.total_pages
@@ -44,11 +50,17 @@ class NeighborFeaturesLoader(FeaturesLoader):
             neighbors_to_keep = min(len(all_neighbors), num_neighbors)
             self.neighbors_in_page[curr_node] = all_neighbors[:neighbors_to_keep]
 
+    def get_page_for_node(self, node):
+        page_nodes = set()
+        page_nodes.add(node)
+        for neighbor_node in self.neighbors_in_page[node]:
+            page_nodes.add(neighbor_node)
+        return page_nodes
+
     def get_node_page(self, src_node, neighbor_node):
         if neighbor_node in self.neighbors_in_page[src_node]:
-            return src_node
-
-        return neighbor_node
+            return self.get_page_for_node(src_node)
+        return self.get_page_for_node(neighbor_node)
 
 
 features_class_map = {"default": FeaturesLoader, "neighbors_nearby": NeighborFeaturesLoader}

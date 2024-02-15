@@ -36,8 +36,8 @@ class DatasetLoader:
         self.adjacency_map = {}
         for source, target in edges_arr:
             if source not in self.adjacency_map:
-                self.adjacency_map[source] = []
-            self.adjacency_map[source].append(target)
+                self.adjacency_map[source] = set()
+            self.adjacency_map[source].add(target)
 
     def get_num_nodes(self):
         return len(self.nodes)
@@ -46,7 +46,7 @@ class DatasetLoader:
         if node_id not in self.adjacency_map:
             return []
 
-        return self.adjacency_map[node_id]
+        return list(self.adjacency_map[node_id])
 
     def get_num_edges(self):
         return self.num_edges
