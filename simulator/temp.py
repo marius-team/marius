@@ -1,0 +1,2 @@
+values = ['cmake', '/working_dir', '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/working_dir/build/lib.linux-x86_64-3.10/marius', '-DPYTHON_EXECUTABLE=/usr/bin/python3', '-DCMAKE_BUILD_TYPE=Release', '-DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE', '-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE', '-DCMAKE_INSTALL_RPATH=$ORIGIN']
+print(" ".join(values))

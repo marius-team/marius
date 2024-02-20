@@ -176,3 +176,5 @@ src/cpp/third_party
 test_datasets
 simulator/datasets
 simulator/images
+simulator/metis-5.1.0.tar
+simulator/metis-5.1.0

@@ -1,10 +1,10 @@
 {
-    "dataset_name" : "ogbn_arxiv",
+    "dataset_name" : "ogbn_products",
     "features_stats" : {
         "featurizer_type" : "default",
         "page_size" : "16.384 KB",
-        "feature_dimension" : 128,
+        "feature_dimension" : 100,
         "feature_size" : "float32"
-    }, 
-    "sampling_depth" : 2
+    },
+    "sampling_depth" : 1
 }

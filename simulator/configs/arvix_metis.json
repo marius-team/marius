@@ -1,8 +1,8 @@
 {
     "dataset_name" : "ogbn_arxiv",
     "features_stats" : {
-        "feature_layout" : "random",
-        "page_size" : "16 KB",
+        "featurizer_type" : "metis_partition",
+        "page_size" : "16.384 KB",
         "feature_dimension" : 128,
         "feature_size" : "float32"
     }
