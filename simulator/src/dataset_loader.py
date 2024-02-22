@@ -2,8 +2,10 @@ import subprocess
 import os
 import numpy as np
 import torch
+import traceback
 from collections import defaultdict
-import marius.storage
+from marius.data import Batch, DENSEGraph, MariusGraph
+from marius.data.samplers import LayeredNeighborSampler
 
 class DatasetLoader:
     SAVE_DIR = "datasets"
@@ -33,47 +35,40 @@ class DatasetLoader:
         edges_flaten_arr = np.frombuffer(edges_bytes, dtype=np.int32)
         edges_arr = edges_flaten_arr.reshape((-1, 2))
 
-        '''
         # Create the graph
-        self.edge_list = torch.from_numpy(edges_arr)
-        self.nodes = torch.unique(self.edge_list)
-        self.current_graph = MariusGraph(self.edge_list, self.edge_list[torch.argsort(edge_list[:, -1])], self.get_num_nodes())
-        self.sampler = LayeredNeighborSampler(full_graph, [-1 for _ in range(self.sampling_depth)])
-
-        # Neighbors cache
-        '''
+        self.edge_list = torch.tensor(edges_arr, dtype = torch.int64)
+        self.total_nodes = torch.max(self.edge_list).item() + 1
+        self.current_graph = MariusGraph(self.edge_list, self.edge_list[torch.argsort(self.edge_list[:, -1])], self.total_nodes)
+        self.sampler = LayeredNeighborSampler(self.current_graph, [-1 for _ in range(self.sampling_depth)])
 
     def get_num_nodes(self):
-        return self.nodes.shape(0)
+        return self.total_nodes
 
-    def get_neigbhors_for_node(self, node_id, all_depths = False):
-        if node_id not in self.adjacency_map:
-            return []
-
-        return list(self.adjacency_map[node_id])
-
-    def get_incoming_neighbors(self, node_id):
-        if node_id not in self.num_incoming_edges:
-            return 0
-
-        return self.num_incoming_edges[node_id]
+    def get_neigbhors_for_nodes(self, nodes):
+        # Get the neighbors for the nodes
+        try:
+            nodes_to_sample = torch.tensor(nodes, dtype = torch.int64)
+            sampled_nodes = self.sampler.getNeighbors(nodes_to_sample)
+            sampled_nodes.performMap()
+            return sampled_nodes.getNeighborIDs(True, True).numpy()
+        except:
+            return np.array([])
 
     def get_num_edges(self):
-        return self.edge_list.shape(0)
+        return self.edge_list.size(0)
+    
+    def get_nodes_sorted_by_incoming(self):
+        return torch.argsort(torch.bincount(self.edge_list[ : , 1]), descending=True).numpy()
 
     def get_average_neighbors(self):
-        neighbors_count = []
-        for node_neighbors in self.adjacency_map.values():
-            neighbors_count.append(len(node_neighbors))
-
-        return np.mean(np.array(neighbors_count))
+        outgoing_nodes = self.edge_list[ : , 0]
+        outgoing_unique_nodes = torch.unique(outgoing_nodes)
+        return outgoing_nodes.size(0)/outgoing_unique_nodes.size(0)
 
     def get_average_incoming(self):
-        incoming_counts = []
-        for num_incoming in self.num_incoming_edges.values():
-            incoming_counts.append(num_incoming)
-
-        return np.mean(np.array(incoming_counts))
+        incoming_nodes = self.edge_list[ : , 1]
+        incoming_unique_nodes = torch.unique(incoming_nodes)
+        return incoming_nodes.size(0)/incoming_unique_nodes.size(0)
 
     def get_values_to_log(self):
         return {

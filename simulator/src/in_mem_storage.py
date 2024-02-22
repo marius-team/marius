@@ -8,13 +8,7 @@ class InMemoryStorage:
         nodes_in_mem = int((total_nodes * self.percent_in_memory) / 100.0)
 
         # Get the top nodes based on incoming neighbors
-        heap = []
-        for node_id in range(total_nodes):
-            num_incoming = data_loader.get_incoming_neighbors(node_id)
-            heapq.heappush(heap, (num_incoming, node_id))
-
-        top_pairs = heapq.nlargest(nodes_in_mem, heap)
-        self.in_memory_nodes = set([pair[1] for pair in top_pairs])
+        self.in_memory_nodes = data_loader.get_nodes_sorted_by_incoming()[ : nodes_in_mem]
 
     def node_in_mem_storage(self, node_id):
         return node_id in self.in_memory_nodes
@@ -24,3 +18,6 @@ class InMemoryStorage:
 
     def in_mem_nodes_count(self):
         return len(self.in_memory_nodes)
+    
+    def remove_in_mem_nodes(self, nodes):
+        return np.setdiff1d(nodes, self.in_memory_nodes)

@@ -10,45 +10,22 @@ class SubgraphSampler:
         self.in_memory_storage = None
         if "top_percent_in_mem" in config:
             self.in_memory_storage = InMemoryStorage(data_loader, config["top_percent_in_mem"])
+
+    def perform_sampling_for_nodes(self, nodes):
+        # Get the neighbors of the node
+        node_neigbhors = self.data_loader.get_neigbhors_for_nodes(nodes)
+        if node_neigbhors.shape[0] == 0:
+            return 0
         
-        self.nodes_loaded = set()
-        self.pages_loaded = 0
-        self.depth = config["sampling_depth"]
-    
-    def reset(self):
-        self.nodes_loaded.clear()
-        self.pages_loaded = 0
-
-    def is_node_in_mem(self, node_id):
-        return self.in_memory_storage is not None and self.in_memory_storage.node_in_mem_storage(node_id)
-    
-    def get_node_features(self, src_node, neighbor_node):
-        if neighbor_node in self.nodes_loaded or self.is_node_in_mem(neighbor_node):
-            return
+        # Remove the in memory nodes
+        if self.in_memory_storage is not None:
+            node_neigbhors = self.in_memory_storage.remove_in_mem_nodes(node_neigbhors)
+        if node_neigbhors.shape[0] == 0:
+            return 0
         
-        self.nodes_loaded.update(self.features_loader.get_node_page(src_node, neighbor_node))
-        self.pages_loaded += 1
-
-    def perform_sampling_for_node(self, node_id):
-        # Read for this node
-        self.reset()
-
-        # Perform bfs
-        curr_queue = [(node_id, node_id)]
-        curr_depth = 0
-        while curr_depth <= self.depth and len(curr_queue) > 0:
-            # Get all of the nodes in the level
-            level_nodes = len(curr_queue)
-            for _ in range(level_nodes):
-                src_node, curr_node = curr_queue.pop(0)
-                self.get_node_features(src_node, curr_node)
-                for neighbor in self.data_loader.get_neigbhors_for_node(curr_node):
-                    curr_queue.append((curr_node, neighbor))
-            
-            # Move to the next level
-            curr_depth += 1
-
-        return self.pages_loaded
+        # Get the average pages per node
+        total_pages_loaded = self.features_loader.num_pages_for_nodes(node_neigbhors)
+        return total_pages_loaded/nodes.shape[0]
 
     def get_values_to_log(self):
         values_to_return = {}

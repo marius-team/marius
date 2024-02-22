@@ -19,17 +19,19 @@ class FeaturesLoader:
 
     def initialize(self):
         total_nodes = self.data_loader.get_num_nodes()
-        print("Total nodes of", total_nodes)
         self.total_pages = int(math.ceil(total_nodes / (1.0 * self.nodes_per_page)))
-        self.node_location_map = [i for i in range(self.total_pages)]
+        self.node_location_map = np.arange(total_nodes)
         if "feature_layout" in self.features_stat and self.features_stat["feature_layout"] == "random":
             random.shuffle(self.node_location_map)
+        self.node_to_page = (self.node_location_map/self.nodes_per_page).astype(int)
 
     def get_node_page(self, src_node, neighbor_node):
-        print("Querying for node", neighbor_node, "with total of", len(self.node_location_map), "nodes")
         start_node = int(self.node_location_map[neighbor_node] / self.nodes_per_page)
         curr_page_nodes = set(range(start_node, start_node + self.nodes_per_page))
         return curr_page_nodes
+    
+    def num_pages_for_nodes(self, nodes):
+        return np.unique(self.node_to_page[nodes]).shape[0]
 
     def get_single_node_feature_size(self):
         return self.node_feature_size
