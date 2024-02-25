@@ -42,7 +42,6 @@ def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
     txt_lines = []
     for key, value in vals_to_log.items():
         txt_lines.append(str(key).strip() + ": " + str(value).strip())
-
     text_to_write = "Key Metrics:\n" + "\n".join(txt_lines)
 
     # Get the current axis limits
@@ -61,14 +60,12 @@ def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
     )
 
     # Save the result
-    plt.tight_layout()
     image_save_path = visualize_args["save_path"]
-    plt.savefig(image_save_path)
-    print("Saved image to", image_save_path)
+    print("Saving image to", image_save_path)
 
     # Save the metrics
     metrics_save_path = image_save_path[ : image_save_path.rindex(".")] + ".json"
+    print("Saving metrics to", metrics_save_path)
     with open(metrics_save_path, 'w+') as writer:
         json.dump(metrics_to_write, writer, indent = 4)
-    print("Saved metrics to", metrics_save_path)
     

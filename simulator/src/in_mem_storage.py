@@ -20,4 +20,5 @@ class InMemoryStorage:
         return len(self.in_memory_nodes)
     
     def remove_in_mem_nodes(self, nodes):
-        return np.setdiff1d(nodes, self.in_memory_nodes)
+        is_in_mask = torch.isin(nodes, self.in_memory_nodes)
+        return nodes[~is_in_mask]

@@ -5,6 +5,7 @@ import random
 import time
 import datetime
 import traceback
+import torch
 import torch.multiprocessing as multiprocessing
 
 from src.dataset_loader import *
@@ -28,35 +29,37 @@ def run_for_worker(i, arguments, results_queue):
     if "sample_percentage" in config:
         sample_percentage = float(config["sample_percentage"])
     all_nodes = data_loader.get_nodes_sorted_by_incoming()
-    total_nodes = all_nodes.shape[0]
+    total_nodes = all_nodes.size(0)
     chunk_start_idx, chunk_end_idx = int((i * total_nodes)/arguments.num_process), int(((i + 1) * total_nodes)/arguments.num_process)
     worker_chunk = all_nodes[chunk_start_idx : chunk_end_idx]
-    np.random.shuffle(worker_chunk)
+    worker_chunk = worker_chunk[torch.randperm(worker_chunk.size(0))]
 
     # Get the sample for this worker
     batch_size = 1
     if "batch_size" in config:
         batch_size = int(config["batch_size"])
-    print("Worker", i, "is processing", worker_chunk.shape, "out of", all_nodes.shape, "using batch size of", batch_size)
-    worker_chunk = worker_chunk[ : worker_chunk.shape[0] - (worker_chunk.shape[0] % batch_size)]
-    worker_chunk = worker_chunk.reshape((-1, batch_size))
-    num_sample_nodes = int((sample_percentage * worker_chunk.shape[0])/100.0) 
-    batches_to_keep = np.random.choice(worker_chunk.shape[0], num_sample_nodes, replace = False)
-    sample_nodes = worker_chunk[batches_to_keep, : ]
+
+    num_sample_nodes = int((sample_percentage * worker_chunk.size(0))/100.0) 
+    node_probabilities = torch.full((worker_chunk.size(0), ), 1.0, dtype = torch.float)
+    batches_idx = torch.multinomial(node_probabilities, num_sample_nodes, replacement = False)
+    worker_chunk = worker_chunk[batches_idx]
+    worker_chunk = worker_chunk[ : worker_chunk.size(0) - (worker_chunk.size(0) % batch_size)]
+    sample_nodes = worker_chunk.reshape((-1, batch_size))
 
     # Perform the sampling
-    total_batches = sample_nodes.shape[0]
+    data_loader.start_graph_initialization(sample_nodes, sampler.get_in_mem_storage())
+    total_batches = sample_nodes.size(0)
     log_rate = int(total_batches/arguments.log_rate)
-    print("Total of", total_batches, "batches with log rate of", log_rate)
+    print("Worker", i, "has a total of", total_batches, "batches with log rate of", log_rate)
     pages_loaded = []
     pages_time_taken = []
-    for batch_idx, batch in enumerate(sample_nodes):
+    for batch_idx in range(total_batches):
         # Process the current batch
         try:
             start_time = time.time()
-            sucess, average_pages_loaded = sampler.perform_sampling_for_nodes(batch)
-            if sucess and average_pages_loaded >= 0:
-                pages_loaded.append(average_pages_loaded)
+            sucess, total_pages_loaded = sampler.perform_sampling_for_nodes(batch_idx)
+            if sucess and total_pages_loaded >= 0:
+                pages_loaded.append(total_pages_loaded/batch_size)
             pages_time_taken.append(time.time() - start_time)
         except:
             print("Worker", i, "batch", batch_idx, "failed due to error", traceback.format_exc())
@@ -69,6 +72,7 @@ def run_for_worker(i, arguments, results_queue):
     # Get the arguments to log
     metrics = sampler.get_metrics()
     metrics["average_time_per_batch"] = np.mean(np.array(pages_time_taken))
+
     vals_to_log = {
         "Batch Size" : batch_size,
         "Sample Percentage" : sample_percentage,
@@ -137,6 +141,7 @@ def main():
 
     # Save the histogram
     all_pages_loaded = np.concatenate(all_workers_pages_loaded)
+    print("All pages loaded of shape", all_pages_loaded.shape)
     os.makedirs(os.path.dirname(arguments.save_path), exist_ok=True)
     visualize_arguments = {
         "pages_loaded": all_pages_loaded,

@@ -3,9 +3,10 @@ import os
 import math
 import random
 import numpy as np
+import torch
 import metis
 import networkx as nx
-
+import pandas as pd
 
 class FeaturesLoader:
     def __init__(self, data_loader, features_stat):
@@ -20,10 +21,6 @@ class FeaturesLoader:
     def initialize(self):
         total_nodes = self.data_loader.get_num_nodes()
         self.total_pages = int(math.ceil(total_nodes / (1.0 * self.nodes_per_page)))
-        self.node_location_map = np.arange(total_nodes)
-        if "feature_layout" in self.features_stat and self.features_stat["feature_layout"] == "random":
-            random.shuffle(self.node_location_map)
-        self.node_to_page = (self.node_location_map/self.nodes_per_page).astype(int)
 
     def get_node_page(self, src_node, neighbor_node):
         start_node = int(self.node_location_map[neighbor_node] / self.nodes_per_page)
@@ -31,7 +28,8 @@ class FeaturesLoader:
         return curr_page_nodes
     
     def num_pages_for_nodes(self, nodes):
-        return np.unique(self.node_to_page[nodes]).shape[0]
+        node_pages = (nodes/self.nodes_per_page).astype(int)
+        return node_pages.shape[0]
 
     def get_single_node_feature_size(self):
         return self.node_feature_size
@@ -48,7 +46,6 @@ class FeaturesLoader:
 
     def get_values_to_log(self):
         return {"Nodes per Page": self.nodes_per_page, "Total File Size": self.get_total_file_size()}
-
 
 class NeighborFeaturesLoader(FeaturesLoader):
     def __init__(self, data_loader, features_stat):

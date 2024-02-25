@@ -2,6 +2,7 @@ import subprocess
 import os
 import numpy as np
 import torch
+import time
 import traceback
 import threading
 from collections import defaultdict
@@ -42,33 +43,43 @@ class DatasetLoader:
         self.current_graph = MariusGraph(self.edge_list, self.edge_list[torch.argsort(self.edge_list[:, -1])], self.total_nodes)
         self.sampler = LayeredNeighborSampler(self.current_graph, [-1 for _ in range(self.sampling_depth)])
 
+        self.batch_graphs = []
+    
     def get_num_nodes(self):
         return self.total_nodes
+    
+    def get_graph_for_batch(self, batch_idx):
+        while batch_idx not in self.batch_graphs:
+            batch_idx += 1
+            batch_idx -= 1
 
-    def get_neigbhors_for_nodes(self, nodes):
-        # Get the neighbors for the nodes
-        try:
-            nodes_to_sample = torch.tensor(nodes, dtype = torch.int64)
-            sampled_nodes = self.sampler.getNeighbors(nodes_to_sample)
-            sampled_nodes.performMap()
-            return True, sampled_nodes.getNeighborIDs(True, True).numpy()
-        except:
-            return False, np.array([])
-        
-    def get_graph_for_nodes(self, nodes):
-        try:
-            nodes_to_sample = torch.tensor(nodes, dtype = torch.int64)
-            sampled_nodes = self.sampler.getNeighbors(nodes_to_sample)
-            sampled_nodes.performMap()
-            return sampled_nodes
-        except:
-            return None
+        return self.batch_graphs[batch_idx]
+    
+    def start_graph_initialization(self, batches, in_memory_storage):
+        self.thread = threading.Thread(target = self.generate_graph_per_batch, args = (batches, in_memory_storage, ))
+        self.thread.daemon = True
+        self.thread.start()
+        time.sleep(20)
+    
+    def generate_graph_per_batch(self, batches, in_memory_storage):
+        for batch in batches:
+            batch_graph = None
+            try:
+                if in_memory_storage is not None:
+                    batch = in_memory_storage.remove_in_mem_nodes(batch)
+                sampled_nodes = self.sampler.getNeighbors(batch)
+                sampled_nodes.performMap()
+                batch_graph = sampled_nodes
+            except:
+                batch_graph = None
+            
+            self.batch_graphs.append(batch_graph)
 
     def get_num_edges(self):
         return self.edge_list.size(0)
     
     def get_nodes_sorted_by_incoming(self):
-        return torch.argsort(torch.bincount(self.edge_list[ : , 1]), descending=True).numpy()
+        return torch.argsort(torch.bincount(self.edge_list[ : , 1]), descending=True)
 
     def get_average_neighbors(self):
         outgoing_nodes = self.edge_list[ : , 0]

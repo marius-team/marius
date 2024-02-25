@@ -22,19 +22,10 @@ class SubgraphSampler:
     def get_in_mem_storage(self):
         return self.in_memory_storage
 
-    def perform_sampling_for_nodes(self, nodes):
-        # Process the initial nodes
-        sample_start_time = time.time()
-        nodes = self.remove_high_degree(nodes)
-        initial_nodes = nodes.shape[0]
-        if initial_nodes == 0:
-            return True, 0
-        remove_end_time = time.time()
-        self.metrics.record_metric("node_removal_time", remove_end_time - sample_start_time)
-
+    def perform_sampling_for_nodes(self, batch_idx):
         # Get the graph for those nodes
         graph_get_start = time.time()
-        current_graph = self.data_loader.get_graph_for_nodes(nodes)
+        current_graph = self.data_loader.get_graph_for_batch(batch_idx)
         if current_graph is None:
             return False, -1
         graph_get_time = time.time() - graph_get_start
@@ -42,11 +33,11 @@ class SubgraphSampler:
 
         current_depth = 0
         total_pages_loaded = 0
-        while current_depth < self.sampling_depth and nodes.shape[0] > 0:
+        while current_depth < self.sampling_depth:
             # Get the neigbhors for the current level
             get_start_time = time.time()
+            nodes = current_graph.getNeighborIDs(True, True)
             num_search_nodes = nodes.shape[0]
-            nodes = current_graph.getNeighborIDs(True, True).numpy()
             get_end_time = time.time()
             self.metrics.record_metric("get_neighbor_time", get_end_time - get_start_time)
             self.metrics.record_metric("search_nodes_num", num_search_nodes)
@@ -61,10 +52,10 @@ class SubgraphSampler:
             
             # Get the pages for this level
             features_start_time = time.time()
-            total_pages_loaded += self.features_loader.num_pages_for_nodes(nodes)
+            total_pages_loaded += self.features_loader.num_pages_for_nodes(nodes.numpy())
             features_end_time = time.time()
             self.metrics.record_metric("features_get_time", features_end_time - features_start_time)
-            self.metrics.record_metric("fetures_nodes_num", nodes.shape[0])
+            self.metrics.record_metric("features_nodes_num", nodes.shape[0])
 
             # Record level time
             prepare_start_time = time.time()
@@ -78,7 +69,7 @@ class SubgraphSampler:
             level_process_time = level_end_time - get_start_time
             self.metrics.record_metric("level_processing_time", level_process_time)
         
-        return True, total_pages_loaded/initial_nodes
+        return True, total_pages_loaded
 
     def get_values_to_log(self):
         values_to_return = {}
