@@ -1,0 +1,11 @@
+{
+    "dataset_name" : "ogbn_arxiv",
+    "features_stats" : {
+        "featurizer_type" : "default",
+        "page_size" : "16.384 KB",
+        "feature_dimension" : 128,
+        "feature_size" : "float32"
+    }, 
+    "batch_size" : 10,
+    "sampling_depth" : 2
+}

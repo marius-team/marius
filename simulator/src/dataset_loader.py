@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 import traceback
+import threading
 from collections import defaultdict
 from marius.data import Batch, DENSEGraph, MariusGraph
 from marius.data.samplers import LayeredNeighborSampler
@@ -50,9 +51,18 @@ class DatasetLoader:
             nodes_to_sample = torch.tensor(nodes, dtype = torch.int64)
             sampled_nodes = self.sampler.getNeighbors(nodes_to_sample)
             sampled_nodes.performMap()
-            return sampled_nodes.getNeighborIDs(True, True).numpy()
+            return True, sampled_nodes.getNeighborIDs(True, True).numpy()
         except:
-            return np.array([])
+            return False, np.array([])
+        
+    def get_graph_for_nodes(self, nodes):
+        try:
+            nodes_to_sample = torch.tensor(nodes, dtype = torch.int64)
+            sampled_nodes = self.sampler.getNeighbors(nodes_to_sample)
+            sampled_nodes.performMap()
+            return sampled_nodes
+        except:
+            return None
 
     def get_num_edges(self):
         return self.edge_list.size(0)

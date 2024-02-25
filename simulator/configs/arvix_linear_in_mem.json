@@ -6,5 +6,7 @@
         "feature_dimension" : 128,
         "feature_size" : "float32"
     }, 
-    "top_percent_in_mem" : 1
+    "top_percent_in_mem" : 1,
+    "sampling_depth" : 1,
+    "batch_size" : 10
 }

@@ -6,5 +6,6 @@
         "feature_dimension" : 128,
         "feature_size" : "float32"
     }, 
-    "sampling_depth" : 2
+    "batch_size" : 10,
+    "sampling_depth" : 1
 }

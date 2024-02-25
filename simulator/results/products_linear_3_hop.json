@@ -1,0 +1,13 @@
+{
+    "pages_loaded_mean": 1677.49,
+    "pages_loaded_std_dev": 118.26,
+    "node_removal_time": 3.538170798880155e-06,
+    "graph_get_time": 0.6719331917215566,
+    "get_neighbor_time": 4.966402314399761e-05,
+    "search_nodes_num": 1071091.732240437,
+    "features_get_time": 0.053997908133626635,
+    "fetures_nodes_num": 1071487.3879781421,
+    "prepare_next_layer_time": 0.004483920628907251,
+    "level_processing_time": 0.058551180558126484,
+    "average_time_per_batch": 0.8651917000285915
+}

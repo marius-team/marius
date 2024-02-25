@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-
+import json
 
 def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
     # Get the number of pages read
@@ -23,11 +23,25 @@ def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
     plt.legend()
 
     # Write some resulting text
-    txt_lines = ["Mean Pages Loaded: " + str(page_mean), "Std dev of Pages Loaded: " + str(page_std)]
+    vals_to_log = {
+        "Mean Pages Loaded" : page_mean,
+        "Std dev of Pages Loaded" : page_std
+    }
     if "values_to_log" in visualize_args:
-        vals_to_log = visualize_args["values_to_log"]
-        for key, value in vals_to_log.items():
-            txt_lines.append(str(key).strip() + ": " + str(value).strip())
+        vals_to_log.update(visualize_args["values_to_log"])
+    
+    metrics_to_write = {
+        "pages_loaded_mean" : page_mean,
+        "pages_loaded_std_dev" : page_std
+    }
+    if "metrics" in visualize_args:
+        for metric_name, metric_values in visualize_args["metrics"].items():
+            if len(metric_values) > 0:
+                metrics_to_write[metric_name] = np.mean(np.array(metric_values))
+
+    txt_lines = []
+    for key, value in vals_to_log.items():
+        txt_lines.append(str(key).strip() + ": " + str(value).strip())
 
     text_to_write = "Key Metrics:\n" + "\n".join(txt_lines)
 
@@ -48,4 +62,13 @@ def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
 
     # Save the result
     plt.tight_layout()
-    plt.savefig(visualize_args["save_path"])
+    image_save_path = visualize_args["save_path"]
+    plt.savefig(image_save_path)
+    print("Saved image to", image_save_path)
+
+    # Save the metrics
+    metrics_save_path = image_save_path[ : image_save_path.rindex(".")] + ".json"
+    with open(metrics_save_path, 'w+') as writer:
+        json.dump(metrics_to_write, writer, indent = 4)
+    print("Saved metrics to", metrics_save_path)
+    
