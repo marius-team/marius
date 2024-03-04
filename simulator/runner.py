@@ -4,23 +4,24 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 
-configs_dir = "configs/arvix_in_mem_benchmark"
-save_dir = "results/arvix_in_mem_benchmark"
+configs_dir = "configs/ogbn_products_benchmark"
+save_dir = "results/ogbn_products_benchmark"
 command_format = "python3 main.py --config_file {} --save_path {} --graph_title \"CDF for sequential features\""
 def run_for_combo(sampling_depth, in_mem_percent):
     # Create the config file
-    file_name = f"arvix_{sampling_depth}_hop_{in_mem_percent}_in_mem"
+    file_name = f"products_{sampling_depth}_hop_{in_mem_percent}_in_mem"
     config_file_path = os.path.join(configs_dir, file_name + ".json")
     if not os.path.exists(config_file_path):
         config_data = {
-            "dataset_name" : "ogbn_arxiv",
+            "dataset_name" : "ogbn_products",
             "features_stats" : {
-                "featurizer_type" : "default",
+                "featurizer_type" : "linear",
                 "page_size" : "16.384 KB",
-                "feature_dimension" : 128,
+                "feature_dimension" : 100,
                 "feature_size" : "float32"
             }, 
-            "batch_size" : 25,
+            "batch_size" : 5,
+            "sample_percentage" : 25,
             "sampling_depth" : sampling_depth,
             "top_percent_in_mem" : in_mem_percent
         }
@@ -40,13 +41,22 @@ def run_for_combo(sampling_depth, in_mem_percent):
     with open(metrics_path, 'r') as reader:
         metrics = json.load(reader)
     
-    mean_val = float(metrics["Mean Pages Loaded"])
-    std_dev = float(metrics["Std dev of Pages Loaded"])
+    mean_val = float(metrics["pages_loaded_mean"])
+    std_dev = float(metrics["pages_loaded_std_dev"])
     return [sampling_depth, in_mem_percent, mean_val, std_dev]
 
 def main():
+    # Create the all in memory percent config
+    os.makedirs(configs_dir, exist_ok = True)
+    os.makedirs(save_dir, exist_ok = True)
+
     all_possible_depths = [i for i in range(1, 4)]
-    all_in_mem_percent = [i/2.0 for i in range(1, 11)] + [10, 25, 50, 75, 100]
+    all_in_mem_percent = [0.0]
+    for i in range(-4, 3, 1):
+        base_val = 10.0 ** i
+        all_in_mem_percent.append(base_val)
+        all_in_mem_percent.append(5.0 * base_val)
+    all_in_mem_percent = all_in_mem_percent[ : -1]
     
     results_rows = []
     for sampling_depth in all_possible_depths:
@@ -54,11 +64,11 @@ def main():
             results_rows.append(run_for_combo(sampling_depth, in_memory_percent))
     
     result_df = pd.DataFrame(results_rows, columns = ["sampling_depth", "percent_in_mem", "mean_pages", "std_dev_pages_loaded"])
-    result_df.to_csv("arvix_sampling_in_mem_benchmark.csv", index = False)
+    result_df.to_csv("ogbn_products_in_mem_benchmark.csv", index = False)
 
 def visualize_results():
     # Create the graph
-    colors = ['tab:blue', 'tab:green', 'tab:orange', 'tab:purple']
+    colors = ['tab:blue', 'tab:green', 'tab:orange']
     color_idx = 0
     fig, ax = plt.subplots()
 
@@ -85,5 +95,5 @@ def visualize_results():
     plt.savefig("arvix_sampling_in_mem_benchmark.png")
     
 if __name__ == "__main__":
-    # main()
+    main()
     visualize_results()

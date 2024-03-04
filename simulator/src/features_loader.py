@@ -5,7 +5,6 @@ import random
 import numpy as np
 import torch
 import metis
-import networkx as nx
 import pandas as pd
 
 class FeaturesLoader:
@@ -15,21 +14,16 @@ class FeaturesLoader:
         self.page_size = humanfriendly.parse_size(features_stat["page_size"])
         self.feature_size = np.dtype(features_stat["feature_size"]).itemsize
         self.node_feature_size = self.feature_size * features_stat["feature_dimension"]
-        self.nodes_per_page = max(int(self.page_size / self.node_feature_size), 1)
+        self.nodes_per_page = int(max(self.page_size / self.node_feature_size, 1))
         self.initialize()
 
     def initialize(self):
         total_nodes = self.data_loader.get_num_nodes()
         self.total_pages = int(math.ceil(total_nodes / (1.0 * self.nodes_per_page)))
-
-    def get_node_page(self, src_node, neighbor_node):
-        start_node = int(self.node_location_map[neighbor_node] / self.nodes_per_page)
-        curr_page_nodes = set(range(start_node, start_node + self.nodes_per_page))
-        return curr_page_nodes
+        self.page_counts = torch.zeros(self.total_pages)
     
-    def num_pages_for_nodes(self, nodes):
-        node_pages = (nodes/self.nodes_per_page).astype(int)
-        return node_pages.shape[0]
+    def get_num_pages_for_nodes(self, nodes):
+        return pd.unique(nodes // self.nodes_per_page).shape[0]
 
     def get_single_node_feature_size(self):
         return self.node_feature_size
@@ -45,7 +39,7 @@ class FeaturesLoader:
         return humanfriendly.format_size(total_bytes)
 
     def get_values_to_log(self):
-        return {"Nodes per Page": self.nodes_per_page, "Total File Size": self.get_total_file_size()}
+        return {"Nodes per Page": self.nodes_per_page, "Total Pages": self.total_pages}
 
 class NeighborFeaturesLoader(FeaturesLoader):
     def __init__(self, data_loader, features_stat):

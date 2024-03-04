@@ -114,14 +114,24 @@ void MariusGraph::clear() {
 }
 
 void MariusGraph::to(torch::Device device) {
-    node_ids_ = node_ids_.to(device);
+    if(node_ids_.defined()) {
+        node_ids_ = node_ids_.to(device);
+    }
     src_sorted_edges_ = src_sorted_edges_.to(device);
     dst_sorted_edges_ = dst_sorted_edges_.to(device);
-    out_sorted_uniques_ = out_sorted_uniques_.to(device);
+    if(out_sorted_uniques_.defined()) {
+        out_sorted_uniques_ = out_sorted_uniques_.to(device);
+    }
     out_offsets_ = out_offsets_.to(device);
     out_num_neighbors_ = out_num_neighbors_.to(device);
-    in_sorted_uniques_ = in_sorted_uniques_.to(device);
+    if(in_sorted_uniques_.defined()) {
+        in_sorted_uniques_ = in_sorted_uniques_.to(device);
+    }
+
     in_offsets_ = in_offsets_.to(device);
+    in_num_neighbors_ = in_num_neighbors_.to(device);
+    out_num_neighbors_ = out_num_neighbors_.to(device);
+    out_offsets_ = out_offsets_.to(device);
 }
 
 // 1 hop sampler
@@ -129,7 +139,6 @@ std::tuple<torch::Tensor, torch::Tensor> MariusGraph::getNeighborsForNodeIds(tor
                                                                              NeighborSamplingLayer neighbor_sampling_layer, int max_neighbors_size,
                                                                              float rate) {
     int gpu = 0;
-
     if (node_ids.is_cuda()) {
         gpu = 1;
     }

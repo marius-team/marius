@@ -1,4 +1,7 @@
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+FROM nvidia/cuda:11.6.1-cudnn8-devel-ubuntu20.04
+
+ENV TZ=Asia/Dubai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt update
 
 RUN apt install -y g++ \
@@ -14,18 +17,18 @@ RUN apt install -y g++ \
 RUN apt install -y software-properties-common
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt update
-RUN apt install -y gcc-9 g++-9
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+RUN apt install -y gcc-11 g++-11
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11
 
 # install cmake 3.20
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.sh
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.28.3/cmake-3.28.3-linux-x86_64.sh
 RUN mkdir /opt/cmake
-RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
+RUN sh cmake-3.28.3-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
 # install pytorch
-RUN python3 -m pip install torch==2.0.1+cu118 -f https://download.pytorch.org/whl/torch_stable.html
+RUN python3 -m pip install torch==1.13.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
 
 RUN mkdir /working_dir
 WORKDIR /working_dir

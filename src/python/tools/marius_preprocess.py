@@ -101,6 +101,15 @@ def set_args():
     )
 
     parser.add_argument(
+        "--num_nodes",
+        metavar="num_nodes",
+        required = False,
+        type = int,
+        default = None,
+        help = "The number of nodes must be specified if no_remap_ids"
+    )
+
+    parser.add_argument(
         "--dst_column",
         metavar="dst_column",
         required=False,
@@ -190,6 +199,7 @@ def main():
             partitioned_eval=args.partitioned_eval,
             sequential_train_nodes=args.sequential_train_nodes,
             src_column=args.src_column,
+            num_nodes = args.num_nodes,
             dst_column=args.dst_column,
             edge_type_column=args.edge_type_column,
             edge_weight_column=args.edge_weight_column,

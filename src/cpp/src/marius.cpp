@@ -9,6 +9,7 @@
 #include "reporting/logger.h"
 #include "storage/checkpointer.h"
 #include "storage/io.h"
+#include "data/features_loader.h"
 
 void encode_and_export(shared_ptr<DataLoader> dataloader, shared_ptr<Model> model, shared_ptr<MariusConfig> marius_config) {
     shared_ptr<GraphEncoder> graph_encoder;
@@ -162,6 +163,45 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
     }
 }
 
+void sampler_test(shared_ptr<MariusConfig> marius_config) {
+    auto tup = marius_init(marius_config, true);
+    auto model = std::get<0>(tup);
+    auto graph_model_storage = std::get<1>(tup);
+    auto dataloader = std::get<2>(tup);
+
+    // Create the graph
+    shared_ptr<Storage> train_edges = graph_model_storage->storage_ptrs_.train_edges;
+    train_edges->load();
+    torch::Tensor edges = train_edges->data_.to(torch::kInt64);
+    torch::Tensor src_sorted_edges = edges.index_select(0, edges.select(1, 0).argsort());
+    torch::Tensor dst_sorted_edges = edges.index_select(0, edges.select(1, -1).argsort());
+
+    // Create the features config
+    shared_ptr<MariusGraph> graph = std::make_shared<MariusGraph>(src_sorted_edges, dst_sorted_edges, 31);
+    shared_ptr<FeaturesLoaderConfig> features_config = std::make_shared<FeaturesLoaderConfig>();
+    features_config->features_type = "linear";
+    features_config->page_size = 1000;
+    features_config->feature_dimension = 100;
+    features_config->feature_size = 4;
+
+    // Create the sampler
+    std::vector<shared_ptr<NeighborSamplingConfig>> sampling_layers;
+    for (int i = 0; i < 3; i++) {
+        shared_ptr<NeighborSamplingConfig> ptr = std::make_shared<NeighborSamplingConfig>();
+        ptr->type = NeighborSamplingLayer::ALL;
+        ptr->options = std::make_shared<NeighborSamplingOptions>();
+        sampling_layers.emplace_back(ptr);
+    }
+    torch::Tensor in_memory_nodes = torch::tensor({2}, torch::kInt64);
+    shared_ptr<LayeredNeighborSampler> sampler = std::make_shared<LayeredNeighborSampler>(graph, sampling_layers, in_memory_nodes, features_config);
+    
+    // Got sample for example tensor
+    torch::Tensor example_tensor = torch::tensor({1}, torch::kInt64);
+    std::cout << "Sampler has page of " << sampler->getNeighborsPages(example_tensor) << std::endl;
+    std::cout << "Avg Scaling of " << sampler->getAvgScalingFactor() << std::endl;
+    std::cout << "Avg Percent Removed of " << sampler->getAvgPercentRemoved() << std::endl;
+}
+
 void marius_eval(shared_ptr<MariusConfig> marius_config) {
     auto tup = marius_init(marius_config, false);
     auto model = std::get<0>(tup);
@@ -196,12 +236,14 @@ void marius(int argc, char *argv[]) {
     }
 
     shared_ptr<MariusConfig> marius_config = loadConfig(config_path, true);
-
+    sampler_test(marius_config);
+    /*
     if (train) {
         marius_train(marius_config);
     } else {
         marius_eval(marius_config);
     }
+    */
 }
 
 int main(int argc, char *argv[]) { marius(argc, argv); }

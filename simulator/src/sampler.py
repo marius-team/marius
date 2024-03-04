@@ -1,86 +1,72 @@
+from .metrics import *
+from marius.data import *
+from marius.data.samplers import *
 from .in_mem_storage import *
+
+import torch
+import numpy as np
 import humanfriendly
 import math
 import time
-from .metrics import *
 
 class SubgraphSampler:
-    def __init__(self, data_loader, features_loader, config):
+    def __init__(self, data_loader, config):
+        self.config = config
         self.data_loader = data_loader
-        self.features_loader = features_loader
         self.sampling_depth = config["sampling_depth"]
-        self.in_memory_storage = None
-        if "top_percent_in_mem" in config:
-            self.in_memory_storage = InMemoryStorage(data_loader, config)
         self.metrics = MetricTracker()
-
-    def remove_high_degree(self, nodes):
-        if self.in_memory_storage is not None:
-            nodes = self.in_memory_storage.remove_in_mem_nodes(nodes)
-        return nodes
+        self.initialize()
     
-    def get_in_mem_storage(self):
-        return self.in_memory_storage
+    def initialize(self):
+        # Create the graph
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        edges = self.data_loader.get_edges()
+        total_nodes = self.data_loader.get_num_nodes()
+        self.current_graph = MariusGraph(edges, edges[torch.argsort(edges[:, -1])], total_nodes)
+        self.current_graph.to(self.device)
 
-    def perform_sampling_for_nodes(self, batch_idx):
-        # Get the graph for those nodes
-        graph_get_start = time.time()
-        current_graph = self.data_loader.get_graph_for_batch(batch_idx)
-        if current_graph is None:
-            return False, -1
-        graph_get_time = time.time() - graph_get_start
-        self.metrics.record_metric("graph_get_time", graph_get_time)
+        # Create the features_config
+        feature_stats = self.config["features_stats"]
+        features_config = FeaturesLoaderConfig() 
+        features_config.features_type = feature_stats["featurizer_type"]
+        features_config.feature_size = np.dtype(feature_stats["feature_size"]).itemsize
+        features_config.page_size = humanfriendly.parse_size(feature_stats["page_size"])
+        features_config.feature_dimension = int(feature_stats["feature_dimension"])
+        self.features_config = features_config
+        print("Features config of", features_config.features_type, features_config.feature_size, features_config.page_size, features_config.feature_dimension)
 
-        current_depth = 0
-        total_pages_loaded = 0
-        while current_depth < self.sampling_depth:
-            # Get the neigbhors for the current level
-            get_start_time = time.time()
-            nodes = current_graph.getNeighborIDs(True, True)
-            num_search_nodes = nodes.shape[0]
-            get_end_time = time.time()
-            self.metrics.record_metric("get_neighbor_time", get_end_time - get_start_time)
-            self.metrics.record_metric("search_nodes_num", num_search_nodes)
+        # Determine the in memory nodes
+        in_memory_nodes = torch.empty((0,), dtype = torch.int64).to(self.device)
+        if "top_percent_in_mem" in self.config:
+            percent_in_memory = float(self.config["top_percent_in_mem"])
+            num_nodes_in_memory = int((total_nodes * percent_in_memory)/100.0)
+            in_memory_nodes = self.data_loader.get_nodes_sorted_by_incoming()[ : num_nodes_in_memory]
+        in_memory_nodes = in_memory_nodes.to(self.device)
+        self.nodes_in_memory = in_memory_nodes.numel()
+        print("Have", self.nodes_in_memory, "in memory nodes on device", in_memory_nodes.device)
 
-            # Remove any in memory nodes for future levels
-            remove_start_time = time.time()
-            nodes = self.remove_high_degree(nodes)
-            if nodes.shape[0] == 0:
-                break
-            remove_end_time = time.time()
-            self.metrics.record_metric("node_removal_time", remove_end_time - remove_start_time)
-            
-            # Get the pages for this level
-            features_start_time = time.time()
-            total_pages_loaded += self.features_loader.num_pages_for_nodes(nodes.numpy())
-            features_end_time = time.time()
-            self.metrics.record_metric("features_get_time", features_end_time - features_start_time)
-            self.metrics.record_metric("features_nodes_num", nodes.shape[0])
+        # Create the sampler
+        sampling_depth = int(self.config["sampling_depth"])
+        levels = [-1 for _ in range(sampling_depth)]
+        self.sampler = LayeredNeighborSampler(self.current_graph, levels, in_memory_nodes, features_config)
 
-            # Record level time
-            prepare_start_time = time.time()
-            current_depth += 1
-            if current_depth < self.sampling_depth:
-                current_graph.prepareForNextLayer()  
-            overall_prepare_time = time.time() - prepare_start_time
-            self.metrics.record_metric("prepare_next_layer_time", overall_prepare_time)
-
-            level_end_time = time.time()
-            level_process_time = level_end_time - get_start_time
-            self.metrics.record_metric("level_processing_time", level_process_time)
-        
-        return True, total_pages_loaded
+    def perform_sampling_for_nodes(self, batch):        
+        # Get all nodes
+        batch = batch.to(self.device)
+        total_pages = 1.0 * self.sampler.getNeighborsPages(batch)
+        return True, total_pages/batch.numel()
 
     def get_values_to_log(self):
-        values_to_return = {}
-        if self.in_memory_storage is not None:
-            nodes_in_memory = self.in_memory_storage.in_mem_nodes_count()
-            values_to_return["Percentage Nodes In Memory"] = self.in_memory_storage.get_percentage_in_mem()
-            in_mem_pages = int(math.ceil(nodes_in_memory / self.features_loader.get_nodes_per_page()))
-            all_pages_size = humanfriendly.format_size(in_mem_pages * self.features_loader.get_page_size() * self.sampling_depth)
-            values_to_return["In Memory Space Used"] = all_pages_size
-
-        return values_to_return
+        nodes_per_page = int(self.features_config.page_size/(self.features_config.feature_size * self.features_config.feature_dimension))
+        total_pages = int(math.ceil(self.data_loader.get_num_nodes() / (1.0 * nodes_per_page)))
+        return {
+            "Nodes Per Page" : nodes_per_page,
+            "Total Pages" : total_pages,
+            "Nodes In Memory" : self.nodes_in_memory
+        }
     
     def get_metrics(self):
-        return self.metrics.get_metrics()
+        metrics = self.metrics.get_metrics()
+        metrics["avg_scaling_factor"]  = self.sampler.getAvgScalingFactor()
+        metrics["avg_in_mem_nodes_removed"]  = self.sampler.getAvgPercentRemoved()
+        return metrics

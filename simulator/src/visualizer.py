@@ -1,25 +1,29 @@
 import matplotlib.pyplot as plt
+import statsmodels.api as sm
 import os
 import numpy as np
 import json
 
-def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
+def visualize_results(visualize_args, num_bins=60, write_location=(0.25, 0.4)):
     # Get the number of pages read
     pages_loaded = visualize_args["pages_loaded"]
-    np_arr = np.array(pages_loaded)
-    page_mean = round(np.mean(np_arr), 2)
-    page_std = round(np.std(np_arr), 2)
-    pages_upper_bound = int(np.percentile(pages_loaded, 99))
+    page_mean = round(np.mean(pages_loaded), 2)
+    page_std = round(np.std(pages_loaded), 2)
+    print("Got pages loaded of mean", page_mean, "and std_dev of", page_std)
 
-    # Create the histogram
-    plt.figure()
-    plt.ecdf(pages_loaded, label="CDF")
+    # Plot the ecdf
+    ecdf = sm.distributions.ECDF(pages_loaded)    
+    num_samples = int((np.max(pages_loaded) - np.min(pages_loaded))/1.25)
+    ecdf_x = np.linspace(np.min(pages_loaded), np.max(pages_loaded), num = num_samples)
+    ecdf_y = ecdf(ecdf_x)
+    plt.step(ecdf_x, ecdf_y, label="ECDF")
+
+    # Plot the hisotgram
     plt.hist(pages_loaded, bins=num_bins, histtype="step", density=True, cumulative=True, label="Cumulative histogram")
     plt.xlabel("Number of pages loaded for node inference")
     plt.ylabel("Percentage of nodes")
     title = visualize_args["graph_title"] + " for dataset " + visualize_args["dataset_name"] + " (Sampling depth = " + str(visualize_args["depth"]) + ")"
     plt.title(title, fontsize = 10)
-    plt.xlim((0, pages_upper_bound))
     plt.legend()
 
     # Write some resulting text
@@ -35,9 +39,8 @@ def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
         "pages_loaded_std_dev" : page_std
     }
     if "metrics" in visualize_args:
-        for metric_name, metric_values in visualize_args["metrics"].items():
-            if len(metric_values) > 0:
-                metrics_to_write[metric_name] = np.mean(np.array(metric_values))
+        for metric_name, metric_value in visualize_args["metrics"].items():
+            metrics_to_write[metric_name] = metric_value
 
     txt_lines = []
     for key, value in vals_to_log.items():
@@ -61,6 +64,7 @@ def visualize_results(visualize_args, num_bins=60, write_location=(0.7, 0.6)):
 
     # Save the result
     image_save_path = visualize_args["save_path"]
+    plt.savefig(image_save_path)
     print("Saving image to", image_save_path)
 
     # Save the metrics

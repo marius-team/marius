@@ -14,14 +14,14 @@ RUN apt install -y g++ \
 RUN apt install -y software-properties-common
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt update
-RUN apt install -y gcc-9 g++-9
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+RUN apt install -y gcc-11 g++-11
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11
 
 # install cmake 3.20
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.sh
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-x86_64.sh
 RUN mkdir /opt/cmake
-RUN sh cmake-3.20.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
+RUN sh cmake-3.28.0-linux-x86_64.sh --skip-license --prefix=/opt/cmake/
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
 # install pytorch
