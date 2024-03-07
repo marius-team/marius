@@ -2,7 +2,7 @@
 
 Before running the simulator, install the required dependencies using the command:
 ```
-$
+$ pip3 install -r requirements.txt
 ```
 
 The following directory contains code to simulate GNN inference. The main file in this directory is `main.py` which takes in the arguments of:
