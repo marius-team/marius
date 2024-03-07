@@ -1,0 +1,1 @@
+{"dataset_name": "ogbn_products", "features_stats": {"featurizer_type": "linear", "page_size": "16.384 KB", "feature_dimension": 100, "feature_size": "float32"}, "batch_size": 5, "sample_percentage": 25, "sampling_depth": 3, "top_percent_in_mem": 0.01}

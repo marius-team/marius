@@ -29,6 +29,7 @@ RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
 # install pytorch
 RUN python3 -m pip install torch==1.13.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
+RUN git config --global --add safe.directory "*"
 
 RUN mkdir /working_dir
 WORKDIR /working_dir

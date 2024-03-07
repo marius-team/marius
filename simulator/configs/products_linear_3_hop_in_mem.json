@@ -7,7 +7,7 @@
         "feature_size" : "float32"
     }, 
     "sampling_depth" : 3,
-    "sample_percentage" : 20,
-    "top_percent_in_mem" : 0.1,
+    "sample_percentage" : 25,
+    "top_percent_in_mem" : 10.0,
     "batch_size" : 5
 }

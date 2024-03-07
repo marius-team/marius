@@ -19,12 +19,13 @@ although Marius and MariusGNN can run on CPU only machines as well.
 **Full List of Example Commands for GPU Installation**:
 
 ```
-CURRENT_DIR=`pwd`
 git clone https://github.com/marius-team/marius.git
-cd marius/examples/docker/
-docker build -t marius:latest gpu_ubuntu/.
-docker run --gpus all -it -v $CURRENT_DIR:/working_dir/ marius:latest bash
 cd marius
+export CURRENT_DIR=`pwd`
+cd examples/docker
+docker build -t marius:latest gpu_ubuntu/.
+docker run --gpus all -d -v $CURRENT_DIR:/working_dir/ --name=marius marius:latest sleep infinity
+docker exec -it marius bash
 pip3 install . --no-build-isolation
 ```
 

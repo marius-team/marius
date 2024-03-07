@@ -1,7 +1,7 @@
 {
     "dataset_name" : "tree",
     "features_stats" : {
-        "featurizer_type" : "default",
+        "featurizer_type" : "linear",
         "page_size" : "16.384 KB",
         "feature_dimension" : 100,
         "feature_size" : "float32"

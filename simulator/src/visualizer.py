@@ -3,8 +3,9 @@ import statsmodels.api as sm
 import os
 import numpy as np
 import json
+import torch
 
-def visualize_results(visualize_args, num_bins=60, write_location=(0.25, 0.4)):
+def visualize_results(visualize_args, num_bins=60, write_location=(0.65, 0.5)):
     # Get the number of pages read
     pages_loaded = visualize_args["pages_loaded"]
     page_mean = round(np.mean(pages_loaded), 2)
@@ -73,3 +74,7 @@ def visualize_results(visualize_args, num_bins=60, write_location=(0.25, 0.4)):
     with open(metrics_save_path, 'w+') as writer:
         json.dump(metrics_to_write, writer, indent = 4)
     
+    # Save the tensor
+    tensor_save_path = image_save_path[ : image_save_path.rindex(".")] + ".pt"
+    print("Saving tensor to", tensor_save_path)
+    torch.save(visualize_args["all_batches"], tensor_save_path)

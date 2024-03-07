@@ -52,7 +52,7 @@ class LayeredNeighborSampler : public NeighborSampler {
     bool use_incoming_nbrs_;
     bool use_outgoing_nbrs_;
     std::vector<shared_ptr<NeighborSamplingConfig>> sampling_layers_;
-    shared_ptr<FeaturesLoader> features_loader_;
+    std::shared_ptr<FeaturesLoader> features_loader_;
     torch::Tensor in_mem_nodes_;
     float percent_removed_total_ = 0.0;
     int64_t percent_count_ = 0;
@@ -70,7 +70,7 @@ class LayeredNeighborSampler : public NeighborSampler {
                            bool use_outgoing_nbrs = true);
     
     LayeredNeighborSampler(shared_ptr<MariusGraph> graph, std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs, torch::Tensor in_mem_nodes, 
-                           shared_ptr<FeaturesLoaderConfig> features_config, bool use_incoming_nbrs = true, bool use_outgoing_nbrs = true);
+                           shared_ptr<FeaturesLoaderConfig> features_config, bool use_incoming_nbrs = false, bool use_outgoing_nbrs = true);
 
     LayeredNeighborSampler(std::vector<shared_ptr<NeighborSamplingConfig>> layer_configs, bool use_incoming_nbrs = true, bool use_outgoing_nbrs = true);
 
