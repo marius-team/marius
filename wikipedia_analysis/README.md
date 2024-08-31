@@ -3,6 +3,8 @@
 The following README contains the steps to perform the benchmarking on the wikipedia datasets. Before we run anything, run the commands:
 ```
 $ sudo apt update -y && sudo apt upgrade -y
+$ sudo apt-get install -y xfsprogs
+$ sudo modprobe -v xfs
 ```
 
 ## Mounting the data directory
@@ -45,11 +47,6 @@ $ sudo mount -a
 $ sudo chmod ugo+rw -R all_data
 ```
 
-Verify by running `df -h` inside of `all_data` and ensure it produces this output:
-```
-
-```
-
 ## Setting up docker
 
 First install the nvidia driver using the command:
@@ -88,6 +85,8 @@ $ curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --de
 $ sudo sed -i -e '/experimental/ s/^#//g' /etc/apt/sources.list.d/nvidia-container-toolkit.list
 $ sudo apt-get update
 $ sudo apt-get install -y nvidia-container-toolkit
+$ sudo nvidia-ctk runtime configure --runtime=docker
+$ sudo systemctl restart docker
 ```
 
 Finally run `sudo reboot`. Verify the install by running the command `nvidia-smi`. 
@@ -121,6 +120,7 @@ $ python3 -m pip install boto3
 
 Then setup aws using `aws configure`. Then run the preprocessing using the commands:
 ```
+$ apt install -y lbzip2
 $ cd wikipedia_analysis
 $ python3 -u preprocess_runner.py &> preprocess.log
 ```
@@ -136,4 +136,10 @@ $ cmake ../ -DUSE_CUDA=TRUE -DUSE_OMP=TRUE
 and then:
 ```
 $ rm -rf /root/all_data/graph_snapshots/initial_snapshot/marius_formatted/model_* && make marius_train -j && ./marius_train ../wikipedia_analysis/initial_training.yaml
+```
+
+Once the training is done then upload the results to AWS using the commands:
+```
+$ tar -I lbzip2 -cvpf ~/all_data/graph_snapshots/trained_initial_snapshot.tar.gz ~/all_data/graph_snapshots/initial_snapshot 
+$ aws s3 mv ~/all_data/graph_snapshots/trained_initial_snapshot.tar.gz s3://wikidata-update-history
 ```

@@ -1,59 +1,9 @@
 model:
   learning_task: LINK_PREDICTION
   encoder:
-    train_neighbor_sampling:
-      - type: UNIFORM
-        options:
-          max_neighbors: 32
-      - type: UNIFORM
-        options:
-          max_neighbors: 32
-      - type: UNIFORM
-        options:
-          max_neighbors: 32
-    eval_neighbor_sampling:
-      - type: UNIFORM
-        options:
-          max_neighbors: 32
-      - type: UNIFORM
-        options:
-          max_neighbors: 32
-      - type: UNIFORM
-        options:
-          max_neighbors: 32
     layers:
       - - type: EMBEDDING
-          output_dim: 32
-          bias: true
-          init:
-            type: GLOROT_NORMAL
-
-      - - type: GNN
-          options:
-            type: GRAPH_SAGE
-            aggregator: MEAN
-          input_dim: 32
-          output_dim: 32
-          bias: true
-          init:
-            type: GLOROT_NORMAL
-
-      - - type: GNN
-          options:
-            type: GRAPH_SAGE
-            aggregator: MEAN
-          input_dim: 32
-          output_dim: 32
-          bias: true
-          init:
-            type: GLOROT_NORMAL
-
-      - - type: GNN
-          options:
-            type: GRAPH_SAGE
-            aggregator: MEAN
-          input_dim: 32
-          output_dim: 32
+          output_dim: 128
           bias: true
           init:
             type: GLOROT_NORMAL
@@ -70,7 +20,7 @@ model:
   sparse_optimizer:
     type: ADAGRAD
     options:
-      learning_rate: 0.01
+      learning_rate: 0.001
 storage:
   device_type: cuda
   dataset:
@@ -81,15 +31,15 @@ storage:
     type: DEVICE_MEMORY
   save_model: true
 training:
-  batch_size: 16
+  batch_size: 1024
   negative_sampling:
     num_chunks: 10
     negatives_per_positive: 750
-    degree_fraction: 0.0
+    degree_fraction: 0.1
     filtered: false
   num_epochs: 50
   epochs_per_shuffle: 1
 evaluation:
-  batch_size: 16
+  batch_size: 1024
   negative_sampling:
-    filtered: true
+    filtered: false
