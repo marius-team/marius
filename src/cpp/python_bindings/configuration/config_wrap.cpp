@@ -117,7 +117,8 @@ void init_config(py::module &m) {
         .def_readwrite("shuffle_input", &StorageConfig::shuffle_input)
         .def_readwrite("full_graph_evaluation", &StorageConfig::full_graph_evaluation)
         .def_readwrite("model_dir", &StorageConfig::model_dir)
-        .def_readwrite("export_encoded_nodes", &StorageConfig::export_encoded_nodes);
+        .def_readwrite("export_encoded_nodes", &StorageConfig::export_encoded_nodes)
+        .def_readwrite("prev_snapshot_dir", &StorageConfig::prev_snapshot_dir);
 
     py::class_<TrainingConfig, std::shared_ptr<TrainingConfig>>(m, "TrainingConfig")
         .def(py::init<>())

@@ -1,0 +1,45 @@
+model:
+  learning_task: LINK_PREDICTION
+  encoder:
+    layers:
+      - - type: EMBEDDING
+          output_dim: 128
+          bias: true
+          init:
+            type: GLOROT_NORMAL
+  decoder:
+    type: DISTMULT
+  loss:
+    type: SOFTMAX_CE
+    options:
+      reduction: SUM
+  dense_optimizer:
+    type: ADAM
+    options:
+      learning_rate: 1e-3
+  sparse_optimizer:
+    type: ADAGRAD
+    options:
+      learning_rate: 1e-3
+storage:
+  device_type: cuda
+  dataset:
+    dataset_dir: text_to_be_replaced
+  edges:
+    type: DEVICE_MEMORY
+  embeddings:
+    type: DEVICE_MEMORY
+  save_model: true
+training:
+  batch_size: 1024
+  negative_sampling:
+    num_chunks: 10
+    negatives_per_positive: 750
+    degree_fraction: 0.1
+    filtered: false
+  num_epochs: 5
+  epochs_per_shuffle: 1
+evaluation:
+  batch_size: 1024
+  negative_sampling:
+    filtered: false

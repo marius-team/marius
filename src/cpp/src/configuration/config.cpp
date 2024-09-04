@@ -458,6 +458,7 @@ shared_ptr<StorageConfig> initStorageConfig(pyobj python_config) {
 
     ret_config->log_level = getLogLevel(cast_helper<string>(python_config.attr("log_level")));
     ret_config->train_edges_pre_sorted = cast_helper<bool>(python_config.attr("train_edges_pre_sorted"));
+    ret_config->prev_snapshot_dir = cast_helper<string>(python_config.attr("prev_snapshot_dir"));
     return ret_config;
 }
 

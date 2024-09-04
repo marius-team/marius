@@ -137,6 +137,7 @@ struct StorageConfig {
     std::string model_dir;
     spdlog::level::level_enum log_level;
     bool train_edges_pre_sorted;
+    std::string prev_snapshot_dir;
 };
 
 struct TrainingConfig {

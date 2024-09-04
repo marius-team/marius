@@ -11,6 +11,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
+#include <filesystem>
 #include <memory>
 #include <string>
 

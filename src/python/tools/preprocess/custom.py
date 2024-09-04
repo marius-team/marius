@@ -47,6 +47,8 @@ class CustomLinkPredictionDataset(LinkPredictionDataset):
         dst_column=None,
         edge_type_column=None,
         edge_weight_column=None,
+        num_nodes = None,
+        num_rels = None
     ):
         if self.spark and pyspark_found:
             converter_class = SparkEdgeListConverter
@@ -68,6 +70,8 @@ class CustomLinkPredictionDataset(LinkPredictionDataset):
             splits=splits,
             remap_ids=remap_ids,
             partitioned_evaluation=partitioned_eval,
+            num_nodes = num_nodes,
+            num_rels = num_rels
         )
 
         return converter.convert()

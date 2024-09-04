@@ -526,6 +526,7 @@ class StorageConfig:
     model_dir: str = MISSING
     log_level: str = "info"
     train_edges_pre_sorted: bool = False
+    prev_snapshot_dir : str = ""
 
     SUPPORTED_EMBEDDING_BACKENDS = ["PARTITION_BUFFER", "DEVICE_MEMORY", "HOST_MEMORY"]
     SUPPORTED_EDGE_BACKENDS = ["FLAT_FILE", "DEVICE_MEMORY", "HOST_MEMORY"]
@@ -601,6 +602,9 @@ class StorageConfig:
 
         if "train_edges_pre_sorted" in input_config.keys():
             self.train_edges_pre_sorted = input_config.train_edges_pre_sorted
+        
+        if "prev_snapshot_dir" in input_config.keys():
+            self.prev_snapshot_dir = input_config.prev_snapshot_dir
 
 
 @dataclass

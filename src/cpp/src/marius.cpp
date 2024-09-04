@@ -97,6 +97,12 @@ std::tuple<shared_ptr<Model>, shared_ptr<GraphModelStorage>, shared_ptr<DataLoad
     initialization_timer.stop();
     int64_t initialization_time = initialization_timer.getDuration();
 
+    // See if we need to read in the model from the previous snapshot
+    std::string prev_snapshot_dir = marius_config->storage->prev_snapshot_dir;
+    if(train && !prev_snapshot_dir.empty()) {
+        model->load(prev_snapshot_dir, train);
+    }
+
     SPDLOG_INFO("Initialization Complete: {}s", (double)initialization_time / 1000);
 
     return std::forward_as_tuple(model, graph_model_storage, dataloader);
@@ -107,7 +113,7 @@ void marius_train(shared_ptr<MariusConfig> marius_config) {
     auto model = std::get<0>(tup);
     auto graph_model_storage = std::get<1>(tup);
     auto dataloader = std::get<2>(tup);
-
+    
     shared_ptr<Trainer> trainer;
     shared_ptr<Evaluator> evaluator;
 

@@ -165,25 +165,36 @@ std::tuple<shared_ptr<Storage>, shared_ptr<Storage>> initializeNodeEmbeddings(sh
     torch::Dtype dtype = storage_config->embeddings->options->dtype;
 
     if (reinitialize) {
-        shared_ptr<FlatFile> init_node_embeddings = std::make_shared<FlatFile>(node_embedding_filename, dtype);
-        shared_ptr<FlatFile> init_optimizer_state_storage = std::make_shared<FlatFile>(optimizer_state_filename, dtype);
+        string prev_snapshot_dir = storage_config->prev_snapshot_dir;
+        if(!prev_snapshot_dir.empty()) {
+            // Just copy over the embeddings from the previous snapshot
+            string prev_embeddings_path = prev_snapshot_dir + PathConstants::embeddings_file + PathConstants::file_ext;
+            std::filesystem::copy(prev_embeddings_path, node_embedding_filename, std::filesystem::copy_options::overwrite_existing);
 
-        int64_t curr_num_nodes = 0;
-        int64_t offset = 0;
+            string prev_embeddings_state_path = prev_snapshot_dir + PathConstants::embeddings_state_file + PathConstants::file_ext;
+            std::filesystem::copy(prev_embeddings_state_path, optimizer_state_filename, std::filesystem::copy_options::overwrite_existing);
+        } else {
+            // Initialize new embeddings and embedding state
+            shared_ptr<FlatFile> init_node_embeddings = std::make_shared<FlatFile>(node_embedding_filename, dtype);
+            shared_ptr<FlatFile> init_optimizer_state_storage = std::make_shared<FlatFile>(optimizer_state_filename, dtype);
 
-        while (offset < num_nodes) {
-            if (num_nodes - offset < MAX_NODE_EMBEDDING_INIT_SIZE) {
-                curr_num_nodes = num_nodes - offset;
-            } else {
-                curr_num_nodes = MAX_NODE_EMBEDDING_INIT_SIZE;
+            int64_t curr_num_nodes = 0;
+            int64_t offset = 0;
+
+            while (offset < num_nodes) {
+                if (num_nodes - offset < MAX_NODE_EMBEDDING_INIT_SIZE) {
+                    curr_num_nodes = num_nodes - offset;
+                } else {
+                    curr_num_nodes = MAX_NODE_EMBEDDING_INIT_SIZE;
+                }
+
+                torch::Tensor weights = initialize_subtensor(init_config, {curr_num_nodes, embedding_dim}, {num_nodes, embedding_dim}, torch::TensorOptions());
+                OptimizerState emb_state = torch::zeros_like(weights);
+                init_node_embeddings->append(weights);
+                init_optimizer_state_storage->append(emb_state);
+
+                offset += curr_num_nodes;
             }
-
-            torch::Tensor weights = initialize_subtensor(init_config, {curr_num_nodes, embedding_dim}, {num_nodes, embedding_dim}, torch::TensorOptions());
-            OptimizerState emb_state = torch::zeros_like(weights);
-            init_node_embeddings->append(weights);
-            init_optimizer_state_storage->append(emb_state);
-
-            offset += curr_num_nodes;
         }
     }
 

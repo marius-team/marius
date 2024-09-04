@@ -85,6 +85,24 @@ def set_args():
     )
 
     parser.add_argument(
+        "--num_nodes",
+        metavar="num_nodes",
+        required=False,
+        type=int,
+        default=None,
+        help="The number of nodes we have, must be specified if no_remap_ids",
+    )
+
+    parser.add_argument(
+        "--num_rels",
+        metavar="num_rels",
+        required=False,
+        type=int,
+        default=None,
+        help="The number of relationships we have, must be specified if no_remap_ids",
+    )
+
+    parser.add_argument(
         "--sequential_train_nodes",
         action="store_true",
         default=False,
@@ -193,6 +211,8 @@ def main():
             dst_column=args.dst_column,
             edge_type_column=args.edge_type_column,
             edge_weight_column=args.edge_weight_column,
+            num_nodes = args.num_nodes,
+            num_rels = args.num_rels
         )
 
 
