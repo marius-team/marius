@@ -1,5 +1,5 @@
 FROM ubuntu:22.04
-RUN apt update
+RUN apt-get update && apt update -y && apt upgrade -y
 
 RUN apt install -y g++ \
          make \
@@ -8,7 +8,8 @@ RUN apt install -y g++ \
          vim \
          git \
          dstat \
-         python3-pip
+         numactl \
+         python3-pip --fix-missing
 
 # install gcc-9
 RUN apt install -y software-properties-common
@@ -27,5 +28,7 @@ RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 # install pytorch
 RUN python3 -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-RUN mkdir /working_dir
-WORKDIR /working_dir
+RUN mkdir -p /root
+WORKDIR /root
+
+RUN apt-get install -y libnuma-dev
