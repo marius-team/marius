@@ -1,0 +1,210 @@
+Processing dir /root/all_datasets/wikipedia_dataset/initial_snapshot
+Uploading file remapped_new_nodes_initial_snapshot.npy with 1615837 nodes
+/root/marius/wikipedia_processing/new_node_extractor.py:42: FutureWarning: The behavior of array concatenation with empty entries is deprecated. In a future version, this will no longer exclude empty items when determining the result dtype. To retain the old behavior, exclude the empty entries before the concat operation.
+  nodes_already_seem = pd.concat([all_nodes, nodes_already_seem]).drop_duplicates()
+Processing dir /root/all_datasets/wikipedia_dataset/update_0
+Uploading file remapped_new_nodes_update_0.npy with 71347 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_1
+Uploading file remapped_new_nodes_update_1.npy with 38265 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_2
+Uploading file remapped_new_nodes_update_2.npy with 53468 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_3
+Uploading file remapped_new_nodes_update_3.npy with 176676 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_4
+Uploading file remapped_new_nodes_update_4.npy with 461701 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_5
+Uploading file remapped_new_nodes_update_5.npy with 108960 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_6
+Uploading file remapped_new_nodes_update_6.npy with 259212 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_7
+Uploading file remapped_new_nodes_update_7.npy with 47531 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_8
+Uploading file remapped_new_nodes_update_8.npy with 84409 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_9
+Uploading file remapped_new_nodes_update_9.npy with 49854 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_10
+Uploading file remapped_new_nodes_update_10.npy with 49427 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_11
+Uploading file remapped_new_nodes_update_11.npy with 51854 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_12
+Uploading file remapped_new_nodes_update_12.npy with 45806 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_13
+Uploading file remapped_new_nodes_update_13.npy with 33652 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_14
+Uploading file remapped_new_nodes_update_14.npy with 47135 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_15
+Uploading file remapped_new_nodes_update_15.npy with 19988 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_16
+Uploading file remapped_new_nodes_update_16.npy with 30490 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_17
+Uploading file remapped_new_nodes_update_17.npy with 37482 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_18
+Uploading file remapped_new_nodes_update_18.npy with 20955 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_19
+Uploading file remapped_new_nodes_update_19.npy with 42264 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_20
+Uploading file remapped_new_nodes_update_20.npy with 48119 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_21
+Uploading file remapped_new_nodes_update_21.npy with 69866 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_22
+Uploading file remapped_new_nodes_update_22.npy with 77827 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_23
+Uploading file remapped_new_nodes_update_23.npy with 40229 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_24
+Uploading file remapped_new_nodes_update_24.npy with 41624 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_25
+Uploading file remapped_new_nodes_update_25.npy with 29787 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_26
+Uploading file remapped_new_nodes_update_26.npy with 41367 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_27
+Uploading file remapped_new_nodes_update_27.npy with 38339 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_28
+Uploading file remapped_new_nodes_update_28.npy with 33811 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_29
+Uploading file remapped_new_nodes_update_29.npy with 37534 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_30
+Uploading file remapped_new_nodes_update_30.npy with 44831 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_31
+Uploading file remapped_new_nodes_update_31.npy with 56729 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_32
+Uploading file remapped_new_nodes_update_32.npy with 32155 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_33
+Uploading file remapped_new_nodes_update_33.npy with 38661 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_34
+Uploading file remapped_new_nodes_update_34.npy with 40311 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_35
+Uploading file remapped_new_nodes_update_35.npy with 44810 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_36
+Uploading file remapped_new_nodes_update_36.npy with 49762 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_37
+Uploading file remapped_new_nodes_update_37.npy with 44249 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_38
+Uploading file remapped_new_nodes_update_38.npy with 34152 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_39
+Uploading file remapped_new_nodes_update_39.npy with 37156 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_40
+Uploading file remapped_new_nodes_update_40.npy with 35179 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_41
+Uploading file remapped_new_nodes_update_41.npy with 50332 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_42
+Uploading file remapped_new_nodes_update_42.npy with 93259 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_43
+Uploading file remapped_new_nodes_update_43.npy with 51529 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_44
+Uploading file remapped_new_nodes_update_44.npy with 59150 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_45
+Uploading file remapped_new_nodes_update_45.npy with 67538 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_46
+Uploading file remapped_new_nodes_update_46.npy with 69256 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_47
+Uploading file remapped_new_nodes_update_47.npy with 327757 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_48
+Uploading file remapped_new_nodes_update_48.npy with 64934 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_49
+Uploading file remapped_new_nodes_update_49.npy with 82288 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_50
+Uploading file remapped_new_nodes_update_50.npy with 58880 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_51
+Uploading file remapped_new_nodes_update_51.npy with 49516 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_52
+Uploading file remapped_new_nodes_update_52.npy with 66898 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_53
+Uploading file remapped_new_nodes_update_53.npy with 107169 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_54
+Uploading file remapped_new_nodes_update_54.npy with 83152 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_55
+Uploading file remapped_new_nodes_update_55.npy with 85345 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_56
+Uploading file remapped_new_nodes_update_56.npy with 55793 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_57
+Uploading file remapped_new_nodes_update_57.npy with 131470 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_58
+Uploading file remapped_new_nodes_update_58.npy with 95259 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_59
+Uploading file remapped_new_nodes_update_59.npy with 102417 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_60
+Uploading file remapped_new_nodes_update_60.npy with 94899 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_61
+Uploading file remapped_new_nodes_update_61.npy with 60144 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_62
+Uploading file remapped_new_nodes_update_62.npy with 57836 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_63
+Uploading file remapped_new_nodes_update_63.npy with 63047 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_64
+Uploading file remapped_new_nodes_update_64.npy with 62223 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_65
+Uploading file remapped_new_nodes_update_65.npy with 74004 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_66
+Uploading file remapped_new_nodes_update_66.npy with 228915 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_67
+Uploading file remapped_new_nodes_update_67.npy with 50908 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_68
+Uploading file remapped_new_nodes_update_68.npy with 53697 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_69
+Uploading file remapped_new_nodes_update_69.npy with 55105 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_70
+Uploading file remapped_new_nodes_update_70.npy with 715147 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_71
+Uploading file remapped_new_nodes_update_71.npy with 61677 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_72
+Uploading file remapped_new_nodes_update_72.npy with 75270 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_73
+Uploading file remapped_new_nodes_update_73.npy with 124570 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_74
+Uploading file remapped_new_nodes_update_74.npy with 275198 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_75
+Uploading file remapped_new_nodes_update_75.npy with 510687 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_76
+Uploading file remapped_new_nodes_update_76.npy with 583151 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_77
+Uploading file remapped_new_nodes_update_77.npy with 153060 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_78
+Uploading file remapped_new_nodes_update_78.npy with 128308 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_79
+Uploading file remapped_new_nodes_update_79.npy with 121600 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_80
+Uploading file remapped_new_nodes_update_80.npy with 119907 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_81
+Uploading file remapped_new_nodes_update_81.npy with 197581 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_82
+Uploading file remapped_new_nodes_update_82.npy with 266715 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_83
+Uploading file remapped_new_nodes_update_83.npy with 145783 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_84
+Uploading file remapped_new_nodes_update_84.npy with 81664 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_85
+Uploading file remapped_new_nodes_update_85.npy with 136943 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_86
+Uploading file remapped_new_nodes_update_86.npy with 74776 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_87
+Uploading file remapped_new_nodes_update_87.npy with 67477 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_88
+Uploading file remapped_new_nodes_update_88.npy with 80010 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_89
+Uploading file remapped_new_nodes_update_89.npy with 49924 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_90
+Uploading file remapped_new_nodes_update_90.npy with 56667 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_91
+Uploading file remapped_new_nodes_update_91.npy with 58459 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_92
+Uploading file remapped_new_nodes_update_92.npy with 38848 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_93
+Uploading file remapped_new_nodes_update_93.npy with 52437 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_94
+Uploading file remapped_new_nodes_update_94.npy with 103285 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_95
+Uploading file remapped_new_nodes_update_95.npy with 112759 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_96
+Uploading file remapped_new_nodes_update_96.npy with 85085 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_97
+Uploading file remapped_new_nodes_update_97.npy with 47752 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_98
+Uploading file remapped_new_nodes_update_98.npy with 61203 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_99
+Uploading file remapped_new_nodes_update_99.npy with 57573 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_100
+Uploading file remapped_new_nodes_update_100.npy with 64493 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_101
+Uploading file remapped_new_nodes_update_101.npy with 255843 nodes
+Processing dir /root/all_datasets/wikipedia_dataset/update_102
+Uploading file remapped_new_nodes_update_102.npy with 59908 nodes

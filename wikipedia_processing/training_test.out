@@ -1,410 +1,145 @@
-Starting training for config /root/wikipedia_dataset/remapped_individual_graph_snapshots/update_0/training.yaml
-Stdout [2024-09-04 11:13:55.718] [info] [marius.cpp:41] Start initialization
-[09/04/24 11:14:09.702] Initialization Complete: 13.932s
-[09/04/24 11:14:20.378] ################ Starting training epoch 1 ################
-[09/04/24 11:14:20.813] Edges processed: [41984/415154], 10.11%
-[09/04/24 11:14:21.033] Edges processed: [83968/415154], 20.23%
-[09/04/24 11:14:21.252] Edges processed: [125952/415154], 30.34%
-[09/04/24 11:14:21.473] Edges processed: [167936/415154], 40.45%
-[09/04/24 11:14:21.670] Edges processed: [209920/415154], 50.56%
-[09/04/24 11:14:21.858] Edges processed: [251904/415154], 60.68%
-[09/04/24 11:14:22.043] Edges processed: [293888/415154], 70.79%
-[09/04/24 11:14:22.238] Edges processed: [335872/415154], 80.90%
-[09/04/24 11:14:22.422] Edges processed: [377856/415154], 91.02%
-[09/04/24 11:14:22.589] Edges processed: [415154/415154], 100.00%
-[09/04/24 11:14:22.589] ################ Finished training epoch 1 ################
-[09/04/24 11:14:22.589] Epoch Runtime: 2210ms
-[09/04/24 11:14:22.589] Edges per Second: 187852.48
-[09/04/24 11:14:22.589] Evaluating validation set
-[09/04/24 11:14:22.649] 
-=================================
-Link Prediction: 103788 edges evaluated
-Mean Rank: 88.826849
-MRR: 0.492656
-Hits@1: 0.469987
-Hits@3: 0.494865
-Hits@5: 0.502370
-Hits@10: 0.516351
-Hits@50: 0.636172
-Hits@100: 0.800960
-=================================
-[09/04/24 11:14:22.649] Evaluating test set
-[09/04/24 11:14:22.695] 
-=================================
-Link Prediction: 103790 edges evaluated
-Mean Rank: 87.929801
-MRR: 0.498146
-Hits@1: 0.480027
-Hits@3: 0.495057
-Hits@5: 0.502428
-Hits@10: 0.516678
-Hits@50: 0.635736
-Hits@100: 0.801031
-=================================
-[09/04/24 11:14:22.698] ################ Starting training epoch 2 ################
-[09/04/24 11:14:22.892] Edges processed: [41984/415154], 10.11%
-[09/04/24 11:14:23.052] Edges processed: [83968/415154], 20.23%
-[09/04/24 11:14:23.213] Edges processed: [125952/415154], 30.34%
-[09/04/24 11:14:23.376] Edges processed: [167936/415154], 40.45%
-[09/04/24 11:14:23.538] Edges processed: [209920/415154], 50.56%
-[09/04/24 11:14:23.707] Edges processed: [251904/415154], 60.68%
-[09/04/24 11:14:23.868] Edges processed: [293888/415154], 70.79%
-[09/04/24 11:14:24.028] Edges processed: [335872/415154], 80.90%
-[09/04/24 11:14:24.188] Edges processed: [377856/415154], 91.02%
-[09/04/24 11:14:24.335] Edges processed: [415154/415154], 100.00%
-[09/04/24 11:14:24.335] ################ Finished training epoch 2 ################
-[09/04/24 11:14:24.335] Epoch Runtime: 1636ms
-[09/04/24 11:14:24.335] Edges per Second: 253761.61
-[09/04/24 11:14:24.335] Evaluating validation set
-[09/04/24 11:14:24.380] 
-=================================
-Link Prediction: 103788 edges evaluated
-Mean Rank: 86.914210
-MRR: 0.498539
-Hits@1: 0.480431
-Hits@3: 0.496493
-Hits@5: 0.503642
-Hits@10: 0.517439
-Hits@50: 0.631046
-Hits@100: 0.800854
-=================================
-[09/04/24 11:14:24.380] Evaluating test set
-[09/04/24 11:14:24.424] 
-=================================
-Link Prediction: 103790 edges evaluated
-Mean Rank: 86.522835
-MRR: 0.498741
-Hits@1: 0.481212
-Hits@3: 0.496050
-Hits@5: 0.502650
-Hits@10: 0.517160
-Hits@50: 0.629743
-Hits@100: 0.796878
-=================================
-[09/04/24 11:14:24.428] ################ Starting training epoch 3 ################
-[09/04/24 11:14:24.588] Edges processed: [41984/415154], 10.11%
-[09/04/24 11:14:24.748] Edges processed: [83968/415154], 20.23%
-[09/04/24 11:14:24.908] Edges processed: [125952/415154], 30.34%
-[09/04/24 11:14:25.068] Edges processed: [167936/415154], 40.45%
-[09/04/24 11:14:25.228] Edges processed: [209920/415154], 50.56%
-[09/04/24 11:14:25.388] Edges processed: [251904/415154], 60.68%
-[09/04/24 11:14:25.548] Edges processed: [293888/415154], 70.79%
-[09/04/24 11:14:25.708] Edges processed: [335872/415154], 80.90%
-[09/04/24 11:14:25.868] Edges processed: [377856/415154], 91.02%
-[09/04/24 11:14:26.012] Edges processed: [415154/415154], 100.00%
-[09/04/24 11:14:26.012] ################ Finished training epoch 3 ################
-[09/04/24 11:14:26.012] Epoch Runtime: 1584ms
-[09/04/24 11:14:26.012] Edges per Second: 262092.17
-[09/04/24 11:14:26.012] Evaluating validation set
-[09/04/24 11:14:26.057] 
-=================================
-Link Prediction: 103788 edges evaluated
-Mean Rank: 87.005675
-MRR: 0.499297
-Hits@1: 0.481722
-Hits@3: 0.497215
-Hits@5: 0.504586
-Hits@10: 0.516890
-Hits@50: 0.620621
-Hits@100: 0.798137
-=================================
-[09/04/24 11:14:26.057] Evaluating test set
-[09/04/24 11:14:26.102] 
-=================================
-Link Prediction: 103790 edges evaluated
-Mean Rank: 85.736757
-MRR: 0.501056
-Hits@1: 0.483727
-Hits@3: 0.498497
-Hits@5: 0.505347
-Hits@10: 0.519116
-Hits@50: 0.621524
-Hits@100: 0.805492
-=================================
-[09/04/24 11:14:26.105] ################ Starting training epoch 4 ################
-[09/04/24 11:14:26.266] Edges processed: [41984/415154], 10.11%
-[09/04/24 11:14:26.426] Edges processed: [83968/415154], 20.23%
-[09/04/24 11:14:26.586] Edges processed: [125952/415154], 30.34%
-[09/04/24 11:14:26.748] Edges processed: [167936/415154], 40.45%
-[09/04/24 11:14:26.908] Edges processed: [209920/415154], 50.56%
-[09/04/24 11:14:27.067] Edges processed: [251904/415154], 60.68%
-[09/04/24 11:14:27.227] Edges processed: [293888/415154], 70.79%
-[09/04/24 11:14:27.387] Edges processed: [335872/415154], 80.90%
-[09/04/24 11:14:27.547] Edges processed: [377856/415154], 91.02%
-[09/04/24 11:14:27.691] Edges processed: [415154/415154], 100.00%
-[09/04/24 11:14:27.691] ################ Finished training epoch 4 ################
-[09/04/24 11:14:27.691] Epoch Runtime: 1585ms
-[09/04/24 11:14:27.691] Edges per Second: 261926.81
-[09/04/24 11:14:27.691] Evaluating validation set
-[09/04/24 11:14:27.735] 
-=================================
-Link Prediction: 103788 edges evaluated
-Mean Rank: 86.775475
-MRR: 0.501108
-Hits@1: 0.484218
-Hits@3: 0.499432
-Hits@5: 0.505559
-Hits@10: 0.516071
-Hits@50: 0.617701
-Hits@100: 0.803754
-=================================
-[09/04/24 11:14:27.735] Evaluating test set
-[09/04/24 11:14:27.780] 
-=================================
-Link Prediction: 103790 edges evaluated
-Mean Rank: 85.818306
-MRR: 0.500025
-Hits@1: 0.481896
-Hits@3: 0.499316
-Hits@5: 0.506793
-Hits@10: 0.518133
-Hits@50: 0.617160
-Hits@100: 0.801359
-=================================
-[09/04/24 11:14:27.783] ################ Starting training epoch 5 ################
-[09/04/24 11:14:27.943] Edges processed: [41984/415154], 10.11%
-[09/04/24 11:14:28.103] Edges processed: [83968/415154], 20.23%
-[09/04/24 11:14:28.263] Edges processed: [125952/415154], 30.34%
-[09/04/24 11:14:28.422] Edges processed: [167936/415154], 40.45%
-[09/04/24 11:14:28.584] Edges processed: [209920/415154], 50.56%
-[09/04/24 11:14:28.744] Edges processed: [251904/415154], 60.68%
-[09/04/24 11:14:28.904] Edges processed: [293888/415154], 70.79%
-[09/04/24 11:14:29.063] Edges processed: [335872/415154], 80.90%
-[09/04/24 11:14:29.223] Edges processed: [377856/415154], 91.02%
-[09/04/24 11:14:29.367] Edges processed: [415154/415154], 100.00%
-[09/04/24 11:14:29.367] ################ Finished training epoch 5 ################
-[09/04/24 11:14:29.367] Epoch Runtime: 1583ms
-[09/04/24 11:14:29.367] Edges per Second: 262257.75
-[09/04/24 11:14:29.367] Evaluating validation set
-[09/04/24 11:14:29.412] 
-=================================
-Link Prediction: 103788 edges evaluated
-Mean Rank: 86.721683
-MRR: 0.503269
-Hits@1: 0.486665
-Hits@3: 0.502004
-Hits@5: 0.508643
-Hits@10: 0.518788
-Hits@50: 0.609280
-Hits@100: 0.798079
-=================================
-[09/04/24 11:14:29.412] Evaluating test set
-[09/04/24 11:14:29.456] 
-=================================
-Link Prediction: 103790 edges evaluated
-Mean Rank: 86.375807
-MRR: 0.503721
-Hits@1: 0.486656
-Hits@3: 0.503295
-Hits@5: 0.509394
-Hits@10: 0.519193
-Hits@50: 0.609644
-Hits@100: 0.799432
-=================================
- 
-and stderr 
-Starting training for config /root/wikipedia_dataset/remapped_individual_graph_snapshots/update_1/training.yaml
-Stdout [2024-09-04 11:14:46.442] [info] [marius.cpp:41] Start initialization
-[09/04/24 11:14:59.974] Initialization Complete: 13.497s
-[09/04/24 11:15:10.880] ################ Starting training epoch 1 ################
-[09/04/24 11:15:12.068] Edges processed: [12288/120292], 10.22%
-[09/04/24 11:15:12.676] Edges processed: [24576/120292], 20.43%
-[09/04/24 11:15:13.314] Edges processed: [36864/120292], 30.65%
-[09/04/24 11:15:13.875] Edges processed: [49152/120292], 40.86%
-[09/04/24 11:15:14.017] Edges processed: [61440/120292], 51.08%
-[09/04/24 11:15:14.081] Edges processed: [73728/120292], 61.29%
-[09/04/24 11:15:14.421] Edges processed: [86016/120292], 71.51%
-[09/04/24 11:15:14.513] Edges processed: [98304/120292], 81.72%
-[09/04/24 11:15:14.606] Edges processed: [110592/120292], 91.94%
-[09/04/24 11:15:14.685] Edges processed: [120292/120292], 100.00%
-[09/04/24 11:15:14.685] ################ Finished training epoch 1 ################
-[09/04/24 11:15:14.685] Epoch Runtime: 3805ms
-[09/04/24 11:15:14.685] Edges per Second: 31614.191
-[09/04/24 11:15:14.685] Evaluating validation set
-[09/04/24 11:15:14.712] 
-=================================
-Link Prediction: 30072 edges evaluated
-Mean Rank: 99.367252
-MRR: 0.489137
-Hits@1: 0.465416
-Hits@3: 0.490955
-Hits@5: 0.501762
-Hits@10: 0.520052
-Hits@50: 0.637869
-Hits@100: 0.739924
-=================================
-[09/04/24 11:15:14.712] Evaluating test set
-[09/04/24 11:15:14.731] 
-=================================
-Link Prediction: 30076 edges evaluated
-Mean Rank: 95.682604
-MRR: 0.491512
-Hits@1: 0.468280
-Hits@3: 0.492851
-Hits@5: 0.503425
-Hits@10: 0.523507
-Hits@50: 0.636321
-Hits@100: 0.744880
-=================================
-[09/04/24 11:15:14.734] ################ Starting training epoch 2 ################
-[09/04/24 11:15:14.807] Edges processed: [12288/120292], 10.22%
-[09/04/24 11:15:14.882] Edges processed: [24576/120292], 20.43%
-[09/04/24 11:15:14.958] Edges processed: [36864/120292], 30.65%
-[09/04/24 11:15:15.033] Edges processed: [49152/120292], 40.86%
-[09/04/24 11:15:15.112] Edges processed: [61440/120292], 51.08%
-[09/04/24 11:15:15.186] Edges processed: [73728/120292], 61.29%
-[09/04/24 11:15:15.262] Edges processed: [86016/120292], 71.51%
-[09/04/24 11:15:15.338] Edges processed: [98304/120292], 81.72%
-[09/04/24 11:15:15.411] Edges processed: [110592/120292], 91.94%
-[09/04/24 11:15:15.471] Edges processed: [120292/120292], 100.00%
-[09/04/24 11:15:15.471] ################ Finished training epoch 2 ################
-[09/04/24 11:15:15.471] Epoch Runtime: 736ms
-[09/04/24 11:15:15.471] Edges per Second: 163440.22
-[09/04/24 11:15:15.471] Evaluating validation set
-[09/04/24 11:15:15.491] 
-=================================
-Link Prediction: 30072 edges evaluated
-Mean Rank: 80.437916
-MRR: 0.500531
-Hits@1: 0.475359
-Hits@3: 0.499667
-Hits@5: 0.511838
-Hits@10: 0.533952
-Hits@50: 0.690576
-Hits@100: 0.815376
-=================================
-[09/04/24 11:15:15.491] Evaluating test set
-[09/04/24 11:15:15.510] 
-=================================
-Link Prediction: 30076 edges evaluated
-Mean Rank: 78.659928
-MRR: 0.499546
-Hits@1: 0.475362
-Hits@3: 0.498105
-Hits@5: 0.510706
-Hits@10: 0.532518
-Hits@50: 0.677783
-Hits@100: 0.808951
-=================================
-[09/04/24 11:15:15.513] ################ Starting training epoch 3 ################
-[09/04/24 11:15:15.587] Edges processed: [12288/120292], 10.22%
-[09/04/24 11:15:15.660] Edges processed: [24576/120292], 20.43%
-[09/04/24 11:15:15.733] Edges processed: [36864/120292], 30.65%
-[09/04/24 11:15:15.807] Edges processed: [49152/120292], 40.86%
-[09/04/24 11:15:15.880] Edges processed: [61440/120292], 51.08%
-[09/04/24 11:15:15.971] Edges processed: [73728/120292], 61.29%
-[09/04/24 11:15:16.046] Edges processed: [86016/120292], 71.51%
-[09/04/24 11:15:16.119] Edges processed: [98304/120292], 81.72%
-[09/04/24 11:15:16.196] Edges processed: [110592/120292], 91.94%
-[09/04/24 11:15:16.258] Edges processed: [120292/120292], 100.00%
-[09/04/24 11:15:16.258] ################ Finished training epoch 3 ################
-[09/04/24 11:15:16.258] Epoch Runtime: 744ms
-[09/04/24 11:15:16.258] Edges per Second: 161682.8
-[09/04/24 11:15:16.258] Evaluating validation set
-[09/04/24 11:15:16.278] 
-=================================
-Link Prediction: 30072 edges evaluated
-Mean Rank: 74.187483
-MRR: 0.513397
-Hits@1: 0.485036
-Hits@3: 0.511406
-Hits@5: 0.527634
-Hits@10: 0.553505
-Hits@50: 0.743017
-Hits@100: 0.847200
-=================================
-[09/04/24 11:15:16.278] Evaluating test set
-[09/04/24 11:15:16.296] 
-=================================
-Link Prediction: 30076 edges evaluated
-Mean Rank: 70.582790
-MRR: 0.515351
-Hits@1: 0.485736
-Hits@3: 0.515527
-Hits@5: 0.529924
-Hits@10: 0.555792
-Hits@50: 0.744979
-Hits@100: 0.853338
-=================================
-[09/04/24 11:15:16.299] ################ Starting training epoch 4 ################
-[09/04/24 11:15:16.377] Edges processed: [12288/120292], 10.22%
-[09/04/24 11:15:16.452] Edges processed: [24576/120292], 20.43%
-[09/04/24 11:15:16.527] Edges processed: [36864/120292], 30.65%
-[09/04/24 11:15:16.602] Edges processed: [49152/120292], 40.86%
-[09/04/24 11:15:16.672] Edges processed: [61440/120292], 51.08%
-[09/04/24 11:15:16.730] Edges processed: [73728/120292], 61.29%
-[09/04/24 11:15:16.806] Edges processed: [86016/120292], 71.51%
-[09/04/24 11:15:16.858] Edges processed: [98304/120292], 81.72%
-[09/04/24 11:15:16.914] Edges processed: [110592/120292], 91.94%
-[09/04/24 11:15:16.961] Edges processed: [120292/120292], 100.00%
-[09/04/24 11:15:16.961] ################ Finished training epoch 4 ################
-[09/04/24 11:15:16.961] Epoch Runtime: 661ms
-[09/04/24 11:15:16.961] Edges per Second: 181984.88
-[09/04/24 11:15:16.961] Evaluating validation set
-[09/04/24 11:15:16.977] 
-=================================
-Link Prediction: 30072 edges evaluated
-Mean Rank: 72.087291
-MRR: 0.519331
-Hits@1: 0.483273
-Hits@3: 0.521149
-Hits@5: 0.541135
-Hits@10: 0.574953
-Hits@50: 0.771349
-Hits@100: 0.857243
-=================================
-[09/04/24 11:15:16.977] Evaluating test set
-[09/04/24 11:15:16.992] 
-=================================
-Link Prediction: 30076 edges evaluated
-Mean Rank: 68.560181
-MRR: 0.520552
-Hits@1: 0.484539
-Hits@3: 0.522942
-Hits@5: 0.541162
-Hits@10: 0.576639
-Hits@50: 0.769949
-Hits@100: 0.861118
-=================================
-[09/04/24 11:15:16.995] ################ Starting training epoch 5 ################
-[09/04/24 11:15:17.055] Edges processed: [12288/120292], 10.22%
-[09/04/24 11:15:17.111] Edges processed: [24576/120292], 20.43%
-[09/04/24 11:15:17.167] Edges processed: [36864/120292], 30.65%
-[09/04/24 11:15:17.222] Edges processed: [49152/120292], 40.86%
-[09/04/24 11:15:17.278] Edges processed: [61440/120292], 51.08%
-[09/04/24 11:15:17.334] Edges processed: [73728/120292], 61.29%
-[09/04/24 11:15:17.390] Edges processed: [86016/120292], 71.51%
-[09/04/24 11:15:17.449] Edges processed: [98304/120292], 81.72%
-[09/04/24 11:15:17.506] Edges processed: [110592/120292], 91.94%
-[09/04/24 11:15:17.553] Edges processed: [120292/120292], 100.00%
-[09/04/24 11:15:17.553] ################ Finished training epoch 5 ################
-[09/04/24 11:15:17.553] Epoch Runtime: 557ms
-[09/04/24 11:15:17.553] Edges per Second: 215964.1
-[09/04/24 11:15:17.553] Evaluating validation set
-[09/04/24 11:15:17.569] 
-=================================
-Link Prediction: 30072 edges evaluated
-Mean Rank: 69.835362
-MRR: 0.534586
-Hits@1: 0.498271
-Hits@3: 0.533553
-Hits@5: 0.556897
-Hits@10: 0.601523
-Hits@50: 0.781691
-Hits@100: 0.864625
-=================================
-[09/04/24 11:15:17.569] Evaluating test set
-[09/04/24 11:15:17.584] 
-=================================
-Link Prediction: 30076 edges evaluated
-Mean Rank: 66.209203
-MRR: 0.533668
-Hits@1: 0.495412
-Hits@3: 0.532983
-Hits@5: 0.557155
-Hits@10: 0.609124
-Hits@50: 0.792060
-Hits@100: 0.869132
-=================================
- 
-and stderr 
+Starting training for config /root/all_datasets/wikipedia_dataset/update_2/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_2/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_2.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_3/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_3/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_3.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_4/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_4/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_4.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_5/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_5/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_5.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_6/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_6/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_6.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_7/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_7/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_7.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_8/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_8/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_8.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_9/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_9/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_9.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_10/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_10/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_10.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_11/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_11/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_11.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_12/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_12/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_12.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_13/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_13/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_13.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_14/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_14/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_14.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_15/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_15/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_15.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_16/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_16/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_16.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_17/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_17/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_17.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_18/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_18/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_18.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_19/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_19/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_19.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_20/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_20/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_20.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_21/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_21/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_21.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_22/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_22/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_22.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_23/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_23/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_23.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_24/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_24/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_24.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_25/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_25/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_25.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_26/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_26/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_26.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_27/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_27/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_27.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_28/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_28/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_28.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_29/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_29/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_29.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_30/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_30/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_30.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_31/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_31/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_31.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_32/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_32/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_32.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_33/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_33/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_33.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_34/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_34/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_34.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_35/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_35/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_35.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_36/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_36/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_36.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_37/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_37/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_37.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_38/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_38/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_38.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_39/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_39/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_39.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_40/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_40/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_40.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_41/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_41/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_41.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_42/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_42/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_42.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_43/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_43/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_43.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_44/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_44/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_44.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_45/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_45/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_45.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_46/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_46/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_46.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_47/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_47/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_47.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_48/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_48/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_48.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_49/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_49/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_49.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_50/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_50/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_50.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_51/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_51/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_51.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_52/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_52/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_52.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_53/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_53/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_53.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_54/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_54/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_54.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_55/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_55/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_55.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_56/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_56/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_56.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_57/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_57/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_57.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_58/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_58/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_58.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_59/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_59/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_59.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_60/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_60/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_60.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_61/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_61/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_61.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_62/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_62/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_62.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_63/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_63/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_63.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_64/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_64/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_64.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_65/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_65/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_65.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_66/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_66/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_66.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_67/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_67/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_67.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_68/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_68/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_68.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_69/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_69/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_69.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_70/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_70/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_70.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_71/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_71/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_71.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_72/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_72/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_72.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_73/training.yaml
+Uploading embeddings /root/all_datasets/wikipedia_dataset/update_73/marius_formatted/model_0/embeddings.bin as remapped_embeddings_update_73.bin
+Starting training for config /root/all_datasets/wikipedia_dataset/update_74/training.yaml

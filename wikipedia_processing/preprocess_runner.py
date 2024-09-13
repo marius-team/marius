@@ -5,8 +5,8 @@ import numpy as np
 import multiprocessing
 
 USER_DIR = os.path.expanduser("~")
-DATA_DIR = os.path.join(USER_DIR, "wikipedia_dataset")
-INDIVIDUAL_GRAPH_SNAPSHOTS = os.path.join(DATA_DIR, "remapped_individual_graph_snapshots")
+DATA_DIR = os.path.join(USER_DIR, "all_datasets")
+INDIVIDUAL_GRAPH_SNAPSHOTS = os.path.join(DATA_DIR, "wikipedia_dataset")
 UPDATE_DIR_PREFIX = "update_"
 OUTPUT_DIR_NAME = "marius_formatted"
 COMPRESSED_TAR_NAME = "remapped_individual_graph_preprocessed.tar.bz2"
@@ -24,7 +24,7 @@ def preprocess_worker(dirs_to_preprocess):
         print("Running command", preprocess_command)
         subprocess.run(preprocess_command, shell = True, capture_output = True)
 
-JUST_UPLOAD = True
+JUST_UPLOAD = False
 NUM_WORKERS = int(0.4 * os.cpu_count())
 def main():
     if not JUST_UPLOAD:
@@ -47,6 +47,7 @@ def main():
         
         [worker.join() for worker in all_workers]
     
+    '''
     # Create the compressed zip
     os.chdir(DATA_DIR)
     compress_command = f'tar -cvjSf {COMPRESSED_TAR_NAME} {INDIVIDUAL_GRAPH_SNAPSHOTS}'
@@ -57,6 +58,7 @@ def main():
     print("Uploading file", COMPRESSED_TAR_NAME, "to S3")
     s3_client = boto3.client('s3')
     s3_client.upload_file(COMPRESSED_TAR_NAME, BUCKET_NAME, COMPRESSED_TAR_NAME)
+    '''
 
 if __name__ == "__main__":
     main()
